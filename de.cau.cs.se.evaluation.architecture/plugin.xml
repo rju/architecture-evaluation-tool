@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Code and Model Analysis"
+            id="de.cau.cs.se.evaluation.architecture">
+      </category>
+      <view
+            name="Analysis Result View"
+            icon="icons/sample.gif"
+            category="de.cau.cs.se.evaluation.architecture"
+            class="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView"
+            id="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="right"
+               id="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Hypergraph -->
+      <package
+            uri="http://evaluation.se.cs.cau.de/hypergraph"
+            class="de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage"
+            genModel="model/Hypergraph.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated HypergraphMetricsState -->
+      <package
+            uri="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
+            class="de.cau.cs.se.evaluation.architecture.state.StatePackage"
+            genModel="model/HypergraphMetricsState.genmodel"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="de.cau.cs.se.evaluation.architecture.commands.AnalysisComplexityHandler"
+            id="de.cau.cs.se.evaluation.architecture.commands.analysis"
+            name="Analysis Complexity">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+	     <!-- menu
+	           id="de.cau.cs.se.evaluation.architecture.popups"
+	           label="Analysis Complexity">
+	     </menu -->
+	     <command
+	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	                  label="Analysis Complexity"
+	                  style="push"
+	                  tooltip="Run the complexity analysis">
+	     </command>
+	  </menuContribution>
+	  <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+	     <!-- menu
+	           id="de.cau.cs.se.evaluation.architecture.popups"
+	           label="Analysis Complexity">
+	     </menu -->
+	     <command
+	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	                  label="Analysis Complexity"
+	                  style="push"
+	                  tooltip="Run the complexity analysis">
+	     </command>
+	  </menuContribution>
+	  <menuContribution
+	        locationURI="popup:de.cau.cs.se.evaluation.architecture.popups?after=additions">
+	     <command
+	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	                  label="Analysis Complexity"
+	                  style="push"
+	                  tooltip="Run the complexity analysis">
+	     </command>
+      </menuContribution>
+   </extension>
+
+</plugin>

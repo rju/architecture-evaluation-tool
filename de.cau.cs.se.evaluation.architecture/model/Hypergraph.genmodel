@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="de.cau.cs.se.evaluation.architecture/model-gen/"
+    modelPluginID="architecture" modelName="Hypergraph" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="5.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>Hypergraph.ecore</foreignModel>
+  <genPackages prefix="Hypergraph" basePackage="de.cau.cs.se.evaluation.architecture"
+      disposableProviderFactory="true" ecorePackage="Hypergraph.ecore#/">
+    <genClasses ecoreClass="Hypergraph.ecore#//Hypergraph">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Hypergraph/nodes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Hypergraph/edges"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//Node">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Node/edges"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//Edge"/>
+    <genClasses ecoreClass="Hypergraph.ecore#//NamedElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//NamedElement/name"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
