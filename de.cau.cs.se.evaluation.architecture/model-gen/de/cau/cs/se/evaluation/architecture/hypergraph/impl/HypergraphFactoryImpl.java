@@ -60,6 +60,7 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 			case HypergraphPackage.NODE: return createNode();
 			case HypergraphPackage.EDGE: return createEdge();
 			case HypergraphPackage.NAMED_ELEMENT: return createNamedElement();
+			case HypergraphPackage.HYPERGRAPH_SET: return createHypergraphSet();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -103,6 +104,16 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	public NamedElement createNamedElement() {
 		NamedElementImpl namedElement = new NamedElementImpl();
 		return namedElement;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public HypergraphSet createHypergraphSet() {
+		HypergraphSetImpl hypergraphSet = new HypergraphSetImpl();
+		return hypergraphSet;
 	}
 
 	/**

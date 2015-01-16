@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: de.cau.cs.se.evaluation.architecture;singleton:=true
+Bundle-SymbolicName: architecture;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
@@ -10,7 +10,7 @@ Bundle-Activator: de.cau.cs.se.evaluation.architecture.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- de.cau.cs.se.evaluation.architecture;visibility:=reexport,
+ architecture;visibility:=reexport,
  org.eclipse.xtend.lib,
  org.eclipse.xtend.lib.macro,
  com.google.guava,

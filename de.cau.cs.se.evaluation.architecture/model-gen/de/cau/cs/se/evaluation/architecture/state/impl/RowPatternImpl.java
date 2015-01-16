@@ -3,19 +3,13 @@
 package de.cau.cs.se.evaluation.architecture.state.impl;
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
-
 import de.cau.cs.se.evaluation.architecture.state.RowPattern;
 import de.cau.cs.se.evaluation.architecture.state.StatePackage;
-
 import java.util.Collection;
-
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
-
-import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
+import org.eclipse.emf.ecore.util.EDataTypeEList;
 import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 
 /**
@@ -91,7 +85,7 @@ public class RowPatternImpl extends MinimalEObjectImpl.Container implements RowP
 	 */
 	public EList<Boolean> getPattern() {
 		if (pattern == null) {
-			pattern = new EDataTypeUniqueEList<Boolean>(Boolean.class, this, StatePackage.ROW_PATTERN__PATTERN);
+			pattern = new EDataTypeEList<Boolean>(Boolean.class, this, StatePackage.ROW_PATTERN__PATTERN);
 		}
 		return pattern;
 	}

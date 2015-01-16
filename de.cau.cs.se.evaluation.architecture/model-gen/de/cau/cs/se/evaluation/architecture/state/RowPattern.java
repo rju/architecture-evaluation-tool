@@ -53,7 +53,7 @@ public interface RowPattern extends EObject {
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Pattern</em>' attribute list.
 	 * @see de.cau.cs.se.evaluation.architecture.state.StatePackage#getRowPattern_Pattern()
-	 * @model
+	 * @model unique="false"
 	 * @generated
 	 */
 	EList<Boolean> getPattern();

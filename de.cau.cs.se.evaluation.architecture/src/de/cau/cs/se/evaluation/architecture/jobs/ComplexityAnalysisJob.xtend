@@ -8,11 +8,22 @@ import org.eclipse.jface.viewers.ISelection
 import org.eclipse.jface.viewers.IStructuredSelection
 import org.eclipse.jface.viewers.ITreeSelection
 import org.eclipse.jface.viewers.TreeSelection
-import org.eclipse.jface.viewers.TreePath
-import org.eclipse.core.runtime.IAdaptable
-import org.eclipse.core.resources.IFile
+import org.eclipse.core.resources.IProject
+import org.eclipse.jdt.core.IPackageFragmentRoot
+import org.eclipse.jdt.core.IPackageFragment
+import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.IType
+import java.util.ArrayList
+import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph
+import org.eclipse.jdt.core.IJavaProject
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics
+import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
+import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
+import org.eclipse.jdt.core.JavaCore
 
 class ComplexityAnalysisJob extends Job {
+	
+	var types = new ArrayList<IType>()
 	
 	/**
 	 * The constructor scans the selection for files.
@@ -24,38 +35,104 @@ class ComplexityAnalysisJob extends Job {
 			System.out.println("Got a structured selection");
 			if (selection instanceof ITreeSelection) {
 				val TreeSelection treeSelection = selection as TreeSelection
-				val TreePath[] treePaths = treeSelection.getPaths()
-				val TreePath treePath = treePaths.get(0)
-
-				System.out.println("Last " + treePath.lastSegment);
-				val Object lastSegmentObj = treePath.lastSegment
-				var Class currClass = lastSegmentObj.getClass()
-				while(currClass != null) {
-					System.out.println("  Class=" + currClass.getName())
-					val Class[] interfaces = currClass.getInterfaces()
-					for(Class interfacey : interfaces) {
-						System.out.println("   I=" + interfacey.getName())
-					}
-					currClass = currClass.getSuperclass()
-				}
-				if(lastSegmentObj instanceof IAdaptable) {
-					val IFile file = (lastSegmentObj as IAdaptable).getAdapter(IFile) as IFile
-					if(file != null) {
-						System.out.println("File=" + file.getName())
-						val String path = file.getRawLocation().toOSString()
-						System.out.println("path: " + path)
-					}
-				}
+				
+				treeSelection.iterator.forEach[element | element.scanForClasses]
 			}
 		}
 	}
 	
-	
 	protected override IStatus run(IProgressMonitor monitor) {
 		// set total number of work units
-		monitor.beginTask("Determine complexity of inter class dependency", 100)
-
+			
+		/** construct analysis. */
+		val projects = new ArrayList<IJavaProject>()
+		types.forEach[type | if (!projects.contains(type.javaProject)) projects.add(type.javaProject)]
+		monitor.beginTask("Determine complexity of inter class dependency", 
+			1 + // initialization 
+			types.size*2 + // java to graph
+			3 + types.size // graph analysis
+		)
+		monitor.worked(1)
+		
+		val hypergraphSet = HypergraphFactory.eINSTANCE.createHypergraphSet()
+		
+		var scopes = new GlobalJavaScope(projects, null)
+		
+		val javaToHypergraph = new TransformationJavaToHyperGraph(hypergraphSet, scopes, monitor)
+		val hypergraphMetrics = new TransformationHypergraphMetrics(hypergraphSet, monitor)
+		
+		hypergraphMetrics.transform(javaToHypergraph.transform(types))
+		
+		monitor.done()
+	
 		return Status.OK_STATUS
 	}
+	
+	
+	private def dispatch scanForClasses(IProject object) {
+		System.out.println("  IProject " + object.toString)
+		if (object.hasNature(JavaCore.NATURE_ID)) {
+			val IJavaProject project = JavaCore.create(object);
+			project.allPackageFragmentRoots.forEach[root | root.checkForTypes]
+		}
+	}
+	
+	private def dispatch scanForClasses(IJavaProject object) {
+		System.out.println("  IJavaProject " + object.elementName)
+		object.allPackageFragmentRoots.forEach[root | root.checkForTypes]
+	}
+		
+	private def dispatch scanForClasses(IPackageFragmentRoot object) {
+		System.out.println("  IPackageFragmentRoot " + object.elementName)
+		object.checkForTypes
+	}
+	
+	private def dispatch scanForClasses(IPackageFragment object) {
+		System.out.println("  IPackageFragment " + object.elementName)
+		object.checkForTypes
+	}
+	
+	private def dispatch scanForClasses(ICompilationUnit unit) {
+		System.out.println("  ICompilationUnit " + unit.elementName)
+		unit.checkForTypes()
+	}
+	
+	private def dispatch scanForClasses(Object object) {
+		System.out.println("  Selection=" + object.class.canonicalName + " " + object.toString)
+	}
+	
+	/** check for types in the project hierarchy */
+	
+	/**
+	 * in fragment roots 
+	 */
+	private def void checkForTypes(IPackageFragmentRoot root) {
+		root.children.forEach[ element |
+			if (element instanceof IPackageFragment) {
+				(element as IPackageFragment).checkForTypes
+			}
+		]
+	}
+	
+	/**
+	 * in fragments
+	 */
+	private def void checkForTypes(IPackageFragment fragment) {
+		fragment.children.forEach[ element |
+			if (element instanceof IPackageFragment) {
+				(element as IPackageFragment).checkForTypes
+			} else if (element instanceof ICompilationUnit) {
+				(element as ICompilationUnit).checkForTypes
+			}
+		]
+	}
+	
+	/**
+	 * in compilation units
+	 */
+	private def void checkForTypes(ICompilationUnit unit) {
+		unit.allTypes.forEach[type | if (type instanceof IType) types.add(type)]
+	}
+	
 	
 }

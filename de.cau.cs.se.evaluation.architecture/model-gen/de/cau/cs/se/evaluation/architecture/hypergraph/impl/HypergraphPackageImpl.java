@@ -6,6 +6,7 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage;
+import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NamedElement;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 
@@ -50,6 +51,13 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass namedElementEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass hypergraphSetEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -189,6 +197,42 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EClass getHypergraphSet() {
+		return hypergraphSetEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getHypergraphSet_Nodes() {
+		return (EReference)hypergraphSetEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getHypergraphSet_Edges() {
+		return (EReference)hypergraphSetEClass.getEStructuralFeatures().get(1);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getHypergraphSet_Graphs() {
+		return (EReference)hypergraphSetEClass.getEStructuralFeatures().get(2);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public HypergraphFactory getHypergraphFactory() {
 		return (HypergraphFactory)getEFactoryInstance();
 	}
@@ -223,6 +267,11 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		namedElementEClass = createEClass(NAMED_ELEMENT);
 		createEAttribute(namedElementEClass, NAMED_ELEMENT__NAME);
+
+		hypergraphSetEClass = createEClass(HYPERGRAPH_SET);
+		createEReference(hypergraphSetEClass, HYPERGRAPH_SET__NODES);
+		createEReference(hypergraphSetEClass, HYPERGRAPH_SET__EDGES);
+		createEReference(hypergraphSetEClass, HYPERGRAPH_SET__GRAPHS);
 	}
 
 	/**
@@ -258,8 +307,8 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(hypergraphEClass, Hypergraph.class, "Hypergraph", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-		initEReference(getHypergraph_Nodes(), this.getNode(), null, "nodes", null, 0, -1, Hypergraph.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEReference(getHypergraph_Edges(), this.getEdge(), null, "edges", null, 0, -1, Hypergraph.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getHypergraph_Nodes(), this.getNode(), null, "nodes", null, 0, -1, Hypergraph.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getHypergraph_Edges(), this.getEdge(), null, "edges", null, 0, -1, Hypergraph.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(nodeEClass, Node.class, "Node", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getNode_Edges(), this.getEdge(), null, "edges", null, 0, -1, Node.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -268,6 +317,11 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		initEClass(namedElementEClass, NamedElement.class, "NamedElement", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getNamedElement_Name(), ecorePackage.getEString(), "name", null, 1, 1, NamedElement.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(hypergraphSetEClass, HypergraphSet.class, "HypergraphSet", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEReference(getHypergraphSet_Nodes(), this.getNode(), null, "nodes", null, 0, -1, HypergraphSet.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getHypergraphSet_Edges(), this.getEdge(), null, "edges", null, 0, -1, HypergraphSet.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getHypergraphSet_Graphs(), this.getHypergraph(), null, "graphs", null, 0, -1, HypergraphSet.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

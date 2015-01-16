@@ -329,7 +329,7 @@ public class StatePackageImpl extends EPackageImpl implements StatePackage {
 
 		initEClass(rowPatternEClass, RowPattern.class, "RowPattern", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getRowPattern_Nodes(), theHypergraphPackage.getNode(), null, "nodes", null, 1, -1, RowPattern.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getRowPattern_Pattern(), ecorePackage.getEBoolean(), "pattern", null, 0, -1, RowPattern.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getRowPattern_Pattern(), ecorePackage.getEBoolean(), "pattern", null, 0, -1, RowPattern.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, !IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

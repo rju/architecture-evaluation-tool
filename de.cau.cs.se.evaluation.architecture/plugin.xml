@@ -28,21 +28,6 @@
          </view>
       </perspectiveExtension>
    </extension>
-   <extension
-         point="org.eclipse.help.contexts">
-      <contexts
-            file="contexts.xml">
-      </contexts>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated Hypergraph -->
-      <package
-            uri="http://evaluation.se.cs.cau.de/hypergraph"
-            class="de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage"
-            genModel="model/Hypergraph.genmodel"/>
-   </extension>
-
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated HypergraphMetricsState -->
       <package
@@ -95,6 +80,14 @@
 	                  tooltip="Run the complexity analysis">
 	     </command>
       </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Hypergraph -->
+      <package
+            uri="http://evaluation.se.cs.cau.de/hypergraph"
+            class="de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage"
+            genModel="model/Hypergraph.genmodel"/>
    </extension>
 
 </plugin>

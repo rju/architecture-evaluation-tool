@@ -58,6 +58,15 @@ public interface HypergraphFactory extends EFactory {
 	NamedElement createNamedElement();
 
 	/**
+	 * Returns a new object of class '<em>Set</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Set</em>'.
+	 * @generated
+	 */
+	HypergraphSet createHypergraphSet();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

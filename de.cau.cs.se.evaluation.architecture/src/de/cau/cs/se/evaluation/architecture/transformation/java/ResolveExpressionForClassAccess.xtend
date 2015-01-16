@@ -31,14 +31,15 @@ import org.eclipse.jdt.core.dom.ThisExpression
 import org.eclipse.jdt.core.dom.TypeLiteral
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
+import de.cau.cs.se.evaluation.architecture.transformation.IScope
 
 class ResolveExpressionForClassAccess {
 	
-	extension JavaTypeHelper javaTypeHelper
+	extension JavaTypeHelper javaTypeHelper = new JavaTypeHelper()
 	
-	var List<IJavaScope> scopes
+	var IScope scopes
 	
-	public new (List<IJavaScope> scopes) {
+	public new (IScope scopes) {
 		this.scopes = scopes
 	}
 	
@@ -188,8 +189,10 @@ class ResolveExpressionForClassAccess {
 	private dispatch def List<IType> findClassCallInExpression(TypeLiteral expression) {
 		val List<IType> types = new ArrayList<IType>()
 		val binding = expression.type.resolveBinding
-		if (binding.isClass) {
-			types.addUnique(binding.qualifiedName.resolveType)
+		if (binding != null) { // TODO when does this happen?
+			if (binding.isClass) {
+				types.addUnique(binding.qualifiedName.resolveType)
+			}
 		}
 		return types
 	}

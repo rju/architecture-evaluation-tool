@@ -6,20 +6,11 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
-
 import java.util.Collection;
-
-import org.eclipse.emf.common.notify.NotificationChain;
-
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.InternalEObject;
-
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
-
-import org.eclipse.emf.ecore.util.EObjectContainmentEList;
-import org.eclipse.emf.ecore.util.InternalEList;
+import org.eclipse.emf.ecore.util.EObjectResolvingEList;
 
 /**
  * <!-- begin-user-doc -->
@@ -37,7 +28,7 @@ import org.eclipse.emf.ecore.util.InternalEList;
  */
 public class HypergraphImpl extends MinimalEObjectImpl.Container implements Hypergraph {
 	/**
-	 * The cached value of the '{@link #getNodes() <em>Nodes</em>}' containment reference list.
+	 * The cached value of the '{@link #getNodes() <em>Nodes</em>}' reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getNodes()
@@ -47,7 +38,7 @@ public class HypergraphImpl extends MinimalEObjectImpl.Container implements Hype
 	protected EList<Node> nodes;
 
 	/**
-	 * The cached value of the '{@link #getEdges() <em>Edges</em>}' containment reference list.
+	 * The cached value of the '{@link #getEdges() <em>Edges</em>}' reference list.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @see #getEdges()
@@ -82,7 +73,7 @@ public class HypergraphImpl extends MinimalEObjectImpl.Container implements Hype
 	 */
 	public EList<Node> getNodes() {
 		if (nodes == null) {
-			nodes = new EObjectContainmentEList<Node>(Node.class, this, HypergraphPackage.HYPERGRAPH__NODES);
+			nodes = new EObjectResolvingEList<Node>(Node.class, this, HypergraphPackage.HYPERGRAPH__NODES);
 		}
 		return nodes;
 	}
@@ -94,25 +85,9 @@ public class HypergraphImpl extends MinimalEObjectImpl.Container implements Hype
 	 */
 	public EList<Edge> getEdges() {
 		if (edges == null) {
-			edges = new EObjectContainmentEList<Edge>(Edge.class, this, HypergraphPackage.HYPERGRAPH__EDGES);
+			edges = new EObjectResolvingEList<Edge>(Edge.class, this, HypergraphPackage.HYPERGRAPH__EDGES);
 		}
 		return edges;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
-		switch (featureID) {
-			case HypergraphPackage.HYPERGRAPH__NODES:
-				return ((InternalEList<?>)getNodes()).basicRemove(otherEnd, msgs);
-			case HypergraphPackage.HYPERGRAPH__EDGES:
-				return ((InternalEList<?>)getEdges()).basicRemove(otherEnd, msgs);
-		}
-		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
 
 	/**
