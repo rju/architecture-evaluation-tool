@@ -17,12 +17,11 @@ class JavaTypeHelper {
 	 * Check if a type is already part of the type list. If not add it.
 	 */
 	def List<IType> addUnique(List<IType> types, IType type) {
-		if (type == null)
-			throw new Exception("WTF")
-		if (types.findFirst[it.equals(type)] == null) {
-			types.add(type)
+		if (type != null) {
+			if (types.findFirst[it.equals(type)] == null) {
+				types.add(type)
+			}
 		}
-		
 		return types
 	}
 

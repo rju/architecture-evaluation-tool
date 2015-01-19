@@ -20,6 +20,7 @@ import de.cau.cs.se.evaluation.architecture.transformation.metrics.Transformatio
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
 import org.eclipse.jdt.core.JavaCore
+import org.eclipse.jdt.core.Flags
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -131,7 +132,7 @@ class ComplexityAnalysisJob extends Job {
 	 * in compilation units
 	 */
 	private def void checkForTypes(ICompilationUnit unit) {
-		unit.allTypes.forEach[type | if (type instanceof IType) types.add(type)]
+		unit.allTypes.forEach[type | if (type instanceof IType) if (!Flags.isAbstract(type.flags)) types.add(type)]
 	}
 	
 	
