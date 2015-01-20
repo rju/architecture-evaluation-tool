@@ -284,8 +284,9 @@ class ResolveStatementForClassAccess {
      *   while ( Expression ) Statement
 	 */
 	private dispatch def List<IType> findClassCallInStatement(WhileStatement statement) {
-		val List<IType> types = expressionResolver.resolve(statement.expression)
+		val List<IType> types = new ArrayList<IType>() 
 		
+		types.addUnique(expressionResolver.resolve(statement.expression))
 		types.addUnique(statement.body.findClassCallInStatement)
 		
 		return types

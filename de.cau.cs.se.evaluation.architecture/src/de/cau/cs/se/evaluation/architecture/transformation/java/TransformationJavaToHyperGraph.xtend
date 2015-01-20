@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.dom.Modifier
 import org.eclipse.jdt.core.IMethod
 import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.SimpleType
+import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.ITypeHierarchy
 
 /**
  * Transform a java project based on a list of classes to a hypergraph.
@@ -138,17 +140,26 @@ class TransformationJavaToHyperGraph {
 	private def Node findMatchingNode(List<Node> nodes, IType type) {
 		val node = nodes.findNode(type)
 		if (node == null) {
-			return nodes.findNode(type.getParentTypesList(new ArrayList<IType>()).findFirst[nodes.findNode(it) != null])
+			val subtype = type.getParentTypesList.findFirst[nodes.findNode(it) != null]
+			if (subtype != null)
+				return nodes.findNode(subtype)
+			else {
+				throw new Exception("No subtype of " + type.elementName + " is matching any node.")
+			}
 		} else
 			return node
 	}
 
-	private def List<IType> getParentTypesList(IType type, List<IType> list) {
-		if (type.parent instanceof IType) {
-			list.add(type.parent as IType)
+	private def List<IType> getParentTypesList(IType type) {
+		val List<IType> result = new ArrayList<IType>()
+		val ITypeHierarchy typeHierarchy = type.newTypeHierarchy(monitor)
+		for (subtype : typeHierarchy.getSubclasses(type)) {
+			result.add(subtype)
+			result.addAll(subtype.getParentTypesList)
 		}
-		return list		
+		return result
 	}
+	
 	/**
 	 * Determine all classes which are called from the given class.
 	 * This determines the required interfaces of a "component" while the

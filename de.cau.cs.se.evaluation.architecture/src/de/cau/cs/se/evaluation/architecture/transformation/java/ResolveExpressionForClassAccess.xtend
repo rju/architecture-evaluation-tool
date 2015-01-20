@@ -44,7 +44,10 @@ class ResolveExpressionForClassAccess {
 	}
 	
 	def List<IType> resolve(Expression expression) {
-		return expression.findClassCallInExpression
+		if (expression != null)
+			return expression.findClassCallInExpression
+		else
+			return null
 	}
 	
 	
