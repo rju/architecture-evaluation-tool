@@ -4,7 +4,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 @SuppressWarnings("all")
-public class TableContentProvider implements IStructuredContentProvider {
+public class AnalysisResultTableContentProvider implements IStructuredContentProvider {
   public void inputChanged(final Viewer v, final Object oldInput, final Object newInput) {
   }
   

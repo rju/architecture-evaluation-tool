@@ -14,17 +14,12 @@ import de.cau.cs.se.evaluation.architecture.transformation.java.JavaPackageScope
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaTypeHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.java.ResolveStatementForClassAccess;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -65,18 +60,36 @@ public class TransformationJavaToHyperGraph {
   
   private final IProgressMonitor monitor;
   
+  /**
+   * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
+   * 
+   * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
+   * @param scope the global scoper used to resolve classes during transformation
+   */
   public TransformationJavaToHyperGraph(final HypergraphSet hypergraphSet, final IScope scope) {
     this.globalScope = scope;
     this.hypergraphSet = hypergraphSet;
     this.monitor = null;
   }
   
+  /**
+   * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
+   * 
+   * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
+   * @param scope the global scoper used to resolve classes during transformation
+   * @param eclipse progres monitor
+   */
   public TransformationJavaToHyperGraph(final HypergraphSet hypergraphSet, final GlobalJavaScope scope, final IProgressMonitor monitor) {
     this.globalScope = scope;
     this.hypergraphSet = hypergraphSet;
     this.monitor = monitor;
   }
   
+  /**
+   * Transform a list of types into a hypergraph.
+   * 
+   * @param classList list of classes to be processed
+   */
   public Hypergraph transform(final List<IType> classList) {
     if (this.monitor!=null) {
       this.monitor.subTask("Constructing hypergraph");
@@ -84,126 +97,15 @@ public class TransformationJavaToHyperGraph {
     final Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph();
     EList<Hypergraph> _graphs = this.hypergraphSet.getGraphs();
     _graphs.add(system);
-    final Map<IType, IMethod> classMethodMap = new HashMap<IType, IMethod>();
     final Procedure1<IType> _function = new Procedure1<IType>() {
       public void apply(final IType it) {
-        try {
-          if (TransformationJavaToHyperGraph.this.monitor!=null) {
-            String _elementName = it.getElementName();
-            String _plus = ("Constructing hypergraph - types " + _elementName);
-            TransformationJavaToHyperGraph.this.monitor.subTask(_plus);
-          }
-          boolean _isClass = it.isClass();
-          if (_isClass) {
-            final Node node = HypergraphFactory.eINSTANCE.createNode();
-            String _elementName_1 = it.getElementName();
-            node.setName(_elementName_1);
-            EList<Node> _nodes = system.getNodes();
-            _nodes.add(node);
-            EList<Node> _nodes_1 = TransformationJavaToHyperGraph.this.hypergraphSet.getNodes();
-            _nodes_1.add(node);
-            IJavaElement _parent = it.getParent();
-            if ((_parent instanceof IType)) {
-              IJavaElement _parent_1 = it.getParent();
-              final IType parent = ((IType) _parent_1);
-              IMethod[] _methods = parent.getMethods();
-              final Procedure1<IMethod> _function = new Procedure1<IMethod>() {
-                public void apply(final IMethod method) {
-                  try {
-                    int _flags = method.getFlags();
-                    boolean _isPublic = Flags.isPublic(_flags);
-                    if (_isPublic) {
-                      classMethodMap.put(it, method);
-                    }
-                  } catch (Throwable _e) {
-                    throw Exceptions.sneakyThrow(_e);
-                  }
-                }
-              };
-              IterableExtensions.<IMethod>forEach(((Iterable<IMethod>)Conversions.doWrapArray(_methods)), _function);
-            }
-            IMethod[] _methods_1 = it.getMethods();
-            final Procedure1<IMethod> _function_1 = new Procedure1<IMethod>() {
-              public void apply(final IMethod method) {
-                try {
-                  int _flags = method.getFlags();
-                  boolean _isPublic = Flags.isPublic(_flags);
-                  if (_isPublic) {
-                    classMethodMap.put(it, method);
-                  }
-                } catch (Throwable _e) {
-                  throw Exceptions.sneakyThrow(_e);
-                }
-              }
-            };
-            IterableExtensions.<IMethod>forEach(((Iterable<IMethod>)Conversions.doWrapArray(_methods_1)), _function_1);
-          }
-          if (TransformationJavaToHyperGraph.this.monitor!=null) {
-            TransformationJavaToHyperGraph.this.monitor.worked(1);
-          }
-        } catch (Throwable _e) {
-          throw Exceptions.sneakyThrow(_e);
-        }
+        TransformationJavaToHyperGraph.this.createNode(it, system);
       }
     };
     IterableExtensions.<IType>forEach(classList, _function);
     final Procedure1<IType> _function_1 = new Procedure1<IType>() {
       public void apply(final IType it) {
-        try {
-          if (TransformationJavaToHyperGraph.this.monitor!=null) {
-            String _elementName = it.getElementName();
-            String _plus = ("Constructing hypergraph - references " + _elementName);
-            TransformationJavaToHyperGraph.this.monitor.subTask(_plus);
-          }
-          boolean _isClass = it.isClass();
-          if (_isClass) {
-            List<IType> _findAllCalledClasses = TransformationJavaToHyperGraph.this.findAllCalledClasses(it);
-            final Function1<IType, Boolean> _function = new Function1<IType, Boolean>() {
-              public Boolean apply(final IType it) {
-                try {
-                  boolean _and = false;
-                  boolean _isClass = it.isClass();
-                  if (!_isClass) {
-                    _and = false;
-                  } else {
-                    boolean _isBinary = it.isBinary();
-                    boolean _not = (!_isBinary);
-                    _and = _not;
-                  }
-                  return Boolean.valueOf(_and);
-                } catch (Throwable _e) {
-                  throw Exceptions.sneakyThrow(_e);
-                }
-              }
-            };
-            Iterable<IType> _filter = IterableExtensions.<IType>filter(_findAllCalledClasses, _function);
-            final Procedure1<IType> _function_1 = new Procedure1<IType>() {
-              public void apply(final IType type) {
-                final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-                String _nextEdgeName = TransformationJavaToHyperGraph.this.getNextEdgeName();
-                edge.setName(_nextEdgeName);
-                EList<Edge> _edges = system.getEdges();
-                _edges.add(edge);
-                EList<Edge> _edges_1 = TransformationJavaToHyperGraph.this.hypergraphSet.getEdges();
-                _edges_1.add(edge);
-                EList<Node> _nodes = system.getNodes();
-                Node _findNode = TransformationJavaToHyperGraph.this.findNode(_nodes, it);
-                EList<Edge> _edges_2 = _findNode.getEdges();
-                _edges_2.add(edge);
-                EList<Node> _nodes_1 = system.getNodes();
-                Node _findMatchingNode = TransformationJavaToHyperGraph.this.findMatchingNode(_nodes_1, type);
-                EList<Edge> _edges_3 = _findMatchingNode.getEdges();
-                _edges_3.add(edge);
-              }
-            };
-            IterableExtensions.<IType>forEach(_filter, _function_1);
-          }
-          if (TransformationJavaToHyperGraph.this.monitor!=null) {
-            TransformationJavaToHyperGraph.this.monitor.worked(1);
-          }
-        } catch (Throwable _e) {
-          throw Exceptions.sneakyThrow(_e);
-        }
+        TransformationJavaToHyperGraph.this.connectNodes(it, system);
       }
     };
     IterableExtensions.<IType>forEach(classList, _function_1);
@@ -211,56 +113,89 @@ public class TransformationJavaToHyperGraph {
   }
   
   /**
-   * Recurse into the type hierarchy and find all public methods.
-   * 
-   * @param type the type to be resolved.
-   * @param classInterfaceMap the present map
+   * determine nodes.
    */
-  private Map<IType, IMethod> resolvePublicClassInterface(final IType type, final Map<IType, IMethod> classInterfaceMap) {
-    IJavaElement _parent = type.getParent();
-    boolean _notEquals = (!Objects.equal(_parent, null));
-    if (_notEquals) {
-      IJavaElement _parent_1 = type.getParent();
-      if ((_parent_1 instanceof IType)) {
-        IJavaElement _parent_2 = type.getParent();
-        final IType parent = ((IType) _parent_2);
-        Map<IType, IMethod> _resolvePublicClassInterface = this.resolvePublicClassInterface(parent, classInterfaceMap);
-        return this.getPublicClassInterface(type, _resolvePublicClassInterface);
+  private void createNode(final IType type, final Hypergraph system) {
+    try {
+      if (this.monitor!=null) {
+        String _elementName = type.getElementName();
+        String _plus = ("Constructing hypergraph - types " + _elementName);
+        this.monitor.subTask(_plus);
       }
+      boolean _isClass = type.isClass();
+      if (_isClass) {
+        final Node node = HypergraphFactory.eINSTANCE.createNode();
+        String _elementName_1 = type.getElementName();
+        node.setName(_elementName_1);
+        EList<Node> _nodes = system.getNodes();
+        _nodes.add(node);
+        EList<Node> _nodes_1 = this.hypergraphSet.getNodes();
+        _nodes_1.add(node);
+      }
+      if (this.monitor!=null) {
+        this.monitor.worked(1);
+      }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
     }
-    return this.getPublicClassInterface(type, classInterfaceMap);
   }
   
   /**
-   * Determine all methods of a class which are public and not abstract.
+   * Connect nodes.
    */
-  private Map<IType, IMethod> getPublicClassInterface(final IType type, final Map<IType, IMethod> classInterfaceMap) {
+  private void connectNodes(final IType sourceType, final Hypergraph system) {
     try {
-      IMethod[] _methods = type.getMethods();
-      final Procedure1<IMethod> _function = new Procedure1<IMethod>() {
-        public void apply(final IMethod method) {
-          try {
-            boolean _and = false;
-            int _flags = method.getFlags();
-            boolean _isPublic = Flags.isPublic(_flags);
-            if (!_isPublic) {
-              _and = false;
-            } else {
-              int _flags_1 = method.getFlags();
-              boolean _isAbstract = Flags.isAbstract(_flags_1);
-              boolean _not = (!_isAbstract);
-              _and = _not;
+      if (this.monitor!=null) {
+        String _elementName = sourceType.getElementName();
+        String _plus = ("Constructing hypergraph - references " + _elementName);
+        this.monitor.subTask(_plus);
+      }
+      boolean _isClass = sourceType.isClass();
+      if (_isClass) {
+        List<IType> _findAllCalledClasses = this.findAllCalledClasses(sourceType);
+        final Function1<IType, Boolean> _function = new Function1<IType, Boolean>() {
+          public Boolean apply(final IType it) {
+            try {
+              boolean _and = false;
+              boolean _isClass = it.isClass();
+              if (!_isClass) {
+                _and = false;
+              } else {
+                boolean _isBinary = it.isBinary();
+                boolean _not = (!_isBinary);
+                _and = _not;
+              }
+              return Boolean.valueOf(_and);
+            } catch (Throwable _e) {
+              throw Exceptions.sneakyThrow(_e);
             }
-            if (_and) {
-              classInterfaceMap.put(type, method);
-            }
-          } catch (Throwable _e) {
-            throw Exceptions.sneakyThrow(_e);
           }
-        }
-      };
-      IterableExtensions.<IMethod>forEach(((Iterable<IMethod>)Conversions.doWrapArray(_methods)), _function);
-      return classInterfaceMap;
+        };
+        Iterable<IType> _filter = IterableExtensions.<IType>filter(_findAllCalledClasses, _function);
+        final Procedure1<IType> _function_1 = new Procedure1<IType>() {
+          public void apply(final IType destinationType) {
+            final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+            String _nextEdgeName = TransformationJavaToHyperGraph.this.getNextEdgeName();
+            edge.setName(_nextEdgeName);
+            EList<Edge> _edges = system.getEdges();
+            _edges.add(edge);
+            EList<Edge> _edges_1 = TransformationJavaToHyperGraph.this.hypergraphSet.getEdges();
+            _edges_1.add(edge);
+            EList<Node> _nodes = system.getNodes();
+            Node _findNode = TransformationJavaToHyperGraph.this.findNode(_nodes, sourceType);
+            EList<Edge> _edges_2 = _findNode.getEdges();
+            _edges_2.add(edge);
+            EList<Node> _nodes_1 = system.getNodes();
+            Node _findMatchingNode = TransformationJavaToHyperGraph.this.findMatchingNode(_nodes_1, destinationType);
+            EList<Edge> _edges_3 = _findMatchingNode.getEdges();
+            _edges_3.add(edge);
+          }
+        };
+        IterableExtensions.<IType>forEach(_filter, _function_1);
+      }
+      if (this.monitor!=null) {
+        this.monitor.worked(1);
+      }
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -321,7 +256,7 @@ public class TransformationJavaToHyperGraph {
   private List<IType> getParentTypesList(final IType type) {
     try {
       final List<IType> result = new ArrayList<IType>();
-      final ITypeHierarchy typeHierarchy = type.newTypeHierarchy(this.monitor);
+      final ITypeHierarchy typeHierarchy = type.newTypeHierarchy(null);
       IType[] _subclasses = typeHierarchy.getSubclasses(type);
       for (final IType subtype : _subclasses) {
         {

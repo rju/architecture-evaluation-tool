@@ -8,7 +8,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 @SuppressWarnings("all")
-public class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+public class AnalysisResultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
   public String getColumnText(final Object obj, final int index) {
     return this.getText(obj);
   }

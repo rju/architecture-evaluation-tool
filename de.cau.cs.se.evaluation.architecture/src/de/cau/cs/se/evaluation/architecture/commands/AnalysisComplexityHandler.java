@@ -11,9 +11,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.cau.cs.se.evaluation.architecture.jobs.ComplexityAnalysisJob;
+import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 
 /**
  * @author rju
@@ -33,6 +35,11 @@ public class AnalysisComplexityHandler extends AbstractHandler implements IHandl
 		if (selection != null) {
 			final Job job = new ComplexityAnalysisJob(selection);
 			job.schedule();
+			try {
+				activePage.showView(AnalysisResultView.ID);
+			} catch (final PartInitException e) {
+				throw new ExecutionException("View initialization failed.", e);
+			}
 		}
 
 		return null;

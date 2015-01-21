@@ -5,7 +5,9 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics;
+import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +28,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -85,8 +94,28 @@ public class ComplexityAnalysisJob extends Job {
     final TransformationJavaToHyperGraph javaToHypergraph = new TransformationJavaToHyperGraph(hypergraphSet, scopes, monitor);
     final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(hypergraphSet, monitor);
     Hypergraph _transform = javaToHypergraph.transform(this.types);
-    hypergraphMetrics.transform(_transform);
+    final ResultModelProvider result = hypergraphMetrics.transform(_transform);
     monitor.done();
+    IWorkbench _workbench = PlatformUI.getWorkbench();
+    Display _display = _workbench.getDisplay();
+    _display.syncExec(new Runnable() {
+      public void run() {
+        try {
+          IWorkbench _workbench = PlatformUI.getWorkbench();
+          IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
+          IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
+          final IViewPart part = _activePage.showView(AnalysisResultView.ID);
+          ((AnalysisResultView) part).update(result);
+        } catch (final Throwable _t) {
+          if (_t instanceof PartInitException) {
+            final PartInitException e = (PartInitException)_t;
+            e.printStackTrace();
+          } else {
+            throw Exceptions.sneakyThrow(_t);
+          }
+        }
+      }
+    });
     return Status.OK_STATUS;
   }
   

@@ -21,6 +21,9 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.Flags
+import org.eclipse.ui.PlatformUI
+import org.eclipse.ui.PartInitException
+import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -62,10 +65,21 @@ class ComplexityAnalysisJob extends Job {
 		val javaToHypergraph = new TransformationJavaToHyperGraph(hypergraphSet, scopes, monitor)
 		val hypergraphMetrics = new TransformationHypergraphMetrics(hypergraphSet, monitor)
 		
-		hypergraphMetrics.transform(javaToHypergraph.transform(types))
+		val result = hypergraphMetrics.transform(javaToHypergraph.transform(types))
 		
 		monitor.done()
-	
+		
+		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
+       		public override void run() {
+	           try { 
+					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
+					(part as AnalysisResultView).update(result)
+	           } catch (PartInitException e) {
+	                e.printStackTrace()
+	           }
+	    	}
+     	})
+							
 		return Status.OK_STATUS
 	}
 	

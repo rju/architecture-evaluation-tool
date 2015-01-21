@@ -3,7 +3,7 @@ package de.cau.cs.se.evaluation.architecture.views
 import org.eclipse.jface.viewers.IStructuredContentProvider
 import org.eclipse.jface.viewers.Viewer
 
-class TableContentProvider implements IStructuredContentProvider {
+class AnalysisResultTableContentProvider implements IStructuredContentProvider {
 	
 	override void inputChanged(Viewer v, Object oldInput, Object newInput) {
 	}

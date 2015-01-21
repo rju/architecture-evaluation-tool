@@ -11,6 +11,9 @@ import de.cau.cs.se.evaluation.architecture.state.RowPatternTable;
 import de.cau.cs.se.evaluation.architecture.state.StateFactory;
 import de.cau.cs.se.evaluation.architecture.state.StateModel;
 import de.cau.cs.se.evaluation.architecture.state.SystemSetup;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
+import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Conversions;
@@ -34,7 +37,7 @@ public class TransformationHypergraphMetrics {
     this.monitor = monitor;
   }
   
-  public void transform(final Hypergraph system) {
+  public ResultModelProvider transform(final Hypergraph system) {
     if (this.monitor!=null) {
       this.monitor.subTask("Calculating metrics");
     }
@@ -73,15 +76,22 @@ public class TransformationHypergraphMetrics {
       }
     };
     IterableExtensions.<Node>forEach(_nodes, _function);
+    final ResultModelProvider result = ResultModelProvider.INSTANCE;
+    List<NamedValue> _values = result.getValues();
     SystemSetup _mainsystem_4 = state.getMainsystem();
     Hypergraph _system = _mainsystem_4.getSystem();
     SystemSetup _mainsystem_5 = state.getMainsystem();
     RowPatternTable _rowPatternTable = _mainsystem_5.getRowPatternTable();
-    final double size = this.calculateSize(_system, _rowPatternTable);
+    double _calculateSize = this.calculateSize(_system, _rowPatternTable);
+    NamedValue _namedValue = new NamedValue("Size", _calculateSize);
+    _values.add(_namedValue);
+    List<NamedValue> _values_1 = result.getValues();
     SystemSetup _mainsystem_6 = state.getMainsystem();
     EList<SystemSetup> _subsystems = state.getSubsystems();
-    final double complexity = this.calculateComplexity(_mainsystem_6, _subsystems);
-    System.out.println(((("Size " + Double.valueOf(size)) + "  Complexity ") + Double.valueOf(complexity)));
+    double _calculateComplexity = this.calculateComplexity(_mainsystem_6, _subsystems);
+    NamedValue _namedValue_1 = new NamedValue("Complexity", _calculateComplexity);
+    _values_1.add(_namedValue_1);
+    return result;
   }
   
   /**

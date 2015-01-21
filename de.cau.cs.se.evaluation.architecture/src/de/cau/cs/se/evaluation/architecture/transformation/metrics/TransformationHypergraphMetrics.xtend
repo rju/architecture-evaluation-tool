@@ -28,7 +28,7 @@ class TransformationHypergraphMetrics {
 		this.monitor = monitor
 	}
 	
-	public def transform(Hypergraph system) {
+	public def ResultModelProvider transform(Hypergraph system) {
 		monitor?.subTask("Calculating metrics")
 		val StateModel state = StateFactory.eINSTANCE.createStateModel
 		
@@ -49,12 +49,16 @@ class TransformationHypergraphMetrics {
 			monitor?.worked(1)
 		]
 		
-		/** calculate sizes. */
-		val double size = calculateSize(state.mainsystem.system, state.mainsystem.rowPatternTable)
-		/** calculate complexity. */
-		val double complexity = calculateComplexity(state.mainsystem, state.subsystems)
+		val result = ResultModelProvider.INSTANCE
 		
-		System.out.println("Size " + size + "  Complexity " + complexity)
+		// result.clearValues
+		
+		/** calculate sizes. */
+		result.getValues.add(new NamedValue("Size", calculateSize(state.mainsystem.system, state.mainsystem.rowPatternTable)))
+		/** calculate complexity. */
+		result.getValues.add(new NamedValue("Complexity",calculateComplexity(state.mainsystem, state.subsystems)))
+		
+		return result
 	}
 	
 	/**

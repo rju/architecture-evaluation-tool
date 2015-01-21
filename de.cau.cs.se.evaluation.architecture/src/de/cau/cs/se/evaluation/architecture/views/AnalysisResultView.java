@@ -1,22 +1,17 @@
 package de.cau.cs.se.evaluation.architecture.views;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
+
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -40,12 +35,7 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	public static final String ID = "de.cau.cs.se.evaluation.architecture.views.AnalysisResultView";
 
-	private static final String CONTEXT_ID = "de.cau.cs.se.evaluation.architecture.viewer";
-
 	private TableViewer viewer;
-	private Action action1;
-	private Action action2;
-	private Action doubleClickAction;
 
 
 	/**
@@ -61,66 +51,53 @@ public class AnalysisResultView extends ViewPart {
 	@Override
 	public void createPartControl(final Composite parent) {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		this.viewer.setContentProvider(new TableContentProvider());
-		this.viewer.setLabelProvider(new TableLabelProvider());
-		this.viewer.setSorter(new ViewerSorter());
-		this.viewer.setInput(this.getViewSite());
 
-		// Create the help context id for the viewer's control
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this.viewer.getControl(), CONTEXT_ID);
-		this.makeActions();
-		this.hookContextMenu();
-		this.hookDoubleClickAction();
-		this.contributeToActionBars();
+		// create the columns
+		this.createColumns();
+
+		// make lines and header visible
+		final Table table = this.viewer.getTable();
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+
+		this.viewer.setContentProvider(ArrayContentProvider.getInstance());
+		this.viewer.setInput(ResultModelProvider.INSTANCE.getValues());
+
+		// define layout for the viewer
+		final GridData gridData = new GridData();
+		gridData.verticalAlignment = GridData.FILL;
+		gridData.horizontalSpan = 2;
+		gridData.grabExcessHorizontalSpace = true;
+		gridData.grabExcessVerticalSpace = true;
+		gridData.horizontalAlignment = GridData.FILL;
+		this.viewer.getControl().setLayoutData(gridData);
 	}
 
-	private void hookContextMenu() {
-		final MenuManager menuMgr = new MenuManager("#PopupMenu");
-		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(final IMenuManager manager) {
-				AnalysisResultView.this.fillContextMenu(manager);
+	private void createColumns() {
+		// create a column for the first name
+		final TableViewerColumn columnName = new TableViewerColumn(this.viewer, SWT.NONE);
+		columnName.getColumn().setWidth(200);
+		columnName.getColumn().setText("Name");
+		columnName.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(final Object element) {
+				final NamedValue value = (NamedValue) element;
+				return value.getName();
 			}
 		});
-		final Menu menu = menuMgr.createContextMenu(this.viewer.getControl());
-		this.viewer.getControl().setMenu(menu);
-		this.getSite().registerContextMenu(menuMgr, this.viewer);
-	}
 
-	private void contributeToActionBars() {
-		final IActionBars bars = this.getViewSite().getActionBars();
-		this.fillLocalPullDown(bars.getMenuManager());
-		this.fillLocalToolBar(bars.getToolBarManager());
-	}
-
-	private void fillLocalPullDown(final IMenuManager manager) {
-		manager.add(this.action1);
-		manager.add(new Separator());
-		manager.add(this.action2);
-	}
-
-	private void fillContextMenu(final IMenuManager manager) {
-		manager.add(this.action1);
-		manager.add(this.action2);
-		// Other plug-ins can contribute there actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-	}
-
-	private void fillLocalToolBar(final IToolBarManager manager) {
-		manager.add(this.action1);
-		manager.add(this.action2);
-	}
-
-	private void makeActions() {
-
-	}
-
-	private void hookDoubleClickAction() {
-		this.viewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(final DoubleClickEvent event) {
-				AnalysisResultView.this.doubleClickAction.run();
+		// create a column for the first name
+		final TableViewerColumn columnValue = new TableViewerColumn(this.viewer, SWT.NONE);
+		columnValue.getColumn().setWidth(200);
+		columnValue.getColumn().setText("Value");
+		columnValue.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(final Object element) {
+				final NamedValue value = (NamedValue) element;
+				return Double.toString(value.getValue());
 			}
 		});
+
 	}
 
 	/**
@@ -130,4 +107,10 @@ public class AnalysisResultView extends ViewPart {
 	public void setFocus() {
 		this.viewer.getControl().setFocus();
 	}
+
+	public void update(final ResultModelProvider provider) {
+		this.setFocus();
+		this.viewer.refresh();
+	}
+
 }

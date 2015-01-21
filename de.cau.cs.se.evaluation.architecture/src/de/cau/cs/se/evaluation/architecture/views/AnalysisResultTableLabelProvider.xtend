@@ -6,7 +6,7 @@ import org.eclipse.swt.graphics.Image
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.ISharedImages
 
-class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+class AnalysisResultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
 	
 	override String getColumnText(Object obj, int index) {
 		return this.getText(obj)

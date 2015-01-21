@@ -5,24 +5,19 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import java.util.ArrayList
-import java.util.HashMap
 import java.util.List
-import java.util.Map
 import org.eclipse.jdt.core.IType
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.TypeDeclaration
-import org.eclipse.jdt.core.Flags
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet
 import de.cau.cs.se.evaluation.architecture.transformation.IScope
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.jdt.core.dom.Modifier
-import org.eclipse.jdt.core.IMethod
 import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.SimpleType
-import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.jdt.core.ITypeHierarchy
 
 /**
@@ -37,89 +32,84 @@ class TransformationJavaToHyperGraph {
 	val IScope globalScope
 	val IProgressMonitor monitor
 	
+	/**
+	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
+	 *  
+	 * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
+	 * @param scope the global scoper used to resolve classes during transformation  
+	 */
 	public new (HypergraphSet hypergraphSet, IScope scope) {
 		this.globalScope = scope
 		this.hypergraphSet = hypergraphSet 
 		this.monitor = null
 	}
 	
+	/**
+	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
+	 *  
+	 * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
+	 * @param scope the global scoper used to resolve classes during transformation
+	 * @param eclipse progres monitor
+	 */
 	public new(HypergraphSet hypergraphSet, GlobalJavaScope scope, IProgressMonitor monitor) {
 		this.globalScope = scope
 		this.hypergraphSet = hypergraphSet 
 		this.monitor = monitor
 	}
 		
+	/**
+	 * Transform a list of types into a hypergraph.
+	 * 
+	 * @param classList list of classes to be processed
+	 */
 	def Hypergraph transform (List<IType> classList) {
 		monitor?.subTask("Constructing hypergraph")
 		val Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph
 		hypergraphSet.graphs.add(system)
-		val Map<IType,IMethod> classMethodMap = new HashMap<IType,IMethod>()
-		
-		classList.forEach[
-			monitor?.subTask("Constructing hypergraph - types " + it.elementName)
-			
-			if (it.isClass) {
-				/** add node and register public methods (determine provided interface). */
-				val Node node = HypergraphFactory.eINSTANCE.createNode
-				node.name = it.elementName
-				system.nodes.add(node)
-				hypergraphSet.nodes.add(node)
+
+		/** connections can only be resolved when all nodes are present. */
+		classList.forEach[it.createNode(system)]
+		classList.forEach[it.connectNodes(system)]
 				
-				if (it.parent instanceof IType) {
-					val parent = it.parent as IType
-					parent.methods.forEach[method | if (Flags.isPublic(method.flags)) classMethodMap.put(it, method) ]
-				}
-				it.methods.forEach[method | if (Flags.isPublic(method.flags)) classMethodMap.put(it, method) ]
-			}
-			
-			monitor?.worked(1)
-		]
-		
-		/** resolve references to provided interfaces. */
-		classList.forEach[
-			monitor?.subTask("Constructing hypergraph - references " + it.elementName)
-			if (it.isClass) {
-				it.findAllCalledClasses.filter[it.isClass && !it.isBinary].forEach[type | {
-					val Edge edge = HypergraphFactory.eINSTANCE.createEdge
-					edge.name = this.getNextEdgeName
-					
-					system.edges.add(edge)
-					hypergraphSet.edges.add(edge)
-
-					system.nodes.findNode(it).edges.add(edge)
-					system.nodes.findMatchingNode(type).edges.add(edge)
-				}]
-			}
-			
-			monitor?.worked(1)
-		]
-		
 		return system
-	}
-
-	/**
-	 * Recurse into the type hierarchy and find all public methods.
-	 * 
-	 * @param type the type to be resolved.
-	 * @param classInterfaceMap the present map
-	 */
-	private def Map<IType,IMethod> resolvePublicClassInterface(IType type, Map<IType,IMethod> classInterfaceMap) {
-		if (type.parent != null) {
-			if (type.parent instanceof IType) {
-				val parent = type.parent as IType
-				return getPublicClassInterface(type, resolvePublicClassInterface(parent, classInterfaceMap))
-			}
-		}
-		
-		return getPublicClassInterface(type, classInterfaceMap) 
 	}
 	
 	/**
-	 * Determine all methods of a class which are public and not abstract.
+	 * determine nodes.
+	 * 
 	 */
-	private def Map<IType,IMethod> getPublicClassInterface(IType type, Map<IType,IMethod> classInterfaceMap) {
-		type.methods.forEach[method | if (Flags.isPublic(method.flags) && !Flags.isAbstract(method.flags)) classInterfaceMap.put(type, method) ]
-		return classInterfaceMap
+	private def void createNode(IType type, Hypergraph system) {
+		monitor?.subTask("Constructing hypergraph - types " + type.elementName)
+			
+		if (type.isClass) {
+			/** add node and register public methods (determine provided interface). */
+			val Node node = HypergraphFactory.eINSTANCE.createNode
+			node.name = type.elementName
+			system.nodes.add(node)
+			hypergraphSet.nodes.add(node)			
+		}
+			
+		monitor?.worked(1)
+	}
+	
+	/**
+	 * Connect nodes.
+	 */
+	private def void connectNodes(IType sourceType, Hypergraph system) {
+		monitor?.subTask("Constructing hypergraph - references " + sourceType.elementName)
+		if (sourceType.isClass) {
+			sourceType.findAllCalledClasses.filter[it.isClass && !it.isBinary].forEach[destinationType | {
+				val Edge edge = HypergraphFactory.eINSTANCE.createEdge
+				edge.name = this.getNextEdgeName
+				
+				system.edges.add(edge)
+				hypergraphSet.edges.add(edge)
+				system.nodes.findNode(sourceType).edges.add(edge)
+				system.nodes.findMatchingNode(destinationType).edges.add(edge)
+			}]
+		}
+			
+		monitor?.worked(1)
 	}
 	
 	/**
@@ -152,7 +142,7 @@ class TransformationJavaToHyperGraph {
 
 	private def List<IType> getParentTypesList(IType type) {
 		val List<IType> result = new ArrayList<IType>()
-		val ITypeHierarchy typeHierarchy = type.newTypeHierarchy(monitor)
+		val ITypeHierarchy typeHierarchy = type.newTypeHierarchy(null)
 		for (subtype : typeHierarchy.getSubclasses(type)) {
 			result.add(subtype)
 			result.addAll(subtype.getParentTypesList)
