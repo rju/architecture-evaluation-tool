@@ -13,6 +13,7 @@ import org.eclipse.emf.common.util.EList;
  * The following features are supported:
  * <ul>
  *   <li>{@link de.cau.cs.se.evaluation.architecture.hypergraph.Node#getEdges <em>Edges</em>}</li>
+ *   <li>{@link de.cau.cs.se.evaluation.architecture.hypergraph.Node#getDerivedFrom <em>Derived From</em>}</li>
  * </ul>
  * </p>
  *
@@ -36,5 +37,31 @@ public interface Node extends NamedElement {
 	 * @generated
 	 */
 	EList<Edge> getEdges();
+
+	/**
+	 * Returns the value of the '<em><b>Derived From</b></em>' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Derived From</em>' containment reference isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Derived From</em>' containment reference.
+	 * @see #setDerivedFrom(NodeReference)
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getNode_DerivedFrom()
+	 * @model containment="true" required="true"
+	 * @generated
+	 */
+	NodeReference getDerivedFrom();
+
+	/**
+	 * Sets the value of the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Node#getDerivedFrom <em>Derived From</em>}' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Derived From</em>' containment reference.
+	 * @see #getDerivedFrom()
+	 * @generated
+	 */
+	void setDerivedFrom(NodeReference value);
 
 } // Node

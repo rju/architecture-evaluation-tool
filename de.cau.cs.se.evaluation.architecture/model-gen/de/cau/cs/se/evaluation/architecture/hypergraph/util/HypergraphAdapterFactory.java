@@ -72,6 +72,14 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 				return createHypergraphAdapter();
 			}
 			@Override
+			public Adapter caseModularHypergraph(ModularHypergraph object) {
+				return createModularHypergraphAdapter();
+			}
+			@Override
+			public Adapter caseModule(Module object) {
+				return createModuleAdapter();
+			}
+			@Override
 			public Adapter caseNode(Node object) {
 				return createNodeAdapter();
 			}
@@ -84,8 +92,24 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 				return createNamedElementAdapter();
 			}
 			@Override
-			public Adapter caseHypergraphSet(HypergraphSet object) {
-				return createHypergraphSetAdapter();
+			public Adapter caseNodeTrace(NodeTrace object) {
+				return createNodeTraceAdapter();
+			}
+			@Override
+			public Adapter caseEdgeTrace(EdgeTrace object) {
+				return createEdgeTraceAdapter();
+			}
+			@Override
+			public Adapter caseGenericTrace(GenericTrace object) {
+				return createGenericTraceAdapter();
+			}
+			@Override
+			public Adapter caseNodeReference(NodeReference object) {
+				return createNodeReferenceAdapter();
+			}
+			@Override
+			public Adapter caseEdgeReference(EdgeReference object) {
+				return createEdgeReferenceAdapter();
 			}
 			@Override
 			public Adapter defaultCase(EObject object) {
@@ -118,6 +142,34 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createHypergraphAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph <em>Modular Hypergraph</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
+	 * @generated
+	 */
+	public Adapter createModularHypergraphAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module <em>Module</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.Module
+	 * @generated
+	 */
+	public Adapter createModuleAdapter() {
 		return null;
 	}
 
@@ -164,16 +216,72 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 	}
 
 	/**
-	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet <em>Set</em>}'.
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace <em>Node Trace</em>}'.
 	 * <!-- begin-user-doc -->
 	 * This default implementation returns null so that we can easily ignore cases;
 	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
 	 * <!-- end-user-doc -->
 	 * @return the new adapter.
-	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace
 	 * @generated
 	 */
-	public Adapter createHypergraphSetAdapter() {
+	public Adapter createNodeTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace <em>Edge Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace
+	 * @generated
+	 */
+	public Adapter createEdgeTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.GenericTrace <em>Generic Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.GenericTrace
+	 * @generated
+	 */
+	public Adapter createGenericTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference <em>Node Reference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference
+	 * @generated
+	 */
+	public Adapter createNodeReferenceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference <em>Edge Reference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference
+	 * @generated
+	 */
+	public Adapter createEdgeReferenceAdapter() {
 		return null;
 	}
 

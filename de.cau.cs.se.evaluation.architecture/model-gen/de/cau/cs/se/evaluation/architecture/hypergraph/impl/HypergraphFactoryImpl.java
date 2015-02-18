@@ -57,10 +57,16 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	public EObject create(EClass eClass) {
 		switch (eClass.getClassifierID()) {
 			case HypergraphPackage.HYPERGRAPH: return createHypergraph();
+			case HypergraphPackage.MODULAR_HYPERGRAPH: return createModularHypergraph();
+			case HypergraphPackage.MODULE: return createModule();
 			case HypergraphPackage.NODE: return createNode();
 			case HypergraphPackage.EDGE: return createEdge();
 			case HypergraphPackage.NAMED_ELEMENT: return createNamedElement();
-			case HypergraphPackage.HYPERGRAPH_SET: return createHypergraphSet();
+			case HypergraphPackage.NODE_TRACE: return createNodeTrace();
+			case HypergraphPackage.EDGE_TRACE: return createEdgeTrace();
+			case HypergraphPackage.GENERIC_TRACE: return createGenericTrace();
+			case HypergraphPackage.NODE_REFERENCE: return createNodeReference();
+			case HypergraphPackage.EDGE_REFERENCE: return createEdgeReference();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -74,6 +80,26 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	public Hypergraph createHypergraph() {
 		HypergraphImpl hypergraph = new HypergraphImpl();
 		return hypergraph;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public ModularHypergraph createModularHypergraph() {
+		ModularHypergraphImpl modularHypergraph = new ModularHypergraphImpl();
+		return modularHypergraph;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public Module createModule() {
+		ModuleImpl module = new ModuleImpl();
+		return module;
 	}
 
 	/**
@@ -111,9 +137,49 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public HypergraphSet createHypergraphSet() {
-		HypergraphSetImpl hypergraphSet = new HypergraphSetImpl();
-		return hypergraphSet;
+	public NodeTrace createNodeTrace() {
+		NodeTraceImpl nodeTrace = new NodeTraceImpl();
+		return nodeTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EdgeTrace createEdgeTrace() {
+		EdgeTraceImpl edgeTrace = new EdgeTraceImpl();
+		return edgeTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public GenericTrace createGenericTrace() {
+		GenericTraceImpl genericTrace = new GenericTraceImpl();
+		return genericTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public NodeReference createNodeReference() {
+		NodeReferenceImpl nodeReference = new NodeReferenceImpl();
+		return nodeReference;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EdgeReference createEdgeReference() {
+		EdgeReferenceImpl edgeReference = new EdgeReferenceImpl();
+		return edgeReference;
 	}
 
 	/**

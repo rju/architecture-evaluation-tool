@@ -31,6 +31,24 @@ public interface HypergraphFactory extends EFactory {
 	Hypergraph createHypergraph();
 
 	/**
+	 * Returns a new object of class '<em>Modular Hypergraph</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Modular Hypergraph</em>'.
+	 * @generated
+	 */
+	ModularHypergraph createModularHypergraph();
+
+	/**
+	 * Returns a new object of class '<em>Module</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Module</em>'.
+	 * @generated
+	 */
+	Module createModule();
+
+	/**
 	 * Returns a new object of class '<em>Node</em>'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -58,13 +76,49 @@ public interface HypergraphFactory extends EFactory {
 	NamedElement createNamedElement();
 
 	/**
-	 * Returns a new object of class '<em>Set</em>'.
+	 * Returns a new object of class '<em>Node Trace</em>'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return a new object of class '<em>Set</em>'.
+	 * @return a new object of class '<em>Node Trace</em>'.
 	 * @generated
 	 */
-	HypergraphSet createHypergraphSet();
+	NodeTrace createNodeTrace();
+
+	/**
+	 * Returns a new object of class '<em>Edge Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Edge Trace</em>'.
+	 * @generated
+	 */
+	EdgeTrace createEdgeTrace();
+
+	/**
+	 * Returns a new object of class '<em>Generic Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Generic Trace</em>'.
+	 * @generated
+	 */
+	GenericTrace createGenericTrace();
+
+	/**
+	 * Returns a new object of class '<em>Node Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Node Reference</em>'.
+	 * @generated
+	 */
+	NodeReference createNodeReference();
+
+	/**
+	 * Returns a new object of class '<em>Edge Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Edge Reference</em>'.
+	 * @generated
+	 */
+	EdgeReference createEdgeReference();
 
 	/**
 	 * Returns the package supported by this factory.

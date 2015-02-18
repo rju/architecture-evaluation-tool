@@ -25,7 +25,7 @@ import org.eclipse.emf.ecore.EObject;
  */
 public interface Hypergraph extends EObject {
 	/**
-	 * Returns the value of the '<em><b>Nodes</b></em>' reference list.
+	 * Returns the value of the '<em><b>Nodes</b></em>' containment reference list.
 	 * The list contents are of type {@link de.cau.cs.se.evaluation.architecture.hypergraph.Node}.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -33,15 +33,15 @@ public interface Hypergraph extends EObject {
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Nodes</em>' reference list.
+	 * @return the value of the '<em>Nodes</em>' containment reference list.
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getHypergraph_Nodes()
-	 * @model
+	 * @model containment="true"
 	 * @generated
 	 */
 	EList<Node> getNodes();
 
 	/**
-	 * Returns the value of the '<em><b>Edges</b></em>' reference list.
+	 * Returns the value of the '<em><b>Edges</b></em>' containment reference list.
 	 * The list contents are of type {@link de.cau.cs.se.evaluation.architecture.hypergraph.Edge}.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -49,9 +49,9 @@ public interface Hypergraph extends EObject {
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Edges</em>' reference list.
+	 * @return the value of the '<em>Edges</em>' containment reference list.
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getHypergraph_Edges()
-	 * @model
+	 * @model containment="true"
 	 * @generated
 	 */
 	EList<Edge> getEdges();
