@@ -12,25 +12,26 @@ import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.TypeDeclaration
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet
 import de.cau.cs.se.evaluation.architecture.transformation.IScope
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.jdt.core.dom.Modifier
 import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.SimpleType
 import org.eclipse.jdt.core.ITypeHierarchy
+import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
 
 /**
  * Transform a java project based on a list of classes to a hypergraph.
  */
-class TransformationJavaToHyperGraph {
+class TransformationJavaToHyperGraph implements ITransformation {
 	
 	extension JavaTypeHelper javaTypeHelper = new JavaTypeHelper()
 		
 	int edgeId = 0
-	val HypergraphSet hypergraphSet
 	val IScope globalScope
 	val IProgressMonitor monitor
+	val List<IType> classList
+	val Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph
 	
 	/**
 	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -38,9 +39,9 @@ class TransformationJavaToHyperGraph {
 	 * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
 	 * @param scope the global scoper used to resolve classes during transformation  
 	 */
-	public new (HypergraphSet hypergraphSet, IScope scope) {
+	public new (IScope scope, List<IType> classList) {
 		this.globalScope = scope
-		this.hypergraphSet = hypergraphSet 
+		this.classList = classList 
 		this.monitor = null
 	}
 	
@@ -51,27 +52,28 @@ class TransformationJavaToHyperGraph {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progres monitor
 	 */
-	public new(HypergraphSet hypergraphSet, GlobalJavaScope scope, IProgressMonitor monitor) {
+	public new(GlobalJavaScope scope, List<IType> classList, IProgressMonitor monitor) {
 		this.globalScope = scope
-		this.hypergraphSet = hypergraphSet 
+		this.classList = classList 
 		this.monitor = monitor
+	}
+	
+	/**
+	 * Return the generated result.
+	 */
+	def Hypergraph getSystem() {
+		return system
 	}
 		
 	/**
 	 * Transform a list of types into a hypergraph.
-	 * 
-	 * @param classList list of classes to be processed
 	 */
-	def Hypergraph transform (List<IType> classList) {
+	override void transform () {
 		monitor?.subTask("Constructing hypergraph")
-		val Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph
-		hypergraphSet.graphs.add(system)
-
+		
 		/** connections can only be resolved when all nodes are present. */
 		classList.forEach[it.createNode(system)]
 		classList.forEach[it.connectNodes(system)]
-				
-		return system
 	}
 	
 	/**
@@ -85,8 +87,7 @@ class TransformationJavaToHyperGraph {
 			/** add node and register public methods (determine provided interface). */
 			val Node node = HypergraphFactory.eINSTANCE.createNode
 			node.name = type.elementName
-			system.nodes.add(node)
-			hypergraphSet.nodes.add(node)			
+			system.nodes.add(node)		
 		}
 			
 		monitor?.worked(1)
@@ -103,7 +104,6 @@ class TransformationJavaToHyperGraph {
 				edge.name = this.getNextEdgeName
 				
 				system.edges.add(edge)
-				hypergraphSet.edges.add(edge)
 				system.nodes.findNode(sourceType).edges.add(edge)
 				system.nodes.findMatchingNode(destinationType).edges.add(edge)
 			}]

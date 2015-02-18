@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.state.RowPattern;
 import de.cau.cs.se.evaluation.architecture.state.RowPatternTable;
@@ -23,21 +22,23 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class TransformationHypergraphMetrics {
-  private final HypergraphSet hypergraphSet;
-  
   private final IProgressMonitor monitor;
   
-  public TransformationHypergraphMetrics(final HypergraphSet hypergraphSet) {
-    this.hypergraphSet = hypergraphSet;
+  private Hypergraph system;
+  
+  public TransformationHypergraphMetrics() {
     this.monitor = null;
   }
   
-  public TransformationHypergraphMetrics(final HypergraphSet hypergraphSet, final IProgressMonitor monitor) {
-    this.hypergraphSet = hypergraphSet;
+  public TransformationHypergraphMetrics(final IProgressMonitor monitor) {
     this.monitor = monitor;
   }
   
-  public ResultModelProvider transform(final Hypergraph system) {
+  public Hypergraph setSystem(final Hypergraph system) {
+    return this.system = system;
+  }
+  
+  public ResultModelProvider calculate() {
     if (this.monitor!=null) {
       this.monitor.subTask("Calculating metrics");
     }
@@ -47,9 +48,9 @@ public class TransformationHypergraphMetrics {
     SystemSetup _createSystemSetup = StateFactory.eINSTANCE.createSystemSetup();
     state.setMainsystem(_createSystemSetup);
     SystemSetup _mainsystem = state.getMainsystem();
-    _mainsystem.setSystem(system);
+    _mainsystem.setSystem(this.system);
     SystemSetup _mainsystem_1 = state.getMainsystem();
-    Hypergraph _createSystemGraph = this.createSystemGraph(system, environmentNode);
+    Hypergraph _createSystemGraph = this.createSystemGraph(this.system, environmentNode);
     _mainsystem_1.setSystemGraph(_createSystemGraph);
     SystemSetup _mainsystem_2 = state.getMainsystem();
     SystemSetup _mainsystem_3 = state.getMainsystem();
@@ -58,7 +59,7 @@ public class TransformationHypergraphMetrics {
     if (this.monitor!=null) {
       this.monitor.worked(1);
     }
-    EList<Node> _nodes = system.getNodes();
+    EList<Node> _nodes = this.system.getNodes();
     final Procedure1<Node> _function = new Procedure1<Node>() {
       public void apply(final Node node) {
         if (TransformationHypergraphMetrics.this.monitor!=null) {
@@ -328,8 +329,6 @@ public class TransformationHypergraphMetrics {
    */
   private Hypergraph createSubsystem(final Node node, final Hypergraph system) {
     final Hypergraph subgraph = HypergraphFactory.eINSTANCE.createHypergraph();
-    EList<Hypergraph> _graphs = this.hypergraphSet.getGraphs();
-    _graphs.add(subgraph);
     EList<Edge> _edges = node.getEdges();
     final Procedure1<Edge> _function = new Procedure1<Edge>() {
       public void apply(final Edge it) {
@@ -359,20 +358,16 @@ public class TransformationHypergraphMetrics {
    */
   private Hypergraph createSystemGraph(final Hypergraph system, final Node environmentNode) {
     final Hypergraph systemGraph = HypergraphFactory.eINSTANCE.createHypergraph();
-    EList<Hypergraph> _graphs = this.hypergraphSet.getGraphs();
-    _graphs.add(systemGraph);
     EList<Node> _nodes = systemGraph.getNodes();
     _nodes.add(environmentNode);
-    EList<Node> _nodes_1 = this.hypergraphSet.getNodes();
-    _nodes_1.add(environmentNode);
-    EList<Node> _nodes_2 = system.getNodes();
+    EList<Node> _nodes_1 = system.getNodes();
     final Procedure1<Node> _function = new Procedure1<Node>() {
       public void apply(final Node node) {
         EList<Node> _nodes = systemGraph.getNodes();
         _nodes.add(node);
       }
     };
-    IterableExtensions.<Node>forEach(_nodes_2, _function);
+    IterableExtensions.<Node>forEach(_nodes_1, _function);
     EList<Edge> _edges = system.getEdges();
     final Procedure1<Edge> _function_1 = new Procedure1<Edge>() {
       public void apply(final Edge edge) {

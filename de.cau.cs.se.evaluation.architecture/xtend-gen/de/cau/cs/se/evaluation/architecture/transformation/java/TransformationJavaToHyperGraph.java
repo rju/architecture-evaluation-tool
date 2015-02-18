@@ -5,9 +5,9 @@ import com.google.common.collect.Iterables;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
+import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaLocalScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaPackageScope;
@@ -48,17 +48,19 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
  * Transform a java project based on a list of classes to a hypergraph.
  */
 @SuppressWarnings("all")
-public class TransformationJavaToHyperGraph {
+public class TransformationJavaToHyperGraph implements ITransformation {
   @Extension
   private JavaTypeHelper javaTypeHelper = new JavaTypeHelper();
   
   private int edgeId = 0;
   
-  private final HypergraphSet hypergraphSet;
-  
   private final IScope globalScope;
   
   private final IProgressMonitor monitor;
+  
+  private final List<IType> classList;
+  
+  private final Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph();
   
   /**
    * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -66,9 +68,9 @@ public class TransformationJavaToHyperGraph {
    * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
    * @param scope the global scoper used to resolve classes during transformation
    */
-  public TransformationJavaToHyperGraph(final HypergraphSet hypergraphSet, final IScope scope) {
+  public TransformationJavaToHyperGraph(final IScope scope, final List<IType> classList) {
     this.globalScope = scope;
-    this.hypergraphSet = hypergraphSet;
+    this.classList = classList;
     this.monitor = null;
   }
   
@@ -79,37 +81,38 @@ public class TransformationJavaToHyperGraph {
    * @param scope the global scoper used to resolve classes during transformation
    * @param eclipse progres monitor
    */
-  public TransformationJavaToHyperGraph(final HypergraphSet hypergraphSet, final GlobalJavaScope scope, final IProgressMonitor monitor) {
+  public TransformationJavaToHyperGraph(final GlobalJavaScope scope, final List<IType> classList, final IProgressMonitor monitor) {
     this.globalScope = scope;
-    this.hypergraphSet = hypergraphSet;
+    this.classList = classList;
     this.monitor = monitor;
   }
   
   /**
-   * Transform a list of types into a hypergraph.
-   * 
-   * @param classList list of classes to be processed
+   * Return the generated result.
    */
-  public Hypergraph transform(final List<IType> classList) {
+  public Hypergraph getSystem() {
+    return this.system;
+  }
+  
+  /**
+   * Transform a list of types into a hypergraph.
+   */
+  public void transform() {
     if (this.monitor!=null) {
       this.monitor.subTask("Constructing hypergraph");
     }
-    final Hypergraph system = HypergraphFactory.eINSTANCE.createHypergraph();
-    EList<Hypergraph> _graphs = this.hypergraphSet.getGraphs();
-    _graphs.add(system);
     final Procedure1<IType> _function = new Procedure1<IType>() {
       public void apply(final IType it) {
-        TransformationJavaToHyperGraph.this.createNode(it, system);
+        TransformationJavaToHyperGraph.this.createNode(it, TransformationJavaToHyperGraph.this.system);
       }
     };
-    IterableExtensions.<IType>forEach(classList, _function);
+    IterableExtensions.<IType>forEach(this.classList, _function);
     final Procedure1<IType> _function_1 = new Procedure1<IType>() {
       public void apply(final IType it) {
-        TransformationJavaToHyperGraph.this.connectNodes(it, system);
+        TransformationJavaToHyperGraph.this.connectNodes(it, TransformationJavaToHyperGraph.this.system);
       }
     };
-    IterableExtensions.<IType>forEach(classList, _function_1);
-    return system;
+    IterableExtensions.<IType>forEach(this.classList, _function_1);
   }
   
   /**
@@ -129,8 +132,6 @@ public class TransformationJavaToHyperGraph {
         node.setName(_elementName_1);
         EList<Node> _nodes = system.getNodes();
         _nodes.add(node);
-        EList<Node> _nodes_1 = this.hypergraphSet.getNodes();
-        _nodes_1.add(node);
       }
       if (this.monitor!=null) {
         this.monitor.worked(1);
@@ -179,16 +180,14 @@ public class TransformationJavaToHyperGraph {
             edge.setName(_nextEdgeName);
             EList<Edge> _edges = system.getEdges();
             _edges.add(edge);
-            EList<Edge> _edges_1 = TransformationJavaToHyperGraph.this.hypergraphSet.getEdges();
-            _edges_1.add(edge);
             EList<Node> _nodes = system.getNodes();
             Node _findNode = TransformationJavaToHyperGraph.this.findNode(_nodes, sourceType);
-            EList<Edge> _edges_2 = _findNode.getEdges();
-            _edges_2.add(edge);
+            EList<Edge> _edges_1 = _findNode.getEdges();
+            _edges_1.add(edge);
             EList<Node> _nodes_1 = system.getNodes();
             Node _findMatchingNode = TransformationJavaToHyperGraph.this.findMatchingNode(_nodes_1, destinationType);
-            EList<Edge> _edges_3 = _findMatchingNode.getEdges();
-            _edges_3.add(edge);
+            EList<Edge> _edges_2 = _findMatchingNode.getEdges();
+            _edges_2.add(edge);
           }
         };
         IterableExtensions.<IType>forEach(_filter, _function_1);

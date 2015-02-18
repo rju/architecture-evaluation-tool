@@ -1,8 +1,6 @@
 package de.cau.cs.se.evaluation.architecture.jobs;
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
@@ -89,12 +87,13 @@ public class ComplexityAnalysisJob extends Job {
     int _plus_2 = (_plus_1 + _size_1);
     monitor.beginTask("Determine complexity of inter class dependency", _plus_2);
     monitor.worked(1);
-    final HypergraphSet hypergraphSet = HypergraphFactory.eINSTANCE.createHypergraphSet();
     GlobalJavaScope scopes = new GlobalJavaScope(projects, null);
-    final TransformationJavaToHyperGraph javaToHypergraph = new TransformationJavaToHyperGraph(hypergraphSet, scopes, monitor);
-    final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(hypergraphSet, monitor);
-    Hypergraph _transform = javaToHypergraph.transform(this.types);
-    final ResultModelProvider result = hypergraphMetrics.transform(_transform);
+    final TransformationJavaToHyperGraph javaToHypergraph = new TransformationJavaToHyperGraph(scopes, this.types, monitor);
+    final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
+    javaToHypergraph.transform();
+    Hypergraph _system = javaToHypergraph.getSystem();
+    hypergraphMetrics.setSystem(_system);
+    final ResultModelProvider result = hypergraphMetrics.calculate();
     monitor.done();
     IWorkbench _workbench = PlatformUI.getWorkbench();
     Display _display = _workbench.getDisplay();

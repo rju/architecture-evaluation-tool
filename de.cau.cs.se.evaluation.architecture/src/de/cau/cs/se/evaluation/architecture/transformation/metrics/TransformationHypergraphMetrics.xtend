@@ -10,25 +10,26 @@ import de.cau.cs.se.evaluation.architecture.state.RowPattern
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.state.SystemSetup
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphSet
 import org.eclipse.core.runtime.IProgressMonitor
 
 class TransformationHypergraphMetrics {
 	
-	val HypergraphSet hypergraphSet
 	val IProgressMonitor monitor
+	var Hypergraph system
 	
-	new (HypergraphSet hypergraphSet) {
-		this.hypergraphSet = hypergraphSet
+	new () {
 		this.monitor = null
 	}
 	
-	new(HypergraphSet hypergraphSet, IProgressMonitor monitor) {
-		this.hypergraphSet = hypergraphSet
+	new(IProgressMonitor monitor) {
 		this.monitor = monitor
 	}
 	
-	public def ResultModelProvider transform(Hypergraph system) {
+	public def setSystem(Hypergraph system) {
+		this.system = system
+	}
+	
+	public def ResultModelProvider calculate() {
 		monitor?.subTask("Calculating metrics")
 		val StateModel state = StateFactory.eINSTANCE.createStateModel
 		
@@ -199,7 +200,6 @@ class TransformationHypergraphMetrics {
 	 */	
 	private def Hypergraph createSubsystem(Node node, Hypergraph system) {
 		val Hypergraph subgraph = HypergraphFactory.eINSTANCE.createHypergraph
-		this.hypergraphSet.graphs.add(subgraph)
 		
 		node.edges.forEach[subgraph.edges.add(it)]
 		system.nodes.forEach[subgraph.nodes.add(it)]
@@ -217,10 +217,8 @@ class TransformationHypergraphMetrics {
 	 */
 	private def Hypergraph createSystemGraph(Hypergraph system, Node environmentNode) {
 		val Hypergraph systemGraph = HypergraphFactory.eINSTANCE.createHypergraph
-		this.hypergraphSet.graphs.add(systemGraph)
 		
 		systemGraph.nodes.add(environmentNode)
-		this.hypergraphSet.nodes.add(environmentNode)
 		
 		system.nodes.forEach[node | systemGraph.nodes.add(node)]
 		system.edges.forEach[edge | systemGraph.edges.add(edge)]

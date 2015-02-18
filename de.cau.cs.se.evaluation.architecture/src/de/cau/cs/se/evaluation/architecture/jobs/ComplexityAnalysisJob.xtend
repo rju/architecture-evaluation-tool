@@ -17,7 +17,6 @@ import java.util.ArrayList
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph
 import org.eclipse.jdt.core.IJavaProject
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.Flags
@@ -57,15 +56,15 @@ class ComplexityAnalysisJob extends Job {
 			3 + types.size // graph analysis
 		)
 		monitor.worked(1)
-		
-		val hypergraphSet = HypergraphFactory.eINSTANCE.createHypergraphSet()
-		
+				
 		var scopes = new GlobalJavaScope(projects, null)
 		
-		val javaToHypergraph = new TransformationJavaToHyperGraph(hypergraphSet, scopes, monitor)
-		val hypergraphMetrics = new TransformationHypergraphMetrics(hypergraphSet, monitor)
+		val javaToHypergraph = new TransformationJavaToHyperGraph(scopes, types, monitor)
+		val hypergraphMetrics = new TransformationHypergraphMetrics( monitor)
 		
-		val result = hypergraphMetrics.transform(javaToHypergraph.transform(types))
+		javaToHypergraph.transform()		
+		hypergraphMetrics.system = javaToHypergraph.system
+		val result = hypergraphMetrics.calculate()
 		
 		monitor.done()
 		
