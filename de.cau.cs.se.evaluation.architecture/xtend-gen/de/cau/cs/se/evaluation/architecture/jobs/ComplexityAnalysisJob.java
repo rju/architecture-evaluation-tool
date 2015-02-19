@@ -2,7 +2,7 @@ package de.cau.cs.se.evaluation.architecture.jobs;
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
-import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph;
+import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
@@ -88,7 +88,7 @@ public class ComplexityAnalysisJob extends Job {
     monitor.beginTask("Determine complexity of inter class dependency", _plus_2);
     monitor.worked(1);
     GlobalJavaScope scopes = new GlobalJavaScope(projects, null);
-    final TransformationJavaToHyperGraph javaToHypergraph = new TransformationJavaToHyperGraph(scopes, this.types, monitor);
+    final TransformationJavaClassesToHypergraph javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, this.types, monitor);
     final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
     javaToHypergraph.transform();
     Hypergraph _system = javaToHypergraph.getSystem();

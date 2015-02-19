@@ -168,33 +168,6 @@ public interface HypergraphPackage extends EPackage {
 	int MODULE = 2;
 
 	/**
-	 * The feature id for the '<em><b>Nodes</b></em>' reference list.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int MODULE__NODES = 0;
-
-	/**
-	 * The number of structural features of the '<em>Module</em>' class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int MODULE_FEATURE_COUNT = 1;
-
-	/**
-	 * The number of operations of the '<em>Module</em>' class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 * @ordered
-	 */
-	int MODULE_OPERATION_COUNT = 0;
-
-	/**
 	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.NamedElementImpl <em>Named Element</em>}' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -230,6 +203,51 @@ public interface HypergraphPackage extends EPackage {
 	 * @ordered
 	 */
 	int NAMED_ELEMENT_OPERATION_COUNT = 0;
+
+	/**
+	 * The feature id for the '<em><b>Name</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE__NAME = NAMED_ELEMENT__NAME;
+
+	/**
+	 * The feature id for the '<em><b>Nodes</b></em>' reference list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE__NODES = NAMED_ELEMENT_FEATURE_COUNT + 0;
+
+	/**
+	 * The feature id for the '<em><b>Derived From</b></em>' containment reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE__DERIVED_FROM = NAMED_ELEMENT_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of structural features of the '<em>Module</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_FEATURE_COUNT = NAMED_ELEMENT_FEATURE_COUNT + 2;
+
+	/**
+	 * The number of operations of the '<em>Module</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_OPERATION_COUNT = NAMED_ELEMENT_OPERATION_COUNT + 0;
 
 	/**
 	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.NodeImpl <em>Node</em>}' class.
@@ -502,6 +520,110 @@ public interface HypergraphPackage extends EPackage {
 
 
 	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleReferenceImpl <em>Module Reference</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleReferenceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getModuleReference()
+	 * @generated
+	 */
+	int MODULE_REFERENCE = 12;
+
+	/**
+	 * The number of structural features of the '<em>Module Reference</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_REFERENCE_FEATURE_COUNT = 0;
+
+	/**
+	 * The number of operations of the '<em>Module Reference</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_REFERENCE_OPERATION_COUNT = 0;
+
+	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleTraceImpl <em>Module Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleTraceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getModuleTrace()
+	 * @generated
+	 */
+	int MODULE_TRACE = 11;
+
+	/**
+	 * The feature id for the '<em><b>Module</b></em>' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_TRACE__MODULE = MODULE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Module Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_TRACE_FEATURE_COUNT = MODULE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Module Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE_TRACE_OPERATION_COUNT = MODULE_REFERENCE_OPERATION_COUNT + 0;
+
+
+	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.TypeTraceImpl <em>Type Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.TypeTraceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getTypeTrace()
+	 * @generated
+	 */
+	int TYPE_TRACE = 13;
+
+	/**
+	 * The feature id for the '<em><b>Type</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int TYPE_TRACE__TYPE = MODULE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Type Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int TYPE_TRACE_FEATURE_COUNT = MODULE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Type Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int TYPE_TRACE_OPERATION_COUNT = MODULE_REFERENCE_OPERATION_COUNT + 0;
+
+
+	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph <em>Hypergraph</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -574,6 +696,17 @@ public interface HypergraphPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getModule_Nodes();
+
+	/**
+	 * Returns the meta object for the containment reference '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getDerivedFrom <em>Derived From</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the containment reference '<em>Derived From</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.Module#getDerivedFrom()
+	 * @see #getModule()
+	 * @generated
+	 */
+	EReference getModule_DerivedFrom();
 
 	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Node <em>Node</em>}'.
@@ -733,6 +866,58 @@ public interface HypergraphPackage extends EPackage {
 	EClass getEdgeReference();
 
 	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace <em>Module Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Module Trace</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace
+	 * @generated
+	 */
+	EClass getModuleTrace();
+
+	/**
+	 * Returns the meta object for the reference '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace#getModule <em>Module</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the reference '<em>Module</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace#getModule()
+	 * @see #getModuleTrace()
+	 * @generated
+	 */
+	EReference getModuleTrace_Module();
+
+	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference <em>Module Reference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Module Reference</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference
+	 * @generated
+	 */
+	EClass getModuleReference();
+
+	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace <em>Type Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Type Trace</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
+	 * @generated
+	 */
+	EClass getTypeTrace();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace#getType <em>Type</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Type</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace#getType()
+	 * @see #getTypeTrace()
+	 * @generated
+	 */
+	EAttribute getTypeTrace_Type();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -816,6 +1001,14 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EReference MODULE__NODES = eINSTANCE.getModule_Nodes();
+
+		/**
+		 * The meta object literal for the '<em><b>Derived From</b></em>' containment reference feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference MODULE__DERIVED_FROM = eINSTANCE.getModule_DerivedFrom();
 
 		/**
 		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.NodeImpl <em>Node</em>}' class.
@@ -952,6 +1145,52 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EClass EDGE_REFERENCE = eINSTANCE.getEdgeReference();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleTraceImpl <em>Module Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleTraceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getModuleTrace()
+		 * @generated
+		 */
+		EClass MODULE_TRACE = eINSTANCE.getModuleTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Module</b></em>' reference feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference MODULE_TRACE__MODULE = eINSTANCE.getModuleTrace_Module();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleReferenceImpl <em>Module Reference</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.ModuleReferenceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getModuleReference()
+		 * @generated
+		 */
+		EClass MODULE_REFERENCE = eINSTANCE.getModuleReference();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.TypeTraceImpl <em>Type Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.TypeTraceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getTypeTrace()
+		 * @generated
+		 */
+		EClass TYPE_TRACE = eINSTANCE.getTypeTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Type</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute TYPE_TRACE__TYPE = eINSTANCE.getTypeTrace_Type();
 
 	}
 

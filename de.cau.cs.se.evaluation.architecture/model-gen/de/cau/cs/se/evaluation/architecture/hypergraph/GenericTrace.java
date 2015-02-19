@@ -19,7 +19,7 @@ package de.cau.cs.se.evaluation.architecture.hypergraph;
  * @model
  * @generated
  */
-public interface GenericTrace extends NodeReference, EdgeReference {
+public interface GenericTrace extends NodeReference, EdgeReference, ModuleReference {
 	/**
 	 * Returns the value of the '<em><b>Resource Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->

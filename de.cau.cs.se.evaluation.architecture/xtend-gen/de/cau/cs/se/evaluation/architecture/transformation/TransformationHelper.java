@@ -3,6 +3,8 @@ package de.cau.cs.se.evaluation.architecture.transformation;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
+import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 
@@ -26,5 +28,15 @@ public class TransformationHelper {
     derivedFrom.setEdge(edge);
     resultEdge.setDerivedFrom(derivedFrom);
     return resultEdge;
+  }
+  
+  public static Module deriveModule(final Module module) {
+    final Module resultModule = HypergraphFactory.eINSTANCE.createModule();
+    String _name = module.getName();
+    resultModule.setName(_name);
+    final ModuleTrace derivedFrom = HypergraphFactory.eINSTANCE.createModuleTrace();
+    derivedFrom.setModule(module);
+    resultModule.setDerivedFrom(derivedFrom);
+    return resultModule;
   }
 }

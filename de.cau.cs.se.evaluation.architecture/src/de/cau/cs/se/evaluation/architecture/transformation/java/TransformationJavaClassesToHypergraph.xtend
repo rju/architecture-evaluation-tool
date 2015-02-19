@@ -23,7 +23,7 @@ import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
 /**
  * Transform a java project based on a list of classes to a hypergraph.
  */
-class TransformationJavaToHyperGraph implements ITransformation {
+class TransformationJavaClassesToHypergraph implements ITransformation {
 	
 	extension JavaTypeHelper javaTypeHelper = new JavaTypeHelper()
 		

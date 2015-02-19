@@ -112,6 +112,18 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 				return createEdgeReferenceAdapter();
 			}
 			@Override
+			public Adapter caseModuleTrace(ModuleTrace object) {
+				return createModuleTraceAdapter();
+			}
+			@Override
+			public Adapter caseModuleReference(ModuleReference object) {
+				return createModuleReferenceAdapter();
+			}
+			@Override
+			public Adapter caseTypeTrace(TypeTrace object) {
+				return createTypeTraceAdapter();
+			}
+			@Override
 			public Adapter defaultCase(EObject object) {
 				return createEObjectAdapter();
 			}
@@ -282,6 +294,48 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createEdgeReferenceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace <em>Module Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace
+	 * @generated
+	 */
+	public Adapter createModuleTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference <em>Module Reference</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference
+	 * @generated
+	 */
+	public Adapter createModuleReferenceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace <em>Type Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
+	 * @generated
+	 */
+	public Adapter createTypeTraceAdapter() {
 		return null;
 	}
 

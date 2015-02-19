@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IPackageFragment
 import org.eclipse.jdt.core.ICompilationUnit
 import org.eclipse.jdt.core.IType
 import java.util.ArrayList
-import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaToHyperGraph
 import org.eclipse.jdt.core.IJavaProject
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
@@ -23,6 +22,7 @@ import org.eclipse.jdt.core.Flags
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.PartInitException
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView
+import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -59,7 +59,7 @@ class ComplexityAnalysisJob extends Job {
 				
 		var scopes = new GlobalJavaScope(projects, null)
 		
-		val javaToHypergraph = new TransformationJavaToHyperGraph(scopes, types, monitor)
+		val javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, types, monitor)
 		val hypergraphMetrics = new TransformationHypergraphMetrics( monitor)
 		
 		javaToHypergraph.transform()		

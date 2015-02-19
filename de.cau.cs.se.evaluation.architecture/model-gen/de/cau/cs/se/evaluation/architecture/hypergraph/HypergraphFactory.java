@@ -121,6 +121,33 @@ public interface HypergraphFactory extends EFactory {
 	EdgeReference createEdgeReference();
 
 	/**
+	 * Returns a new object of class '<em>Module Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Module Trace</em>'.
+	 * @generated
+	 */
+	ModuleTrace createModuleTrace();
+
+	/**
+	 * Returns a new object of class '<em>Module Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Module Reference</em>'.
+	 * @generated
+	 */
+	ModuleReference createModuleReference();
+
+	/**
+	 * Returns a new object of class '<em>Type Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Type Trace</em>'.
+	 * @generated
+	 */
+	TypeTrace createTypeTrace();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

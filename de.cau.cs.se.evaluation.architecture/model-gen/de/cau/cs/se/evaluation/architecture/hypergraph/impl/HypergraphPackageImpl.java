@@ -11,10 +11,13 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference;
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModuleTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NamedElement;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
+import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
@@ -104,6 +107,27 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass edgeReferenceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass moduleTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass moduleReferenceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass typeTraceEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -227,6 +251,15 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 */
 	public EReference getModule_Nodes() {
 		return (EReference)moduleEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getModule_DerivedFrom() {
+		return (EReference)moduleEClass.getEStructuralFeatures().get(1);
 	}
 
 	/**
@@ -369,6 +402,51 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EClass getModuleTrace() {
+		return moduleTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getModuleTrace_Module() {
+		return (EReference)moduleTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EClass getModuleReference() {
+		return moduleReferenceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EClass getTypeTrace() {
+		return typeTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getTypeTrace_Type() {
+		return (EAttribute)typeTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public HypergraphFactory getHypergraphFactory() {
 		return (HypergraphFactory)getEFactoryInstance();
 	}
@@ -401,6 +479,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		moduleEClass = createEClass(MODULE);
 		createEReference(moduleEClass, MODULE__NODES);
+		createEReference(moduleEClass, MODULE__DERIVED_FROM);
 
 		nodeEClass = createEClass(NODE);
 		createEReference(nodeEClass, NODE__EDGES);
@@ -424,6 +503,14 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		nodeReferenceEClass = createEClass(NODE_REFERENCE);
 
 		edgeReferenceEClass = createEClass(EDGE_REFERENCE);
+
+		moduleTraceEClass = createEClass(MODULE_TRACE);
+		createEReference(moduleTraceEClass, MODULE_TRACE__MODULE);
+
+		moduleReferenceEClass = createEClass(MODULE_REFERENCE);
+
+		typeTraceEClass = createEClass(TYPE_TRACE);
+		createEAttribute(typeTraceEClass, TYPE_TRACE__TYPE);
 	}
 
 	/**
@@ -455,12 +542,16 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		// Add supertypes to classes
 		modularHypergraphEClass.getESuperTypes().add(this.getHypergraph());
+		moduleEClass.getESuperTypes().add(this.getNamedElement());
 		nodeEClass.getESuperTypes().add(this.getNamedElement());
 		edgeEClass.getESuperTypes().add(this.getNamedElement());
 		nodeTraceEClass.getESuperTypes().add(this.getNodeReference());
 		edgeTraceEClass.getESuperTypes().add(this.getEdgeReference());
 		genericTraceEClass.getESuperTypes().add(this.getNodeReference());
 		genericTraceEClass.getESuperTypes().add(this.getEdgeReference());
+		genericTraceEClass.getESuperTypes().add(this.getModuleReference());
+		moduleTraceEClass.getESuperTypes().add(this.getModuleReference());
+		typeTraceEClass.getESuperTypes().add(this.getModuleReference());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(hypergraphEClass, Hypergraph.class, "Hypergraph", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -472,6 +563,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		initEClass(moduleEClass, Module.class, "Module", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getModule_Nodes(), this.getNode(), null, "nodes", null, 0, -1, Module.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getModule_DerivedFrom(), this.getModuleReference(), null, "derivedFrom", null, 0, 1, Module.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(nodeEClass, Node.class, "Node", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getNode_Edges(), this.getEdge(), null, "edges", null, 0, -1, Node.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -495,6 +587,14 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		initEClass(nodeReferenceEClass, NodeReference.class, "NodeReference", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
 		initEClass(edgeReferenceEClass, EdgeReference.class, "EdgeReference", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(moduleTraceEClass, ModuleTrace.class, "ModuleTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEReference(getModuleTrace_Module(), this.getModule(), null, "module", null, 1, 1, ModuleTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(moduleReferenceEClass, ModuleReference.class, "ModuleReference", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
+		initEClass(typeTraceEClass, TypeTrace.class, "TypeTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getTypeTrace_Type(), ecorePackage.getEJavaObject(), "type", null, 1, 1, TypeTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

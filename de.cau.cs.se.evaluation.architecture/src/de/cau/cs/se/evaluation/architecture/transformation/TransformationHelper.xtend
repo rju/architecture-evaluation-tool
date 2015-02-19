@@ -3,6 +3,7 @@ package de.cau.cs.se.evaluation.architecture.transformation
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
+import de.cau.cs.se.evaluation.architecture.hypergraph.Module
 
 class TransformationHelper {
 	
@@ -24,6 +25,16 @@ class TransformationHelper {
 		resultEdge.derivedFrom = derivedFrom
 		
 		return resultEdge
+	}
+	
+	def static deriveModule(Module module) {
+		val resultModule = HypergraphFactory.eINSTANCE.createModule
+		resultModule.name = module.name
+		val derivedFrom = HypergraphFactory.eINSTANCE.createModuleTrace
+		derivedFrom.module = module
+		resultModule.derivedFrom = derivedFrom
+		
+		return resultModule
 	}
 	
 }

@@ -82,6 +82,7 @@ public class HypergraphSwitch<T> extends Switch<T> {
 			case HypergraphPackage.MODULE: {
 				Module module = (Module)theEObject;
 				T result = caseModule(module);
+				if (result == null) result = caseNamedElement(module);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -124,6 +125,7 @@ public class HypergraphSwitch<T> extends Switch<T> {
 				T result = caseGenericTrace(genericTrace);
 				if (result == null) result = caseNodeReference(genericTrace);
 				if (result == null) result = caseEdgeReference(genericTrace);
+				if (result == null) result = caseModuleReference(genericTrace);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -136,6 +138,26 @@ public class HypergraphSwitch<T> extends Switch<T> {
 			case HypergraphPackage.EDGE_REFERENCE: {
 				EdgeReference edgeReference = (EdgeReference)theEObject;
 				T result = caseEdgeReference(edgeReference);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case HypergraphPackage.MODULE_TRACE: {
+				ModuleTrace moduleTrace = (ModuleTrace)theEObject;
+				T result = caseModuleTrace(moduleTrace);
+				if (result == null) result = caseModuleReference(moduleTrace);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case HypergraphPackage.MODULE_REFERENCE: {
+				ModuleReference moduleReference = (ModuleReference)theEObject;
+				T result = caseModuleReference(moduleReference);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case HypergraphPackage.TYPE_TRACE: {
+				TypeTrace typeTrace = (TypeTrace)theEObject;
+				T result = caseTypeTrace(typeTrace);
+				if (result == null) result = caseModuleReference(typeTrace);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
@@ -305,6 +327,51 @@ public class HypergraphSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseEdgeReference(EdgeReference object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Module Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Module Trace</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseModuleTrace(ModuleTrace object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Module Reference</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Module Reference</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseModuleReference(ModuleReference object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Type Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Type Trace</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseTypeTrace(TypeTrace object) {
 		return null;
 	}
 
