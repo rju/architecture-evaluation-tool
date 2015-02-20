@@ -3,6 +3,7 @@ package de.cau.cs.se.evaluation.architecture.jobs;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph;
+import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
@@ -89,7 +90,9 @@ public class ComplexityAnalysisJob extends Job {
     monitor.worked(1);
     GlobalJavaScope scopes = new GlobalJavaScope(projects, null);
     final TransformationJavaClassesToHypergraph javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, this.types, monitor);
+    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(scopes, this.types, monitor);
     final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
+    javaToModularHypergraph.transform();
     javaToHypergraph.transform();
     Hypergraph _system = javaToHypergraph.getSystem();
     hypergraphMetrics.setSystem(_system);

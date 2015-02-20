@@ -70,6 +70,8 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 			case HypergraphPackage.MODULE_TRACE: return createModuleTrace();
 			case HypergraphPackage.MODULE_REFERENCE: return createModuleReference();
 			case HypergraphPackage.TYPE_TRACE: return createTypeTrace();
+			case HypergraphPackage.FIELD_TRACE: return createFieldTrace();
+			case HypergraphPackage.METHOD_TRACE: return createMethodTrace();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -213,6 +215,26 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	public TypeTrace createTypeTrace() {
 		TypeTraceImpl typeTrace = new TypeTraceImpl();
 		return typeTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public FieldTrace createFieldTrace() {
+		FieldTraceImpl fieldTrace = new FieldTraceImpl();
+		return fieldTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public MethodTrace createMethodTrace() {
+		MethodTraceImpl methodTrace = new MethodTraceImpl();
+		return methodTrace;
 	}
 
 	/**

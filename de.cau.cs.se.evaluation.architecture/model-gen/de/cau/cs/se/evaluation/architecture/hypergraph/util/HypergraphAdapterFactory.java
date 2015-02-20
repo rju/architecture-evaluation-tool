@@ -124,6 +124,14 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 				return createTypeTraceAdapter();
 			}
 			@Override
+			public Adapter caseFieldTrace(FieldTrace object) {
+				return createFieldTraceAdapter();
+			}
+			@Override
+			public Adapter caseMethodTrace(MethodTrace object) {
+				return createMethodTraceAdapter();
+			}
+			@Override
 			public Adapter defaultCase(EObject object) {
 				return createEObjectAdapter();
 			}
@@ -336,6 +344,34 @@ public class HypergraphAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createTypeTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace <em>Field Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
+	 * @generated
+	 */
+	public Adapter createFieldTraceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace <em>Method Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
+	 * @generated
+	 */
+	public Adapter createMethodTraceAdapter() {
 		return null;
 	}
 

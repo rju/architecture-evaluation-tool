@@ -624,6 +624,82 @@ public interface HypergraphPackage extends EPackage {
 
 
 	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.FieldTraceImpl <em>Field Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.FieldTraceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getFieldTrace()
+	 * @generated
+	 */
+	int FIELD_TRACE = 14;
+
+	/**
+	 * The feature id for the '<em><b>Field</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int FIELD_TRACE__FIELD = EDGE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Field Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int FIELD_TRACE_FEATURE_COUNT = EDGE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Field Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int FIELD_TRACE_OPERATION_COUNT = EDGE_REFERENCE_OPERATION_COUNT + 0;
+
+
+	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.MethodTraceImpl <em>Method Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.MethodTraceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getMethodTrace()
+	 * @generated
+	 */
+	int METHOD_TRACE = 15;
+
+	/**
+	 * The feature id for the '<em><b>Method</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int METHOD_TRACE__METHOD = NODE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Method Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int METHOD_TRACE_FEATURE_COUNT = NODE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Method Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int METHOD_TRACE_OPERATION_COUNT = NODE_REFERENCE_OPERATION_COUNT + 0;
+
+
+	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph <em>Hypergraph</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -918,6 +994,48 @@ public interface HypergraphPackage extends EPackage {
 	EAttribute getTypeTrace_Type();
 
 	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace <em>Field Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Field Trace</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
+	 * @generated
+	 */
+	EClass getFieldTrace();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace#getField <em>Field</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Field</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace#getField()
+	 * @see #getFieldTrace()
+	 * @generated
+	 */
+	EAttribute getFieldTrace_Field();
+
+	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace <em>Method Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Method Trace</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
+	 * @generated
+	 */
+	EClass getMethodTrace();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace#getMethod <em>Method</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Method</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace#getMethod()
+	 * @see #getMethodTrace()
+	 * @generated
+	 */
+	EAttribute getMethodTrace_Method();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1191,6 +1309,42 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute TYPE_TRACE__TYPE = eINSTANCE.getTypeTrace_Type();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.FieldTraceImpl <em>Field Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.FieldTraceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getFieldTrace()
+		 * @generated
+		 */
+		EClass FIELD_TRACE = eINSTANCE.getFieldTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Field</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute FIELD_TRACE__FIELD = eINSTANCE.getFieldTrace_Field();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.MethodTraceImpl <em>Method Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.MethodTraceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getMethodTrace()
+		 * @generated
+		 */
+		EClass METHOD_TRACE = eINSTANCE.getMethodTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Method</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute METHOD_TRACE__METHOD = eINSTANCE.getMethodTrace_Method();
 
 	}
 

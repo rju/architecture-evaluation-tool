@@ -52,4 +52,11 @@
   <eClassifiers xsi:type="ecore:EClass" name="TypeTrace" eSuperTypes="#//ModuleReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FieldTrace" eSuperTypes="#//EdgeReference">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="field" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MethodTrace" eSuperTypes="#//NodeReference">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="method" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+  </eClassifiers>
 </ecore:EPackage>

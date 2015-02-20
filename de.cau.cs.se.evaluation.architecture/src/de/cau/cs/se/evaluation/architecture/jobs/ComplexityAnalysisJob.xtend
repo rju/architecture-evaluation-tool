@@ -23,6 +23,7 @@ import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.PartInitException
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph
+import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -60,7 +61,10 @@ class ComplexityAnalysisJob extends Job {
 		var scopes = new GlobalJavaScope(projects, null)
 		
 		val javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, types, monitor)
+		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(scopes, types, monitor)
 		val hypergraphMetrics = new TransformationHypergraphMetrics( monitor)
+		
+		javaToModularHypergraph.transform()
 		
 		javaToHypergraph.transform()		
 		hypergraphMetrics.system = javaToHypergraph.system

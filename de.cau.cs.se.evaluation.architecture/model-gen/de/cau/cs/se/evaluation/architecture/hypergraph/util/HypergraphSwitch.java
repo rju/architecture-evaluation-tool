@@ -161,6 +161,20 @@ public class HypergraphSwitch<T> extends Switch<T> {
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
+			case HypergraphPackage.FIELD_TRACE: {
+				FieldTrace fieldTrace = (FieldTrace)theEObject;
+				T result = caseFieldTrace(fieldTrace);
+				if (result == null) result = caseEdgeReference(fieldTrace);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case HypergraphPackage.METHOD_TRACE: {
+				MethodTrace methodTrace = (MethodTrace)theEObject;
+				T result = caseMethodTrace(methodTrace);
+				if (result == null) result = caseNodeReference(methodTrace);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
 			default: return defaultCase(theEObject);
 		}
 	}
@@ -372,6 +386,36 @@ public class HypergraphSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseTypeTrace(TypeTrace object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Field Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Field Trace</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseFieldTrace(FieldTrace object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Method Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Method Trace</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseMethodTrace(MethodTrace object) {
 		return null;
 	}
 

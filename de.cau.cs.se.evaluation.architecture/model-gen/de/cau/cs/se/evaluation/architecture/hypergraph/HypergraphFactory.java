@@ -148,6 +148,24 @@ public interface HypergraphFactory extends EFactory {
 	TypeTrace createTypeTrace();
 
 	/**
+	 * Returns a new object of class '<em>Field Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Field Trace</em>'.
+	 * @generated
+	 */
+	FieldTrace createFieldTrace();
+
+	/**
+	 * Returns a new object of class '<em>Method Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Method Trace</em>'.
+	 * @generated
+	 */
+	MethodTrace createMethodTrace();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

@@ -5,10 +5,12 @@ package de.cau.cs.se.evaluation.architecture.hypergraph.impl;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace;
+import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.GenericTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage;
+import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference;
@@ -128,6 +130,20 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass typeTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass fieldTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass methodTraceEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -447,6 +463,42 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EClass getFieldTrace() {
+		return fieldTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getFieldTrace_Field() {
+		return (EAttribute)fieldTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EClass getMethodTrace() {
+		return methodTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getMethodTrace_Method() {
+		return (EAttribute)methodTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public HypergraphFactory getHypergraphFactory() {
 		return (HypergraphFactory)getEFactoryInstance();
 	}
@@ -511,6 +563,12 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		typeTraceEClass = createEClass(TYPE_TRACE);
 		createEAttribute(typeTraceEClass, TYPE_TRACE__TYPE);
+
+		fieldTraceEClass = createEClass(FIELD_TRACE);
+		createEAttribute(fieldTraceEClass, FIELD_TRACE__FIELD);
+
+		methodTraceEClass = createEClass(METHOD_TRACE);
+		createEAttribute(methodTraceEClass, METHOD_TRACE__METHOD);
 	}
 
 	/**
@@ -552,6 +610,8 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		genericTraceEClass.getESuperTypes().add(this.getModuleReference());
 		moduleTraceEClass.getESuperTypes().add(this.getModuleReference());
 		typeTraceEClass.getESuperTypes().add(this.getModuleReference());
+		fieldTraceEClass.getESuperTypes().add(this.getEdgeReference());
+		methodTraceEClass.getESuperTypes().add(this.getNodeReference());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(hypergraphEClass, Hypergraph.class, "Hypergraph", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -595,6 +655,12 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		initEClass(typeTraceEClass, TypeTrace.class, "TypeTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getTypeTrace_Type(), ecorePackage.getEJavaObject(), "type", null, 1, 1, TypeTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(fieldTraceEClass, FieldTrace.class, "FieldTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getFieldTrace_Field(), ecorePackage.getEJavaObject(), "field", null, 1, 1, FieldTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(methodTraceEClass, MethodTrace.class, "MethodTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getMethodTrace_Method(), ecorePackage.getEJavaObject(), "method", null, 1, 1, MethodTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);
