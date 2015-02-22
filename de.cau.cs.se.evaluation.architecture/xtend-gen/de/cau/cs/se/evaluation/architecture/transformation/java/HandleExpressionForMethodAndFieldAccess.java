@@ -1,13 +1,19 @@
 package de.cau.cs.se.evaluation.architecture.transformation.java;
 
 import com.google.common.base.Objects;
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
+import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
+import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace;
+import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
+import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
+import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
-import de.cau.cs.se.evaluation.architecture.transformation.java.JavaTypeHelper;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -21,6 +27,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
@@ -32,35 +39,39 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.xtext.xbase.lib.Extension;
+import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.Exceptions;
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class HandleExpressionForMethodAndFieldAccess {
-  @Extension
-  private JavaTypeHelper javaTypeHelper = new JavaTypeHelper();
-  
   private IScope scopes;
   
   private ModularHypergraph modularSystem;
   
   private MethodDeclaration method;
   
+  private TypeDeclaration clazz;
+  
   public HandleExpressionForMethodAndFieldAccess(final IScope scopes) {
     this.scopes = scopes;
   }
   
-  public void handle(final ModularHypergraph modularSystem, final MethodDeclaration method, final Expression expression) {
+  public void handle(final ModularHypergraph modularSystem, final TypeDeclaration clazz, final MethodDeclaration method, final Expression expression) {
     this.modularSystem = modularSystem;
+    this.clazz = clazz;
     this.method = method;
     boolean _notEquals = (!Objects.equal(expression, null));
     if (_notEquals) {
@@ -185,7 +196,79 @@ public class HandleExpressionForMethodAndFieldAccess {
   
   private void _findMethodAndFieldCallInExpression(final FieldAccess expression) {
     Expression _expression = expression.getExpression();
-    this.findMethodAndFieldCallInExpression(_expression);
+    if ((_expression instanceof ThisExpression)) {
+      FieldDeclaration[] _fields = this.clazz.getFields();
+      final Procedure1<FieldDeclaration> _function = new Procedure1<FieldDeclaration>() {
+        public void apply(final FieldDeclaration it) {
+          try {
+            List _fragments = it.fragments();
+            final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
+              public Boolean apply(final Object fragment) {
+                SimpleName _name = ((VariableDeclarationFragment) fragment).getName();
+                String _fullyQualifiedName = _name.getFullyQualifiedName();
+                SimpleName _name_1 = expression.getName();
+                String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
+                return Boolean.valueOf(_fullyQualifiedName.equals(_fullyQualifiedName_1));
+              }
+            };
+            final Object variableDecl = IterableExtensions.<Object>findFirst(_fragments, _function);
+            boolean _notEquals = (!Objects.equal(variableDecl, null));
+            if (_notEquals) {
+              EList<Edge> _edges = HandleExpressionForMethodAndFieldAccess.this.modularSystem.getEdges();
+              final Function1<Edge, Boolean> _function_1 = new Function1<Edge, Boolean>() {
+                public Boolean apply(final Edge it) {
+                  return Boolean.valueOf(HandleExpressionForMethodAndFieldAccess.this.checkVariable(((VariableDeclarationFragment) variableDecl), it));
+                }
+              };
+              final Edge edge = IterableExtensions.<Edge>findFirst(_edges, _function_1);
+              boolean _notEquals_1 = (!Objects.equal(edge, null));
+              if (_notEquals_1) {
+                EList<Node> _nodes = HandleExpressionForMethodAndFieldAccess.this.modularSystem.getNodes();
+                final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
+                  public Boolean apply(final Node it) {
+                    return Boolean.valueOf(HandleExpressionForMethodAndFieldAccess.this.checkMethodNode(it, HandleExpressionForMethodAndFieldAccess.this.method));
+                  }
+                };
+                final Node node = IterableExtensions.<Node>findFirst(_nodes, _function_2);
+                EList<Edge> _edges_1 = node.getEdges();
+                _edges_1.add(edge);
+              } else {
+                String _string = variableDecl.toString();
+                String _plus = ("Missing edge for variable " + _string);
+                throw new Exception(_plus);
+              }
+            }
+          } catch (Throwable _e) {
+            throw Exceptions.sneakyThrow(_e);
+          }
+        }
+      };
+      IterableExtensions.<FieldDeclaration>forEach(((Iterable<FieldDeclaration>)Conversions.doWrapArray(_fields)), _function);
+    }
+  }
+  
+  public boolean checkMethodNode(final Node node, final MethodDeclaration declaration) {
+    NodeReference _derivedFrom = node.getDerivedFrom();
+    if ((_derivedFrom instanceof MethodTrace)) {
+      String _name = node.getName();
+      String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(this.clazz, declaration);
+      return _name.equals(_determineFullQualifiedName);
+    }
+    return false;
+  }
+  
+  /**
+   * Match if a given variable in jdt.dom corresponds to an edge in the hypergraph based
+   * on the IField reference stored in the edge.
+   */
+  public boolean checkVariable(final VariableDeclarationFragment variable, final Edge edge) {
+    EdgeReference _derivedFrom = edge.getDerivedFrom();
+    if ((_derivedFrom instanceof FieldTrace)) {
+      String _name = edge.getName();
+      String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(this.clazz, variable);
+      return _name.equals(_determineFullQualifiedName);
+    }
+    return false;
   }
   
   private void _findMethodAndFieldCallInExpression(final InfixExpression expression) {
@@ -216,7 +299,38 @@ public class HandleExpressionForMethodAndFieldAccess {
     expression.getParent();
   }
   
+  /**
+   * check what name that is. If it is a variable connect to edge
+   */
   private void _findMethodAndFieldCallInExpression(final Name expression) {
+    EList<Edge> _edges = this.modularSystem.getEdges();
+    final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
+      public Boolean apply(final Edge it) {
+        boolean _xblockexpression = false;
+        {
+          String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(HandleExpressionForMethodAndFieldAccess.this.clazz);
+          String _plus = (_determineFullQualifiedName + ".");
+          String _fullyQualifiedName = expression.getFullyQualifiedName();
+          final String variableName = (_plus + _fullyQualifiedName);
+          String _name = it.getName();
+          _xblockexpression = _name.equals(variableName);
+        }
+        return Boolean.valueOf(_xblockexpression);
+      }
+    };
+    final Edge edge = IterableExtensions.<Edge>findFirst(_edges, _function);
+    boolean _notEquals = (!Objects.equal(edge, null));
+    if (_notEquals) {
+      EList<Node> _nodes = this.modularSystem.getNodes();
+      final Function1<Node, Boolean> _function_1 = new Function1<Node, Boolean>() {
+        public Boolean apply(final Node it) {
+          return Boolean.valueOf(HandleExpressionForMethodAndFieldAccess.this.checkMethodNode(it, HandleExpressionForMethodAndFieldAccess.this.method));
+        }
+      };
+      final Node node = IterableExtensions.<Node>findFirst(_nodes, _function_1);
+      EList<Edge> _edges_1 = node.getEdges();
+      _edges_1.add(edge);
+    }
   }
   
   private void _findMethodAndFieldCallInExpression(final NullLiteral expression) {
@@ -249,7 +363,15 @@ public class HandleExpressionForMethodAndFieldAccess {
   private void _findMethodAndFieldCallInExpression(final SuperMethodInvocation expression) {
   }
   
+  /**
+   * this should not be called by the dispatcher it must be resolved in variable or method access expressions
+   */
   private void _findMethodAndFieldCallInExpression(final ThisExpression expression) {
+    try {
+      throw new Exception("Eeek ThisExpression must not be evaluated by the dispatcher");
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   private void _findMethodAndFieldCallInExpression(final TypeLiteral expression) {

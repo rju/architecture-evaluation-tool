@@ -1,10 +1,13 @@
 package de.cau.cs.se.evaluation.architecture.jobs;
 
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
+import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
+import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -93,10 +97,39 @@ public class ComplexityAnalysisJob extends Job {
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(scopes, this.types, monitor);
     final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
     javaToModularHypergraph.transform();
+    ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();
+    EList<Module> _modules = _modularSystem.getModules();
+    for (final Module module : _modules) {
+      {
+        String _name = module.getName();
+        String _plus_3 = ("module " + _name);
+        System.out.println(_plus_3);
+        EList<Node> _nodes = module.getNodes();
+        for (final Node node : _nodes) {
+          String _name_1 = node.getName();
+          String _plus_4 = ("  node " + _name_1);
+          System.out.println(_plus_4);
+        }
+      }
+    }
+    ModularHypergraph _modularSystem_1 = javaToModularHypergraph.getModularSystem();
+    EList<Node> _nodes = _modularSystem_1.getNodes();
+    for (final Node node : _nodes) {
+      {
+        String _name = node.getName();
+        String _plus_3 = ("node " + _name);
+        System.out.println(_plus_3);
+        EList<Edge> _edges = node.getEdges();
+        for (final Edge edge : _edges) {
+          String _name_1 = edge.getName();
+          String _plus_4 = ("  edge " + _name_1);
+          System.out.println(_plus_4);
+        }
+      }
+    }
     javaToHypergraph.transform();
     Hypergraph _system = javaToHypergraph.getSystem();
     hypergraphMetrics.setSystem(_system);
-    final ResultModelProvider result = hypergraphMetrics.calculate();
     monitor.done();
     IWorkbench _workbench = PlatformUI.getWorkbench();
     Display _display = _workbench.getDisplay();
@@ -107,7 +140,6 @@ public class ComplexityAnalysisJob extends Job {
           IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
           IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
           final IViewPart part = _activePage.showView(AnalysisResultView.ID);
-          ((AnalysisResultView) part).update(result);
         } catch (final Throwable _t) {
           if (_t instanceof PartInitException) {
             final PartInitException e = (PartInitException)_t;

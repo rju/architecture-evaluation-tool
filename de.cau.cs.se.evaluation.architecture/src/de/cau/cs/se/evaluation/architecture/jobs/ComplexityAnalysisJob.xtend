@@ -66,9 +66,22 @@ class ComplexityAnalysisJob extends Job {
 		
 		javaToModularHypergraph.transform()
 		
+		for (module : javaToModularHypergraph.modularSystem.modules) {
+			System.out.println("module " + module.name)
+			for (node : module.nodes) {
+				System.out.println("  node " + node.name)
+			}
+		}
+		for (node : javaToModularHypergraph.modularSystem.nodes) {
+			System.out.println("node " + node.name)
+			for (edge : node.edges) {
+				System.out.println("  edge " + edge.name)
+			}
+		}
+		
 		javaToHypergraph.transform()		
 		hypergraphMetrics.system = javaToHypergraph.system
-		val result = hypergraphMetrics.calculate()
+		// val result = hypergraphMetrics.calculate()
 		
 		monitor.done()
 		
@@ -76,7 +89,7 @@ class ComplexityAnalysisJob extends Job {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					(part as AnalysisResultView).update(result)
+					// (part as AnalysisResultView).update(result)
 	           } catch (PartInitException e) {
 	                e.printStackTrace()
 	           }

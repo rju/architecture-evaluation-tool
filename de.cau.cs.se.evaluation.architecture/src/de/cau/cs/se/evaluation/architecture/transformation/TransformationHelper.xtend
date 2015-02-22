@@ -16,6 +16,9 @@ import org.eclipse.jdt.core.IMethod
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration
 import org.eclipse.jdt.core.dom.Expression
+import org.eclipse.jdt.internal.core.SourceMethod
+import org.eclipse.jdt.core.ILocalVariable
+import org.eclipse.jdt.core.dom.TypeDeclaration
 
 class TransformationHelper {
 	
@@ -68,13 +71,42 @@ class TransformationHelper {
 
 	def static matchArguments(Iterable<Node> nodes, List arguments) {
 		nodes.findFirst[node |
-			val method = (node.derivedFrom as MethodTrace).method as MethodDeclaration
-			val parameters = method.parameters
-			if (parameters.size == arguments.size)
-				compareArgAndParam(parameters, arguments)
-			else
-				false
+			val method = (node.derivedFrom as MethodTrace).method
+			switch(method) {
+				 MethodDeclaration: {
+				 	val parameters = method.parameters
+					if (parameters.size == arguments.size)
+						compareArgAndParam(parameters, arguments)
+					else
+						false
+				 }
+				 IMethod: {
+				 	val parameters = method.parameters
+				 	if (parameters.size == arguments.size)
+				 		compareArgAndParamIMethod(parameters, arguments)
+				 	else
+				 		false
+				 }
+				 default:
+				 	throw new Exception("Implementation error. Method type " + method.class + " not supported.")
+			}
+			
 		]
+	}
+	
+	/** returns true if the arguments match the parameters. */
+	def static boolean compareArgAndParamIMethod(List<ILocalVariable> parameters, List arguments) {
+		// arguments are Expression
+		// parameters SingleVariableDeclaration
+		for(var i=0;i < parameters.size ; i++) {
+			val pType = parameters.get(i).
+			val aType = (arguments.get(i) as Expression).resolveTypeBinding.erasure
+			
+			if (!pType.isAssignmentCompatible(aType))
+				return false	
+		}
+		
+		return true
 	}
 	
 	/** returns true if the arguments match the parameters. */

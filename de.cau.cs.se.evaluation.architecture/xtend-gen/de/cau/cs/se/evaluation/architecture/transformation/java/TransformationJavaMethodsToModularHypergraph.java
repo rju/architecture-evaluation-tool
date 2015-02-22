@@ -23,6 +23,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -167,7 +168,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
               List _statements = _body.statements();
               final Procedure1<Statement> _function = new Procedure1<Statement>() {
                 public void apply(final Statement it) {
-                  handler.handle(TransformationJavaMethodsToModularHypergraph.this.modularSystem, method, it);
+                  handler.handle(TransformationJavaMethodsToModularHypergraph.this.modularSystem, declaredType, method, it);
                 }
               };
               IterableExtensions.<Statement>forEach(_statements, _function);
@@ -186,14 +187,25 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    */
   private void createNodesForClassMethods(final EList<Node> nodes, final IType type) {
     try {
-      IMethod[] _methods = type.getMethods();
-      final Procedure1<IMethod> _function = new Procedure1<IMethod>() {
-        public void apply(final IMethod method) {
-          Node _createNodeForMethod = TransformationJavaMethodsToModularHypergraph.this.createNodeForMethod(method);
-          nodes.add(_createNodeForMethod);
+      EList<Module> _modules = this.modularSystem.getModules();
+      final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
+        public Boolean apply(final Module it) {
+          String _name = it.getName();
+          String _fullyQualifiedName = type.getFullyQualifiedName();
+          return Boolean.valueOf(_name.equals(_fullyQualifiedName));
         }
       };
-      IterableExtensions.<IMethod>forEach(((Iterable<IMethod>)Conversions.doWrapArray(_methods)), _function);
+      final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
+      IMethod[] _methods = type.getMethods();
+      final Procedure1<IMethod> _function_1 = new Procedure1<IMethod>() {
+        public void apply(final IMethod method) {
+          final Node node = TransformationJavaMethodsToModularHypergraph.this.createNodeForMethod(method);
+          nodes.add(node);
+          EList<Node> _nodes = module.getNodes();
+          _nodes.add(node);
+        }
+      };
+      IterableExtensions.<IMethod>forEach(((Iterable<IMethod>)Conversions.doWrapArray(_methods)), _function_1);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -205,11 +217,16 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   private Node createNodeForMethod(final IMethod method) {
     final Node node = HypergraphFactory.eINSTANCE.createNode();
     ICompilationUnit _compilationUnit = method.getCompilationUnit();
-    String _elementName = _compilationUnit.getElementName();
+    IJavaElement _parent = _compilationUnit.getParent();
+    String _elementName = _parent.getElementName();
     String _plus = (_elementName + ".");
-    String _elementName_1 = method.getElementName();
+    IJavaElement _parent_1 = method.getParent();
+    String _elementName_1 = _parent_1.getElementName();
     String _plus_1 = (_plus + _elementName_1);
-    node.setName(_plus_1);
+    String _plus_2 = (_plus_1 + ".");
+    String _elementName_2 = method.getElementName();
+    String _plus_3 = (_plus_2 + _elementName_2);
+    node.setName(_plus_3);
     final MethodTrace derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace();
     derivedFrom.setMethod(method);
     node.setDerivedFrom(derivedFrom);
@@ -240,11 +257,16 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   private Edge createEdgeForField(final IField field) {
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
     ICompilationUnit _compilationUnit = field.getCompilationUnit();
-    String _elementName = _compilationUnit.getElementName();
+    IJavaElement _parent = _compilationUnit.getParent();
+    String _elementName = _parent.getElementName();
     String _plus = (_elementName + ".");
-    String _elementName_1 = field.getElementName();
+    IJavaElement _parent_1 = field.getParent();
+    String _elementName_1 = _parent_1.getElementName();
     String _plus_1 = (_plus + _elementName_1);
-    edge.setName(_plus_1);
+    String _plus_2 = (_plus_1 + ".");
+    String _elementName_2 = field.getElementName();
+    String _plus_3 = (_plus_2 + _elementName_2);
+    edge.setName(_plus_3);
     final FieldTrace derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace();
     derivedFrom.setField(field);
     edge.setDerivedFrom(derivedFrom);

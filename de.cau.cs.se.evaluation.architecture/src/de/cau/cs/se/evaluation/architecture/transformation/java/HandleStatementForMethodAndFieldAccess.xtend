@@ -30,11 +30,10 @@ import org.eclipse.jdt.core.dom.CatchClause
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import org.eclipse.jdt.core.dom.MethodDeclaration
+import org.eclipse.jdt.core.dom.TypeDeclaration
 
 class HandleStatementForMethodAndFieldAccess {
-	
-	extension JavaTypeHelper javaTypeHelper = new JavaTypeHelper()
-	
+		
 	val HandleExpressionForMethodAndFieldAccess expressionHandler
 	
 	var IScope scopes
@@ -43,13 +42,16 @@ class HandleStatementForMethodAndFieldAccess {
 	
 	var MethodDeclaration method
 	
+	var TypeDeclaration clazz
+	
 	public new (IScope scopes) {
 		this.scopes = scopes
 		expressionHandler = new HandleExpressionForMethodAndFieldAccess(scopes)
 	}
 	
-	def void handle(ModularHypergraph modularSystem, MethodDeclaration method, Statement statement) {
+	def void handle(ModularHypergraph modularSystem, TypeDeclaration clazz, MethodDeclaration method, Statement statement) {
 		this.modularSystem = modularSystem
+		this.clazz = clazz
 		this.method = method
 		statement.findMethodAndFieldCallInStatement
 	}
@@ -59,9 +61,9 @@ class HandleStatementForMethodAndFieldAccess {
 	 * assert Expression [ : Expression ] ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(AssertStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		if (statement.message != null)
-			expressionHandler.handle(modularSystem, method, statement.message)
+			expressionHandler.handle(modularSystem, clazz, method, statement.message)
 	}
 		
 	/**
@@ -79,7 +81,7 @@ class HandleStatementForMethodAndFieldAccess {
      *                 this ( [ Expression { , Expression } ] ) ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(ConstructorInvocation statement) {
-		statement.arguments.forEach[expression | expressionHandler.handle(modularSystem, method, expression)]
+		statement.arguments.forEach[expression | expressionHandler.handle(modularSystem, clazz, method, expression)]
 	}
 	
 	/**
@@ -87,7 +89,7 @@ class HandleStatementForMethodAndFieldAccess {
      *    do Statement while ( Expression ) ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(DoStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		statement.body.findMethodAndFieldCallInStatement
 	}
 	
@@ -97,7 +99,7 @@ class HandleStatementForMethodAndFieldAccess {
      *                  Statement
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(EnhancedForStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		statement.body.findMethodAndFieldCallInStatement
 	}
 	
@@ -106,7 +108,7 @@ class HandleStatementForMethodAndFieldAccess {
      *     StatementExpression ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(ExpressionStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 	}
 	
 	/**
@@ -122,10 +124,10 @@ class HandleStatementForMethodAndFieldAccess {
 	 *	    Expression { , Expression }
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(ForStatement statement) {
-		statement.initializers.forEach[expressionHandler.handle(modularSystem, method, it)]
+		statement.initializers.forEach[expressionHandler.handle(modularSystem, clazz, method, it)]
 		if (statement.expression != null)
-			expressionHandler.handle(modularSystem, method, statement.expression)
-		statement.updaters.forEach[expressionHandler.handle(modularSystem, method, it)]
+			expressionHandler.handle(modularSystem, clazz, method, statement.expression)
+		statement.updaters.forEach[expressionHandler.handle(modularSystem, clazz, method, it)]
 		
 		statement.body.findMethodAndFieldCallInStatement
 	}
@@ -135,7 +137,7 @@ class HandleStatementForMethodAndFieldAccess {
      *   if ( Expression ) Statement [ else Statement]
  	 */
 	private dispatch def void findMethodAndFieldCallInStatement(IfStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		statement.thenStatement.findMethodAndFieldCallInStatement
 		if (statement.elseStatement != null)
 			statement.elseStatement.findMethodAndFieldCallInStatement
@@ -154,8 +156,8 @@ class HandleStatementForMethodAndFieldAccess {
      *    return [ Expression ] ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(ReturnStatement statement) {
-		if (statement.expression != null)
-			expressionHandler.handle(modularSystem, method, statement.expression)
+		if (statement.expression != null) 
+			expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 	}
 	
 	/**
@@ -166,8 +168,8 @@ class HandleStatementForMethodAndFieldAccess {
      */
 	private dispatch def void findMethodAndFieldCallInStatement(SuperConstructorInvocation statement) {
 		if (statement.expression != null)
-			expressionHandler.handle(modularSystem, method, statement.expression)
-		statement.arguments.forEach[expressionHandler.handle(modularSystem, method, it)]
+			expressionHandler.handle(modularSystem, clazz, method, statement.expression)
+		statement.arguments.forEach[expressionHandler.handle(modularSystem, clazz, method, it)]
 	}
 	
 	/**
@@ -177,7 +179,7 @@ class HandleStatementForMethodAndFieldAccess {
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(SwitchCase statement) {
 		if (statement.expression != null)
-			expressionHandler.handle(modularSystem, method, statement.expression)
+			expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 	}
 	
 	/**
@@ -186,7 +188,7 @@ class HandleStatementForMethodAndFieldAccess {
      *                   { { SwitchCase | Statement } } }
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(SwitchStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		
 		statement.statements.forEach[(it as Statement).findMethodAndFieldCallInStatement]
 	}
@@ -196,7 +198,7 @@ class HandleStatementForMethodAndFieldAccess {
      *   synchronized ( Expression ) Block
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(SynchronizedStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		
 		statement.body.statements.forEach[it.findMethodAndFieldCallInStatement]
 	}
@@ -206,7 +208,7 @@ class HandleStatementForMethodAndFieldAccess {
      *   throw Expression ;
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(ThrowStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 	}
 	
 	/**
@@ -221,7 +223,7 @@ class HandleStatementForMethodAndFieldAccess {
 		statement.catchClauses.forEach[(it as CatchClause).body.statements.forEach[it.findMethodAndFieldCallInStatement]]
 		if (statement.^finally != null)
 			statement.^finally.statements.forEach[it.findMethodAndFieldCallInStatement]
-		statement.resources.forEach[expressionHandler.handle(modularSystem, method, it as VariableDeclarationExpression)]
+		statement.resources.forEach[expressionHandler.handle(modularSystem, clazz, method, it as VariableDeclarationExpression)]
 	}
 	
 	private dispatch def void findMethodAndFieldCallInStatement(VariableDeclarationStatement statement) {
@@ -231,7 +233,7 @@ class HandleStatementForMethodAndFieldAccess {
 			val result = scopes.getType(fqn)
 			if (result != null) {
 				statement.fragments.forEach[fragment | 
-					expressionHandler.handle(modularSystem, method,
+					expressionHandler.handle(modularSystem, clazz, method,
 						(fragment as VariableDeclarationFragment).initializer
 					)
 				]				
@@ -244,7 +246,7 @@ class HandleStatementForMethodAndFieldAccess {
      *   while ( Expression ) Statement
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(WhileStatement statement) {
-		expressionHandler.handle(modularSystem, method, statement.expression)
+		expressionHandler.handle(modularSystem, clazz, method, statement.expression)
 		statement.body.findMethodAndFieldCallInStatement
 	}
 	

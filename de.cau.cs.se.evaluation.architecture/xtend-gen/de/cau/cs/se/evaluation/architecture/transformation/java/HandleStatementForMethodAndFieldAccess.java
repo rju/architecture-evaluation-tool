@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HandleExpressionForMethodAndFieldAccess;
-import de.cau.cs.se.evaluation.architecture.transformation.java.JavaTypeHelper;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.jdt.core.IType;
@@ -34,20 +33,17 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class HandleStatementForMethodAndFieldAccess {
-  @Extension
-  private JavaTypeHelper javaTypeHelper = new JavaTypeHelper();
-  
   private final HandleExpressionForMethodAndFieldAccess expressionHandler;
   
   private IScope scopes;
@@ -56,14 +52,17 @@ public class HandleStatementForMethodAndFieldAccess {
   
   private MethodDeclaration method;
   
+  private TypeDeclaration clazz;
+  
   public HandleStatementForMethodAndFieldAccess(final IScope scopes) {
     this.scopes = scopes;
     HandleExpressionForMethodAndFieldAccess _handleExpressionForMethodAndFieldAccess = new HandleExpressionForMethodAndFieldAccess(scopes);
     this.expressionHandler = _handleExpressionForMethodAndFieldAccess;
   }
   
-  public void handle(final ModularHypergraph modularSystem, final MethodDeclaration method, final Statement statement) {
+  public void handle(final ModularHypergraph modularSystem, final TypeDeclaration clazz, final MethodDeclaration method, final Statement statement) {
     this.modularSystem = modularSystem;
+    this.clazz = clazz;
     this.method = method;
     this.findMethodAndFieldCallInStatement(statement);
   }
@@ -74,12 +73,12 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final AssertStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Expression _message = statement.getMessage();
     boolean _notEquals = (!Objects.equal(_message, null));
     if (_notEquals) {
       Expression _message_1 = statement.getMessage();
-      this.expressionHandler.handle(this.modularSystem, this.method, _message_1);
+      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _message_1);
     }
   }
   
@@ -106,7 +105,7 @@ public class HandleStatementForMethodAndFieldAccess {
     List _arguments = statement.arguments();
     final Procedure1<Expression> _function = new Procedure1<Expression>() {
       public void apply(final Expression expression) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, expression);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, expression);
       }
     };
     IterableExtensions.<Expression>forEach(_arguments, _function);
@@ -118,7 +117,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final DoStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }
@@ -130,7 +129,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final EnhancedForStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }
@@ -141,7 +140,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ExpressionStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
   }
   
   /**
@@ -160,7 +159,7 @@ public class HandleStatementForMethodAndFieldAccess {
     List _initializers = statement.initializers();
     final Procedure1<Expression> _function = new Procedure1<Expression>() {
       public void apply(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     IterableExtensions.<Expression>forEach(_initializers, _function);
@@ -168,12 +167,12 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
     List _updaters = statement.updaters();
     final Procedure1<Expression> _function_1 = new Procedure1<Expression>() {
       public void apply(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     IterableExtensions.<Expression>forEach(_updaters, _function_1);
@@ -187,7 +186,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final IfStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Statement _thenStatement = statement.getThenStatement();
     this.findMethodAndFieldCallInStatement(_thenStatement);
     Statement _elseStatement = statement.getElseStatement();
@@ -216,7 +215,7 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
   }
   
@@ -231,12 +230,12 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
     List _arguments = statement.arguments();
     final Procedure1<Expression> _function = new Procedure1<Expression>() {
       public void apply(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     IterableExtensions.<Expression>forEach(_arguments, _function);
@@ -252,7 +251,7 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
   }
   
@@ -263,7 +262,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final SwitchStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     List _statements = statement.statements();
     final Procedure1<Object> _function = new Procedure1<Object>() {
       public void apply(final Object it) {
@@ -279,7 +278,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final SynchronizedStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Block _body = statement.getBody();
     List _statements = _body.statements();
     final Procedure1<Statement> _function = new Procedure1<Statement>() {
@@ -296,7 +295,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ThrowStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
   }
   
   /**
@@ -344,7 +343,7 @@ public class HandleStatementForMethodAndFieldAccess {
     List _resources = statement.resources();
     final Procedure1<Object> _function_3 = new Procedure1<Object>() {
       public void apply(final Object it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, ((VariableDeclarationExpression) it));
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, ((VariableDeclarationExpression) it));
       }
     };
     IterableExtensions.<Object>forEach(_resources, _function_3);
@@ -363,7 +362,7 @@ public class HandleStatementForMethodAndFieldAccess {
         final Procedure1<Object> _function = new Procedure1<Object>() {
           public void apply(final Object fragment) {
             Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
-            HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
+            HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
           }
         };
         IterableExtensions.<Object>forEach(_fragments, _function);
@@ -377,7 +376,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final WhileStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }

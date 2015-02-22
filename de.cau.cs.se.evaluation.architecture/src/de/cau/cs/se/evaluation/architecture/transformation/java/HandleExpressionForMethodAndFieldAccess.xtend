@@ -33,23 +33,31 @@ import de.cau.cs.se.evaluation.architecture.transformation.IScope
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper
+import org.eclipse.jdt.core.dom.TypeDeclaration
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
+import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
+import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
+
+import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 
 class HandleExpressionForMethodAndFieldAccess {
-	
-	extension JavaTypeHelper javaTypeHelper = new JavaTypeHelper()
-	
+		
 	var IScope scopes
 	
 	var ModularHypergraph modularSystem
 	
 	var MethodDeclaration method
 	
+	var TypeDeclaration clazz
+	
 	public new (IScope scopes) {
 		this.scopes = scopes
 	}
 	
-	def void handle(ModularHypergraph modularSystem, MethodDeclaration method, Expression expression) {
+	def void handle(ModularHypergraph modularSystem, TypeDeclaration clazz, MethodDeclaration method, Expression expression) {
 		this.modularSystem = modularSystem
+		this.clazz = clazz
 		this.method = method
 		if (expression != null)
 			expression.findMethodAndFieldCallInExpression
@@ -114,8 +122,45 @@ class HandleExpressionForMethodAndFieldAccess {
 	}
 	
 	private dispatch def void findMethodAndFieldCallInExpression(FieldAccess expression) {
-		// check out complete field access expression.
-		expression.expression.findMethodAndFieldCallInExpression
+		// check out complete field access expression. expression is for instance this, field name is in fieldName
+		if (expression.expression instanceof ThisExpression) {
+			clazz.fields.forEach[
+				val variableDecl = it.fragments.findFirst[fragment | 
+					(fragment as VariableDeclarationFragment).name.
+						fullyQualifiedName.equals(expression.name.fullyQualifiedName)
+				]
+				if (variableDecl != null) {
+					// the edge represents a internal variable of the class
+					val edge = modularSystem.edges.findFirst[checkVariable(variableDecl as VariableDeclarationFragment,it)]
+					if (edge != null) {
+						// there is an edge for this variable (if not this is an error)
+						// connect present method node to variable edge
+						val node = modularSystem.nodes.findFirst[it.checkMethodNode(method)]
+						node.edges.add(edge)
+					} else {
+						throw new Exception("Missing edge for variable " + variableDecl.toString)
+					}
+				}
+			]
+		}
+	}
+	
+	def checkMethodNode(Node node, MethodDeclaration declaration) {
+		if (node.derivedFrom instanceof MethodTrace) {
+			return node.name.equals(clazz.determineFullQualifiedName(declaration))
+		}
+		return false
+	}
+	
+	/**
+	 * Match if a given variable in jdt.dom corresponds to an edge in the hypergraph based
+	 * on the IField reference stored in the edge.
+	 */
+	def checkVariable(VariableDeclarationFragment variable, Edge edge) {
+		if (edge.derivedFrom instanceof FieldTrace) {
+			return edge.name.equals(clazz.determineFullQualifiedName(variable))
+		}
+		return false
 	}
 	
 	private dispatch def void findMethodAndFieldCallInExpression(InfixExpression expression) {
@@ -137,7 +182,21 @@ class HandleExpressionForMethodAndFieldAccess {
 		// TODO determine the class of the method
 	}
 	
-	private dispatch def void findMethodAndFieldCallInExpression(Name expression) {}
+	/**
+	 * check what name that is. If it is a variable connect to edge
+	 */
+	private dispatch def void findMethodAndFieldCallInExpression(Name expression) {
+		val edge = modularSystem.edges.findFirst[
+			val variableName = clazz.determineFullQualifiedName + "." + expression.fullyQualifiedName
+			it.name.equals(variableName)
+		]
+		// TODO make this a function
+		if (edge != null) {
+			val node = modularSystem.nodes.findFirst[it.checkMethodNode(method)]
+			node.edges.add(edge)
+		}
+	}
+	
 	private dispatch def void findMethodAndFieldCallInExpression(NullLiteral expression) {}
 	
 	private dispatch def void findMethodAndFieldCallInExpression(NumberLiteral expression) {}
@@ -166,8 +225,9 @@ class HandleExpressionForMethodAndFieldAccess {
 		// because if we inherit a structure we inherit its provided and required interfaces
 	}
 	
+	/** this should not be called by the dispatcher it must be resolved in variable or method access expressions */
 	private dispatch def void findMethodAndFieldCallInExpression(ThisExpression expression) {
-		// TODO this is important it is either a variable access or a local method call
+		throw new Exception("Eeek ThisExpression must not be evaluated by the dispatcher")
 	}
 	
 	private dispatch def void findMethodAndFieldCallInExpression(TypeLiteral expression) {

@@ -14,6 +14,7 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import java.util.List;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Expression;
@@ -24,6 +25,8 @@ import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
@@ -108,27 +111,78 @@ public class TransformationHelper {
   public static Node matchArguments(final Iterable<Node> nodes, final List arguments) {
     final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
       public Boolean apply(final Node node) {
-        boolean _xblockexpression = false;
-        {
-          NodeReference _derivedFrom = node.getDerivedFrom();
-          Object _method = ((MethodTrace) _derivedFrom).getMethod();
-          final MethodDeclaration method = ((MethodDeclaration) _method);
-          final List parameters = method.parameters();
-          boolean _xifexpression = false;
-          int _size = parameters.size();
-          int _size_1 = arguments.size();
-          boolean _equals = (_size == _size_1);
-          if (_equals) {
-            _xifexpression = TransformationHelper.compareArgAndParam(parameters, arguments);
-          } else {
-            _xifexpression = false;
+        try {
+          boolean _xblockexpression = false;
+          {
+            NodeReference _derivedFrom = node.getDerivedFrom();
+            final Object method = ((MethodTrace) _derivedFrom).getMethod();
+            boolean _switchResult = false;
+            boolean _matched = false;
+            if (!_matched) {
+              if (method instanceof MethodDeclaration) {
+                _matched=true;
+                boolean _xblockexpression_1 = false;
+                {
+                  final List parameters = ((MethodDeclaration)method).parameters();
+                  boolean _xifexpression = false;
+                  int _size = parameters.size();
+                  int _size_1 = arguments.size();
+                  boolean _equals = (_size == _size_1);
+                  if (_equals) {
+                    _xifexpression = TransformationHelper.compareArgAndParam(parameters, arguments);
+                  } else {
+                    _xifexpression = false;
+                  }
+                  _xblockexpression_1 = _xifexpression;
+                }
+                _switchResult = _xblockexpression_1;
+              }
+            }
+            if (!_matched) {
+              if (method instanceof IMethod) {
+                _matched=true;
+                boolean _xblockexpression_1 = false;
+                {
+                  final ILocalVariable[] parameters = ((IMethod)method).getParameters();
+                  boolean _xifexpression = false;
+                  int _size = ((List<ILocalVariable>)Conversions.doWrapArray(parameters)).size();
+                  int _size_1 = arguments.size();
+                  boolean _equals = (_size == _size_1);
+                  if (_equals) {
+                    _xifexpression = TransformationHelper.compareArgAndParamIMethod(((List<ILocalVariable>)Conversions.doWrapArray(parameters)), arguments);
+                  } else {
+                    _xifexpression = false;
+                  }
+                  _xblockexpression_1 = _xifexpression;
+                }
+                _switchResult = _xblockexpression_1;
+              }
+            }
+            if (!_matched) {
+              Class<?> _class = method.getClass();
+              String _plus = ("Implementation error. Method type " + _class);
+              String _plus_1 = (_plus + " not supported.");
+              throw new Exception(_plus_1);
+            }
+            _xblockexpression = _switchResult;
           }
-          _xblockexpression = _xifexpression;
+          return Boolean.valueOf(_xblockexpression);
+        } catch (Throwable _e) {
+          throw Exceptions.sneakyThrow(_e);
         }
-        return Boolean.valueOf(_xblockexpression);
       }
     };
     return IterableExtensions.<Node>findFirst(nodes, _function);
+  }
+  
+  /**
+   * returns true if the arguments match the parameters.
+   */
+  public static boolean compareArgAndParamIMethod(final List<ILocalVariable> parameters, final List arguments) {
+    throw new Error("Unresolved compilation problems:"
+      + "\nno viable alternative at input \'val\'"
+      + "\nThe method isAssignmentCompatible is undefined for the type TransformationHelper"
+      + "\n! cannot be resolved");
   }
   
   /**

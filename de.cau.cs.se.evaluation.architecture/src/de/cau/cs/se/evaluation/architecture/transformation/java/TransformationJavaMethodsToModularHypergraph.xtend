@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.Modifier
 import org.eclipse.jdt.core.IMethod
 
+import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
 	var ModularHypergraph modularSystem
@@ -99,7 +101,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 			if (!declaredType.isInterface && (modifiers.findFirst[(it as Modifier).isAbstract()] == null)) {
 				/** check method bodies. */
 				declaredType.methods.forEach[method | 
-					method.body.statements.forEach[handler.handle(modularSystem, method, it)]
+					method.body.statements.forEach[handler.handle(modularSystem, declaredType, method, it)]
 				]
 			}
 		}
@@ -109,15 +111,23 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * Resolve all methods of a given class.
 	 */
 	private def void createNodesForClassMethods(EList<Node> nodes, IType type) {
-		type.methods.forEach[method | nodes.add(createNodeForMethod(method))]
+		val module = modularSystem.modules.findFirst[it.name.equals(type.fullyQualifiedName)]
+		type.methods.forEach[method |
+			val node = method.createNodeForMethod 
+			nodes.add(node)
+			module.nodes.add(node)
+		]
 	}
+	
 	
 	/**
 	 * Create a node for a given method.
 	 */
 	private def createNodeForMethod(IMethod method) {
 		val node = HypergraphFactory.eINSTANCE.createNode
-		node.name = method.compilationUnit.elementName + "." + method.elementName
+		// TODO redo this based on name qualification resolving
+		node.name = method.compilationUnit.parent.elementName + "." + 
+			method.parent.elementName + "." + method.elementName
 		val derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace
 		derivedFrom.method = method
 		node.derivedFrom = derivedFrom
@@ -137,7 +147,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 */
 	private def createEdgeForField(IField field) {
 		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name = field.compilationUnit.elementName + "." + field.elementName
+		edge.name = field.compilationUnit.parent.elementName + "." + field.parent.elementName + "." + field.elementName
 		val derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace
 		derivedFrom.field = field
 		edge.derivedFrom = derivedFrom
