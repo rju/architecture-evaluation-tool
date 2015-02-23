@@ -62,47 +62,61 @@ class TransformationHelper {
 		val module = graph.modules.findFirst[module | 
 			((module.derivedFrom as TypeTrace).type as IType).elementName.equals(typeName.fullyQualifiedName)
 		]
-		val moduleName = ((module.derivedFrom as TypeTrace).type as IType).elementName
-		val nodes = module.nodes.filter[node | 
-			((node.derivedFrom as MethodTrace).method as IMethod).elementName.equals(moduleName)
-		]
-		return matchArguments(nodes, arguments)
+		if (module != null) { // is null iff the type is an external type. External types must be ignored.
+			val moduleName = ((module.derivedFrom as TypeTrace).type as IType).elementName
+			val nodes = module.nodes.filter[node | 
+				switch (node.derivedFrom) {
+					MethodTrace: ((node.derivedFrom as MethodTrace).method as IMethod).elementName.equals(moduleName)
+					TypeTrace: true // only implicit constructors are not derived from anything directly
+					default: false
+				} 
+			]
+			return matchArguments(nodes, arguments)
+		} else
+			return null
 	}
 
 	def static matchArguments(Iterable<Node> nodes, List arguments) {
 		nodes.findFirst[node |
-			val method = (node.derivedFrom as MethodTrace).method
-			switch(method) {
-				 MethodDeclaration: {
-				 	val parameters = method.parameters
-					if (parameters.size == arguments.size)
-						compareArgAndParam(parameters, arguments)
-					else
-						false
-				 }
-				 IMethod: {
-				 	val parameters = method.parameters
-				 	if (parameters.size == arguments.size)
-				 		compareArgAndParamIMethod(parameters, arguments)
-				 	else
-				 		false
-				 }
-				 default:
-				 	throw new Exception("Implementation error. Method type " + method.class + " not supported.")
+			switch(node.derivedFrom) {
+				TypeTrace: return (arguments.size == 0) // name already matched. Implicit constructor has no parameters => only check argument size.
+				MethodTrace: return matchArgumentsForExplicitMethods(node.derivedFrom as MethodTrace, arguments)
+				default: throw new Exception("Unsupported derivedFrom type used for node " + node.derivedFrom.class)
 			}
-			
 		]
 	}
 	
+	private def static matchArgumentsForExplicitMethods(MethodTrace trace, List arguments) {
+		switch(trace.method) {
+			 MethodDeclaration: {
+			 	val parameters = (trace.method as MethodDeclaration).parameters
+				if (parameters.size == arguments.size)
+					compareArgAndParam(parameters, arguments)
+				else
+					false
+			 }
+			 IMethod: {
+			 	val parameters = (trace.method as IMethod).parameters
+			 	if (parameters.size == arguments.size)
+			 		compareArgAndParamIMethod(parameters, arguments)
+			 	else
+			 		false
+			 }
+			 default:
+			 	throw new Exception("Implementation error. Method type " + trace.method.class + " not supported.")
+		}
+	}
+	
 	/** returns true if the arguments match the parameters. */
-	def static boolean compareArgAndParamIMethod(List<ILocalVariable> parameters, List arguments) {
+	private def static boolean compareArgAndParamIMethod(List<ILocalVariable> parameters, List arguments) {
 		// arguments are Expression
-		// parameters SingleVariableDeclaration
+		// parameters ILocalVariable
+		// TODO this is not a satisfying implementation
 		for(var i=0;i < parameters.size ; i++) {
-			val pType = parameters.get(i).
-			val aType = (arguments.get(i) as Expression).resolveTypeBinding.erasure
+			val pType = parameters.get(i).typeSignature
+			val aType = (arguments.get(i) as Expression).resolveTypeBinding.binaryName
 			
-			if (!pType.isAssignmentCompatible(aType))
+			if (pType.equals(aType))
 				return false	
 		}
 		
@@ -110,7 +124,7 @@ class TransformationHelper {
 	}
 	
 	/** returns true if the arguments match the parameters. */
-	def static boolean compareArgAndParam(List parameters, List arguments) {
+	private def static boolean compareArgAndParam(List parameters, List arguments) {
 		// arguments are Expression
 		// parameters SingleVariableDeclaration
 		for(var i=0;i < parameters.size ; i++) {
@@ -122,6 +136,20 @@ class TransformationHelper {
 		}
 		
 		return true
+	}
+	
+	def static createEdgeBetweenMethods(ModularHypergraph hypergraph, Node caller, Node callee) {
+		val edgeSubset = caller.edges.filter[callerEdge | callee.edges.exists[calleeEdge | calleeEdge == callerEdge]]
+		val edgeName = caller.name + "::" + callee.name
+		val existingEdge = edgeSubset.findFirst[edge | edge.name.equals(edgeName)]
+		if (existingEdge == null) {
+			val edge = HypergraphFactory.eINSTANCE.createEdge
+			edge.derivedFrom = null
+			edge.name = edgeName
+			hypergraph.edges.add(edge)
+			callee.edges.add(edge)
+			caller.edges.add(edge)
+		}
 	}
 	
 }

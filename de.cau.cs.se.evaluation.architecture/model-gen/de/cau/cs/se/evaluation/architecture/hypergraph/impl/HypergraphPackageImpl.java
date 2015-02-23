@@ -610,6 +610,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		genericTraceEClass.getESuperTypes().add(this.getModuleReference());
 		moduleTraceEClass.getESuperTypes().add(this.getModuleReference());
 		typeTraceEClass.getESuperTypes().add(this.getModuleReference());
+		typeTraceEClass.getESuperTypes().add(this.getNodeReference());
 		fieldTraceEClass.getESuperTypes().add(this.getEdgeReference());
 		methodTraceEClass.getESuperTypes().add(this.getNodeReference());
 

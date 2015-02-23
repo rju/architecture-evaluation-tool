@@ -10,10 +10,10 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 
 @SuppressWarnings("all")
@@ -34,21 +34,21 @@ public class TransfromationMaximalInterconnectedGraph implements ITransformation
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.resultHypergraph = _createModularHypergraph;
     EList<Node> _nodes = this.hypergraph.getNodes();
-    final Procedure1<Node> _function = new Procedure1<Node>() {
-      public void apply(final Node it) {
+    final Consumer<Node> _function = new Consumer<Node>() {
+      public void accept(final Node it) {
         EList<Node> _nodes = TransfromationMaximalInterconnectedGraph.this.resultHypergraph.getNodes();
         Node _deriveNode = TransformationHelper.deriveNode(it);
         _nodes.add(_deriveNode);
       }
     };
-    IterableExtensions.<Node>forEach(_nodes, _function);
+    _nodes.forEach(_function);
     EList<Module> _modules = this.hypergraph.getModules();
-    final Procedure1<Module> _function_1 = new Procedure1<Module>() {
-      public void apply(final Module module) {
+    final Consumer<Module> _function_1 = new Consumer<Module>() {
+      public void accept(final Module module) {
         final Module derivedModule = TransformationHelper.deriveModule(module);
         EList<Node> _nodes = module.getNodes();
-        final Procedure1<Node> _function = new Procedure1<Node>() {
-          public void apply(final Node node) {
+        final Consumer<Node> _function = new Consumer<Node>() {
+          public void accept(final Node node) {
             EList<Node> _nodes = derivedModule.getNodes();
             EList<Node> _nodes_1 = TransfromationMaximalInterconnectedGraph.this.resultHypergraph.getNodes();
             final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
@@ -62,12 +62,12 @@ public class TransfromationMaximalInterconnectedGraph implements ITransformation
             _nodes.add(_findFirst);
           }
         };
-        IterableExtensions.<Node>forEach(_nodes, _function);
+        _nodes.forEach(_function);
         EList<Module> _modules = TransfromationMaximalInterconnectedGraph.this.resultHypergraph.getModules();
         _modules.add(derivedModule);
       }
     };
-    IterableExtensions.<Module>forEach(_modules, _function_1);
+    _modules.forEach(_function_1);
     EList<Node> _nodes_1 = this.resultHypergraph.getNodes();
     final Procedure2<Node, Integer> _function_2 = new Procedure2<Node, Integer>() {
       public void apply(final Node startNode, final Integer startIndex) {

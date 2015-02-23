@@ -158,6 +158,7 @@ public class HypergraphSwitch<T> extends Switch<T> {
 				TypeTrace typeTrace = (TypeTrace)theEObject;
 				T result = caseTypeTrace(typeTrace);
 				if (result == null) result = caseModuleReference(typeTrace);
+				if (result == null) result = caseNodeReference(typeTrace);
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}

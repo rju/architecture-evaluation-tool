@@ -41,6 +41,8 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions.*
+
 class HandleExpressionForMethodAndFieldAccess {
 		
 	var IScope scopes
@@ -106,11 +108,10 @@ class HandleExpressionForMethodAndFieldAccess {
 	/** class instance creation */
 	private dispatch def void findMethodAndFieldCallInExpression(ClassInstanceCreation expression) {
 		val callee = TransformationHelper.findConstructorMethod(modularSystem, expression.type, expression.arguments)
-		// TODO
-		//val edge = TransformationHelper.createEdgeBetweenMethods(modularSystem, method, callee)
-		//if (!modularSystem.edges.exists[TransformationHelper.compareWith(it,edge)]) {
-		//	modularSystem.edges.add(edge)
-		//}
+		if (callee != null) {
+			val caller = modularSystem.findNodeForMethod(clazz, method)
+			TransformationHelper.createEdgeBetweenMethods(modularSystem, caller, callee)
+		}
 		expression.arguments.forEach[it.findMethodAndFieldCallInExpression]
 		expression.expression?.findMethodAndFieldCallInExpression
 	}
@@ -135,7 +136,7 @@ class HandleExpressionForMethodAndFieldAccess {
 					if (edge != null) {
 						// there is an edge for this variable (if not this is an error)
 						// connect present method node to variable edge
-						val node = modularSystem.nodes.findFirst[it.checkMethodNode(method)]
+						val node = modularSystem.findNodeForMethod(clazz, method)
 						node.edges.add(edge)
 					} else {
 						throw new Exception("Missing edge for variable " + variableDecl.toString)
@@ -143,13 +144,6 @@ class HandleExpressionForMethodAndFieldAccess {
 				}
 			]
 		}
-	}
-	
-	def checkMethodNode(Node node, MethodDeclaration declaration) {
-		if (node.derivedFrom instanceof MethodTrace) {
-			return node.name.equals(clazz.determineFullQualifiedName(declaration))
-		}
-		return false
 	}
 	
 	/**
@@ -192,7 +186,7 @@ class HandleExpressionForMethodAndFieldAccess {
 		]
 		// TODO make this a function
 		if (edge != null) {
-			val node = modularSystem.nodes.findFirst[it.checkMethodNode(method)]
+			val node = modularSystem.findNodeForMethod(clazz, method)
 			node.edges.add(edge)
 		}
 	}

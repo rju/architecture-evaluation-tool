@@ -2,10 +2,10 @@ package de.cau.cs.se.evaluation.architecture.transformation.java;
 
 import com.google.common.base.Objects;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class JavaTypeHelper {
@@ -14,12 +14,12 @@ public class JavaTypeHelper {
    */
   public List<IType> addUnique(final List<IType> types, final List<IType> addTypes) {
     if (addTypes!=null) {
-      final Procedure1<IType> _function = new Procedure1<IType>() {
-        public void apply(final IType type) {
+      final Consumer<IType> _function = new Consumer<IType>() {
+        public void accept(final IType type) {
           JavaTypeHelper.this.addUnique(types, type);
         }
       };
-      IterableExtensions.<IType>forEach(addTypes, _function);
+      addTypes.forEach(_function);
     }
     return types;
   }

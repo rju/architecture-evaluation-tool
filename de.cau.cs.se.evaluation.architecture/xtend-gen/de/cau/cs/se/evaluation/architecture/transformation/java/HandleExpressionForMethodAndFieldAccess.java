@@ -4,15 +4,15 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace;
-import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
-import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -53,7 +53,6 @@ import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class HandleExpressionForMethodAndFieldAccess {
@@ -108,12 +107,12 @@ public class HandleExpressionForMethodAndFieldAccess {
       this.findMethodAndFieldCallInExpression(_initializer);
     }
     List _dimensions = expression.dimensions();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    IterableExtensions.<Expression>forEach(_dimensions, _function);
+    _dimensions.forEach(_function);
   }
   
   /**
@@ -121,12 +120,12 @@ public class HandleExpressionForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInExpression(final ArrayInitializer expression) {
     List _expressions = expression.expressions();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    IterableExtensions.<Expression>forEach(_expressions, _function);
+    _expressions.forEach(_function);
   }
   
   /**
@@ -166,13 +165,18 @@ public class HandleExpressionForMethodAndFieldAccess {
     Type _type = expression.getType();
     List _arguments = expression.arguments();
     final Node callee = TransformationHelper.findConstructorMethod(this.modularSystem, _type, _arguments);
+    boolean _notEquals = (!Objects.equal(callee, null));
+    if (_notEquals) {
+      final Node caller = HypergraphJavaExtensions.findNodeForMethod(this.modularSystem, this.clazz, this.method);
+      TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
+    }
     List _arguments_1 = expression.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments_1, _function);
+    _arguments_1.forEach(_function);
     Expression _expression = expression.getExpression();
     if (_expression!=null) {
       this.findMethodAndFieldCallInExpression(_expression);
@@ -198,8 +202,8 @@ public class HandleExpressionForMethodAndFieldAccess {
     Expression _expression = expression.getExpression();
     if ((_expression instanceof ThisExpression)) {
       FieldDeclaration[] _fields = this.clazz.getFields();
-      final Procedure1<FieldDeclaration> _function = new Procedure1<FieldDeclaration>() {
-        public void apply(final FieldDeclaration it) {
+      final Consumer<FieldDeclaration> _function = new Consumer<FieldDeclaration>() {
+        public void accept(final FieldDeclaration it) {
           try {
             List _fragments = it.fragments();
             final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
@@ -223,13 +227,7 @@ public class HandleExpressionForMethodAndFieldAccess {
               final Edge edge = IterableExtensions.<Edge>findFirst(_edges, _function_1);
               boolean _notEquals_1 = (!Objects.equal(edge, null));
               if (_notEquals_1) {
-                EList<Node> _nodes = HandleExpressionForMethodAndFieldAccess.this.modularSystem.getNodes();
-                final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
-                  public Boolean apply(final Node it) {
-                    return Boolean.valueOf(HandleExpressionForMethodAndFieldAccess.this.checkMethodNode(it, HandleExpressionForMethodAndFieldAccess.this.method));
-                  }
-                };
-                final Node node = IterableExtensions.<Node>findFirst(_nodes, _function_2);
+                final Node node = HypergraphJavaExtensions.findNodeForMethod(HandleExpressionForMethodAndFieldAccess.this.modularSystem, HandleExpressionForMethodAndFieldAccess.this.clazz, HandleExpressionForMethodAndFieldAccess.this.method);
                 EList<Edge> _edges_1 = node.getEdges();
                 _edges_1.add(edge);
               } else {
@@ -243,18 +241,8 @@ public class HandleExpressionForMethodAndFieldAccess {
           }
         }
       };
-      IterableExtensions.<FieldDeclaration>forEach(((Iterable<FieldDeclaration>)Conversions.doWrapArray(_fields)), _function);
+      ((List<FieldDeclaration>)Conversions.doWrapArray(_fields)).forEach(_function);
     }
-  }
-  
-  public boolean checkMethodNode(final Node node, final MethodDeclaration declaration) {
-    NodeReference _derivedFrom = node.getDerivedFrom();
-    if ((_derivedFrom instanceof MethodTrace)) {
-      String _name = node.getName();
-      String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(this.clazz, declaration);
-      return _name.equals(_determineFullQualifiedName);
-    }
-    return false;
   }
   
   /**
@@ -277,12 +265,12 @@ public class HandleExpressionForMethodAndFieldAccess {
     Expression _rightOperand = expression.getRightOperand();
     this.findMethodAndFieldCallInExpression(_rightOperand);
     List _extendedOperands = expression.extendedOperands();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    IterableExtensions.<Expression>forEach(_extendedOperands, _function);
+    _extendedOperands.forEach(_function);
   }
   
   private void _findMethodAndFieldCallInExpression(final InstanceofExpression expression) {
@@ -290,12 +278,12 @@ public class HandleExpressionForMethodAndFieldAccess {
   
   private void _findMethodAndFieldCallInExpression(final MethodInvocation expression) {
     List _arguments = expression.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments, _function);
+    _arguments.forEach(_function);
     expression.getParent();
   }
   
@@ -321,13 +309,7 @@ public class HandleExpressionForMethodAndFieldAccess {
     final Edge edge = IterableExtensions.<Edge>findFirst(_edges, _function);
     boolean _notEquals = (!Objects.equal(edge, null));
     if (_notEquals) {
-      EList<Node> _nodes = this.modularSystem.getNodes();
-      final Function1<Node, Boolean> _function_1 = new Function1<Node, Boolean>() {
-        public Boolean apply(final Node it) {
-          return Boolean.valueOf(HandleExpressionForMethodAndFieldAccess.this.checkMethodNode(it, HandleExpressionForMethodAndFieldAccess.this.method));
-        }
-      };
-      final Node node = IterableExtensions.<Node>findFirst(_nodes, _function_1);
+      final Node node = HypergraphJavaExtensions.findNodeForMethod(this.modularSystem, this.clazz, this.method);
       EList<Edge> _edges_1 = node.getEdges();
       _edges_1.add(edge);
     }
@@ -393,12 +375,12 @@ public class HandleExpressionForMethodAndFieldAccess {
   
   private void _findMethodAndFieldCallInExpression(final VariableDeclarationExpression expression) {
     List _fragments = expression.fragments();
-    final Procedure1<Object> _function = new Procedure1<Object>() {
-      public void apply(final Object it) {
+    final Consumer<Object> _function = new Consumer<Object>() {
+      public void accept(final Object it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInFragment(((VariableDeclarationFragment) it));
       }
     };
-    IterableExtensions.<Object>forEach(_fragments, _function);
+    _fragments.forEach(_function);
   }
   
   private void findMethodAndFieldCallInFragment(final VariableDeclarationFragment fragment) {

@@ -13,12 +13,12 @@ import de.cau.cs.se.evaluation.architecture.state.SystemSetup;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class TransformationHypergraphMetrics {
@@ -60,8 +60,8 @@ public class TransformationHypergraphMetrics {
       this.monitor.worked(1);
     }
     EList<Node> _nodes = this.system.getNodes();
-    final Procedure1<Node> _function = new Procedure1<Node>() {
-      public void apply(final Node node) {
+    final Consumer<Node> _function = new Consumer<Node>() {
+      public void accept(final Node node) {
         if (TransformationHypergraphMetrics.this.monitor!=null) {
           String _name = node.getName();
           String _plus = ("Calculating metrics - subgraphs" + _name);
@@ -76,7 +76,7 @@ public class TransformationHypergraphMetrics {
         }
       }
     };
-    IterableExtensions.<Node>forEach(_nodes, _function);
+    _nodes.forEach(_function);
     final ResultModelProvider result = ResultModelProvider.INSTANCE;
     List<NamedValue> _values = result.getValues();
     SystemSetup _mainsystem_4 = state.getMainsystem();
@@ -213,24 +213,24 @@ public class TransformationHypergraphMetrics {
     final RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable();
     Hypergraph _system = setup.getSystem();
     EList<Edge> _edges = _system.getEdges();
-    final Procedure1<Edge> _function = new Procedure1<Edge>() {
-      public void apply(final Edge edge) {
+    final Consumer<Edge> _function = new Consumer<Edge>() {
+      public void accept(final Edge edge) {
         EList<Edge> _edges = patternTable.getEdges();
         _edges.add(edge);
       }
     };
-    IterableExtensions.<Edge>forEach(_edges, _function);
+    _edges.forEach(_function);
     Hypergraph _systemGraph = setup.getSystemGraph();
     EList<Node> _nodes = _systemGraph.getNodes();
-    final Procedure1<Node> _function_1 = new Procedure1<Node>() {
-      public void apply(final Node node) {
+    final Consumer<Node> _function_1 = new Consumer<Node>() {
+      public void accept(final Node node) {
         EList<RowPattern> _patterns = patternTable.getPatterns();
         EList<Edge> _edges = patternTable.getEdges();
         RowPattern _calculateRowPattern = TransformationHypergraphMetrics.this.calculateRowPattern(node, _edges);
         _patterns.add(_calculateRowPattern);
       }
     };
-    IterableExtensions.<Node>forEach(_nodes, _function_1);
+    _nodes.forEach(_function_1);
     this.compactPatternTable(patternTable);
     return patternTable;
   }
@@ -247,8 +247,8 @@ public class TransformationHypergraphMetrics {
     final RowPattern pattern = StateFactory.eINSTANCE.createRowPattern();
     EList<Node> _nodes = pattern.getNodes();
     _nodes.add(node);
-    final Procedure1<Edge> _function = new Procedure1<Edge>() {
-      public void apply(final Edge edge) {
+    final Consumer<Edge> _function = new Consumer<Edge>() {
+      public void accept(final Edge edge) {
         EList<Boolean> _pattern = pattern.getPattern();
         EList<Edge> _edges = node.getEdges();
         final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
@@ -260,7 +260,7 @@ public class TransformationHypergraphMetrics {
         _pattern.add(Boolean.valueOf(_exists));
       }
     };
-    IterableExtensions.<Edge>forEach(edgeList, _function);
+    edgeList.forEach(_function);
     return pattern;
   }
   
@@ -283,13 +283,13 @@ public class TransformationHypergraphMetrics {
           EList<RowPattern> _patterns_3 = table.getPatterns();
           RowPattern _get_2 = _patterns_3.get(j);
           EList<Node> _nodes = _get_2.getNodes();
-          final Procedure1<Node> _function = new Procedure1<Node>() {
-            public void apply(final Node node) {
+          final Consumer<Node> _function = new Consumer<Node>() {
+            public void accept(final Node node) {
               EList<Node> _nodes = basePattern.getNodes();
               _nodes.add(node);
             }
           };
-          IterableExtensions.<Node>forEach(_nodes, _function);
+          _nodes.forEach(_function);
           EList<RowPattern> _patterns_4 = table.getPatterns();
           _patterns_4.remove(j);
         }
@@ -330,21 +330,21 @@ public class TransformationHypergraphMetrics {
   private Hypergraph createSubsystem(final Node node, final Hypergraph system) {
     final Hypergraph subgraph = HypergraphFactory.eINSTANCE.createHypergraph();
     EList<Edge> _edges = node.getEdges();
-    final Procedure1<Edge> _function = new Procedure1<Edge>() {
-      public void apply(final Edge it) {
+    final Consumer<Edge> _function = new Consumer<Edge>() {
+      public void accept(final Edge it) {
         EList<Edge> _edges = subgraph.getEdges();
         _edges.add(it);
       }
     };
-    IterableExtensions.<Edge>forEach(_edges, _function);
+    _edges.forEach(_function);
     EList<Node> _nodes = system.getNodes();
-    final Procedure1<Node> _function_1 = new Procedure1<Node>() {
-      public void apply(final Node it) {
+    final Consumer<Node> _function_1 = new Consumer<Node>() {
+      public void accept(final Node it) {
         EList<Node> _nodes = subgraph.getNodes();
         _nodes.add(it);
       }
     };
-    IterableExtensions.<Node>forEach(_nodes, _function_1);
+    _nodes.forEach(_function_1);
     return subgraph;
   }
   
@@ -361,21 +361,21 @@ public class TransformationHypergraphMetrics {
     EList<Node> _nodes = systemGraph.getNodes();
     _nodes.add(environmentNode);
     EList<Node> _nodes_1 = system.getNodes();
-    final Procedure1<Node> _function = new Procedure1<Node>() {
-      public void apply(final Node node) {
+    final Consumer<Node> _function = new Consumer<Node>() {
+      public void accept(final Node node) {
         EList<Node> _nodes = systemGraph.getNodes();
         _nodes.add(node);
       }
     };
-    IterableExtensions.<Node>forEach(_nodes_1, _function);
+    _nodes_1.forEach(_function);
     EList<Edge> _edges = system.getEdges();
-    final Procedure1<Edge> _function_1 = new Procedure1<Edge>() {
-      public void apply(final Edge edge) {
+    final Consumer<Edge> _function_1 = new Consumer<Edge>() {
+      public void accept(final Edge edge) {
         EList<Edge> _edges = systemGraph.getEdges();
         _edges.add(edge);
       }
     };
-    IterableExtensions.<Edge>forEach(_edges, _function_1);
+    _edges.forEach(_function_1);
     return systemGraph;
   }
 }

@@ -6,6 +6,7 @@ import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HandleExpressionForMethodAndFieldAccess;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
@@ -39,8 +40,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class HandleStatementForMethodAndFieldAccess {
@@ -88,12 +87,12 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final Block statement) {
     List _statements = statement.statements();
-    final Procedure1<Statement> _function = new Procedure1<Statement>() {
-      public void apply(final Statement it) {
+    final Consumer<Statement> _function = new Consumer<Statement>() {
+      public void accept(final Statement it) {
         HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(it);
       }
     };
-    IterableExtensions.<Statement>forEach(_statements, _function);
+    _statements.forEach(_function);
   }
   
   /**
@@ -103,12 +102,12 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ConstructorInvocation statement) {
     List _arguments = statement.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression expression) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression expression) {
         HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, expression);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments, _function);
+    _arguments.forEach(_function);
   }
   
   /**
@@ -157,12 +156,12 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ForStatement statement) {
     List _initializers = statement.initializers();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
-    IterableExtensions.<Expression>forEach(_initializers, _function);
+    _initializers.forEach(_function);
     Expression _expression = statement.getExpression();
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
@@ -170,12 +169,12 @@ public class HandleStatementForMethodAndFieldAccess {
       this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
     List _updaters = statement.updaters();
-    final Procedure1<Expression> _function_1 = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function_1 = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
-    IterableExtensions.<Expression>forEach(_updaters, _function_1);
+    _updaters.forEach(_function_1);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }
@@ -233,12 +232,12 @@ public class HandleStatementForMethodAndFieldAccess {
       this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
     }
     List _arguments = statement.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments, _function);
+    _arguments.forEach(_function);
   }
   
   /**
@@ -264,12 +263,12 @@ public class HandleStatementForMethodAndFieldAccess {
     Expression _expression = statement.getExpression();
     this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     List _statements = statement.statements();
-    final Procedure1<Object> _function = new Procedure1<Object>() {
-      public void apply(final Object it) {
+    final Consumer<Object> _function = new Consumer<Object>() {
+      public void accept(final Object it) {
         HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(((Statement) it));
       }
     };
-    IterableExtensions.<Object>forEach(_statements, _function);
+    _statements.forEach(_function);
   }
   
   /**
@@ -281,12 +280,12 @@ public class HandleStatementForMethodAndFieldAccess {
     this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
     Block _body = statement.getBody();
     List _statements = _body.statements();
-    final Procedure1<Statement> _function = new Procedure1<Statement>() {
-      public void apply(final Statement it) {
+    final Consumer<Statement> _function = new Consumer<Statement>() {
+      public void accept(final Statement it) {
         HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(it);
       }
     };
-    IterableExtensions.<Statement>forEach(_statements, _function);
+    _statements.forEach(_function);
   }
   
   /**
@@ -308,45 +307,45 @@ public class HandleStatementForMethodAndFieldAccess {
   private void _findMethodAndFieldCallInStatement(final TryStatement statement) {
     Block _body = statement.getBody();
     List _statements = _body.statements();
-    final Procedure1<Statement> _function = new Procedure1<Statement>() {
-      public void apply(final Statement it) {
+    final Consumer<Statement> _function = new Consumer<Statement>() {
+      public void accept(final Statement it) {
         HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(it);
       }
     };
-    IterableExtensions.<Statement>forEach(_statements, _function);
+    _statements.forEach(_function);
     List _catchClauses = statement.catchClauses();
-    final Procedure1<Object> _function_1 = new Procedure1<Object>() {
-      public void apply(final Object it) {
+    final Consumer<Object> _function_1 = new Consumer<Object>() {
+      public void accept(final Object it) {
         Block _body = ((CatchClause) it).getBody();
         List _statements = _body.statements();
-        final Procedure1<Statement> _function = new Procedure1<Statement>() {
-          public void apply(final Statement it) {
+        final Consumer<Statement> _function = new Consumer<Statement>() {
+          public void accept(final Statement it) {
             HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(it);
           }
         };
-        IterableExtensions.<Statement>forEach(_statements, _function);
+        _statements.forEach(_function);
       }
     };
-    IterableExtensions.<Object>forEach(_catchClauses, _function_1);
+    _catchClauses.forEach(_function_1);
     Block _finally = statement.getFinally();
     boolean _notEquals = (!Objects.equal(_finally, null));
     if (_notEquals) {
       Block _finally_1 = statement.getFinally();
       List _statements_1 = _finally_1.statements();
-      final Procedure1<Statement> _function_2 = new Procedure1<Statement>() {
-        public void apply(final Statement it) {
+      final Consumer<Statement> _function_2 = new Consumer<Statement>() {
+        public void accept(final Statement it) {
           HandleStatementForMethodAndFieldAccess.this.findMethodAndFieldCallInStatement(it);
         }
       };
-      IterableExtensions.<Statement>forEach(_statements_1, _function_2);
+      _statements_1.forEach(_function_2);
     }
     List _resources = statement.resources();
-    final Procedure1<Object> _function_3 = new Procedure1<Object>() {
-      public void apply(final Object it) {
+    final Consumer<Object> _function_3 = new Consumer<Object>() {
+      public void accept(final Object it) {
         HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, ((VariableDeclarationExpression) it));
       }
     };
-    IterableExtensions.<Object>forEach(_resources, _function_3);
+    _resources.forEach(_function_3);
   }
   
   private void _findMethodAndFieldCallInStatement(final VariableDeclarationStatement statement) {
@@ -359,13 +358,13 @@ public class HandleStatementForMethodAndFieldAccess {
       boolean _notEquals = (!Objects.equal(result, null));
       if (_notEquals) {
         List _fragments = statement.fragments();
-        final Procedure1<Object> _function = new Procedure1<Object>() {
-          public void apply(final Object fragment) {
+        final Consumer<Object> _function = new Consumer<Object>() {
+          public void accept(final Object fragment) {
             Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
             HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
           }
         };
-        IterableExtensions.<Object>forEach(_fragments, _function);
+        _fragments.forEach(_function);
       }
     }
   }

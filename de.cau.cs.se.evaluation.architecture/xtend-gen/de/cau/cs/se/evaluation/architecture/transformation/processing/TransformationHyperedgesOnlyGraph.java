@@ -9,10 +9,10 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class TransformationHyperedgesOnlyGraph implements ITransformation {
@@ -48,8 +48,8 @@ public class TransformationHyperedgesOnlyGraph implements ITransformation {
       if (_greaterThan) {
         final Node resultNode = TransformationHelper.deriveNode(node);
         EList<Edge> _edges_3 = node.getEdges();
-        final Procedure1<Edge> _function = new Procedure1<Edge>() {
-          public void apply(final Edge edge) {
+        final Consumer<Edge> _function = new Consumer<Edge>() {
+          public void accept(final Edge edge) {
             EList<Edge> _edges = node.getEdges();
             EList<Edge> _edges_1 = TransformationHyperedgesOnlyGraph.this.resultHypergraph.getEdges();
             final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
@@ -63,7 +63,7 @@ public class TransformationHyperedgesOnlyGraph implements ITransformation {
             _edges.add(_findFirst);
           }
         };
-        IterableExtensions.<Edge>forEach(_edges_3, _function);
+        _edges_3.forEach(_function);
         EList<Node> _nodes_1 = this.resultHypergraph.getNodes();
         _nodes_1.add(resultNode);
       }

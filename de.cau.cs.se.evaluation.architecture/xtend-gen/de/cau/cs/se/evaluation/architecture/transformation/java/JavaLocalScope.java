@@ -6,13 +6,13 @@ import de.cau.cs.se.evaluation.architecture.transformation.Scope;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class JavaLocalScope extends Scope implements IScope {
@@ -21,8 +21,8 @@ public class JavaLocalScope extends Scope implements IScope {
   public JavaLocalScope(final CompilationUnit unit, final IScope parent) {
     super(parent);
     List _imports = unit.imports();
-    final Procedure1<Object> _function = new Procedure1<Object>() {
-      public void apply(final Object ref) {
+    final Consumer<Object> _function = new Consumer<Object>() {
+      public void accept(final Object ref) {
         final ImportDeclaration importDecl = ((ImportDeclaration) ref);
         Name _name = importDecl.getName();
         final String fqn = _name.getFullyQualifiedName();
@@ -32,7 +32,7 @@ public class JavaLocalScope extends Scope implements IScope {
         JavaLocalScope.this.importedClasses.put(_last, type);
       }
     };
-    IterableExtensions.<Object>forEach(_imports, _function);
+    _imports.forEach(_function);
   }
   
   public IType getType(final String name) {

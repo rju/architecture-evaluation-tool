@@ -13,6 +13,8 @@ import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,7 +42,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.IteratorExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
@@ -71,8 +72,8 @@ public class ComplexityAnalysisJob extends Job {
   
   protected IStatus run(final IProgressMonitor monitor) {
     final ArrayList<IJavaProject> projects = new ArrayList<IJavaProject>();
-    final Procedure1<IType> _function = new Procedure1<IType>() {
-      public void apply(final IType type) {
+    final Consumer<IType> _function = new Consumer<IType>() {
+      public void accept(final IType type) {
         IJavaProject _javaProject = type.getJavaProject();
         boolean _contains = projects.contains(_javaProject);
         boolean _not = (!_contains);
@@ -82,7 +83,7 @@ public class ComplexityAnalysisJob extends Job {
         }
       }
     };
-    IterableExtensions.<IType>forEach(this.types, _function);
+    this.types.forEach(_function);
     int _size = this.types.size();
     int _multiply = (_size * 2);
     int _plus = (1 + _multiply);
@@ -162,12 +163,12 @@ public class ComplexityAnalysisJob extends Job {
       if (_hasNature) {
         final IJavaProject project = JavaCore.create(object);
         IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
-        final Procedure1<IPackageFragmentRoot> _function = new Procedure1<IPackageFragmentRoot>() {
-          public void apply(final IPackageFragmentRoot root) {
+        final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
+          public void accept(final IPackageFragmentRoot root) {
             ComplexityAnalysisJob.this.checkForTypes(root);
           }
         };
-        IterableExtensions.<IPackageFragmentRoot>forEach(((Iterable<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)), _function);
+        ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
       }
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -180,12 +181,12 @@ public class ComplexityAnalysisJob extends Job {
       String _plus = ("  IJavaProject " + _elementName);
       System.out.println(_plus);
       IPackageFragmentRoot[] _allPackageFragmentRoots = object.getAllPackageFragmentRoots();
-      final Procedure1<IPackageFragmentRoot> _function = new Procedure1<IPackageFragmentRoot>() {
-        public void apply(final IPackageFragmentRoot root) {
+      final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
+        public void accept(final IPackageFragmentRoot root) {
           ComplexityAnalysisJob.this.checkForTypes(root);
         }
       };
-      IterableExtensions.<IPackageFragmentRoot>forEach(((Iterable<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)), _function);
+      ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -228,14 +229,14 @@ public class ComplexityAnalysisJob extends Job {
   private void checkForTypes(final IPackageFragmentRoot root) {
     try {
       IJavaElement[] _children = root.getChildren();
-      final Procedure1<IJavaElement> _function = new Procedure1<IJavaElement>() {
-        public void apply(final IJavaElement element) {
+      final Consumer<IJavaElement> _function = new Consumer<IJavaElement>() {
+        public void accept(final IJavaElement element) {
           if ((element instanceof IPackageFragment)) {
             ComplexityAnalysisJob.this.checkForTypes(((IPackageFragment) element));
           }
         }
       };
-      IterableExtensions.<IJavaElement>forEach(((Iterable<IJavaElement>)Conversions.doWrapArray(_children)), _function);
+      ((List<IJavaElement>)Conversions.doWrapArray(_children)).forEach(_function);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -247,8 +248,8 @@ public class ComplexityAnalysisJob extends Job {
   private void checkForTypes(final IPackageFragment fragment) {
     try {
       IJavaElement[] _children = fragment.getChildren();
-      final Procedure1<IJavaElement> _function = new Procedure1<IJavaElement>() {
-        public void apply(final IJavaElement element) {
+      final Consumer<IJavaElement> _function = new Consumer<IJavaElement>() {
+        public void accept(final IJavaElement element) {
           if ((element instanceof IPackageFragment)) {
             ComplexityAnalysisJob.this.checkForTypes(((IPackageFragment) element));
           } else {
@@ -258,7 +259,7 @@ public class ComplexityAnalysisJob extends Job {
           }
         }
       };
-      IterableExtensions.<IJavaElement>forEach(((Iterable<IJavaElement>)Conversions.doWrapArray(_children)), _function);
+      ((List<IJavaElement>)Conversions.doWrapArray(_children)).forEach(_function);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -270,8 +271,8 @@ public class ComplexityAnalysisJob extends Job {
   private void checkForTypes(final ICompilationUnit unit) {
     try {
       IType[] _allTypes = unit.getAllTypes();
-      final Procedure1<IType> _function = new Procedure1<IType>() {
-        public void apply(final IType type) {
+      final Consumer<IType> _function = new Consumer<IType>() {
+        public void accept(final IType type) {
           try {
             if ((type instanceof IType)) {
               int _flags = type.getFlags();
@@ -286,7 +287,7 @@ public class ComplexityAnalysisJob extends Job {
           }
         }
       };
-      IterableExtensions.<IType>forEach(((Iterable<IType>)Conversions.doWrapArray(_allTypes)), _function);
+      ((List<IType>)Conversions.doWrapArray(_allTypes)).forEach(_function);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

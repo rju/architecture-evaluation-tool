@@ -6,6 +6,7 @@ import de.cau.cs.se.evaluation.architecture.transformation.java.JavaTypeHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -38,8 +39,6 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.xtext.xbase.lib.Extension;
-import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class ResolveExpressionForClassAccess {
@@ -90,26 +89,26 @@ public class ResolveExpressionForClassAccess {
     }
     this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
     List _dimensions = expression.dimensions();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         List<IType> _findClassCallInExpression = ResolveExpressionForClassAccess.this.findClassCallInExpression(it);
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
       }
     };
-    IterableExtensions.<Expression>forEach(_dimensions, _function);
+    _dimensions.forEach(_function);
     return types;
   }
   
   private List<IType> _findClassCallInExpression(final ArrayInitializer expression) {
     final ArrayList<IType> types = new ArrayList<IType>();
     List _expressions = expression.expressions();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         List<IType> _findClassCallInExpression = ResolveExpressionForClassAccess.this.findClassCallInExpression(it);
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
       }
     };
-    IterableExtensions.<Expression>forEach(_expressions, _function);
+    _expressions.forEach(_function);
     return types;
   }
   
@@ -140,13 +139,13 @@ public class ResolveExpressionForClassAccess {
   private List<IType> _findClassCallInExpression(final ClassInstanceCreation expression) {
     final ArrayList<IType> types = new ArrayList<IType>();
     List _arguments = expression.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         List<IType> _findClassCallInExpression = ResolveExpressionForClassAccess.this.findClassCallInExpression(it);
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments, _function);
+    _arguments.forEach(_function);
     Expression _expression = expression.getExpression();
     List<IType> _findClassCallInExpression = null;
     if (_expression!=null) {
@@ -193,13 +192,13 @@ public class ResolveExpressionForClassAccess {
     List<IType> _findClassCallInExpression_1 = this.findClassCallInExpression(_rightOperand);
     this.javaTypeHelper.addUnique(types, _findClassCallInExpression_1);
     List _extendedOperands = expression.extendedOperands();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         List<IType> _findClassCallInExpression = ResolveExpressionForClassAccess.this.findClassCallInExpression(it);
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
       }
     };
-    IterableExtensions.<Expression>forEach(_extendedOperands, _function);
+    _extendedOperands.forEach(_function);
     return types;
   }
   
@@ -210,13 +209,13 @@ public class ResolveExpressionForClassAccess {
   private List<IType> _findClassCallInExpression(final MethodInvocation expression) {
     final ArrayList<IType> types = new ArrayList<IType>();
     List _arguments = expression.arguments();
-    final Procedure1<Expression> _function = new Procedure1<Expression>() {
-      public void apply(final Expression it) {
+    final Consumer<Expression> _function = new Consumer<Expression>() {
+      public void accept(final Expression it) {
         List<IType> _findClassCallInExpression = ResolveExpressionForClassAccess.this.findClassCallInExpression(it);
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInExpression);
       }
     };
-    IterableExtensions.<Expression>forEach(_arguments, _function);
+    _arguments.forEach(_function);
     expression.getParent();
     return types;
   }
@@ -287,13 +286,13 @@ public class ResolveExpressionForClassAccess {
   private List<IType> _findClassCallInExpression(final VariableDeclarationExpression expression) {
     final List<IType> types = new ArrayList<IType>();
     List _fragments = expression.fragments();
-    final Procedure1<Object> _function = new Procedure1<Object>() {
-      public void apply(final Object it) {
+    final Consumer<Object> _function = new Consumer<Object>() {
+      public void accept(final Object it) {
         List<IType> _findClassCallInFragment = ResolveExpressionForClassAccess.this.findClassCallInFragment(((VariableDeclarationFragment) it));
         ResolveExpressionForClassAccess.this.javaTypeHelper.addUnique(types, _findClassCallInFragment);
       }
     };
-    IterableExtensions.<Object>forEach(_fragments, _function);
+    _fragments.forEach(_function);
     return types;
   }
   

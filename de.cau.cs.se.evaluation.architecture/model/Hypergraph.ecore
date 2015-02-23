@@ -49,7 +49,7 @@
         eType="#//Module"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModuleReference"/>
-  <eClassifiers xsi:type="ecore:EClass" name="TypeTrace" eSuperTypes="#//ModuleReference">
+  <eClassifiers xsi:type="ecore:EClass" name="TypeTrace" eSuperTypes="#//ModuleReference #//NodeReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FieldTrace" eSuperTypes="#//EdgeReference">

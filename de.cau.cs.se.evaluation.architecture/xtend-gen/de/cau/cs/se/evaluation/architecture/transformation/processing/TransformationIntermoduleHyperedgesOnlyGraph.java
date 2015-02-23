@@ -10,10 +10,10 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransformation {
@@ -44,8 +44,8 @@ public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransforma
       }
     };
     final Iterable<Edge> interModuleEdges = IterableExtensions.<Edge>filter(_edges, _function);
-    final Procedure1<Edge> _function_1 = new Procedure1<Edge>() {
-      public void apply(final Edge edge) {
+    final Consumer<Edge> _function_1 = new Consumer<Edge>() {
+      public void accept(final Edge edge) {
         final Edge derivedEdge = TransformationHelper.deriveEdge(edge);
         EList<Edge> _edges = TransformationIntermoduleHyperedgesOnlyGraph.this.resultHypergraph.getEdges();
         _edges.add(derivedEdge);
@@ -57,8 +57,8 @@ public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransforma
           }
         };
         Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes, _function);
-        final Procedure1<Node> _function_1 = new Procedure1<Node>() {
-          public void apply(final Node node) {
+        final Consumer<Node> _function_1 = new Consumer<Node>() {
+          public void accept(final Node node) {
             EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.resultHypergraph.getNodes();
             final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
               public Boolean apply(final Node derivedNode) {
@@ -79,17 +79,17 @@ public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransforma
             _edges.add(derivedEdge);
           }
         };
-        IterableExtensions.<Node>forEach(_filter, _function_1);
+        _filter.forEach(_function_1);
       }
     };
-    IterableExtensions.<Edge>forEach(interModuleEdges, _function_1);
+    interModuleEdges.forEach(_function_1);
     EList<Module> _modules = this.hypergraph.getModules();
-    final Procedure1<Module> _function_2 = new Procedure1<Module>() {
-      public void apply(final Module module) {
+    final Consumer<Module> _function_2 = new Consumer<Module>() {
+      public void accept(final Module module) {
         final Module derivedModule = TransformationHelper.deriveModule(module);
         EList<Node> _nodes = module.getNodes();
-        final Procedure1<Node> _function = new Procedure1<Node>() {
-          public void apply(final Node node) {
+        final Consumer<Node> _function = new Consumer<Node>() {
+          public void accept(final Node node) {
             EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.resultHypergraph.getNodes();
             final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
               public Boolean apply(final Node derivedNode) {
@@ -106,10 +106,10 @@ public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransforma
             }
           }
         };
-        IterableExtensions.<Node>forEach(_nodes, _function);
+        _nodes.forEach(_function);
       }
     };
-    IterableExtensions.<Module>forEach(_modules, _function_2);
+    _modules.forEach(_function_2);
   }
   
   /**

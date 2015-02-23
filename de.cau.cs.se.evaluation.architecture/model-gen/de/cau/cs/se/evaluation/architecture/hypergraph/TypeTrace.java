@@ -19,7 +19,7 @@ package de.cau.cs.se.evaluation.architecture.hypergraph;
  * @model
  * @generated
  */
-public interface TypeTrace extends ModuleReference {
+public interface TypeTrace extends ModuleReference, NodeReference {
 	/**
 	 * Returns the value of the '<em><b>Type</b></em>' attribute.
 	 * <!-- begin-user-doc -->

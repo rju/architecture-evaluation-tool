@@ -11,10 +11,10 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransformation {
@@ -57,23 +57,23 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransfor
       Node _deriveNode = TransformationHelper.deriveNode(selectedNode);
       _nodes_1.add(_deriveNode);
       EList<Edge> _edges = selectedNode.getEdges();
-      final Procedure1<Edge> _function = new Procedure1<Edge>() {
-        public void apply(final Edge edge) {
+      final Consumer<Edge> _function = new Consumer<Edge>() {
+        public void accept(final Edge edge) {
           EList<Edge> _edges = TransformationConnectedNodeHyperedgesOnlyGraph.this.resultHypergraph.getEdges();
           Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
           _edges.add(_deriveEdge);
         }
       };
-      IterableExtensions.<Edge>forEach(_edges, _function);
+      _edges.forEach(_function);
       EList<Edge> _edges_1 = this.resultHypergraph.getEdges();
-      final Procedure1<Edge> _function_1 = new Procedure1<Edge>() {
-        public void apply(final Edge edge) {
+      final Consumer<Edge> _function_1 = new Consumer<Edge>() {
+        public void accept(final Edge edge) {
           EList<Node> _nodes = TransformationConnectedNodeHyperedgesOnlyGraph.this.hypergraph.getNodes();
           EList<Node> _nodes_1 = TransformationConnectedNodeHyperedgesOnlyGraph.this.resultHypergraph.getNodes();
           TransformationConnectedNodeHyperedgesOnlyGraph.this.createAndLinkNodesConnectedToEdge(edge, _nodes, _nodes_1);
         }
       };
-      IterableExtensions.<Edge>forEach(_edges_1, _function_1);
+      _edges_1.forEach(_function_1);
     }
   }
   

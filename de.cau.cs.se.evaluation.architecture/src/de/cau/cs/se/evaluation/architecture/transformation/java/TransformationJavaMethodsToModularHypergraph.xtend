@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.IType
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
-import org.eclipse.jdt.core.IField
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.AST
@@ -17,9 +16,9 @@ import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.Modifier
-import org.eclipse.jdt.core.IMethod
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions.*
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
@@ -70,12 +69,28 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 
 		// find all method declarations and create nodes for it, grouped by class as modules
 		classList.forEach[clazz | modularSystem.nodes.createNodesForClassMethods(clazz)]
+		classList.forEach[clazz | modularSystem.nodes.createNodesForInplicitClassConstructors(clazz)]
 		
 		// find all method invocations create edges for them 
 		// find all variable accesses from expressions inside methods
 		classList.forEach[clazz | createEdgesForInvocations(clazz)]
 		
 	}
+	
+	def void createNodesForInplicitClassConstructors(EList<Node> nodes, IType type) {
+		val tname = type.fullyQualifiedName + "." + type.elementName
+		if (!nodes.exists[node | node.name.equals(tname)]) {
+			val module = modularSystem.modules.findFirst[it.name.equals(type.fullyQualifiedName)]
+			val newNode = HypergraphFactory.eINSTANCE.createNode
+			newNode.name = type.fullyQualifiedName + "." + type.elementName
+			val derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace
+			derivedFrom.type = type
+			newNode.derivedFrom = derivedFrom
+			nodes.add(newNode)
+			module.nodes.add(newNode)
+		}	
+	}
+	
 	
 	/**
 	 * create edges for invocations and edges for variable access.
@@ -119,56 +134,11 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		]
 	}
 	
-	
-	/**
-	 * Create a node for a given method.
-	 */
-	private def createNodeForMethod(IMethod method) {
-		val node = HypergraphFactory.eINSTANCE.createNode
-		// TODO redo this based on name qualification resolving
-		node.name = method.compilationUnit.parent.elementName + "." + 
-			method.parent.elementName + "." + method.elementName
-		val derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace
-		derivedFrom.method = method
-		node.derivedFrom = derivedFrom
-		
-		return node
-	}
-	
 	/**
 	 * Create edges for all variables in the given type.
 	 */
 	private def void createEdgesForClassVariables(EList<Edge> edges, IType type) {
 		type.fields.forEach[field | edges.add(createEdgeForField(field))]
 	}
-	
-	/**
-	 * Create for one IField an edge.
-	 */
-	private def createEdgeForField(IField field) {
-		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name = field.compilationUnit.parent.elementName + "." + field.parent.elementName + "." + field.elementName
-		val derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace
-		derivedFrom.field = field
-		edge.derivedFrom = derivedFrom
 		
-		return edge
-	}
-	
-	/**
-	 * Create a module for each class in the list. Pointing to the class as derived from
-	 * element. 
-	 * 
-	 * @return one new module
-	 */
-	private def createModuleForClass(IType type) {
-		val module = HypergraphFactory.eINSTANCE.createModule
-		module.name = type.fullyQualifiedName
-		val derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace
-		derivedFrom.type = type
-		module.derivedFrom = derivedFrom
-		
-		return module
-	}
-	
 }

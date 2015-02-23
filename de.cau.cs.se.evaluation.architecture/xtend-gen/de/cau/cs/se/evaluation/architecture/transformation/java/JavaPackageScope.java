@@ -4,7 +4,9 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.Scope;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -12,7 +14,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
 public class JavaPackageScope extends Scope implements IScope {
@@ -22,8 +23,8 @@ public class JavaPackageScope extends Scope implements IScope {
     super(parentScope);
     try {
       IJavaElement[] _children = packageFragment.getChildren();
-      final Procedure1<IJavaElement> _function = new Procedure1<IJavaElement>() {
-        public void apply(final IJavaElement it) {
+      final Consumer<IJavaElement> _function = new Consumer<IJavaElement>() {
+        public void accept(final IJavaElement it) {
           try {
             if ((it instanceof ICompilationUnit)) {
               final ICompilationUnit unit = ((ICompilationUnit) it);
@@ -42,7 +43,7 @@ public class JavaPackageScope extends Scope implements IScope {
           }
         }
       };
-      IterableExtensions.<IJavaElement>forEach(((Iterable<IJavaElement>)Conversions.doWrapArray(_children)), _function);
+      ((List<IJavaElement>)Conversions.doWrapArray(_children)).forEach(_function);
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }

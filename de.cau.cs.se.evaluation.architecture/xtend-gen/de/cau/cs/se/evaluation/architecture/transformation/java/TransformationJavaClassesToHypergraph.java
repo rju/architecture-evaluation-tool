@@ -16,6 +16,7 @@ import de.cau.cs.se.evaluation.architecture.transformation.java.ResolveStatement
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IBuffer;
@@ -42,7 +43,6 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
  * Transform a java project based on a list of classes to a hypergraph.
@@ -101,18 +101,18 @@ public class TransformationJavaClassesToHypergraph implements ITransformation {
     if (this.monitor!=null) {
       this.monitor.subTask("Constructing hypergraph");
     }
-    final Procedure1<IType> _function = new Procedure1<IType>() {
-      public void apply(final IType it) {
+    final Consumer<IType> _function = new Consumer<IType>() {
+      public void accept(final IType it) {
         TransformationJavaClassesToHypergraph.this.createNode(it, TransformationJavaClassesToHypergraph.this.system);
       }
     };
-    IterableExtensions.<IType>forEach(this.classList, _function);
-    final Procedure1<IType> _function_1 = new Procedure1<IType>() {
-      public void apply(final IType it) {
+    this.classList.forEach(_function);
+    final Consumer<IType> _function_1 = new Consumer<IType>() {
+      public void accept(final IType it) {
         TransformationJavaClassesToHypergraph.this.connectNodes(it, TransformationJavaClassesToHypergraph.this.system);
       }
     };
-    IterableExtensions.<IType>forEach(this.classList, _function_1);
+    this.classList.forEach(_function_1);
   }
   
   /**
@@ -173,8 +173,8 @@ public class TransformationJavaClassesToHypergraph implements ITransformation {
           }
         };
         Iterable<IType> _filter = IterableExtensions.<IType>filter(_findAllCalledClasses, _function);
-        final Procedure1<IType> _function_1 = new Procedure1<IType>() {
-          public void apply(final IType destinationType) {
+        final Consumer<IType> _function_1 = new Consumer<IType>() {
+          public void accept(final IType destinationType) {
             final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
             String _nextEdgeName = TransformationJavaClassesToHypergraph.this.getNextEdgeName();
             edge.setName(_nextEdgeName);
@@ -190,7 +190,7 @@ public class TransformationJavaClassesToHypergraph implements ITransformation {
             _edges_2.add(edge);
           }
         };
-        IterableExtensions.<IType>forEach(_filter, _function_1);
+        _filter.forEach(_function_1);
       }
       if (this.monitor!=null) {
         this.monitor.worked(1);
@@ -321,29 +321,29 @@ public class TransformationJavaClassesToHypergraph implements ITransformation {
         }
         if (_and) {
           MethodDeclaration[] _methods = declaredType.getMethods();
-          final Procedure1<MethodDeclaration> _function_1 = new Procedure1<MethodDeclaration>() {
-            public void apply(final MethodDeclaration method) {
+          final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
+            public void accept(final MethodDeclaration method) {
               Block _body = method.getBody();
               List _statements = _body.statements();
-              final Procedure1<Statement> _function = new Procedure1<Statement>() {
-                public void apply(final Statement it) {
+              final Consumer<Statement> _function = new Consumer<Statement>() {
+                public void accept(final Statement it) {
                   List<IType> _resolve = resolver.resolve(it);
                   TransformationJavaClassesToHypergraph.this.javaTypeHelper.addUnique(classCalls, _resolve);
                 }
               };
-              IterableExtensions.<Statement>forEach(_statements, _function);
+              _statements.forEach(_function);
             }
           };
-          IterableExtensions.<MethodDeclaration>forEach(((Iterable<MethodDeclaration>)Conversions.doWrapArray(_methods)), _function_1);
+          ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function_1);
           FieldDeclaration[] _fields = declaredType.getFields();
-          final Procedure1<FieldDeclaration> _function_2 = new Procedure1<FieldDeclaration>() {
-            public void apply(final FieldDeclaration field) {
+          final Consumer<FieldDeclaration> _function_2 = new Consumer<FieldDeclaration>() {
+            public void accept(final FieldDeclaration field) {
               Type _type = field.getType();
               IType _findType = TransformationJavaClassesToHypergraph.this.findType(_type, scope);
               TransformationJavaClassesToHypergraph.this.javaTypeHelper.addUnique(classCalls, _findType);
             }
           };
-          IterableExtensions.<FieldDeclaration>forEach(((Iterable<FieldDeclaration>)Conversions.doWrapArray(_fields)), _function_2);
+          ((List<FieldDeclaration>)Conversions.doWrapArray(_fields)).forEach(_function_2);
         }
       }
       return classCalls;
