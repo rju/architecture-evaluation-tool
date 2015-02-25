@@ -12,24 +12,18 @@ import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HandleStatementForMethodAndFieldAccess;
-import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions;
+import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension;
+import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaLocalScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaPackageScope;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -89,7 +83,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
     final Consumer<IType> _function = new Consumer<IType>() {
       public void accept(final IType clazz) {
         EList<Module> _modules = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getModules();
-        Module _createModuleForClass = HypergraphJavaExtensions.createModuleForClass(clazz);
+        Module _createModuleForClass = HypergraphJavaExtension.createModuleForClass(clazz);
         _modules.add(_createModuleForClass);
       }
     };
@@ -165,27 +159,13 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * create edges for invocations and edges for variable access.
    */
   private void createEdgesForInvocations(final IType type) {
-    try {
-      System.out.println("XX");
-      final ASTParser parser = ASTParser.newParser(AST.JLS8);
-      final Hashtable options = JavaCore.getOptions();
-      JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
-      parser.setCompilerOptions(options);
-      ICompilationUnit _compilationUnit = type.getCompilationUnit();
-      IBuffer _buffer = _compilationUnit.getBuffer();
-      String _contents = _buffer.getContents();
-      char[] _charArray = _contents.toCharArray();
-      parser.setSource(_charArray);
-      ASTNode _createAST = parser.createAST(null);
-      final CompilationUnit unit = ((CompilationUnit) _createAST);
-      IPackageFragment _packageFragment = type.getPackageFragment();
-      JavaPackageScope _javaPackageScope = new JavaPackageScope(_packageFragment, this.globalScope);
-      final JavaLocalScope scope = new JavaLocalScope(unit, _javaPackageScope);
-      final HandleStatementForMethodAndFieldAccess handler = new HandleStatementForMethodAndFieldAccess(scope);
-      List _types = unit.types();
-      final Object object = _types.get(0);
-      if ((object instanceof TypeDeclaration)) {
-        final TypeDeclaration declaredType = ((TypeDeclaration) object);
+    final CompilationUnit unit = HypergraphJDTDOMExtension.getUnitForType(type);
+    List _types = unit.types();
+    final Object object = _types.get(0);
+    if ((object instanceof TypeDeclaration)) {
+      final TypeDeclaration declaredType = ((TypeDeclaration) object);
+      boolean _notEquals = (!Objects.equal(declaredType, null));
+      if (_notEquals) {
         List _modifiers = declaredType.modifiers();
         final Iterable<Modifier> modifiers = Iterables.<Modifier>filter(_modifiers, Modifier.class);
         boolean _and = false;
@@ -204,6 +184,10 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
           _and = _equals;
         }
         if (_and) {
+          IPackageFragment _packageFragment = type.getPackageFragment();
+          JavaPackageScope _javaPackageScope = new JavaPackageScope(_packageFragment, this.globalScope);
+          final JavaLocalScope scope = new JavaLocalScope(unit, _javaPackageScope);
+          final HandleStatementForMethodAndFieldAccess handler = new HandleStatementForMethodAndFieldAccess(scope);
           MethodDeclaration[] _methods = declaredType.getMethods();
           final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
             public void accept(final MethodDeclaration method) {
@@ -220,8 +204,6 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
           ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function_1);
         }
       }
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
     }
   }
   
@@ -242,7 +224,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
       IMethod[] _methods = type.getMethods();
       final Consumer<IMethod> _function_1 = new Consumer<IMethod>() {
         public void accept(final IMethod method) {
-          final Node node = HypergraphJavaExtensions.createNodeForMethod(method);
+          final Node node = HypergraphJavaExtension.createNodeForMethod(method);
           nodes.add(node);
           EList<Node> _nodes = module.getNodes();
           _nodes.add(node);
@@ -262,7 +244,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
       IField[] _fields = type.getFields();
       final Consumer<IField> _function = new Consumer<IField>() {
         public void accept(final IField field) {
-          Edge _createEdgeForField = HypergraphJavaExtensions.createEdgeForField(field);
+          Edge _createEdgeForField = HypergraphJavaExtension.createEdgeForField(field);
           edges.add(_createEdgeForField);
         }
       };

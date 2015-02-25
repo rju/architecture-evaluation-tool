@@ -10,15 +10,12 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import org.eclipse.jdt.core.dom.ASTParser
-import org.eclipse.jdt.core.dom.AST
-import org.eclipse.jdt.core.JavaCore
-import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.Modifier
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension.*
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
@@ -74,7 +71,10 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		// find all method invocations create edges for them 
 		// find all variable accesses from expressions inside methods
 		classList.forEach[clazz | createEdgesForInvocations(clazz)]
-		
+		// find all internal variables and check whether they use any of the used modules.
+		// Connect nodes accordingly
+		// TODO
+				
 	}
 	
 	def void createNodesForInplicitClassConstructors(EList<Node> nodes, IType type) {
@@ -91,33 +91,24 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		}	
 	}
 	
-	
 	/**
 	 * create edges for invocations and edges for variable access.
 	 */
 	private def void createEdgesForInvocations(IType type) {
-		System.out.println("XX")	
-		val ASTParser parser = ASTParser.newParser(AST.JLS8)
-		val options = JavaCore.getOptions()
-				
- 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options)
- 		
- 		parser.setCompilerOptions(options)
- 		parser.setSource(type.compilationUnit.buffer.contents.toCharArray())
- 		
- 		val CompilationUnit unit = parser.createAST(null) as CompilationUnit
- 		val scope = new JavaLocalScope(unit, new JavaPackageScope(type.packageFragment, globalScope))
- 		val handler = new HandleStatementForMethodAndFieldAccess(scope)
- 				
+		val unit = type.getUnitForType
 		val object = unit.types.get(0)
 		if (object instanceof TypeDeclaration) {
-			val declaredType = object as TypeDeclaration
-			val Iterable<Modifier> modifiers = declaredType.modifiers().filter(Modifier)
-			if (!declaredType.isInterface && (modifiers.findFirst[(it as Modifier).isAbstract()] == null)) {
-				/** check method bodies. */
-				declaredType.methods.forEach[method | 
-					method.body.statements.forEach[handler.handle(modularSystem, declaredType, method, it)]
-				]
+			val declaredType =  object as TypeDeclaration
+			if (declaredType != null) {
+				val Iterable<Modifier> modifiers = declaredType.modifiers().filter(Modifier)
+				if (!declaredType.isInterface && (modifiers.findFirst[(it as Modifier).isAbstract()] == null)) {
+					val scope = new JavaLocalScope(unit, new JavaPackageScope(type.packageFragment, globalScope))
+	 				val handler = new HandleStatementForMethodAndFieldAccess(scope)
+					/** check method bodies. */
+					declaredType.methods.forEach[method | 
+						method.body.statements.forEach[handler.handle(modularSystem, declaredType, method, it)]
+					]
+				}
 			}
 		}
 	}

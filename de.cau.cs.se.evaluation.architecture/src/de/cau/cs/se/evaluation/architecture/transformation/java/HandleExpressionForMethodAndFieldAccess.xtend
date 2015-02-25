@@ -32,16 +32,27 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import de.cau.cs.se.evaluation.architecture.transformation.IScope
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import org.eclipse.jdt.core.dom.MethodDeclaration
-import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper
 import org.eclipse.jdt.core.dom.TypeDeclaration
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
-import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension.*
 
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtensions.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper.*
+
+import org.eclipse.jdt.core.dom.SimpleName
+import org.eclipse.jdt.core.IField
+import org.eclipse.jdt.core.dom.SimpleType
+import org.eclipse.jdt.core.dom.ASTNode
+import org.eclipse.jdt.core.dom.Statement
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement
+import org.eclipse.jdt.core.dom.Block
+import org.eclipse.jdt.core.dom.Type
+import org.eclipse.jdt.core.dom.CompilationUnit
+import org.eclipse.jdt.core.dom.ImportDeclaration
+import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
 
 class HandleExpressionForMethodAndFieldAccess {
 		
@@ -57,6 +68,14 @@ class HandleExpressionForMethodAndFieldAccess {
 		this.scopes = scopes
 	}
 	
+	/**
+	 * Central handler for expressions.
+	 * 
+	 * @param modularSystem the hypergraph
+	 * @param clazz the present class declaration in JDT DOM
+	 * @param method one method from that class declaration
+	 * @param the expression to evaluate
+	 */
 	def void handle(ModularHypergraph modularSystem, TypeDeclaration clazz, MethodDeclaration method, Expression expression) {
 		this.modularSystem = modularSystem
 		this.clazz = clazz
@@ -97,7 +116,7 @@ class HandleExpressionForMethodAndFieldAccess {
 	/** Literal no references */
 	private dispatch def void findMethodAndFieldCallInExpression(BooleanLiteral expression) {}
 	
-	/** cast */
+	/** cast TODO */
 	private dispatch def void findMethodAndFieldCallInExpression(CastExpression expression) {
 		expression.expression.findMethodAndFieldCallInExpression	
 	}
@@ -107,21 +126,27 @@ class HandleExpressionForMethodAndFieldAccess {
 	
 	/** class instance creation */
 	private dispatch def void findMethodAndFieldCallInExpression(ClassInstanceCreation expression) {
-		val callee = TransformationHelper.findConstructorMethod(modularSystem, expression.type, expression.arguments)
+		val callee = modularSystem.findConstructorMethod(expression.type, expression.arguments)
 		if (callee != null) {
 			val caller = modularSystem.findNodeForMethod(clazz, method)
-			TransformationHelper.createEdgeBetweenMethods(modularSystem, caller, callee)
+			modularSystem.createEdgeBetweenMethods(caller, callee)
 		}
 		expression.arguments.forEach[it.findMethodAndFieldCallInExpression]
 		expression.expression?.findMethodAndFieldCallInExpression
 	}
 	
+	/**
+	 * If then else - conditional expression.
+	 */
 	private dispatch def void findMethodAndFieldCallInExpression(ConditionalExpression expression) {
 		expression.expression?.findMethodAndFieldCallInExpression
 		expression.thenExpression?.findMethodAndFieldCallInExpression
 		expression.elseExpression?.findMethodAndFieldCallInExpression
 	}
 	
+	/**
+	 * Field access.
+	 */
 	private dispatch def void findMethodAndFieldCallInExpression(FieldAccess expression) {
 		// check out complete field access expression. expression is for instance this, field name is in fieldName
 		if (expression.expression instanceof ThisExpression) {
@@ -170,11 +195,102 @@ class HandleExpressionForMethodAndFieldAccess {
 	
 	private dispatch def void findMethodAndFieldCallInExpression(MethodInvocation expression) {
 		expression.arguments.forEach[it.findMethodAndFieldCallInExpression]
-		/** resolve context of the method to determine to which type it belongs */
-		expression.parent
 		
-		// TODO determine the class of the method
+		/** resolve context of the method to determine to which type it belongs */
+		val methodName = expression.name.fullyQualifiedName
+		val variable = expression?.expression
+		if (variable == null) {
+			/** this is a local call */
+			val caller = modularSystem.findNodeForMethod(clazz, method)
+			val callee = modularSystem.findNodeForMethod(clazz, methodName, expression.arguments)
+			modularSystem.createEdgeBetweenMethods(caller, callee)
+		} else {
+			/** access to another class */
+			val caller = modularSystem.findNodeForMethod(clazz, method)
+			switch(variable) {
+				SimpleName case !variable.isClassStaticEnvocation: {
+					val edge = modularSystem.findEdgeForVariable(clazz, variable.fullyQualifiedName)
+					if (edge == null) {
+						/** this is a local variable, handle as call, */
+						val Type type = variable.findVariableDeclaration 
+						val classImport = (clazz.parent as CompilationUnit).imports.findFirst[classImport |
+							(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith((type as SimpleType).name.fullyQualifiedName)
+						]
+						val module = 
+							if (classImport != null) {
+								(classImport as ImportDeclaration).name.fullyQualifiedName.loadClass
+							} else { /** same package */ 
+								((clazz.parent as CompilationUnit).package.name.fullyQualifiedName + "." + (type as SimpleType).name.fullyQualifiedName).loadClass
+							}
+							
+						val callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + methodName)]
+						modularSystem.createEdgeBetweenMethods(caller,callee)
+					} else {
+						val fieldName = ((edge.derivedFrom as FieldTrace).field as IField).elementName
+						val field = clazz.fields.findFirst[field | field.fragments.exists[frag | (frag as VariableDeclarationFragment).name.fullyQualifiedName.equals(fieldName)]]
+						val classImport = (clazz.parent as CompilationUnit).imports.findFirst[classImport |
+							(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith((field.type as SimpleType).name.fullyQualifiedName)
+						]
+						val module = 
+							if (classImport != null) {
+								(classImport as ImportDeclaration).name.fullyQualifiedName.loadClass
+							} else { /** same package */ 
+								((clazz.parent as CompilationUnit).package.name.fullyQualifiedName + "." + (field.type as SimpleType).name.fullyQualifiedName).loadClass
+							}
+						val callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + methodName)]	
+						if (!caller.edges.contains(edge)) caller.edges.add(edge)
+						if (!callee.edges.contains(edge)) callee.edges.add(edge)
+					}
+				}
+				SimpleName case variable.isClassStaticEnvocation: {
+					// TODO
+				}
+			}
+		}
 	}
+	
+	def boolean isClassStaticEnvocation(SimpleName name) {
+		return (clazz.parent as CompilationUnit).imports.exists[classImport | 
+			(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith(name.fullyQualifiedName)
+		]
+	}
+	
+	def loadClass(String fqn) {
+		modularSystem.modules.findFirst[module | module.name.equals(fqn)]
+	}
+	
+	def Type findVariableDeclaration(SimpleName name) {
+		if (name.parent instanceof Expression)
+			return name.parent.findVariableDeclaration(name.fullyQualifiedName)
+		else if (name.parent instanceof Statement)
+			return name.parent.findVariableDeclaration(name.fullyQualifiedName)
+		else
+			return null
+	}
+	
+	def dispatch Type findVariableDeclaration(Expression node, String variableName) {
+		return node.parent.findVariableDeclaration(variableName)
+	}
+	
+	def dispatch Type findVariableDeclaration(Statement node, String variableName) {
+		return node.parent.findVariableDeclaration(variableName)
+	}
+	
+	def dispatch Type findVariableDeclaration(Block node, String variableName) {
+		val declaration = node.statements.filter(VariableDeclarationStatement).findFirst[declaration | 
+			declaration.fragments.exists[(it as VariableDeclarationFragment).name.fullyQualifiedName.equals(variableName)]
+		]
+		return declaration?.type
+	}
+	
+	def dispatch Type findVariableDeclaration(MethodDeclaration node, String variableName) {
+		return node.body.findVariableDeclaration(variableName)
+	}
+	
+	def dispatch Type findVariableDeclaration(ASTNode node, String variableName) {
+		throw new Exception ("unhandled node type " + node + " " + node.class)
+	}
+	
 	
 	/**
 	 * check what name that is. If it is a variable connect to edge
