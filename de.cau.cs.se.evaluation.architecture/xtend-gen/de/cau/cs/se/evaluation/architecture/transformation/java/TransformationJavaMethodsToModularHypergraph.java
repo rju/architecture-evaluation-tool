@@ -7,32 +7,30 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
-import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
+import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HandleStatementForMethodAndFieldAccess;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension;
-import de.cau.cs.se.evaluation.architecture.transformation.java.JavaLocalScope;
-import de.cau.cs.se.evaluation.architecture.transformation.java.JavaPackageScope;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.xtext.xbase.lib.Conversions;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
@@ -46,20 +44,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   
   private final IProgressMonitor monitor;
   
-  private final List<IType> classList;
-  
-  /**
-   * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
-   * 
-   * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
-   * @param scope the global scoper used to resolve classes during transformation
-   */
-  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final IScope scope, final List<IType> classList) {
-    this.project = project;
-    this.globalScope = scope;
-    this.classList = classList;
-    this.monitor = null;
-  }
+  private final List<AbstractTypeDeclaration> classList;
   
   /**
    * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -71,7 +56,17 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final GlobalJavaScope scope, final List<IType> classList, final IProgressMonitor monitor) {
     this.project = project;
     this.globalScope = scope;
-    this.classList = classList;
+    ArrayList<AbstractTypeDeclaration> _arrayList = new ArrayList<AbstractTypeDeclaration>();
+    this.classList = _arrayList;
+    for (final IType clazz : classList) {
+      {
+        final AbstractTypeDeclaration type = HypergraphJDTDOMExtension.getTypeDeclarationForType(clazz, monitor, project);
+        boolean _notEquals = (!Objects.equal(type, null));
+        if (_notEquals) {
+          this.classList.add(type);
+        }
+      }
+    }
     this.monitor = monitor;
   }
   
@@ -85,48 +80,52 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   public void transform() {
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.modularSystem = _createModularHypergraph;
-    final Consumer<IType> _function = new Consumer<IType>() {
-      public void accept(final IType clazz) {
+    final Consumer<AbstractTypeDeclaration> _function = new Consumer<AbstractTypeDeclaration>() {
+      public void accept(final AbstractTypeDeclaration clazz) {
         EList<Module> _modules = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getModules();
         Module _createModuleForClass = HypergraphJavaExtension.createModuleForClass(clazz);
         _modules.add(_createModuleForClass);
       }
     };
     this.classList.forEach(_function);
-    final Consumer<IType> _function_1 = new Consumer<IType>() {
-      public void accept(final IType clazz) {
+    final Consumer<AbstractTypeDeclaration> _function_1 = new Consumer<AbstractTypeDeclaration>() {
+      public void accept(final AbstractTypeDeclaration clazz) {
         EList<Edge> _edges = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getEdges();
         TransformationJavaMethodsToModularHypergraph.this.createEdgesForClassVariables(_edges, clazz);
       }
     };
     this.classList.forEach(_function_1);
-    final Consumer<IType> _function_2 = new Consumer<IType>() {
-      public void accept(final IType clazz) {
+    final Consumer<AbstractTypeDeclaration> _function_2 = new Consumer<AbstractTypeDeclaration>() {
+      public void accept(final AbstractTypeDeclaration clazz) {
         EList<Node> _nodes = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getNodes();
         TransformationJavaMethodsToModularHypergraph.this.createNodesForClassMethods(_nodes, clazz);
       }
     };
     this.classList.forEach(_function_2);
-    final Consumer<IType> _function_3 = new Consumer<IType>() {
-      public void accept(final IType clazz) {
+    final Consumer<AbstractTypeDeclaration> _function_3 = new Consumer<AbstractTypeDeclaration>() {
+      public void accept(final AbstractTypeDeclaration clazz) {
         EList<Node> _nodes = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getNodes();
         TransformationJavaMethodsToModularHypergraph.this.createNodesForInplicitClassConstructors(_nodes, clazz);
       }
     };
     this.classList.forEach(_function_3);
-    final Consumer<IType> _function_4 = new Consumer<IType>() {
-      public void accept(final IType clazz) {
+    final Consumer<AbstractTypeDeclaration> _function_4 = new Consumer<AbstractTypeDeclaration>() {
+      public void accept(final AbstractTypeDeclaration clazz) {
         TransformationJavaMethodsToModularHypergraph.this.createEdgesForInvocations(clazz, TransformationJavaMethodsToModularHypergraph.this.project);
       }
     };
     this.classList.forEach(_function_4);
   }
   
-  public void createNodesForInplicitClassConstructors(final EList<Node> nodes, final IType type) {
-    String _fullyQualifiedName = type.getFullyQualifiedName();
-    String _plus = (_fullyQualifiedName + ".");
-    String _elementName = type.getElementName();
-    final String tname = (_plus + _elementName);
+  /**
+   * Create a node for implicit constructors of classes.
+   */
+  public void createNodesForInplicitClassConstructors(final EList<Node> nodes, final AbstractTypeDeclaration type) {
+    String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+    String _plus = (_determineFullQualifiedName + ".");
+    SimpleName _name = type.getName();
+    String _fullyQualifiedName = _name.getFullyQualifiedName();
+    final String tname = (_plus + _fullyQualifiedName);
     final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
       public Boolean apply(final Node node) {
         String _name = node.getName();
@@ -140,20 +139,12 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
       final Function1<Module, Boolean> _function_1 = new Function1<Module, Boolean>() {
         public Boolean apply(final Module it) {
           String _name = it.getName();
-          String _fullyQualifiedName = type.getFullyQualifiedName();
-          return Boolean.valueOf(_name.equals(_fullyQualifiedName));
+          String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+          return Boolean.valueOf(_name.equals(_determineFullQualifiedName));
         }
       };
       final Module module = IterableExtensions.<Module>findFirst(_modules, _function_1);
-      final Node newNode = HypergraphFactory.eINSTANCE.createNode();
-      String _fullyQualifiedName_1 = type.getFullyQualifiedName();
-      String _plus_1 = (_fullyQualifiedName_1 + ".");
-      String _elementName_1 = type.getElementName();
-      String _plus_2 = (_plus_1 + _elementName_1);
-      newNode.setName(_plus_2);
-      final TypeTrace derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace();
-      derivedFrom.setType(type);
-      newNode.setDerivedFrom(derivedFrom);
+      final Node newNode = HypergraphJavaExtension.createNodeForImplicitConstructor(type);
       nodes.add(newNode);
       EList<Node> _nodes = module.getNodes();
       _nodes.add(newNode);
@@ -163,18 +154,14 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   /**
    * create edges for invocations and edges for variable access.
    */
-  private void createEdgesForInvocations(final IType type, final IJavaProject project) {
-    final CompilationUnit unit = HypergraphJDTDOMExtension.getUnitForType(type, this.monitor, project);
-    List _types = unit.types();
-    final Object object = _types.get(0);
-    if ((object instanceof TypeDeclaration)) {
-      final TypeDeclaration declaredType = ((TypeDeclaration) object);
-      boolean _notEquals = (!Objects.equal(declaredType, null));
-      if (_notEquals) {
-        List _modifiers = declaredType.modifiers();
-        final Iterable<Modifier> modifiers = Iterables.<Modifier>filter(_modifiers, Modifier.class);
+  private void createEdgesForInvocations(final AbstractTypeDeclaration type, final IJavaProject project) {
+    boolean _notEquals = (!Objects.equal(type, null));
+    if (_notEquals) {
+      List _modifiers = type.modifiers();
+      final Iterable<Modifier> modifiers = Iterables.<Modifier>filter(_modifiers, Modifier.class);
+      if ((type instanceof TypeDeclaration)) {
         boolean _and = false;
-        boolean _isInterface = declaredType.isInterface();
+        boolean _isInterface = ((TypeDeclaration)type).isInterface();
         boolean _not = (!_isInterface);
         if (!_not) {
           _and = false;
@@ -189,24 +176,49 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
           _and = _equals;
         }
         if (_and) {
-          IPackageFragment _packageFragment = type.getPackageFragment();
-          JavaPackageScope _javaPackageScope = new JavaPackageScope(_packageFragment, this.globalScope);
-          final JavaLocalScope scope = new JavaLocalScope(unit, _javaPackageScope);
-          final HandleStatementForMethodAndFieldAccess handler = new HandleStatementForMethodAndFieldAccess(scope);
-          MethodDeclaration[] _methods = declaredType.getMethods();
+          final HandleStatementForMethodAndFieldAccess handler = new HandleStatementForMethodAndFieldAccess(project);
+          MethodDeclaration[] _methods = ((TypeDeclaration)type).getMethods();
           final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
             public void accept(final MethodDeclaration method) {
               Block _body = method.getBody();
               List _statements = _body.statements();
               final Consumer<Statement> _function = new Consumer<Statement>() {
                 public void accept(final Statement it) {
-                  handler.handle(TransformationJavaMethodsToModularHypergraph.this.modularSystem, declaredType, method, it);
+                  handler.handle(TransformationJavaMethodsToModularHypergraph.this.modularSystem, type, method, it);
                 }
               };
               _statements.forEach(_function);
             }
           };
           ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function_1);
+        }
+      } else {
+        if ((type instanceof EnumDeclaration)) {
+          final Function1<Modifier, Boolean> _function_2 = new Function1<Modifier, Boolean>() {
+            public Boolean apply(final Modifier it) {
+              return Boolean.valueOf(((Modifier) it).isAbstract());
+            }
+          };
+          Modifier _findFirst_1 = IterableExtensions.<Modifier>findFirst(modifiers, _function_2);
+          boolean _equals_1 = Objects.equal(_findFirst_1, null);
+          if (_equals_1) {
+            final HandleStatementForMethodAndFieldAccess handler_1 = new HandleStatementForMethodAndFieldAccess(project);
+            List _bodyDeclarations = ((EnumDeclaration)type).bodyDeclarations();
+            Iterable<MethodDeclaration> _filter = Iterables.<MethodDeclaration>filter(_bodyDeclarations, MethodDeclaration.class);
+            final Consumer<MethodDeclaration> _function_3 = new Consumer<MethodDeclaration>() {
+              public void accept(final MethodDeclaration method) {
+                Block _body = method.getBody();
+                List _statements = _body.statements();
+                final Consumer<Statement> _function = new Consumer<Statement>() {
+                  public void accept(final Statement it) {
+                    handler_1.handle(TransformationJavaMethodsToModularHypergraph.this.modularSystem, type, method, it);
+                  }
+                };
+                _statements.forEach(_function);
+              }
+            };
+            _filter.forEach(_function_3);
+          }
         }
       }
     }
@@ -215,47 +227,78 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   /**
    * Resolve all methods of a given class.
    */
-  private void createNodesForClassMethods(final EList<Node> nodes, final IType type) {
-    try {
+  private void createNodesForClassMethods(final EList<Node> nodes, final AbstractTypeDeclaration type) {
+    if ((type instanceof TypeDeclaration)) {
       EList<Module> _modules = this.modularSystem.getModules();
       final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
         public Boolean apply(final Module it) {
           String _name = it.getName();
-          String _fullyQualifiedName = type.getFullyQualifiedName();
-          return Boolean.valueOf(_name.equals(_fullyQualifiedName));
+          String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+          return Boolean.valueOf(_name.equals(_determineFullQualifiedName));
         }
       };
       final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
-      IMethod[] _methods = type.getMethods();
-      final Consumer<IMethod> _function_1 = new Consumer<IMethod>() {
-        public void accept(final IMethod method) {
-          final Node node = HypergraphJavaExtension.createNodeForMethod(method);
+      MethodDeclaration[] _methods = ((TypeDeclaration)type).getMethods();
+      final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
+        public void accept(final MethodDeclaration method) {
+          final Node node = HypergraphJavaExtension.createNodeForMethod(method, type);
           nodes.add(node);
           EList<Node> _nodes = module.getNodes();
           _nodes.add(node);
         }
       };
-      ((List<IMethod>)Conversions.doWrapArray(_methods)).forEach(_function_1);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
+      ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function_1);
+    } else {
+      if ((type instanceof EnumDeclaration)) {
+        EList<Module> _modules_1 = this.modularSystem.getModules();
+        final Function1<Module, Boolean> _function_2 = new Function1<Module, Boolean>() {
+          public Boolean apply(final Module it) {
+            String _name = it.getName();
+            String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+            return Boolean.valueOf(_name.equals(_determineFullQualifiedName));
+          }
+        };
+        final Module module_1 = IterableExtensions.<Module>findFirst(_modules_1, _function_2);
+        List _bodyDeclarations = ((EnumDeclaration)type).bodyDeclarations();
+        Iterable<MethodDeclaration> _filter = Iterables.<MethodDeclaration>filter(_bodyDeclarations, MethodDeclaration.class);
+        final Consumer<MethodDeclaration> _function_3 = new Consumer<MethodDeclaration>() {
+          public void accept(final MethodDeclaration method) {
+            final Node node = HypergraphJavaExtension.createNodeForMethod(method, type);
+            nodes.add(node);
+            EList<Node> _nodes = module_1.getNodes();
+            _nodes.add(node);
+          }
+        };
+        _filter.forEach(_function_3);
+      }
     }
   }
   
   /**
    * Create edges for all variables in the given type.
    */
-  private void createEdgesForClassVariables(final EList<Edge> edges, final IType type) {
-    try {
-      IField[] _fields = type.getFields();
-      final Consumer<IField> _function = new Consumer<IField>() {
-        public void accept(final IField field) {
-          Edge _createEdgeForField = HypergraphJavaExtension.createEdgeForField(field);
+  private void createEdgesForClassVariables(final EList<Edge> edges, final AbstractTypeDeclaration type) {
+    if ((type instanceof TypeDeclaration)) {
+      FieldDeclaration[] _fields = ((TypeDeclaration)type).getFields();
+      final Consumer<FieldDeclaration> _function = new Consumer<FieldDeclaration>() {
+        public void accept(final FieldDeclaration field) {
+          Edge _createEdgeForField = HypergraphJavaExtension.createEdgeForField(field, type);
           edges.add(_createEdgeForField);
         }
       };
-      ((List<IField>)Conversions.doWrapArray(_fields)).forEach(_function);
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
+      ((List<FieldDeclaration>)Conversions.doWrapArray(_fields)).forEach(_function);
+    } else {
+      if ((type instanceof EnumDeclaration)) {
+        List _bodyDeclarations = ((EnumDeclaration)type).bodyDeclarations();
+        Iterable<FieldDeclaration> _filter = Iterables.<FieldDeclaration>filter(_bodyDeclarations, FieldDeclaration.class);
+        final Consumer<FieldDeclaration> _function_1 = new Consumer<FieldDeclaration>() {
+          public void accept(final FieldDeclaration field) {
+            Edge _createEdgeForField = HypergraphJavaExtension.createEdgeForField(field, type);
+            edges.add(_createEdgeForField);
+          }
+        };
+        _filter.forEach(_function_1);
+      }
     }
   }
 }

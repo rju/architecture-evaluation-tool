@@ -5,9 +5,9 @@ import org.eclipse.jdt.core.IType
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.JavaCore
-import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 
 class HypergraphJDTDOMExtension {
 	
@@ -31,10 +31,10 @@ class HypergraphJDTDOMExtension {
  		return parser.createAST(null) as CompilationUnit
  	}
  	
- 	def static TypeDeclaration getTypeDeclarationForType(IType type, IProgressMonitor monitor, IJavaProject project) {
+ 	def static AbstractTypeDeclaration getTypeDeclarationForType(IType type, IProgressMonitor monitor, IJavaProject project) {
  		val object = type.getUnitForType(monitor, project).types.get(0)
-		if (object instanceof TypeDeclaration) {
-			return object as TypeDeclaration
+		if (object instanceof AbstractTypeDeclaration) {
+			return object as AbstractTypeDeclaration
 		} else
 			return null
  	}

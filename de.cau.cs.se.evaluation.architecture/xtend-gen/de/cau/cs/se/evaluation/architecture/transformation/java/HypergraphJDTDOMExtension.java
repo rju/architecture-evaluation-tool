@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 
 @SuppressWarnings("all")
@@ -46,12 +46,12 @@ public class HypergraphJDTDOMExtension {
     }
   }
   
-  public static TypeDeclaration getTypeDeclarationForType(final IType type, final IProgressMonitor monitor, final IJavaProject project) {
+  public static AbstractTypeDeclaration getTypeDeclarationForType(final IType type, final IProgressMonitor monitor, final IJavaProject project) {
     CompilationUnit _unitForType = HypergraphJDTDOMExtension.getUnitForType(type, monitor, project);
     List _types = _unitForType.types();
     final Object object = _types.get(0);
-    if ((object instanceof TypeDeclaration)) {
-      return ((TypeDeclaration) object);
+    if ((object instanceof AbstractTypeDeclaration)) {
+      return ((AbstractTypeDeclaration) object);
     } else {
       return null;
     }

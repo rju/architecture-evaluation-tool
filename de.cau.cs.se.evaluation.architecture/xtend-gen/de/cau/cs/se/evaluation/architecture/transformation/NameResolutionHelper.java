@@ -1,17 +1,17 @@
 package de.cau.cs.se.evaluation.architecture.transformation;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 @SuppressWarnings("all")
 public class NameResolutionHelper {
-  public static String determineFullQualifiedName(final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static String determineFullQualifiedName(final AbstractTypeDeclaration clazz, final MethodDeclaration method) {
     String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(clazz);
     String _plus = (_determineFullQualifiedName + ".");
     SimpleName _name = method.getName();
@@ -19,7 +19,7 @@ public class NameResolutionHelper {
     return (_plus + _fullyQualifiedName);
   }
   
-  public static String determineFullQualifiedName(final TypeDeclaration clazz, final VariableDeclarationFragment fragment) {
+  public static String determineFullQualifiedName(final AbstractTypeDeclaration clazz, final VariableDeclarationFragment fragment) {
     String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(clazz);
     String _plus = (_determineFullQualifiedName + ".");
     SimpleName _name = fragment.getName();
@@ -27,7 +27,7 @@ public class NameResolutionHelper {
     return (_plus + _fullyQualifiedName);
   }
   
-  public static String determineFullQualifiedName(final TypeDeclaration clazz) {
+  public static String determineFullQualifiedName(final AbstractTypeDeclaration clazz) {
     ASTNode _parent = clazz.getParent();
     PackageDeclaration _package = ((CompilationUnit) _parent).getPackage();
     Name _name = _package.getName();

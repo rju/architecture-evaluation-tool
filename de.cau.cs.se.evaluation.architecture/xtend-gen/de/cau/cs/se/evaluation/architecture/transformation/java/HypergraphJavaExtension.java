@@ -1,6 +1,7 @@
 package de.cau.cs.se.evaluation.architecture.transformation.java;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Iterables;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
@@ -14,14 +15,10 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import java.util.List;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -31,6 +28,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
@@ -39,11 +37,76 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 @SuppressWarnings("all")
 public class HypergraphJavaExtension {
   /**
+   * Create a node for a given method.
+   */
+  public static Node createNodeForMethod(final MethodDeclaration method, final AbstractTypeDeclaration type) {
+    final Node node = HypergraphFactory.eINSTANCE.createNode();
+    String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type, method);
+    node.setName(_determineFullQualifiedName);
+    final MethodTrace derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace();
+    derivedFrom.setMethod(method);
+    node.setDerivedFrom(derivedFrom);
+    return node;
+  }
+  
+  /**
+   * Create a node for a class' implicit constructor
+   */
+  public static Node createNodeForImplicitConstructor(final AbstractTypeDeclaration type) {
+    final Node node = HypergraphFactory.eINSTANCE.createNode();
+    String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+    String _plus = (_determineFullQualifiedName + ".");
+    SimpleName _name = type.getName();
+    String _fullyQualifiedName = _name.getFullyQualifiedName();
+    String _plus_1 = (_plus + _fullyQualifiedName);
+    node.setName(_plus_1);
+    final TypeTrace derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace();
+    derivedFrom.setType(type);
+    node.setDerivedFrom(derivedFrom);
+    return node;
+  }
+  
+  /**
+   * Create for one IField an edge.
+   */
+  public static Edge createEdgeForField(final FieldDeclaration field, final AbstractTypeDeclaration type) {
+    final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+    List _fragments = field.fragments();
+    for (final Object element : _fragments) {
+      {
+        final VariableDeclarationFragment fragment = ((VariableDeclarationFragment) element);
+        String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type, fragment);
+        edge.setName(_determineFullQualifiedName);
+        final FieldTrace derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace();
+        derivedFrom.setField(fragment);
+        edge.setDerivedFrom(derivedFrom);
+      }
+    }
+    return edge;
+  }
+  
+  /**
+   * Create a module for each class in the list. Pointing to the class as derived from
+   * element.
+   * 
+   * @return one new module
+   */
+  public static Module createModuleForClass(final AbstractTypeDeclaration type) {
+    final Module module = HypergraphFactory.eINSTANCE.createModule();
+    String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+    module.setName(_determineFullQualifiedName);
+    final TypeTrace derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace();
+    derivedFrom.setType(type);
+    module.setDerivedFrom(derivedFrom);
+    return module;
+  }
+  
+  /**
    * Find node for a given method specified by name clazz, name and argment list.
    */
-  public static Node findNodeForMethod(final ModularHypergraph graph, final TypeDeclaration clazz, final String methodName, final List<Expression> arguments) {
-    Node _xblockexpression = null;
-    {
+  public static Node findNodeForMethod(final ModularHypergraph graph, final AbstractTypeDeclaration type, final String methodName, final List<Expression> arguments) {
+    if ((type instanceof TypeDeclaration)) {
+      final TypeDeclaration clazz = ((TypeDeclaration) type);
       MethodDeclaration[] _methods = clazz.getMethods();
       final Function1<MethodDeclaration, Boolean> _function = new Function1<MethodDeclaration, Boolean>() {
         public Boolean apply(final MethodDeclaration method) {
@@ -60,21 +123,59 @@ public class HypergraphJavaExtension {
         }
       };
       final MethodDeclaration method = IterableExtensions.<MethodDeclaration>findFirst(_filter, _function_1);
-      EList<Node> _nodes = graph.getNodes();
-      final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
-        public Boolean apply(final Node it) {
-          return Boolean.valueOf(HypergraphJavaExtension.isDerivedFromMethod(it, clazz, method));
+      boolean _notEquals = (!Objects.equal(method, null));
+      if (_notEquals) {
+        EList<Node> _nodes = graph.getNodes();
+        final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
+          public Boolean apply(final Node it) {
+            return Boolean.valueOf(HypergraphJavaExtension.isDerivedFromMethod(it, clazz, method));
+          }
+        };
+        return IterableExtensions.<Node>findFirst(_nodes, _function_2);
+      } else {
+        return null;
+      }
+    } else {
+      if ((type instanceof EnumDeclaration)) {
+        final EnumDeclaration enumerate = ((EnumDeclaration) type);
+        List _bodyDeclarations = enumerate.bodyDeclarations();
+        Iterable<MethodDeclaration> _filter_1 = Iterables.<MethodDeclaration>filter(_bodyDeclarations, MethodDeclaration.class);
+        final Function1<MethodDeclaration, Boolean> _function_3 = new Function1<MethodDeclaration, Boolean>() {
+          public Boolean apply(final MethodDeclaration declaration) {
+            SimpleName _name = declaration.getName();
+            String _fullyQualifiedName = _name.getFullyQualifiedName();
+            return Boolean.valueOf(_fullyQualifiedName.equals(methodName));
+          }
+        };
+        Iterable<MethodDeclaration> _filter_2 = IterableExtensions.<MethodDeclaration>filter(_filter_1, _function_3);
+        final Function1<MethodDeclaration, Boolean> _function_4 = new Function1<MethodDeclaration, Boolean>() {
+          public Boolean apply(final MethodDeclaration declaration) {
+            List _parameters = declaration.parameters();
+            return Boolean.valueOf(HypergraphJavaExtension.compareArgAndParam(_parameters, arguments));
+          }
+        };
+        final MethodDeclaration method_1 = IterableExtensions.<MethodDeclaration>findFirst(_filter_2, _function_4);
+        boolean _notEquals_1 = (!Objects.equal(method_1, null));
+        if (_notEquals_1) {
+          EList<Node> _nodes_1 = graph.getNodes();
+          final Function1<Node, Boolean> _function_5 = new Function1<Node, Boolean>() {
+            public Boolean apply(final Node it) {
+              return Boolean.valueOf(HypergraphJavaExtension.isDerivedFromMethod(it, enumerate, method_1));
+            }
+          };
+          return IterableExtensions.<Node>findFirst(_nodes_1, _function_5);
+        } else {
+          return null;
         }
-      };
-      _xblockexpression = IterableExtensions.<Node>findFirst(_nodes, _function_2);
+      }
     }
-    return _xblockexpression;
+    return null;
   }
   
   /**
    * Find node for a given method declaration of a JDT DOM method in a given class.
    */
-  public static Node findNodeForMethod(final ModularHypergraph graph, final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static Node findNodeForMethod(final ModularHypergraph graph, final AbstractTypeDeclaration clazz, final MethodDeclaration method) {
     EList<Node> _nodes = graph.getNodes();
     final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
       public Boolean apply(final Node it) {
@@ -87,7 +188,7 @@ public class HypergraphJavaExtension {
   /**
    * check if a given node is derived from a given method specified by clazz and method
    */
-  public static boolean isDerivedFromMethod(final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static boolean isDerivedFromMethod(final Node node, final AbstractTypeDeclaration clazz, final MethodDeclaration method) {
     NodeReference _derivedFrom = node.getDerivedFrom();
     if ((_derivedFrom instanceof MethodTrace)) {
       String _name = node.getName();
@@ -100,7 +201,7 @@ public class HypergraphJavaExtension {
   /**
    * Find edge for a given variable in the given class.
    */
-  public static Edge findEdgeForVariable(final ModularHypergraph hypergraph, final TypeDeclaration clazz, final String variable) {
+  public static Edge findEdgeForVariable(final ModularHypergraph hypergraph, final AbstractTypeDeclaration clazz, final String variable) {
     EList<Edge> _edges = hypergraph.getEdges();
     final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
       public Boolean apply(final Edge edge) {
@@ -115,66 +216,9 @@ public class HypergraphJavaExtension {
   }
   
   /**
-   * Create a node for a given method.
+   * Find the constructor node matching the type and argument list.
    */
-  public static Node createNodeForMethod(final IMethod method) {
-    final Node node = HypergraphFactory.eINSTANCE.createNode();
-    ICompilationUnit _compilationUnit = method.getCompilationUnit();
-    IJavaElement _parent = _compilationUnit.getParent();
-    String _elementName = _parent.getElementName();
-    String _plus = (_elementName + ".");
-    IJavaElement _parent_1 = method.getParent();
-    String _elementName_1 = _parent_1.getElementName();
-    String _plus_1 = (_plus + _elementName_1);
-    String _plus_2 = (_plus_1 + ".");
-    String _elementName_2 = method.getElementName();
-    String _plus_3 = (_plus_2 + _elementName_2);
-    node.setName(_plus_3);
-    final MethodTrace derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace();
-    derivedFrom.setMethod(method);
-    node.setDerivedFrom(derivedFrom);
-    return node;
-  }
-  
-  /**
-   * Create for one IField an edge.
-   */
-  public static Edge createEdgeForField(final IField field) {
-    final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    ICompilationUnit _compilationUnit = field.getCompilationUnit();
-    IJavaElement _parent = _compilationUnit.getParent();
-    String _elementName = _parent.getElementName();
-    String _plus = (_elementName + ".");
-    IJavaElement _parent_1 = field.getParent();
-    String _elementName_1 = _parent_1.getElementName();
-    String _plus_1 = (_plus + _elementName_1);
-    String _plus_2 = (_plus_1 + ".");
-    String _elementName_2 = field.getElementName();
-    String _plus_3 = (_plus_2 + _elementName_2);
-    edge.setName(_plus_3);
-    final FieldTrace derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace();
-    derivedFrom.setField(field);
-    edge.setDerivedFrom(derivedFrom);
-    return edge;
-  }
-  
-  /**
-   * Create a module for each class in the list. Pointing to the class as derived from
-   * element.
-   * 
-   * @return one new module
-   */
-  public static Module createModuleForClass(final IType type) {
-    final Module module = HypergraphFactory.eINSTANCE.createModule();
-    String _fullyQualifiedName = type.getFullyQualifiedName();
-    module.setName(_fullyQualifiedName);
-    final TypeTrace derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace();
-    derivedFrom.setType(type);
-    module.setDerivedFrom(derivedFrom);
-    return module;
-  }
-  
-  public static Node findConstructorMethod(final ModularHypergraph graph, final Type type, final List arguments) {
+  public static Node findConstructorMethod(final ModularHypergraph graph, final Type type, final List<?> arguments) {
     Name _switchResult = null;
     boolean _matched = false;
     if (!_matched) {
@@ -198,9 +242,9 @@ public class HypergraphJavaExtension {
       public Boolean apply(final Module module) {
         ModuleReference _derivedFrom = module.getDerivedFrom();
         Object _type = ((TypeTrace) _derivedFrom).getType();
-        String _elementName = ((IType) _type).getElementName();
+        String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(((AbstractTypeDeclaration) _type));
         String _fullyQualifiedName = typeName.getFullyQualifiedName();
-        return Boolean.valueOf(_elementName.equals(_fullyQualifiedName));
+        return Boolean.valueOf(_determineFullQualifiedName.equals(_fullyQualifiedName));
       }
     };
     final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
@@ -208,7 +252,8 @@ public class HypergraphJavaExtension {
     if (_notEquals) {
       ModuleReference _derivedFrom = module.getDerivedFrom();
       Object _type = ((TypeTrace) _derivedFrom).getType();
-      final String moduleName = ((IType) _type).getElementName();
+      SimpleName _name = ((TypeDeclaration) _type).getName();
+      final String constructorName = _name.getFullyQualifiedName();
       EList<Node> _nodes = module.getNodes();
       final Function1<Node, Boolean> _function_1 = new Function1<Node, Boolean>() {
         public Boolean apply(final Node node) {
@@ -218,10 +263,11 @@ public class HypergraphJavaExtension {
           if (!_matched) {
             if (_derivedFrom instanceof MethodTrace) {
               _matched=true;
-              NodeReference _derivedFrom_1 = node.getDerivedFrom();
-              Object _method = ((MethodTrace) _derivedFrom_1).getMethod();
-              String _elementName = ((IMethod) _method).getElementName();
-              _switchResult = _elementName.equals(moduleName);
+              String _name = node.getName();
+              String _name_1 = module.getName();
+              String _plus = (_name_1 + ".");
+              String _plus_1 = (_plus + constructorName);
+              _switchResult = _name.equals(_plus_1);
             }
           }
           if (!_matched) {
@@ -243,7 +289,7 @@ public class HypergraphJavaExtension {
     }
   }
   
-  public static Node matchArguments(final Iterable<Node> nodes, final List arguments) {
+  private static Node matchArguments(final Iterable<Node> nodes, final List<?> arguments) {
     final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
       public Boolean apply(final Node node) {
         try {
@@ -275,61 +321,35 @@ public class HypergraphJavaExtension {
     return IterableExtensions.<Node>findFirst(nodes, _function);
   }
   
-  private static boolean matchArgumentsForExplicitMethods(final MethodTrace trace, final List arguments) {
+  private static boolean matchArgumentsForExplicitMethods(final MethodTrace trace, final List<?> arguments) {
     try {
-      boolean _switchResult = false;
+      boolean _xifexpression = false;
       Object _method = trace.getMethod();
-      boolean _matched = false;
-      if (!_matched) {
-        if (_method instanceof MethodDeclaration) {
-          _matched=true;
-          boolean _xblockexpression = false;
-          {
-            Object _method_1 = trace.getMethod();
-            final List parameters = ((MethodDeclaration) _method_1).parameters();
-            boolean _xifexpression = false;
-            int _size = parameters.size();
-            int _size_1 = arguments.size();
-            boolean _equals = (_size == _size_1);
-            if (_equals) {
-              _xifexpression = HypergraphJavaExtension.compareArgAndParam(parameters, arguments);
-            } else {
-              _xifexpression = false;
-            }
-            _xblockexpression = _xifexpression;
+      if ((_method instanceof MethodDeclaration)) {
+        boolean _xblockexpression = false;
+        {
+          Object _method_1 = trace.getMethod();
+          final List parameters = ((MethodDeclaration) _method_1).parameters();
+          boolean _xifexpression_1 = false;
+          int _size = parameters.size();
+          int _size_1 = arguments.size();
+          boolean _equals = (_size == _size_1);
+          if (_equals) {
+            _xifexpression_1 = HypergraphJavaExtension.compareArgAndParam(parameters, arguments);
+          } else {
+            _xifexpression_1 = false;
           }
-          _switchResult = _xblockexpression;
+          _xblockexpression = _xifexpression_1;
         }
-      }
-      if (!_matched) {
-        if (_method instanceof IMethod) {
-          _matched=true;
-          boolean _xblockexpression = false;
-          {
-            Object _method_1 = trace.getMethod();
-            final ILocalVariable[] parameters = ((IMethod) _method_1).getParameters();
-            boolean _xifexpression = false;
-            int _size = ((List<ILocalVariable>)Conversions.doWrapArray(parameters)).size();
-            int _size_1 = arguments.size();
-            boolean _equals = (_size == _size_1);
-            if (_equals) {
-              _xifexpression = HypergraphJavaExtension.compareArgAndParamIMethod(((List<ILocalVariable>)Conversions.doWrapArray(parameters)), arguments);
-            } else {
-              _xifexpression = false;
-            }
-            _xblockexpression = _xifexpression;
-          }
-          _switchResult = _xblockexpression;
-        }
-      }
-      if (!_matched) {
+        _xifexpression = _xblockexpression;
+      } else {
         Object _method_1 = trace.getMethod();
         Class<?> _class = _method_1.getClass();
         String _plus = ("Implementation error. Method type " + _class);
         String _plus_1 = (_plus + " not supported.");
         throw new Exception(_plus_1);
       }
-      return _switchResult;
+      return _xifexpression;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -338,27 +358,7 @@ public class HypergraphJavaExtension {
   /**
    * returns true if the arguments match the parameters.
    */
-  private static boolean compareArgAndParamIMethod(final List<ILocalVariable> parameters, final List arguments) {
-    for (int i = 0; (i < parameters.size()); i++) {
-      {
-        ILocalVariable _get = parameters.get(i);
-        final IMember pType = _get.getDeclaringMember();
-        Object _get_1 = arguments.get(i);
-        ITypeBinding _resolveTypeBinding = ((Expression) _get_1).resolveTypeBinding();
-        final String aType = _resolveTypeBinding.getBinaryName();
-        boolean _equals = pType.equals(aType);
-        if (_equals) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * returns true if the arguments match the parameters.
-   */
-  public static boolean compareArgAndParam(final List parameters, final List arguments) {
+  public static boolean compareArgAndParam(final List<?> parameters, final List<?> arguments) {
     int _size = parameters.size();
     int _size_1 = arguments.size();
     boolean _notEquals = (_size != _size_1);

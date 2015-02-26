@@ -2,12 +2,12 @@ package de.cau.cs.se.evaluation.architecture.transformation.java;
 
 import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
-import de.cau.cs.se.evaluation.architecture.transformation.IScope;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HandleExpressionForMethodAndFieldAccess;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
@@ -34,34 +34,31 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 
 @SuppressWarnings("all")
 public class HandleStatementForMethodAndFieldAccess {
   private final HandleExpressionForMethodAndFieldAccess expressionHandler;
   
-  private IScope scopes;
-  
   private ModularHypergraph modularSystem;
   
   private MethodDeclaration method;
   
-  private TypeDeclaration clazz;
+  private AbstractTypeDeclaration type;
   
-  public HandleStatementForMethodAndFieldAccess(final IScope scopes) {
-    this.scopes = scopes;
-    HandleExpressionForMethodAndFieldAccess _handleExpressionForMethodAndFieldAccess = new HandleExpressionForMethodAndFieldAccess(scopes);
+  public HandleStatementForMethodAndFieldAccess(final IJavaProject project) {
+    HandleExpressionForMethodAndFieldAccess _handleExpressionForMethodAndFieldAccess = new HandleExpressionForMethodAndFieldAccess(project);
     this.expressionHandler = _handleExpressionForMethodAndFieldAccess;
   }
   
-  public void handle(final ModularHypergraph modularSystem, final TypeDeclaration clazz, final MethodDeclaration method, final Statement statement) {
+  public void handle(final ModularHypergraph modularSystem, final AbstractTypeDeclaration type, final MethodDeclaration method, final Statement statement) {
     this.modularSystem = modularSystem;
-    this.clazz = clazz;
+    this.type = type;
     this.method = method;
     this.findMethodAndFieldCallInStatement(statement);
   }
@@ -72,12 +69,12 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final AssertStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Expression _message = statement.getMessage();
     boolean _notEquals = (!Objects.equal(_message, null));
     if (_notEquals) {
       Expression _message_1 = statement.getMessage();
-      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _message_1);
+      this.expressionHandler.handle(this.modularSystem, this.type, this.method, _message_1);
     }
   }
   
@@ -104,7 +101,7 @@ public class HandleStatementForMethodAndFieldAccess {
     List _arguments = statement.arguments();
     final Consumer<Expression> _function = new Consumer<Expression>() {
       public void accept(final Expression expression) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, expression);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, expression);
       }
     };
     _arguments.forEach(_function);
@@ -116,7 +113,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final DoStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }
@@ -128,7 +125,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final EnhancedForStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }
@@ -139,7 +136,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ExpressionStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
   }
   
   /**
@@ -158,7 +155,7 @@ public class HandleStatementForMethodAndFieldAccess {
     List _initializers = statement.initializers();
     final Consumer<Expression> _function = new Consumer<Expression>() {
       public void accept(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     _initializers.forEach(_function);
@@ -166,12 +163,12 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression_1);
     }
     List _updaters = statement.updaters();
     final Consumer<Expression> _function_1 = new Consumer<Expression>() {
       public void accept(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     _updaters.forEach(_function_1);
@@ -185,7 +182,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final IfStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Statement _thenStatement = statement.getThenStatement();
     this.findMethodAndFieldCallInStatement(_thenStatement);
     Statement _elseStatement = statement.getElseStatement();
@@ -214,7 +211,7 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression_1);
     }
   }
   
@@ -229,12 +226,12 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression_1);
     }
     List _arguments = statement.arguments();
     final Consumer<Expression> _function = new Consumer<Expression>() {
       public void accept(final Expression it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, it);
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, it);
       }
     };
     _arguments.forEach(_function);
@@ -250,7 +247,7 @@ public class HandleStatementForMethodAndFieldAccess {
     boolean _notEquals = (!Objects.equal(_expression, null));
     if (_notEquals) {
       Expression _expression_1 = statement.getExpression();
-      this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression_1);
+      this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression_1);
     }
   }
   
@@ -261,7 +258,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final SwitchStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     List _statements = statement.statements();
     final Consumer<Object> _function = new Consumer<Object>() {
       public void accept(final Object it) {
@@ -277,7 +274,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final SynchronizedStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Block _body = statement.getBody();
     List _statements = _body.statements();
     final Consumer<Statement> _function = new Consumer<Statement>() {
@@ -294,7 +291,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final ThrowStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
   }
   
   /**
@@ -342,30 +339,42 @@ public class HandleStatementForMethodAndFieldAccess {
     List _resources = statement.resources();
     final Consumer<Object> _function_3 = new Consumer<Object>() {
       public void accept(final Object it) {
-        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, ((VariableDeclarationExpression) it));
+        HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, ((VariableDeclarationExpression) it));
       }
     };
     _resources.forEach(_function_3);
   }
   
+  /**
+   * Process internal variable declarations. They do not produce edges.
+   */
   private void _findMethodAndFieldCallInStatement(final VariableDeclarationStatement statement) {
-    Type _type = statement.getType();
-    if ((_type instanceof SimpleType)) {
-      Type _type_1 = statement.getType();
-      final Name name = ((SimpleType) _type_1).getName();
-      final String fqn = name.getFullyQualifiedName();
-      final IType result = this.scopes.getType(fqn);
-      boolean _notEquals = (!Objects.equal(result, null));
-      if (_notEquals) {
+    try {
+      boolean _or = false;
+      Type _type = statement.getType();
+      if ((_type instanceof SimpleType)) {
+        _or = true;
+      } else {
+        Type _type_1 = statement.getType();
+        _or = (_type_1 instanceof ParameterizedType);
+      }
+      if (_or) {
         List _fragments = statement.fragments();
         final Consumer<Object> _function = new Consumer<Object>() {
           public void accept(final Object fragment) {
             Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
-            HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.clazz, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
+            HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
           }
         };
         _fragments.forEach(_function);
+      } else {
+        Type _type_2 = statement.getType();
+        Class<? extends Type> _class = _type_2.getClass();
+        String _plus = ("Variable declaration type is not supported " + _class);
+        throw new Exception(_plus);
       }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
     }
   }
   
@@ -375,7 +384,7 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final WhileStatement statement) {
     Expression _expression = statement.getExpression();
-    this.expressionHandler.handle(this.modularSystem, this.clazz, this.method, _expression);
+    this.expressionHandler.handle(this.modularSystem, this.type, this.method, _expression);
     Statement _body = statement.getBody();
     this.findMethodAndFieldCallInStatement(_body);
   }

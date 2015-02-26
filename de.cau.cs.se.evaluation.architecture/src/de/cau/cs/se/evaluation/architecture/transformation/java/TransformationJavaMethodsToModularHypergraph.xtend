@@ -17,6 +17,11 @@ import static extension de.cau.cs.se.evaluation.architecture.transformation.Name
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension.*
 import org.eclipse.jdt.core.IJavaProject
+import java.util.ArrayList
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
+import org.eclipse.jdt.core.dom.EnumDeclaration
+import org.eclipse.jdt.core.dom.FieldDeclaration
+import org.eclipse.jdt.core.dom.MethodDeclaration
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
@@ -24,21 +29,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	val IScope globalScope
 	val IJavaProject project
 	val IProgressMonitor monitor
-	val List<IType> classList
-	
-	/**
-	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
-	 *  
-	 * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
-	 * @param scope the global scoper used to resolve classes during transformation  
-	 */
-	public new (IJavaProject project, IScope scope, List<IType> classList) {
-		this.project = project
-		this.globalScope = scope
-		this.classList = classList 
-		this.monitor = null
-	}
-	
+	val List<AbstractTypeDeclaration> classList
+		
 	/**
 	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
 	 *  
@@ -49,7 +41,11 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	public new(IJavaProject project, GlobalJavaScope scope, List<IType> classList, IProgressMonitor monitor) {
 		this.project = project
 		this.globalScope = scope
-		this.classList = classList 
+		this.classList = new ArrayList<AbstractTypeDeclaration>
+		for (clazz : classList) {
+			val type = clazz.getTypeDeclarationForType(monitor,project)
+			if (type != null) this.classList.add(type)
+		}
 		this.monitor = monitor
 	}
 	
@@ -81,15 +77,14 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 				
 	}
 	
-	def void createNodesForInplicitClassConstructors(EList<Node> nodes, IType type) {
-		val tname = type.fullyQualifiedName + "." + type.elementName
+	/**
+	 * Create a node for implicit constructors of classes.
+	 */
+	def void createNodesForInplicitClassConstructors(EList<Node> nodes, AbstractTypeDeclaration type) {
+		val tname = type.determineFullQualifiedName + "." + type.name.fullyQualifiedName
 		if (!nodes.exists[node | node.name.equals(tname)]) {
-			val module = modularSystem.modules.findFirst[it.name.equals(type.fullyQualifiedName)]
-			val newNode = HypergraphFactory.eINSTANCE.createNode
-			newNode.name = type.fullyQualifiedName + "." + type.elementName
-			val derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace
-			derivedFrom.type = type
-			newNode.derivedFrom = derivedFrom
+			val module = modularSystem.modules.findFirst[it.name.equals(type.determineFullQualifiedName)]
+			val newNode = type.createNodeForImplicitConstructor
 			nodes.add(newNode)
 			module.nodes.add(newNode)
 		}	
@@ -98,19 +93,23 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	/**
 	 * create edges for invocations and edges for variable access.
 	 */
-	private def void createEdgesForInvocations(IType type, IJavaProject project) {
-		val unit = type.getUnitForType(monitor, project)
-		val object = unit.types.get(0)
-		if (object instanceof TypeDeclaration) {
-			val declaredType =  object as TypeDeclaration
-			if (declaredType != null) {
-				val Iterable<Modifier> modifiers = declaredType.modifiers().filter(Modifier)
-				if (!declaredType.isInterface && (modifiers.findFirst[(it as Modifier).isAbstract()] == null)) {
-					val scope = new JavaLocalScope(unit, new JavaPackageScope(type.packageFragment, globalScope))
-	 				val handler = new HandleStatementForMethodAndFieldAccess(scope)
+	private def void createEdgesForInvocations(AbstractTypeDeclaration type, IJavaProject project) {
+		if (type != null) {
+			val Iterable<Modifier> modifiers = type.modifiers().filter(Modifier)
+			if (type instanceof TypeDeclaration) {
+				if (!type.isInterface && (modifiers.findFirst[(it as Modifier).isAbstract()] == null)) {
+	 				val handler = new HandleStatementForMethodAndFieldAccess(project)
 					/** check method bodies. */
-					declaredType.methods.forEach[method | 
-						method.body.statements.forEach[handler.handle(modularSystem, declaredType, method, it)]
+					type.methods.forEach[method | 
+						method.body.statements.forEach[handler.handle(modularSystem, type, method, it)]
+					]
+				}
+			} else if (type instanceof EnumDeclaration) {
+				if (modifiers.findFirst[(it as Modifier).isAbstract()] == null) {
+	 				val handler = new HandleStatementForMethodAndFieldAccess(project)
+					/** check method bodies. */
+					type.bodyDeclarations.filter(MethodDeclaration).forEach[method | 
+						method.body.statements.forEach[handler.handle(modularSystem, type, method, it)]
 					]
 				}
 			}
@@ -120,20 +119,33 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	/**
 	 * Resolve all methods of a given class.
 	 */
-	private def void createNodesForClassMethods(EList<Node> nodes, IType type) {
-		val module = modularSystem.modules.findFirst[it.name.equals(type.fullyQualifiedName)]
-		type.methods.forEach[method |
-			val node = method.createNodeForMethod 
-			nodes.add(node)
-			module.nodes.add(node)
-		]
+	private def void createNodesForClassMethods(EList<Node> nodes, AbstractTypeDeclaration type) {
+		if (type instanceof TypeDeclaration) {
+			val module = modularSystem.modules.findFirst[it.name.equals(type.determineFullQualifiedName)]
+			type.methods.forEach[method |
+				val node = method.createNodeForMethod(type) 
+				nodes.add(node)
+				module.nodes.add(node)
+			]
+		} else if (type instanceof EnumDeclaration) {
+			val module = modularSystem.modules.findFirst[it.name.equals(type.determineFullQualifiedName)]
+			type.bodyDeclarations.filter(MethodDeclaration).forEach[method |
+				val node = method.createNodeForMethod(type) 
+				nodes.add(node)
+				module.nodes.add(node)
+			]
+		}
 	}
 	
 	/**
 	 * Create edges for all variables in the given type.
 	 */
-	private def void createEdgesForClassVariables(EList<Edge> edges, IType type) {
-		type.fields.forEach[field | edges.add(createEdgeForField(field))]
+	private def void createEdgesForClassVariables(EList<Edge> edges, AbstractTypeDeclaration type) {
+		if (type instanceof TypeDeclaration) {
+			type.fields.forEach[field | edges.add(field.createEdgeForField(type))]
+		} else if (type instanceof EnumDeclaration) {
+			type.bodyDeclarations.filter(FieldDeclaration).forEach[field | edges.add(field.createEdgeForField(type))]
+		}
 	}
 		
 }
