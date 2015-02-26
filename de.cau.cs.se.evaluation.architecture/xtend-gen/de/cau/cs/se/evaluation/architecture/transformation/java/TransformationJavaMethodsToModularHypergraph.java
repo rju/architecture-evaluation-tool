@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -41,6 +42,8 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   
   private final IScope globalScope;
   
+  private final IJavaProject project;
+  
   private final IProgressMonitor monitor;
   
   private final List<IType> classList;
@@ -51,7 +54,8 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
    * @param scope the global scoper used to resolve classes during transformation
    */
-  public TransformationJavaMethodsToModularHypergraph(final IScope scope, final List<IType> classList) {
+  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final IScope scope, final List<IType> classList) {
+    this.project = project;
     this.globalScope = scope;
     this.classList = classList;
     this.monitor = null;
@@ -64,7 +68,8 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * @param scope the global scoper used to resolve classes during transformation
    * @param eclipse progress monitor
    */
-  public TransformationJavaMethodsToModularHypergraph(final GlobalJavaScope scope, final List<IType> classList, final IProgressMonitor monitor) {
+  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final GlobalJavaScope scope, final List<IType> classList, final IProgressMonitor monitor) {
+    this.project = project;
     this.globalScope = scope;
     this.classList = classList;
     this.monitor = monitor;
@@ -111,7 +116,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
     this.classList.forEach(_function_3);
     final Consumer<IType> _function_4 = new Consumer<IType>() {
       public void accept(final IType clazz) {
-        TransformationJavaMethodsToModularHypergraph.this.createEdgesForInvocations(clazz);
+        TransformationJavaMethodsToModularHypergraph.this.createEdgesForInvocations(clazz, TransformationJavaMethodsToModularHypergraph.this.project);
       }
     };
     this.classList.forEach(_function_4);
@@ -158,8 +163,8 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   /**
    * create edges for invocations and edges for variable access.
    */
-  private void createEdgesForInvocations(final IType type) {
-    final CompilationUnit unit = HypergraphJDTDOMExtension.getUnitForType(type);
+  private void createEdgesForInvocations(final IType type, final IJavaProject project) {
+    final CompilationUnit unit = HypergraphJDTDOMExtension.getUnitForType(type, this.monitor, project);
     List _types = unit.types();
     final Object object = _types.get(0);
     if ((object instanceof TypeDeclaration)) {

@@ -16,11 +16,13 @@ import org.eclipse.jdt.core.dom.Modifier
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJDTDOMExtension.*
+import org.eclipse.jdt.core.IJavaProject
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
 	var ModularHypergraph modularSystem
 	val IScope globalScope
+	val IJavaProject project
 	val IProgressMonitor monitor
 	val List<IType> classList
 	
@@ -30,7 +32,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param hypergraphSet the hypergraph set where the generated hypergraph will be added to
 	 * @param scope the global scoper used to resolve classes during transformation  
 	 */
-	public new (IScope scope, List<IType> classList) {
+	public new (IJavaProject project, IScope scope, List<IType> classList) {
+		this.project = project
 		this.globalScope = scope
 		this.classList = classList 
 		this.monitor = null
@@ -43,7 +46,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(GlobalJavaScope scope, List<IType> classList, IProgressMonitor monitor) {
+	public new(IJavaProject project, GlobalJavaScope scope, List<IType> classList, IProgressMonitor monitor) {
+		this.project = project
 		this.globalScope = scope
 		this.classList = classList 
 		this.monitor = monitor
@@ -70,7 +74,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		
 		// find all method invocations create edges for them 
 		// find all variable accesses from expressions inside methods
-		classList.forEach[clazz | createEdgesForInvocations(clazz)]
+		classList.forEach[clazz | clazz.createEdgesForInvocations(project)]
 		// find all internal variables and check whether they use any of the used modules.
 		// Connect nodes accordingly
 		// TODO
@@ -94,8 +98,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	/**
 	 * create edges for invocations and edges for variable access.
 	 */
-	private def void createEdgesForInvocations(IType type) {
-		val unit = type.getUnitForType
+	private def void createEdgesForInvocations(IType type, IJavaProject project) {
+		val unit = type.getUnitForType(monitor, project)
 		val object = unit.types.get(0)
 		if (object instanceof TypeDeclaration) {
 			val declaredType =  object as TypeDeclaration

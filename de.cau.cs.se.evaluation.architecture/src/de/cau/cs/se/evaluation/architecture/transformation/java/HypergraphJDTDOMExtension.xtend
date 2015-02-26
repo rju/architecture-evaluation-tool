@@ -6,26 +6,33 @@ import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.dom.TypeDeclaration
+import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.core.runtime.IProgressMonitor
 
 class HypergraphJDTDOMExtension {
 	
 	/**
 	 * Get compilation unit for JDT type.
 	 */
-	def static CompilationUnit getUnitForType(IType type) {
-		val ASTParser parser = ASTParser.newParser(AST.JLS8)
+	def static CompilationUnit getUnitForType(IType type, IProgressMonitor monitor, IJavaProject project) {
 		val options = JavaCore.getOptions()
-				
- 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options)
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
  		
+		val ASTParser parser = ASTParser.newParser(AST.JLS8)
+		parser.setProject(project)	
  		parser.setCompilerOptions(options)
- 		parser.setSource(type.compilationUnit.buffer.contents.toCharArray())
+ 		parser.kind = ASTParser.K_COMPILATION_UNIT
+ 		parser.source = type.compilationUnit.buffer.contents.toCharArray()
+ 		parser.unitName = type.compilationUnit.elementName
+ 		parser.resolveBindings = true
+ 		parser.bindingsRecovery = true
+ 		parser.statementsRecovery = true
  		
  		return parser.createAST(null) as CompilationUnit
  	}
  	
- 	def static TypeDeclaration getTypeDeclarationForType(IType type) {
- 		val object = type.getUnitForType.types.get(0)
+ 	def static TypeDeclaration getTypeDeclarationForType(IType type, IProgressMonitor monitor, IJavaProject project) {
+ 		val object = type.getUnitForType(monitor, project).types.get(0)
 		if (object instanceof TypeDeclaration) {
 			return object as TypeDeclaration
 		} else

@@ -165,7 +165,7 @@ class HypergraphJavaExtension {
 		// parameters ILocalVariable
 		// TODO this is not a satisfying implementation
 		for(var i=0;i < parameters.size ; i++) {
-			val pType = parameters.get(i).typeSignature
+			val pType = parameters.get(i).declaringMember
 			val aType = (arguments.get(i) as Expression).resolveTypeBinding.binaryName
 			
 			if (pType.equals(aType))
@@ -183,11 +183,11 @@ class HypergraphJavaExtension {
 		// parameters SingleVariableDeclaration
 		for(var i=0;i < parameters.size ; i++) {
 			// TODO fix this
-			/*val pType = (parameters.get(i) as SingleVariableDeclaration).type.resolveBinding
+			val pType = (parameters.get(i) as SingleVariableDeclaration).type.resolveBinding
 			val aType = (arguments.get(i) as Expression).resolveTypeBinding
 			
 			if (!pType.isAssignmentCompatible(aType))
-				return false*/	
+				return false	
 		}
 		
 		return true

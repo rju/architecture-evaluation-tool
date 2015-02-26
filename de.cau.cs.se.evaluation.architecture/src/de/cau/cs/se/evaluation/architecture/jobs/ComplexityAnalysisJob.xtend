@@ -61,7 +61,7 @@ class ComplexityAnalysisJob extends Job {
 		var scopes = new GlobalJavaScope(projects, null)
 		
 		val javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, types, monitor)
-		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(scopes, types, monitor)
+		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), scopes, types, monitor)
 		val hypergraphMetrics = new TransformationHypergraphMetrics( monitor)
 		
 		javaToModularHypergraph.transform()

@@ -95,7 +95,8 @@ public class ComplexityAnalysisJob extends Job {
     monitor.worked(1);
     GlobalJavaScope scopes = new GlobalJavaScope(projects, null);
     final TransformationJavaClassesToHypergraph javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, this.types, monitor);
-    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(scopes, this.types, monitor);
+    IJavaProject _get = projects.get(0);
+    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(_get, scopes, this.types, monitor);
     final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
     javaToModularHypergraph.transform();
     ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();

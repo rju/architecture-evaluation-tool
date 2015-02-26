@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Expression;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.xtext.xbase.lib.Conversions;
@@ -340,7 +342,7 @@ public class HypergraphJavaExtension {
     for (int i = 0; (i < parameters.size()); i++) {
       {
         ILocalVariable _get = parameters.get(i);
-        final String pType = _get.getTypeSignature();
+        final IMember pType = _get.getDeclaringMember();
         Object _get_1 = arguments.get(i);
         ITypeBinding _resolveTypeBinding = ((Expression) _get_1).resolveTypeBinding();
         final String aType = _resolveTypeBinding.getBinaryName();
@@ -364,6 +366,18 @@ public class HypergraphJavaExtension {
       return false;
     }
     for (int i = 0; (i < parameters.size()); i++) {
+      {
+        Object _get = parameters.get(i);
+        Type _type = ((SingleVariableDeclaration) _get).getType();
+        final ITypeBinding pType = _type.resolveBinding();
+        Object _get_1 = arguments.get(i);
+        final ITypeBinding aType = ((Expression) _get_1).resolveTypeBinding();
+        boolean _isAssignmentCompatible = pType.isAssignmentCompatible(aType);
+        boolean _not = (!_isAssignmentCompatible);
+        if (_not) {
+          return false;
+        }
+      }
     }
     return true;
   }
