@@ -6,7 +6,7 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace
 
-class TransfromationMaximalInterconnectedGraph implements ITransformation {
+class TransformationMaximalInterconnectedGraph implements ITransformation {
 	
 	val ModularHypergraph hypergraph
 	var ModularHypergraph resultHypergraph
@@ -15,7 +15,7 @@ class TransfromationMaximalInterconnectedGraph implements ITransformation {
 		this.hypergraph = hypergraph
 	}
 	
-	def ModularHypergraph getMaximalInterconnectedGraph() {
+	def ModularHypergraph getResult() {
 		return this.resultHypergraph
 	}
 	
@@ -40,6 +40,7 @@ class TransfromationMaximalInterconnectedGraph implements ITransformation {
 				edge.name = startNode.name + "-" + endNode.name
 				startNode.edges.add(edge)
 				endNode.edges.add(edge)
+				resultHypergraph.edges.add(edge)
 			}
 		]
 	}

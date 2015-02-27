@@ -44,7 +44,15 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		this.classList = new ArrayList<AbstractTypeDeclaration>
 		for (clazz : classList) {
 			val type = clazz.getTypeDeclarationForType(monitor,project)
-			if (type != null) this.classList.add(type)
+			if (type != null) {
+				if (type instanceof TypeDeclaration) {
+					if (!type.interface) {
+						this.classList.add(type)
+					}
+				} else {
+			 		this.classList.add(type)
+			 	}
+			 }
 		}
 		this.monitor = monitor
 	}

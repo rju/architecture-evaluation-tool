@@ -6,9 +6,14 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope;
-import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics;
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationConnectedNodeHyperedgesOnlyGraph;
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationHyperedgesOnlyGraph;
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationIntermoduleHyperedgesOnlyGraph;
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationMaximalInterconnectedGraph;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,10 +99,8 @@ public class ComplexityAnalysisJob extends Job {
     monitor.beginTask("Determine complexity of inter class dependency", _plus_2);
     monitor.worked(1);
     GlobalJavaScope scopes = new GlobalJavaScope(projects, null);
-    final TransformationJavaClassesToHypergraph javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, this.types, monitor);
     IJavaProject _get = projects.get(0);
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(_get, scopes, this.types, monitor);
-    final TransformationHypergraphMetrics hypergraphMetrics = new TransformationHypergraphMetrics(monitor);
     javaToModularHypergraph.transform();
     ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();
     EList<Module> _modules = _modularSystem.getModules();
@@ -129,9 +132,38 @@ public class ComplexityAnalysisJob extends Job {
         }
       }
     }
-    javaToHypergraph.transform();
-    Hypergraph _system = javaToHypergraph.getSystem();
-    hypergraphMetrics.setSystem(_system);
+    ModularHypergraph _modularSystem_2 = javaToModularHypergraph.getModularSystem();
+    final TransformationMaximalInterconnectedGraph transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(_modularSystem_2);
+    ModularHypergraph _modularSystem_3 = javaToModularHypergraph.getModularSystem();
+    final TransformationIntermoduleHyperedgesOnlyGraph transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(_modularSystem_3);
+    transformationMaximalInterconnectedGraph.transform();
+    transformationIntermoduleHyperedgesOnlyGraph.transform();
+    final TransformationHypergraphMetrics metrics = new TransformationHypergraphMetrics(monitor);
+    ModularHypergraph _modularSystem_4 = javaToModularHypergraph.getModularSystem();
+    metrics.setSystem(_modularSystem_4);
+    final double systemSize = metrics.calculate();
+    ModularHypergraph _modularSystem_5 = javaToModularHypergraph.getModularSystem();
+    final double complexity = this.calculateComplexity(_modularSystem_5, monitor);
+    ModularHypergraph _result = transformationMaximalInterconnectedGraph.getResult();
+    final double complexityMaximalInterconnected = this.calculateComplexity(_result, monitor);
+    ModularHypergraph _result_1 = transformationIntermoduleHyperedgesOnlyGraph.getResult();
+    final double complexityIntermodule = this.calculateComplexity(_result_1, monitor);
+    final ResultModelProvider result = ResultModelProvider.INSTANCE;
+    IJavaProject _get_1 = projects.get(0);
+    IProject _project = _get_1.getProject();
+    final String projectName = _project.getName();
+    List<NamedValue> _values = result.getValues();
+    NamedValue _namedValue = new NamedValue((projectName + " Size"), systemSize);
+    _values.add(_namedValue);
+    List<NamedValue> _values_1 = result.getValues();
+    NamedValue _namedValue_1 = new NamedValue((projectName + " Complexity"), complexity);
+    _values_1.add(_namedValue_1);
+    List<NamedValue> _values_2 = result.getValues();
+    NamedValue _namedValue_2 = new NamedValue((projectName + " Cohesion"), (complexityIntermodule / complexityMaximalInterconnected));
+    _values_2.add(_namedValue_2);
+    List<NamedValue> _values_3 = result.getValues();
+    NamedValue _namedValue_3 = new NamedValue((projectName + " Coupling"), complexityIntermodule);
+    _values_3.add(_namedValue_3);
     monitor.done();
     IWorkbench _workbench = PlatformUI.getWorkbench();
     Display _display = _workbench.getDisplay();
@@ -142,6 +174,7 @@ public class ComplexityAnalysisJob extends Job {
           IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
           IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
           final IViewPart part = _activePage.showView(AnalysisResultView.ID);
+          ((AnalysisResultView) part).update(ResultModelProvider.INSTANCE);
         } catch (final Throwable _t) {
           if (_t instanceof PartInitException) {
             final PartInitException e = (PartInitException)_t;
@@ -153,6 +186,70 @@ public class ComplexityAnalysisJob extends Job {
       }
     });
     return Status.OK_STATUS;
+  }
+  
+  /**
+   * Calculate for a given modular hyper graph:
+   * - hyperedges only graph
+   * - hyperedges only graphs for each node in the graph which is connected to the i-th node
+   * - calculate the size of all graphs
+   * - calculate the complexity
+   * 
+   * @param input a modular system
+   */
+  private double calculateComplexity(final ModularHypergraph input, final IProgressMonitor monitor) {
+    if (monitor!=null) {
+      monitor.subTask("Calculating metrics");
+    }
+    final TransformationHyperedgesOnlyGraph transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(input);
+    transformationHyperedgesOnlyGraph.transform();
+    Hypergraph _result = transformationHyperedgesOnlyGraph.getResult();
+    final TransformationConnectedNodeHyperedgesOnlyGraph transformationConnectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(_result);
+    final ArrayList<Hypergraph> resultConnectedNodeGraphs = new ArrayList<Hypergraph>();
+    Hypergraph _result_1 = transformationHyperedgesOnlyGraph.getResult();
+    EList<Node> _nodes = _result_1.getNodes();
+    for (final Node node : _nodes) {
+      {
+        transformationConnectedNodeHyperedgesOnlyGraph.setNode(node);
+        transformationConnectedNodeHyperedgesOnlyGraph.transform();
+        Hypergraph _result_2 = transformationConnectedNodeHyperedgesOnlyGraph.getResult();
+        resultConnectedNodeGraphs.add(_result_2);
+      }
+    }
+    final TransformationHypergraphMetrics metrics = new TransformationHypergraphMetrics(monitor);
+    Hypergraph _result_2 = transformationHyperedgesOnlyGraph.getResult();
+    metrics.setSystem(_result_2);
+    Hypergraph _result_3 = transformationHyperedgesOnlyGraph.getResult();
+    final double complexity = this.calculateComplexity(_result_3, resultConnectedNodeGraphs, monitor);
+    if (monitor!=null) {
+      monitor.worked(1);
+    }
+    return complexity;
+  }
+  
+  /**
+   * Calculate complexity.
+   */
+  private double calculateComplexity(final Hypergraph hypergraph, final List<Hypergraph> subgraphs, final IProgressMonitor monitor) {
+    final TransformationHypergraphMetrics metrics = new TransformationHypergraphMetrics(monitor);
+    double complexity = 0;
+    for (int i = 0; (i < hypergraph.getNodes().size()); i++) {
+      {
+        Hypergraph _get = subgraphs.get(i);
+        metrics.setSystem(_get);
+        double _complexity = complexity;
+        double _calculate = metrics.calculate();
+        complexity = (_complexity + _calculate);
+      }
+    }
+    metrics.setSystem(hypergraph);
+    double _complexity = complexity;
+    double _calculate = metrics.calculate();
+    complexity = (_complexity - _calculate);
+    if (monitor!=null) {
+      monitor.worked(1);
+    }
+    return complexity;
   }
   
   private void _scanForClasses(final IProject object) {

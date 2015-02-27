@@ -49,10 +49,14 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.jdt.core.dom.EnumDeclaration
 import org.eclipse.jdt.core.dom.FieldDeclaration
 import org.eclipse.jdt.core.IJavaProject
-import org.eclipse.core.runtime.Path
 import org.eclipse.jdt.core.dom.ASTNode
+import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
+import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import java.util.List
 
 class HandleExpressionForMethodAndFieldAccess {
+	
+	static var int count = 0
 			
 	var ModularHypergraph modularSystem
 	
@@ -62,8 +66,11 @@ class HandleExpressionForMethodAndFieldAccess {
 	
 	IJavaProject project
 	
-	public new (IJavaProject project) {
+	HandleStatementForMethodAndFieldAccess statementHandler
+	
+	public new (IJavaProject project, HandleStatementForMethodAndFieldAccess statementHandler) {
 		this.project = project
+		this.statementHandler = statementHandler
 	}
 	
 	/**
@@ -124,10 +131,20 @@ class HandleExpressionForMethodAndFieldAccess {
 	
 	/** class instance creation */
 	private dispatch def void findMethodAndFieldCallInExpression(ClassInstanceCreation expression) {
-		val callee = modularSystem.findConstructorMethod(expression.type, expression.arguments)
-		if (callee != null) {
-			val caller = modularSystem.findNodeForMethod(type, method)
-			modularSystem.createEdgeBetweenMethods(caller, callee)
+		if (expression.anonymousClassDeclaration != null) {
+			// TODO maybe names should be extended for anonymous classes
+			expression.anonymousClassDeclaration.bodyDeclarations.filter(FieldDeclaration).forEach[field |
+				modularSystem.edges.add(field.createEdgeForField(type))
+			]
+			expression.anonymousClassDeclaration.bodyDeclarations.filter(MethodDeclaration).forEach[localMethod |
+				localMethod.body.statements.forEach[statementHandler.handle(modularSystem, type, method, it)]
+			]
+		} else {
+			val callee = modularSystem.findConstructorMethod(expression.type, expression.arguments)
+			if (callee != null) {
+				val caller = modularSystem.findNodeForMethod(type, method)
+				modularSystem.createEdgeBetweenMethods(caller, callee)
+			}
 		}
 		expression.arguments.forEach[it.findMethodAndFieldCallInExpression]
 		expression.expression?.findMethodAndFieldCallInExpression
@@ -193,67 +210,134 @@ class HandleExpressionForMethodAndFieldAccess {
 	    // expression.leftOperand.findMethodAndFieldCallInExpression
 	}
 	
-	private dispatch def void findMethodAndFieldCallInExpression(MethodInvocation expression) {
-		expression.arguments.forEach[it.findMethodAndFieldCallInExpression]
+	private dispatch def void findMethodAndFieldCallInExpression(MethodInvocation calleeExpression) {
+		calleeExpression.arguments.forEach[it.findMethodAndFieldCallInExpression]
+		
+		val caller = modularSystem.findNodeForMethod(type, method)
 		
 		/** resolve context of the method to determine to which type it belongs */
-		val methodName = expression.name.fullyQualifiedName
-		val variable = expression?.expression
-		if (variable == null) {
+		val calleeName = calleeExpression.name.fullyQualifiedName
+		val calleeVariable = calleeExpression?.expression
+		
+		if (calleeVariable == null) {
 			/** this is a local call */
-			val caller = modularSystem.findNodeForMethod(type, method)
-			val callee = modularSystem.findNodeForMethod(type, methodName, expression.arguments)
+			val callee = modularSystem.findNodeForMethod(type, calleeName, calleeExpression.arguments)
 			/** callee is null for inherited methods. */
 			// TODO shall we include inherited methods? shall we include inherited methods when the source code is part of the project?
 			if (callee != null) 
 				modularSystem.createEdgeBetweenMethods(caller, callee)
 		} else {
 			/** access to another class */
-			val caller = modularSystem.findNodeForMethod(type, method)
-			switch(variable) {
-				SimpleName case !variable.isClassStaticEnvocation: {
-					val edge = modularSystem.findEdgeForVariable(type, variable.fullyQualifiedName)
-					if (edge == null) {
-						/** this is a local variable, handle as call, */
-						val SimpleType localType = variable.findVariableDeclaration.resolveBaseType						
-						val classImport = localType.parent.findCompilationUnit.imports.findFirst[classImport |
-							(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith(localType.name.fullyQualifiedName)
-						]
-						val module = 
-							if (classImport != null) {
-								(classImport as ImportDeclaration).name.fullyQualifiedName.findCorrespondingModule
-							} else { /** same package */ 
-								((type.parent as CompilationUnit).package.name.fullyQualifiedName + "." + (localType as SimpleType).name.fullyQualifiedName).findCorrespondingModule
-							}
-						if (module != null) { /** class is part of the system */
-							val callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + methodName)]
-							modularSystem.createEdgeBetweenMethods(caller,callee)
-						} 
-					} else {
-						val fieldName = ((edge.derivedFrom as FieldTrace).field as VariableDeclarationFragment).name.fullyQualifiedName
-						val field = type.fields.findFirst[field | field.fragments.exists[frag | (frag as VariableDeclarationFragment).name.fullyQualifiedName.equals(fieldName)]]
-						val classImport = (type.parent as CompilationUnit).imports.findFirst[classImport |
-							(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith((field.type as SimpleType).name.fullyQualifiedName)
-						]
-						val module = 
-							if (classImport != null) {
-								(classImport as ImportDeclaration).name.fullyQualifiedName.findCorrespondingModule
-							} else { /** same package */ 
-								((type.parent as CompilationUnit).package.name.fullyQualifiedName + "." + (field.type as SimpleType).name.fullyQualifiedName).findCorrespondingModule
-							}
-						val callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + methodName)]	
-						if (!caller.edges.contains(edge)) caller.edges.add(edge)
-						if (!callee.edges.contains(edge)) callee.edges.add(edge)
-					}
+			switch(calleeVariable) {
+				SimpleName case !calleeVariable.isClassStaticInvocation: 
+					calleeVariable.valueInvocation(caller, calleeName, calleeExpression.arguments)
+				SimpleName case calleeVariable.isClassStaticInvocation: 
+					calleeVariable.staticInvocation(caller, calleeName, calleeExpression.arguments)
+			}
+		}
+	}
+	
+	def staticInvocation(SimpleName name, Node caller, String calleeName, List<Expression> calleeArguments) {
+		val callee = modularSystem.nodes.findFirst[node | node.name.equals(type.determineFullQualifiedName + "." + calleeName)]
+		if (callee != null) 
+			modularSystem.createEdgeBetweenMethods(caller, callee)
+	}
+	
+	private def valueInvocation(SimpleName variable, Node caller, String calleeName, List<Expression> calleeArguments) {
+		val edge = modularSystem.findEdgeForVariable(type, variable.fullyQualifiedName)
+		if (edge == null) {
+			/** this is a local variable, handle as call if it is not on inherited variable */
+			val resolvedType = variable.findVariableDeclaration(type)
+			if (resolvedType == null) { /** indicates inherited variable, therefore type is current type. */
+				methodInvocationViaInheritedField(variable.fullyQualifiedName, caller, calleeName, calleeArguments)
+			} else {
+				methodInvocationViaLocalVariable(resolvedType.resolveBaseType, caller, calleeName)
+			}
+		} else {
+			methodInvocationViaField(edge, caller, calleeName) 
+		}
+	}
+	
+	/**
+	 * Connect nodes for method via an variable edge of an inherited variable.
+	 */
+	private def methodInvocationViaInheritedField(String variableName, Node caller, String calleeName, List<Expression> calleeArguments) {
+		/** fix edge collection */
+		val edge = HypergraphFactory.eINSTANCE.createEdge
+		edge.name =  type.determineFullQualifiedName + "." + variableName
+		edge.derivedFrom = null
+		modularSystem.edges.add(edge)
+		var callee = modularSystem.findNodeForMethod(type, type.determineFullQualifiedName + "." + calleeName, calleeArguments)
+		if (callee == null) {
+			callee = createNodeForMethodName(calleeName, type)
+			modularSystem.nodes.add(callee)
+			val module = modularSystem.modules.findFirst[module | module.name.equals(type.determineFullQualifiedName)]
+			module.nodes.add(callee)
+		}
+		if (!caller.edges.contains(edge)) caller.edges.add(edge)
+		if (!callee.edges.contains(edge)) callee.edges.add(edge)
+	}
+	
+	/**
+	 * Connect nodes via an call edge.
+	 */
+	private def methodInvocationViaLocalVariable(Type resolvedType, Node caller, String calleeName) {
+		val SimpleType localType = resolvedType.resolveBaseType						
+		val classImport = localType.parent.findCompilationUnit.imports.findFirst[classImport |
+			(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith(localType.name.fullyQualifiedName)
+		]
+		val module = 
+			if (classImport != null) {
+				(classImport as ImportDeclaration).name.fullyQualifiedName.findCorrespondingModule
+			} else { /** same package */ 
+				((type.parent as CompilationUnit).package.name.fullyQualifiedName + "." + localType.resolveBaseType.name.fullyQualifiedName).findCorrespondingModule
+			}
+		if (module != null) { /** class is part of the system */
+			var callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + calleeName)]
+			count++
+			System.out.println("count " + count + " callee " + callee + " : " + caller)
+			// TODO check if it is really necessary to create inherited method node here
+			if (callee == null) {
+				callee = createNodeForMethodName(calleeName, type)
+			}
+			modularSystem.createEdgeBetweenMethods(caller,callee)
+		}
+	}
+	
+	/**
+	 * Connect nodes of the current module over an edge for a class field.
+	 */
+	private def methodInvocationViaField(Edge edge, Node caller, String calleeName) {
+		val fieldName = if (edge.derivedFrom != null)
+			((edge.derivedFrom as FieldTrace).field as VariableDeclarationFragment).name.fullyQualifiedName
+		else
+			edge.name.split("\\.").last
+		val field = type.fields.findFirst[field | field.fragments.exists[frag | (frag as VariableDeclarationFragment).name.fullyQualifiedName.equals(fieldName)]]
+		if (field == null) { /** possibly inherited field */
+			// TODO should determine type of the inherited field
+		} else {
+			val classImport = (type.parent as CompilationUnit).imports.findFirst[classImport |
+				(classImport as ImportDeclaration).name.fullyQualifiedName.
+					endsWith(field.type.resolveBaseType.name.fullyQualifiedName)
+			]		 
+			val module = 
+				if (classImport != null) {
+					(classImport as ImportDeclaration).name.fullyQualifiedName.findCorrespondingModule
+				} else { /** same package */ 
+					((type.parent as CompilationUnit).package.name.fullyQualifiedName + "." + field.type.resolveBaseType.name.fullyQualifiedName).findCorrespondingModule
 				}
-				SimpleName case variable.isClassStaticEnvocation: {
-					// TODO
-				}
+			if (module != null) { /** class is part of the system */
+				val callee = module.nodes.findFirst[node | node.name.equals(module.name + "." + calleeName)]	
+				if (!caller.edges.contains(edge)) caller.edges.add(edge)
+				if (!callee.edges.contains(edge)) callee.edges.add(edge)
 			}
 		}
 	}
 		
-	def CompilationUnit findCompilationUnit(ASTNode astNode) {
+	/**
+	 * Find the compilation unit for the given ast node.
+	 */
+	private def CompilationUnit findCompilationUnit(ASTNode astNode) {
 		if (astNode instanceof CompilationUnit)
 			return astNode as CompilationUnit
 		else
@@ -269,14 +353,15 @@ class HandleExpressionForMethodAndFieldAccess {
 		} 
 	}
 	
-	def boolean isClassStaticEnvocation(SimpleName name) {
+	def boolean isClassStaticInvocation(SimpleName name) {
+		System.out.println("static? " + name.fullyQualifiedName)
 		if ((type.parent as CompilationUnit).imports.exists[classImport | 
 			(classImport as ImportDeclaration).name.fullyQualifiedName.endsWith(name.fullyQualifiedName)
 		]) {
 			return true
 		} else { /* check class in package */
 			val packageName = (type.parent as CompilationUnit).package.name.fullyQualifiedName
-			return modularSystem.modules.exists[module  | name.equals(packageName + "." + name.fullyQualifiedName)]
+			return modularSystem.modules.exists[module | module.name.equals(packageName + "." + name.fullyQualifiedName)]
 		}
 	}
 	

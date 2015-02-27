@@ -24,7 +24,7 @@ public class TransformationHyperedgesOnlyGraph implements ITransformation {
     this.hypergraph = hypergraph;
   }
   
-  public Hypergraph getHyperedgesOnlyGraph() {
+  public Hypergraph getResult() {
     return this.resultHypergraph;
   }
   
@@ -50,7 +50,7 @@ public class TransformationHyperedgesOnlyGraph implements ITransformation {
         EList<Edge> _edges_3 = node.getEdges();
         final Consumer<Edge> _function = new Consumer<Edge>() {
           public void accept(final Edge edge) {
-            EList<Edge> _edges = node.getEdges();
+            EList<Edge> _edges = resultNode.getEdges();
             EList<Edge> _edges_1 = TransformationHyperedgesOnlyGraph.this.resultHypergraph.getEdges();
             final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
               public Boolean apply(final Edge it) {

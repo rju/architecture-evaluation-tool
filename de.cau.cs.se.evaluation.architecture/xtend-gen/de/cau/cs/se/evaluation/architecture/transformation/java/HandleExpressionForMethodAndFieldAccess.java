@@ -5,11 +5,13 @@ import com.google.common.collect.Iterables;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace;
+import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
+import de.cau.cs.se.evaluation.architecture.transformation.java.HandleStatementForMethodAndFieldAccess;
 import de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension;
 import de.cau.cs.se.evaluation.architecture.transformation.java.VariableDeclarationResolver;
 import java.util.Arrays;
@@ -20,10 +22,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -49,6 +53,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -65,6 +70,8 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 @SuppressWarnings("all")
 public class HandleExpressionForMethodAndFieldAccess {
+  private static int count = 0;
+  
   private ModularHypergraph modularSystem;
   
   private MethodDeclaration method;
@@ -73,8 +80,11 @@ public class HandleExpressionForMethodAndFieldAccess {
   
   private IJavaProject project;
   
-  public HandleExpressionForMethodAndFieldAccess(final IJavaProject project) {
+  private HandleStatementForMethodAndFieldAccess statementHandler;
+  
+  public HandleExpressionForMethodAndFieldAccess(final IJavaProject project, final HandleStatementForMethodAndFieldAccess statementHandler) {
     this.project = project;
+    this.statementHandler = statementHandler;
   }
   
   /**
@@ -179,21 +189,53 @@ public class HandleExpressionForMethodAndFieldAccess {
    * class instance creation
    */
   private void _findMethodAndFieldCallInExpression(final ClassInstanceCreation expression) {
-    Type _type = expression.getType();
-    List _arguments = expression.arguments();
-    final Node callee = HypergraphJavaExtension.findConstructorMethod(this.modularSystem, _type, _arguments);
-    boolean _notEquals = (!Objects.equal(callee, null));
+    AnonymousClassDeclaration _anonymousClassDeclaration = expression.getAnonymousClassDeclaration();
+    boolean _notEquals = (!Objects.equal(_anonymousClassDeclaration, null));
     if (_notEquals) {
-      final Node caller = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, this.method);
-      TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
+      AnonymousClassDeclaration _anonymousClassDeclaration_1 = expression.getAnonymousClassDeclaration();
+      List _bodyDeclarations = _anonymousClassDeclaration_1.bodyDeclarations();
+      Iterable<FieldDeclaration> _filter = Iterables.<FieldDeclaration>filter(_bodyDeclarations, FieldDeclaration.class);
+      final Consumer<FieldDeclaration> _function = new Consumer<FieldDeclaration>() {
+        public void accept(final FieldDeclaration field) {
+          EList<Edge> _edges = HandleExpressionForMethodAndFieldAccess.this.modularSystem.getEdges();
+          Edge _createEdgeForField = HypergraphJavaExtension.createEdgeForField(field, HandleExpressionForMethodAndFieldAccess.this.type);
+          _edges.add(_createEdgeForField);
+        }
+      };
+      _filter.forEach(_function);
+      AnonymousClassDeclaration _anonymousClassDeclaration_2 = expression.getAnonymousClassDeclaration();
+      List _bodyDeclarations_1 = _anonymousClassDeclaration_2.bodyDeclarations();
+      Iterable<MethodDeclaration> _filter_1 = Iterables.<MethodDeclaration>filter(_bodyDeclarations_1, MethodDeclaration.class);
+      final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
+        public void accept(final MethodDeclaration localMethod) {
+          Block _body = localMethod.getBody();
+          List _statements = _body.statements();
+          final Consumer<Statement> _function = new Consumer<Statement>() {
+            public void accept(final Statement it) {
+              HandleExpressionForMethodAndFieldAccess.this.statementHandler.handle(HandleExpressionForMethodAndFieldAccess.this.modularSystem, HandleExpressionForMethodAndFieldAccess.this.type, HandleExpressionForMethodAndFieldAccess.this.method, it);
+            }
+          };
+          _statements.forEach(_function);
+        }
+      };
+      _filter_1.forEach(_function_1);
+    } else {
+      Type _type = expression.getType();
+      List _arguments = expression.arguments();
+      final Node callee = HypergraphJavaExtension.findConstructorMethod(this.modularSystem, _type, _arguments);
+      boolean _notEquals_1 = (!Objects.equal(callee, null));
+      if (_notEquals_1) {
+        final Node caller = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, this.method);
+        TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
+      }
     }
     List _arguments_1 = expression.arguments();
-    final Consumer<Expression> _function = new Consumer<Expression>() {
+    final Consumer<Expression> _function_2 = new Consumer<Expression>() {
       public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
-    _arguments_1.forEach(_function);
+    _arguments_1.forEach(_function_2);
     Expression _expression = expression.getExpression();
     if (_expression!=null) {
       this.findMethodAndFieldCallInExpression(_expression);
@@ -299,184 +341,362 @@ public class HandleExpressionForMethodAndFieldAccess {
   private void _findMethodAndFieldCallInExpression(final InstanceofExpression expression) {
   }
   
-  private void _findMethodAndFieldCallInExpression(final MethodInvocation expression) {
-    List _arguments = expression.arguments();
+  private void _findMethodAndFieldCallInExpression(final MethodInvocation calleeExpression) {
+    List _arguments = calleeExpression.arguments();
     final Consumer<Expression> _function = new Consumer<Expression>() {
       public void accept(final Expression it) {
         HandleExpressionForMethodAndFieldAccess.this.findMethodAndFieldCallInExpression(it);
       }
     };
     _arguments.forEach(_function);
-    SimpleName _name = expression.getName();
-    final String methodName = _name.getFullyQualifiedName();
+    final Node caller = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, this.method);
+    SimpleName _name = calleeExpression.getName();
+    final String calleeName = _name.getFullyQualifiedName();
     Expression _expression = null;
-    if (expression!=null) {
-      _expression=expression.getExpression();
+    if (calleeExpression!=null) {
+      _expression=calleeExpression.getExpression();
     }
-    final Expression variable = _expression;
-    boolean _equals = Objects.equal(variable, null);
+    final Expression calleeVariable = _expression;
+    boolean _equals = Objects.equal(calleeVariable, null);
     if (_equals) {
-      final Node caller = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, this.method);
-      List _arguments_1 = expression.arguments();
-      final Node callee = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, methodName, _arguments_1);
+      List _arguments_1 = calleeExpression.arguments();
+      final Node callee = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, calleeName, _arguments_1);
       boolean _notEquals = (!Objects.equal(callee, null));
       if (_notEquals) {
         TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
       }
     } else {
-      final Node caller_1 = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, this.method);
       boolean _matched = false;
       if (!_matched) {
-        if (variable instanceof SimpleName) {
-          boolean _isClassStaticEnvocation = this.isClassStaticEnvocation(((SimpleName)variable));
-          boolean _not = (!_isClassStaticEnvocation);
+        if (calleeVariable instanceof SimpleName) {
+          boolean _isClassStaticInvocation = this.isClassStaticInvocation(((SimpleName)calleeVariable));
+          boolean _not = (!_isClassStaticInvocation);
           if (_not) {
             _matched=true;
-            String _fullyQualifiedName = ((SimpleName)variable).getFullyQualifiedName();
-            final Edge edge = HypergraphJavaExtension.findEdgeForVariable(this.modularSystem, this.type, _fullyQualifiedName);
-            boolean _equals_1 = Objects.equal(edge, null);
-            if (_equals_1) {
-              Type _findVariableDeclaration = VariableDeclarationResolver.findVariableDeclaration(((SimpleName)variable));
-              final SimpleType localType = this.resolveBaseType(_findVariableDeclaration);
-              ASTNode _parent = localType.getParent();
-              CompilationUnit _findCompilationUnit = this.findCompilationUnit(_parent);
-              List _imports = _findCompilationUnit.imports();
-              final Function1<Object, Boolean> _function_1 = new Function1<Object, Boolean>() {
-                public Boolean apply(final Object classImport) {
-                  Name _name = ((ImportDeclaration) classImport).getName();
-                  String _fullyQualifiedName = _name.getFullyQualifiedName();
-                  Name _name_1 = localType.getName();
-                  String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
-                  return Boolean.valueOf(_fullyQualifiedName.endsWith(_fullyQualifiedName_1));
-                }
-              };
-              final Object classImport = IterableExtensions.<Object>findFirst(_imports, _function_1);
-              Module _xifexpression = null;
-              boolean _notEquals_1 = (!Objects.equal(classImport, null));
-              if (_notEquals_1) {
-                Name _name_1 = ((ImportDeclaration) classImport).getName();
-                String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
-                _xifexpression = this.findCorrespondingModule(_fullyQualifiedName_1);
-              } else {
-                ASTNode _parent_1 = this.type.getParent();
-                PackageDeclaration _package = ((CompilationUnit) _parent_1).getPackage();
-                Name _name_2 = _package.getName();
-                String _fullyQualifiedName_2 = _name_2.getFullyQualifiedName();
-                String _plus = (_fullyQualifiedName_2 + ".");
-                Name _name_3 = ((SimpleType) localType).getName();
-                String _fullyQualifiedName_3 = _name_3.getFullyQualifiedName();
-                String _plus_1 = (_plus + _fullyQualifiedName_3);
-                _xifexpression = this.findCorrespondingModule(_plus_1);
-              }
-              final Module module = _xifexpression;
-              boolean _notEquals_2 = (!Objects.equal(module, null));
-              if (_notEquals_2) {
-                EList<Node> _nodes = module.getNodes();
-                final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
-                  public Boolean apply(final Node node) {
-                    String _name = node.getName();
-                    String _name_1 = module.getName();
-                    String _plus = (_name_1 + ".");
-                    String _plus_1 = (_plus + methodName);
-                    return Boolean.valueOf(_name.equals(_plus_1));
-                  }
-                };
-                final Node callee_1 = IterableExtensions.<Node>findFirst(_nodes, _function_2);
-                TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller_1, callee_1);
-              }
-            } else {
-              EdgeReference _derivedFrom = edge.getDerivedFrom();
-              Object _field = ((FieldTrace) _derivedFrom).getField();
-              SimpleName _name_4 = ((VariableDeclarationFragment) _field).getName();
-              final String fieldName = _name_4.getFullyQualifiedName();
-              Iterable<FieldDeclaration> _fields = this.getFields(this.type);
-              final Function1<FieldDeclaration, Boolean> _function_3 = new Function1<FieldDeclaration, Boolean>() {
-                public Boolean apply(final FieldDeclaration field) {
-                  List _fragments = field.fragments();
-                  final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
-                    public Boolean apply(final Object frag) {
-                      SimpleName _name = ((VariableDeclarationFragment) frag).getName();
-                      String _fullyQualifiedName = _name.getFullyQualifiedName();
-                      return Boolean.valueOf(_fullyQualifiedName.equals(fieldName));
-                    }
-                  };
-                  return Boolean.valueOf(IterableExtensions.<Object>exists(_fragments, _function));
-                }
-              };
-              final FieldDeclaration field = IterableExtensions.<FieldDeclaration>findFirst(_fields, _function_3);
-              ASTNode _parent_2 = this.type.getParent();
-              List _imports_1 = ((CompilationUnit) _parent_2).imports();
-              final Function1<Object, Boolean> _function_4 = new Function1<Object, Boolean>() {
-                public Boolean apply(final Object classImport) {
-                  Name _name = ((ImportDeclaration) classImport).getName();
-                  String _fullyQualifiedName = _name.getFullyQualifiedName();
-                  Type _type = field.getType();
-                  Name _name_1 = ((SimpleType) _type).getName();
-                  String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
-                  return Boolean.valueOf(_fullyQualifiedName.endsWith(_fullyQualifiedName_1));
-                }
-              };
-              final Object classImport_1 = IterableExtensions.<Object>findFirst(_imports_1, _function_4);
-              Module _xifexpression_1 = null;
-              boolean _notEquals_3 = (!Objects.equal(classImport_1, null));
-              if (_notEquals_3) {
-                Name _name_5 = ((ImportDeclaration) classImport_1).getName();
-                String _fullyQualifiedName_4 = _name_5.getFullyQualifiedName();
-                _xifexpression_1 = this.findCorrespondingModule(_fullyQualifiedName_4);
-              } else {
-                ASTNode _parent_3 = this.type.getParent();
-                PackageDeclaration _package_1 = ((CompilationUnit) _parent_3).getPackage();
-                Name _name_6 = _package_1.getName();
-                String _fullyQualifiedName_5 = _name_6.getFullyQualifiedName();
-                String _plus_2 = (_fullyQualifiedName_5 + ".");
-                Type _type = field.getType();
-                Name _name_7 = ((SimpleType) _type).getName();
-                String _fullyQualifiedName_6 = _name_7.getFullyQualifiedName();
-                String _plus_3 = (_plus_2 + _fullyQualifiedName_6);
-                _xifexpression_1 = this.findCorrespondingModule(_plus_3);
-              }
-              final Module module_1 = _xifexpression_1;
-              EList<Node> _nodes_1 = module_1.getNodes();
-              final Function1<Node, Boolean> _function_5 = new Function1<Node, Boolean>() {
-                public Boolean apply(final Node node) {
-                  String _name = node.getName();
-                  String _name_1 = module_1.getName();
-                  String _plus = (_name_1 + ".");
-                  String _plus_1 = (_plus + methodName);
-                  return Boolean.valueOf(_name.equals(_plus_1));
-                }
-              };
-              final Node callee_2 = IterableExtensions.<Node>findFirst(_nodes_1, _function_5);
-              EList<Edge> _edges = caller_1.getEdges();
-              boolean _contains = _edges.contains(edge);
-              boolean _not_1 = (!_contains);
-              if (_not_1) {
-                EList<Edge> _edges_1 = caller_1.getEdges();
-                _edges_1.add(edge);
-              }
-              EList<Edge> _edges_2 = callee_2.getEdges();
-              boolean _contains_1 = _edges_2.contains(edge);
-              boolean _not_2 = (!_contains_1);
-              if (_not_2) {
-                EList<Edge> _edges_3 = callee_2.getEdges();
-                _edges_3.add(edge);
-              }
-            }
+            List _arguments_2 = calleeExpression.arguments();
+            this.valueInvocation(((SimpleName)calleeVariable), caller, calleeName, _arguments_2);
           }
         }
       }
       if (!_matched) {
-        if (variable instanceof SimpleName) {
-          boolean _isClassStaticEnvocation = this.isClassStaticEnvocation(((SimpleName)variable));
-          if (_isClassStaticEnvocation) {
+        if (calleeVariable instanceof SimpleName) {
+          boolean _isClassStaticInvocation = this.isClassStaticInvocation(((SimpleName)calleeVariable));
+          if (_isClassStaticInvocation) {
             _matched=true;
+            List _arguments_2 = calleeExpression.arguments();
+            this.staticInvocation(((SimpleName)calleeVariable), caller, calleeName, _arguments_2);
           }
         }
       }
     }
   }
   
-  public CompilationUnit findCompilationUnit(final ASTNode astNode) {
+  public boolean staticInvocation(final SimpleName name, final Node caller, final String calleeName, final List<Expression> calleeArguments) {
+    boolean _xblockexpression = false;
+    {
+      EList<Node> _nodes = this.modularSystem.getNodes();
+      final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
+        public Boolean apply(final Node node) {
+          String _name = node.getName();
+          String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(HandleExpressionForMethodAndFieldAccess.this.type);
+          String _plus = (_determineFullQualifiedName + ".");
+          String _plus_1 = (_plus + calleeName);
+          return Boolean.valueOf(_name.equals(_plus_1));
+        }
+      };
+      final Node callee = IterableExtensions.<Node>findFirst(_nodes, _function);
+      boolean _xifexpression = false;
+      boolean _notEquals = (!Objects.equal(callee, null));
+      if (_notEquals) {
+        _xifexpression = TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
+      }
+      _xblockexpression = _xifexpression;
+    }
+    return _xblockexpression;
+  }
+  
+  private Boolean valueInvocation(final SimpleName variable, final Node caller, final String calleeName, final List<Expression> calleeArguments) {
+    Boolean _xblockexpression = null;
+    {
+      String _fullyQualifiedName = variable.getFullyQualifiedName();
+      final Edge edge = HypergraphJavaExtension.findEdgeForVariable(this.modularSystem, this.type, _fullyQualifiedName);
+      Boolean _xifexpression = null;
+      boolean _equals = Objects.equal(edge, null);
+      if (_equals) {
+        boolean _xblockexpression_1 = false;
+        {
+          final Type resolvedType = VariableDeclarationResolver.findVariableDeclaration(variable, this.type);
+          boolean _xifexpression_1 = false;
+          boolean _equals_1 = Objects.equal(resolvedType, null);
+          if (_equals_1) {
+            String _fullyQualifiedName_1 = variable.getFullyQualifiedName();
+            _xifexpression_1 = this.methodInvocationViaInheritedField(_fullyQualifiedName_1, caller, calleeName, calleeArguments);
+          } else {
+            SimpleType _resolveBaseType = this.resolveBaseType(resolvedType);
+            _xifexpression_1 = this.methodInvocationViaLocalVariable(_resolveBaseType, caller, calleeName);
+          }
+          _xblockexpression_1 = _xifexpression_1;
+        }
+        _xifexpression = Boolean.valueOf(_xblockexpression_1);
+      } else {
+        _xifexpression = this.methodInvocationViaField(edge, caller, calleeName);
+      }
+      _xblockexpression = _xifexpression;
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Connect nodes for method via an variable edge of an inherited variable.
+   */
+  private boolean methodInvocationViaInheritedField(final String variableName, final Node caller, final String calleeName, final List<Expression> calleeArguments) {
+    boolean _xblockexpression = false;
+    {
+      final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+      String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(this.type);
+      String _plus = (_determineFullQualifiedName + ".");
+      String _plus_1 = (_plus + variableName);
+      edge.setName(_plus_1);
+      edge.setDerivedFrom(null);
+      EList<Edge> _edges = this.modularSystem.getEdges();
+      _edges.add(edge);
+      String _determineFullQualifiedName_1 = NameResolutionHelper.determineFullQualifiedName(this.type);
+      String _plus_2 = (_determineFullQualifiedName_1 + ".");
+      String _plus_3 = (_plus_2 + calleeName);
+      Node callee = HypergraphJavaExtension.findNodeForMethod(this.modularSystem, this.type, _plus_3, calleeArguments);
+      boolean _equals = Objects.equal(callee, null);
+      if (_equals) {
+        Node _createNodeForMethodName = HypergraphJavaExtension.createNodeForMethodName(calleeName, this.type);
+        callee = _createNodeForMethodName;
+        EList<Node> _nodes = this.modularSystem.getNodes();
+        _nodes.add(callee);
+        EList<Module> _modules = this.modularSystem.getModules();
+        final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
+          public Boolean apply(final Module module) {
+            String _name = module.getName();
+            String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(HandleExpressionForMethodAndFieldAccess.this.type);
+            return Boolean.valueOf(_name.equals(_determineFullQualifiedName));
+          }
+        };
+        final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
+        EList<Node> _nodes_1 = module.getNodes();
+        _nodes_1.add(callee);
+      }
+      EList<Edge> _edges_1 = caller.getEdges();
+      boolean _contains = _edges_1.contains(edge);
+      boolean _not = (!_contains);
+      if (_not) {
+        EList<Edge> _edges_2 = caller.getEdges();
+        _edges_2.add(edge);
+      }
+      boolean _xifexpression = false;
+      EList<Edge> _edges_3 = callee.getEdges();
+      boolean _contains_1 = _edges_3.contains(edge);
+      boolean _not_1 = (!_contains_1);
+      if (_not_1) {
+        EList<Edge> _edges_4 = callee.getEdges();
+        _xifexpression = _edges_4.add(edge);
+      }
+      _xblockexpression = _xifexpression;
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Connect nodes via an call edge.
+   */
+  private boolean methodInvocationViaLocalVariable(final Type resolvedType, final Node caller, final String calleeName) {
+    boolean _xblockexpression = false;
+    {
+      final SimpleType localType = this.resolveBaseType(resolvedType);
+      ASTNode _parent = localType.getParent();
+      CompilationUnit _findCompilationUnit = this.findCompilationUnit(_parent);
+      List _imports = _findCompilationUnit.imports();
+      final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
+        public Boolean apply(final Object classImport) {
+          Name _name = ((ImportDeclaration) classImport).getName();
+          String _fullyQualifiedName = _name.getFullyQualifiedName();
+          Name _name_1 = localType.getName();
+          String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
+          return Boolean.valueOf(_fullyQualifiedName.endsWith(_fullyQualifiedName_1));
+        }
+      };
+      final Object classImport = IterableExtensions.<Object>findFirst(_imports, _function);
+      Module _xifexpression = null;
+      boolean _notEquals = (!Objects.equal(classImport, null));
+      if (_notEquals) {
+        Name _name = ((ImportDeclaration) classImport).getName();
+        String _fullyQualifiedName = _name.getFullyQualifiedName();
+        _xifexpression = this.findCorrespondingModule(_fullyQualifiedName);
+      } else {
+        ASTNode _parent_1 = this.type.getParent();
+        PackageDeclaration _package = ((CompilationUnit) _parent_1).getPackage();
+        Name _name_1 = _package.getName();
+        String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
+        String _plus = (_fullyQualifiedName_1 + ".");
+        SimpleType _resolveBaseType = this.resolveBaseType(localType);
+        Name _name_2 = _resolveBaseType.getName();
+        String _fullyQualifiedName_2 = _name_2.getFullyQualifiedName();
+        String _plus_1 = (_plus + _fullyQualifiedName_2);
+        _xifexpression = this.findCorrespondingModule(_plus_1);
+      }
+      final Module module = _xifexpression;
+      boolean _xifexpression_1 = false;
+      boolean _notEquals_1 = (!Objects.equal(module, null));
+      if (_notEquals_1) {
+        boolean _xblockexpression_1 = false;
+        {
+          EList<Node> _nodes = module.getNodes();
+          final Function1<Node, Boolean> _function_1 = new Function1<Node, Boolean>() {
+            public Boolean apply(final Node node) {
+              String _name = node.getName();
+              String _name_1 = module.getName();
+              String _plus = (_name_1 + ".");
+              String _plus_1 = (_plus + calleeName);
+              return Boolean.valueOf(_name.equals(_plus_1));
+            }
+          };
+          Node callee = IterableExtensions.<Node>findFirst(_nodes, _function_1);
+          HandleExpressionForMethodAndFieldAccess.count++;
+          System.out.println(((((("count " + Integer.valueOf(HandleExpressionForMethodAndFieldAccess.count)) + " callee ") + callee) + " : ") + caller));
+          boolean _equals = Objects.equal(callee, null);
+          if (_equals) {
+            Node _createNodeForMethodName = HypergraphJavaExtension.createNodeForMethodName(calleeName, this.type);
+            callee = _createNodeForMethodName;
+          }
+          _xblockexpression_1 = TransformationHelper.createEdgeBetweenMethods(this.modularSystem, caller, callee);
+        }
+        _xifexpression_1 = _xblockexpression_1;
+      }
+      _xblockexpression = _xifexpression_1;
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Connect nodes of the current module over an edge for a class field.
+   */
+  private Boolean methodInvocationViaField(final Edge edge, final Node caller, final String calleeName) {
+    Boolean _xblockexpression = null;
+    {
+      String _xifexpression = null;
+      EdgeReference _derivedFrom = edge.getDerivedFrom();
+      boolean _notEquals = (!Objects.equal(_derivedFrom, null));
+      if (_notEquals) {
+        EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
+        Object _field = ((FieldTrace) _derivedFrom_1).getField();
+        SimpleName _name = ((VariableDeclarationFragment) _field).getName();
+        _xifexpression = _name.getFullyQualifiedName();
+      } else {
+        String _name_1 = edge.getName();
+        String[] _split = _name_1.split("\\.");
+        _xifexpression = IterableExtensions.<String>last(((Iterable<String>)Conversions.doWrapArray(_split)));
+      }
+      final String fieldName = _xifexpression;
+      Iterable<FieldDeclaration> _fields = this.getFields(this.type);
+      final Function1<FieldDeclaration, Boolean> _function = new Function1<FieldDeclaration, Boolean>() {
+        public Boolean apply(final FieldDeclaration field) {
+          List _fragments = field.fragments();
+          final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
+            public Boolean apply(final Object frag) {
+              SimpleName _name = ((VariableDeclarationFragment) frag).getName();
+              String _fullyQualifiedName = _name.getFullyQualifiedName();
+              return Boolean.valueOf(_fullyQualifiedName.equals(fieldName));
+            }
+          };
+          return Boolean.valueOf(IterableExtensions.<Object>exists(_fragments, _function));
+        }
+      };
+      final FieldDeclaration field = IterableExtensions.<FieldDeclaration>findFirst(_fields, _function);
+      Boolean _xifexpression_1 = null;
+      boolean _equals = Objects.equal(field, null);
+      if (_equals) {
+        _xifexpression_1 = null;
+      } else {
+        boolean _xblockexpression_1 = false;
+        {
+          ASTNode _parent = this.type.getParent();
+          List _imports = ((CompilationUnit) _parent).imports();
+          final Function1<Object, Boolean> _function_1 = new Function1<Object, Boolean>() {
+            public Boolean apply(final Object classImport) {
+              Name _name = ((ImportDeclaration) classImport).getName();
+              String _fullyQualifiedName = _name.getFullyQualifiedName();
+              Type _type = field.getType();
+              SimpleType _resolveBaseType = HandleExpressionForMethodAndFieldAccess.this.resolveBaseType(_type);
+              Name _name_1 = _resolveBaseType.getName();
+              String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
+              return Boolean.valueOf(_fullyQualifiedName.endsWith(_fullyQualifiedName_1));
+            }
+          };
+          final Object classImport = IterableExtensions.<Object>findFirst(_imports, _function_1);
+          Module _xifexpression_2 = null;
+          boolean _notEquals_1 = (!Objects.equal(classImport, null));
+          if (_notEquals_1) {
+            Name _name_2 = ((ImportDeclaration) classImport).getName();
+            String _fullyQualifiedName = _name_2.getFullyQualifiedName();
+            _xifexpression_2 = this.findCorrespondingModule(_fullyQualifiedName);
+          } else {
+            ASTNode _parent_1 = this.type.getParent();
+            PackageDeclaration _package = ((CompilationUnit) _parent_1).getPackage();
+            Name _name_3 = _package.getName();
+            String _fullyQualifiedName_1 = _name_3.getFullyQualifiedName();
+            String _plus = (_fullyQualifiedName_1 + ".");
+            Type _type = field.getType();
+            SimpleType _resolveBaseType = this.resolveBaseType(_type);
+            Name _name_4 = _resolveBaseType.getName();
+            String _fullyQualifiedName_2 = _name_4.getFullyQualifiedName();
+            String _plus_1 = (_plus + _fullyQualifiedName_2);
+            _xifexpression_2 = this.findCorrespondingModule(_plus_1);
+          }
+          final Module module = _xifexpression_2;
+          boolean _xifexpression_3 = false;
+          boolean _notEquals_2 = (!Objects.equal(module, null));
+          if (_notEquals_2) {
+            boolean _xblockexpression_2 = false;
+            {
+              EList<Node> _nodes = module.getNodes();
+              final Function1<Node, Boolean> _function_2 = new Function1<Node, Boolean>() {
+                public Boolean apply(final Node node) {
+                  String _name = node.getName();
+                  String _name_1 = module.getName();
+                  String _plus = (_name_1 + ".");
+                  String _plus_1 = (_plus + calleeName);
+                  return Boolean.valueOf(_name.equals(_plus_1));
+                }
+              };
+              final Node callee = IterableExtensions.<Node>findFirst(_nodes, _function_2);
+              EList<Edge> _edges = caller.getEdges();
+              boolean _contains = _edges.contains(edge);
+              boolean _not = (!_contains);
+              if (_not) {
+                EList<Edge> _edges_1 = caller.getEdges();
+                _edges_1.add(edge);
+              }
+              boolean _xifexpression_4 = false;
+              EList<Edge> _edges_2 = callee.getEdges();
+              boolean _contains_1 = _edges_2.contains(edge);
+              boolean _not_1 = (!_contains_1);
+              if (_not_1) {
+                EList<Edge> _edges_3 = callee.getEdges();
+                _xifexpression_4 = _edges_3.add(edge);
+              }
+              _xblockexpression_2 = _xifexpression_4;
+            }
+            _xifexpression_3 = _xblockexpression_2;
+          }
+          _xblockexpression_1 = _xifexpression_3;
+        }
+        _xifexpression_1 = Boolean.valueOf(_xblockexpression_1);
+      }
+      _xblockexpression = _xifexpression_1;
+    }
+    return _xblockexpression;
+  }
+  
+  /**
+   * Find the compilation unit for the given ast node.
+   */
+  private CompilationUnit findCompilationUnit(final ASTNode astNode) {
     if ((astNode instanceof CompilationUnit)) {
       return ((CompilationUnit) astNode);
     } else {
@@ -510,7 +730,10 @@ public class HandleExpressionForMethodAndFieldAccess {
     return _switchResult;
   }
   
-  public boolean isClassStaticEnvocation(final SimpleName name) {
+  public boolean isClassStaticInvocation(final SimpleName name) {
+    String _fullyQualifiedName = name.getFullyQualifiedName();
+    String _plus = ("static? " + _fullyQualifiedName);
+    System.out.println(_plus);
     ASTNode _parent = this.type.getParent();
     List _imports = ((CompilationUnit) _parent).imports();
     final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
@@ -532,9 +755,10 @@ public class HandleExpressionForMethodAndFieldAccess {
       EList<Module> _modules = this.modularSystem.getModules();
       final Function1<Module, Boolean> _function_1 = new Function1<Module, Boolean>() {
         public Boolean apply(final Module module) {
+          String _name = module.getName();
           String _fullyQualifiedName = name.getFullyQualifiedName();
           String _plus = ((packageName + ".") + _fullyQualifiedName);
-          return Boolean.valueOf(name.equals(_plus));
+          return Boolean.valueOf(_name.equals(_plus));
         }
       };
       return IterableExtensions.<Module>exists(_modules, _function_1);

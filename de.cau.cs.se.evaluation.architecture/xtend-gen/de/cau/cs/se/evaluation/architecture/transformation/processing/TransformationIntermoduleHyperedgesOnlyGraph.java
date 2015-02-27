@@ -25,7 +25,7 @@ public class TransformationIntermoduleHyperedgesOnlyGraph implements ITransforma
     this.hypergraph = hypergraph;
   }
   
-  public ModularHypergraph getIntermoduleHyperedgesOnlyGraph() {
+  public ModularHypergraph getResult() {
     return this.resultHypergraph;
   }
   

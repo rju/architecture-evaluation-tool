@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
@@ -52,7 +54,7 @@ public class HandleStatementForMethodAndFieldAccess {
   private AbstractTypeDeclaration type;
   
   public HandleStatementForMethodAndFieldAccess(final IJavaProject project) {
-    HandleExpressionForMethodAndFieldAccess _handleExpressionForMethodAndFieldAccess = new HandleExpressionForMethodAndFieldAccess(project);
+    HandleExpressionForMethodAndFieldAccess _handleExpressionForMethodAndFieldAccess = new HandleExpressionForMethodAndFieldAccess(project, this);
     this.expressionHandler = _handleExpressionForMethodAndFieldAccess;
   }
   
@@ -350,28 +352,57 @@ public class HandleStatementForMethodAndFieldAccess {
    */
   private void _findMethodAndFieldCallInStatement(final VariableDeclarationStatement statement) {
     try {
-      boolean _or = false;
       Type _type = statement.getType();
-      if ((_type instanceof SimpleType)) {
-        _or = true;
-      } else {
+      if ((_type instanceof ArrayType)) {
+        boolean _or = false;
         Type _type_1 = statement.getType();
-        _or = (_type_1 instanceof ParameterizedType);
-      }
-      if (_or) {
-        List _fragments = statement.fragments();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object fragment) {
-            Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
-            HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
-          }
-        };
-        _fragments.forEach(_function);
+        Type _elementType = ((ArrayType) _type_1).getElementType();
+        if ((_elementType instanceof SimpleType)) {
+          _or = true;
+        } else {
+          Type _type_2 = statement.getType();
+          Type _elementType_1 = ((ArrayType) _type_2).getElementType();
+          _or = (_elementType_1 instanceof ParameterizedType);
+        }
+        if (_or) {
+          List _fragments = statement.fragments();
+          final Consumer<Object> _function = new Consumer<Object>() {
+            public void accept(final Object fragment) {
+              Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
+              HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
+            }
+          };
+          _fragments.forEach(_function);
+        }
       } else {
-        Type _type_2 = statement.getType();
-        Class<? extends Type> _class = _type_2.getClass();
-        String _plus = ("Variable declaration type is not supported " + _class);
-        throw new Exception(_plus);
+        boolean _or_1 = false;
+        Type _type_3 = statement.getType();
+        if ((_type_3 instanceof SimpleType)) {
+          _or_1 = true;
+        } else {
+          Type _type_4 = statement.getType();
+          _or_1 = (_type_4 instanceof ParameterizedType);
+        }
+        if (_or_1) {
+          List _fragments_1 = statement.fragments();
+          final Consumer<Object> _function_1 = new Consumer<Object>() {
+            public void accept(final Object fragment) {
+              Expression _initializer = ((VariableDeclarationFragment) fragment).getInitializer();
+              HandleStatementForMethodAndFieldAccess.this.expressionHandler.handle(HandleStatementForMethodAndFieldAccess.this.modularSystem, HandleStatementForMethodAndFieldAccess.this.type, HandleStatementForMethodAndFieldAccess.this.method, _initializer);
+            }
+          };
+          _fragments_1.forEach(_function_1);
+        } else {
+          Type _type_5 = statement.getType();
+          if ((_type_5 instanceof PrimitiveType)) {
+            System.out.println("primitive type");
+          } else {
+            Type _type_6 = statement.getType();
+            Class<? extends Type> _class = _type_6.getClass();
+            String _plus = ("Variable declaration type is not supported " + _class);
+            throw new Exception(_plus);
+          }
+        }
       }
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

@@ -17,7 +17,7 @@ class TransformationHyperedgesOnlyGraph implements ITransformation {
 		this.hypergraph = hypergraph
 	}
 	
-	def getHyperedgesOnlyGraph() {
+	def getResult() {
 		return this.resultHypergraph
 	}
 	
@@ -32,7 +32,7 @@ class TransformationHyperedgesOnlyGraph implements ITransformation {
 		for (Node node : hypergraph.nodes) {
 			if (node.edges.size > 0) {
 				val resultNode = TransformationHelper.deriveNode(node)
-				node.edges.forEach[edge | node.edges.add(resultHypergraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
+				node.edges.forEach[edge | resultNode.edges.add(resultHypergraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
 				resultHypergraph.nodes.add(resultNode)
 			}
 		}		

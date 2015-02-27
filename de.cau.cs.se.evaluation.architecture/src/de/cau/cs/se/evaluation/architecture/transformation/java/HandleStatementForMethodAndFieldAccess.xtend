@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.ParameterizedType
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.jdt.core.dom.PrimitiveType
+import org.eclipse.jdt.core.dom.ArrayType
 
 class HandleStatementForMethodAndFieldAccess {
 		
@@ -44,7 +46,7 @@ class HandleStatementForMethodAndFieldAccess {
 	var AbstractTypeDeclaration type
 	
 	public new (IJavaProject project) {
-		expressionHandler = new HandleExpressionForMethodAndFieldAccess(project)
+		expressionHandler = new HandleExpressionForMethodAndFieldAccess(project, this)
 	}
 	
 	def void handle(ModularHypergraph modularSystem, AbstractTypeDeclaration type, MethodDeclaration method, Statement statement) {
@@ -228,13 +230,24 @@ class HandleStatementForMethodAndFieldAccess {
 	 * Process internal variable declarations. They do not produce edges.
 	 */
 	private dispatch def void findMethodAndFieldCallInStatement(VariableDeclarationStatement statement) {
-		if (statement.type instanceof SimpleType ||
+		if (statement.type instanceof ArrayType) {
+			if ((statement.type as ArrayType).elementType instanceof SimpleType ||
+				(statement.type as ArrayType).elementType instanceof ParameterizedType) {
+				statement.fragments.forEach[fragment | 
+					expressionHandler.handle(modularSystem, type, method,
+						(fragment as VariableDeclarationFragment).initializer
+					)
+				]
+			}
+		} else if (statement.type instanceof SimpleType ||
 			statement.type instanceof ParameterizedType) {
 			statement.fragments.forEach[fragment | 
 				expressionHandler.handle(modularSystem, type, method,
 					(fragment as VariableDeclarationFragment).initializer
 				)
-			]	
+			]
+		} else if (statement.type instanceof PrimitiveType) {
+			System.out.println("primitive type")	
 		} else {
 			throw new Exception ("Variable declaration type is not supported " + statement.type.class)
 		}

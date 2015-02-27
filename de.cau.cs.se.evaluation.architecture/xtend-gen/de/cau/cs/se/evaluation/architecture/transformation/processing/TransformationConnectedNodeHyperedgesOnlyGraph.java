@@ -32,7 +32,7 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransfor
     this.startNode = startNode;
   }
   
-  public Hypergraph getConnectedNodeHyperedgesOnlyGraph() {
+  public Hypergraph getResult() {
     return this.resultHypergraph;
   }
   

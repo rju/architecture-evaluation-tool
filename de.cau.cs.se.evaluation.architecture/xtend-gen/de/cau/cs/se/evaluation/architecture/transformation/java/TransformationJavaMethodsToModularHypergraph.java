@@ -63,7 +63,15 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
         final AbstractTypeDeclaration type = HypergraphJDTDOMExtension.getTypeDeclarationForType(clazz, monitor, project);
         boolean _notEquals = (!Objects.equal(type, null));
         if (_notEquals) {
-          this.classList.add(type);
+          if ((type instanceof TypeDeclaration)) {
+            boolean _isInterface = ((TypeDeclaration)type).isInterface();
+            boolean _not = (!_isInterface);
+            if (_not) {
+              this.classList.add(type);
+            }
+          } else {
+            this.classList.add(type);
+          }
         }
       }
     }

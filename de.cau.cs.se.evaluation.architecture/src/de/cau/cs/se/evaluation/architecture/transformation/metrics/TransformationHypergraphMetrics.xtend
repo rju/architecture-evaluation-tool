@@ -1,7 +1,6 @@
 package de.cau.cs.se.evaluation.architecture.transformation.metrics
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
-import de.cau.cs.se.evaluation.architecture.state.StateModel
 import de.cau.cs.se.evaluation.architecture.state.StateFactory
 import de.cau.cs.se.evaluation.architecture.state.RowPatternTable
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
@@ -9,8 +8,10 @@ import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.state.RowPattern
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
-import de.cau.cs.se.evaluation.architecture.state.SystemSetup
 import org.eclipse.core.runtime.IProgressMonitor
+
+import static extension de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper.*
+import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace
 
 class TransformationHypergraphMetrics {
 	
@@ -29,58 +30,14 @@ class TransformationHypergraphMetrics {
 		this.system = system
 	}
 	
-	public def ResultModelProvider calculate() {
-		monitor?.subTask("Calculating metrics")
-		val StateModel state = StateFactory.eINSTANCE.createStateModel
-		
-		val environmentNode = HypergraphFactory.eINSTANCE.createNode
-		environmentNode.name = '_environment'	
-		
-		state.mainsystem = StateFactory.eINSTANCE.createSystemSetup
-		state.mainsystem.system = system
-		state.mainsystem.systemGraph = system.createSystemGraph(environmentNode)
-		state.mainsystem.rowPatternTable = state.mainsystem.createRowPatternTable
-		monitor?.worked(1)
-		
-		
-		/** create subgraphs. */
-		system.nodes.forEach[node |
-			monitor?.subTask("Calculating metrics - subgraphs" + node.name)
-			state.subsystems.add(createSetup(node, state.mainsystem, environmentNode))
-			monitor?.worked(1)
-		]
-		
-		val result = ResultModelProvider.INSTANCE
-		
-		// result.clearValues
-		
-		/** calculate sizes. */
-		result.getValues.add(new NamedValue("Size", calculateSize(state.mainsystem.system, state.mainsystem.rowPatternTable)))
-		/** calculate complexity. */
-		result.getValues.add(new NamedValue("Complexity",calculateComplexity(state.mainsystem, state.subsystems)))
-		
-		return result
-	}
-	
-	/**
-	 * Calculate complexity.
-	 */
-	private def double calculateComplexity(SystemSetup setup, EList<SystemSetup> list) {
-		var double complexity = 0
-		
-		/** Can start at zero, as we ignore environment node by using system and not system graph. */
-		for (var int i=0;i < setup.system.nodes.size;i++) {
-			val subSystemSetup = list.get(i)
-			complexity += calculateSize (subSystemSetup.system, subSystemSetup.rowPatternTable)
-		}
-				
-		complexity -= calculateSize(setup.system, setup.rowPatternTable)
-		
-		monitor?.worked(1)
+	public def double calculate() {
+		val systemGraph = createSystemGraph(system)
+		val table = systemGraph.createRowPatternTable		
 			
-		return complexity
+		return calculateSize(systemGraph, table)
 	}
 	
+
 	/**
 	 * Calculate the size of given system.
 	 */
@@ -118,29 +75,18 @@ class TransformationHypergraphMetrics {
 		return count/((system.nodes.size + 1) as double)
 	}
 	
-	/**
-	 * Create a system setup.
-	 */
-	private def SystemSetup createSetup(Node node, SystemSetup mainSetup, Node environmentNode) {
-		val setup = StateFactory.eINSTANCE.createSystemSetup
-		setup.system = createSubsystem(node, mainSetup.system)
-		setup.systemGraph = createSystemGraph(setup.system, environmentNode)
-		setup.rowPatternTable = setup.createRowPatternTable		
-		
-		return setup
-	}
-	
+
 	/**
 	 * Create a row pattern table for a system and a system graph.
 	 * First, register the edges in the pattern table as column definitions.
 	 * Second, calculate the pattern row for each node of the system graph.
 	 * Compact, rows with the same pattern
 	 */
-	private def RowPatternTable createRowPatternTable(SystemSetup setup) {
+	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph) {
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
-		setup.system.edges.forEach[edge | patternTable.edges.add(edge)]
+		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
 		
-		setup.systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
+		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
 		patternTable.compactPatternTable
 				
 		return patternTable	
@@ -171,6 +117,7 @@ class TransformationHypergraphMetrics {
 					val basePattern = table.patterns.get(i)
 					table.patterns.get(j).nodes.forEach[node | basePattern.nodes.add(node)]
 					table.patterns.remove(j)
+					j--
 				}
 			}
 		}
@@ -189,24 +136,7 @@ class TransformationHypergraphMetrics {
 		
 		return true
 	}
-	
-	/**
-	 * Create an subgraph only containing those edges which are connected to the given start node.
-	 * 
-	 * @param node the start node
-	 * @param system the system graph of a system
-	 * 
-	 * @returns a proper subgraph
-	 */	
-	private def Hypergraph createSubsystem(Node node, Hypergraph system) {
-		val Hypergraph subgraph = HypergraphFactory.eINSTANCE.createHypergraph
-		
-		node.edges.forEach[subgraph.edges.add(it)]
-		system.nodes.forEach[subgraph.nodes.add(it)]
-		
-		return subgraph
-	}
-		
+			
 	/**
 	 * Create a system graph from a hypergraph of a system by adding an additional not connected
 	 * node for the environment.
@@ -215,14 +145,23 @@ class TransformationHypergraphMetrics {
 	 * 
 	 * @returns the system graph (Note: the system graph and the system share nodes)
 	 */
-	private def Hypergraph createSystemGraph(Hypergraph system, Node environmentNode) {
+	private def Hypergraph createSystemGraph(Hypergraph system) {
 		val Hypergraph systemGraph = HypergraphFactory.eINSTANCE.createHypergraph
+		val environmentNode = HypergraphFactory.eINSTANCE.createNode
+		environmentNode.name = '_environment'
 		
 		systemGraph.nodes.add(environmentNode)
 		
-		system.nodes.forEach[node | systemGraph.nodes.add(node)]
-		system.edges.forEach[edge | systemGraph.edges.add(edge)]
-			
+		system.edges.forEach[edge | systemGraph.edges.add(edge.deriveEdge)]
+		system.nodes.forEach[node |
+			val derivedNode = node.deriveNode 
+			node.edges.forEach[edge |
+				val derivedEdge = systemGraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge] 
+				derivedNode.edges.add(derivedEdge)
+			]
+			systemGraph.nodes.add(derivedNode)
+		]
+					
 		return systemGraph
 	}
 	

@@ -50,6 +50,19 @@ public class HypergraphJavaExtension {
   }
   
   /**
+   * Create a node for a given method.
+   */
+  public static Node createNodeForMethodName(final String methodName, final AbstractTypeDeclaration type) {
+    final Node node = HypergraphFactory.eINSTANCE.createNode();
+    String _determineFullQualifiedName = NameResolutionHelper.determineFullQualifiedName(type);
+    String _plus = (_determineFullQualifiedName + ".");
+    String _plus_1 = (_plus + methodName);
+    node.setName(_plus_1);
+    node.setDerivedFrom(null);
+    return node;
+  }
+  
+  /**
    * Create a node for a class' implicit constructor
    */
   public static Node createNodeForImplicitConstructor(final AbstractTypeDeclaration type) {

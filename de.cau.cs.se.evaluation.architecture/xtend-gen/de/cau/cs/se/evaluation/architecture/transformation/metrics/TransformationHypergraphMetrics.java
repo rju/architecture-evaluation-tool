@@ -2,17 +2,15 @@ package de.cau.cs.se.evaluation.architecture.transformation.metrics;
 
 import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
+import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
+import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.state.RowPattern;
 import de.cau.cs.se.evaluation.architecture.state.RowPatternTable;
 import de.cau.cs.se.evaluation.architecture.state.StateFactory;
-import de.cau.cs.se.evaluation.architecture.state.StateModel;
-import de.cau.cs.se.evaluation.architecture.state.SystemSetup;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
-import java.util.List;
+import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -38,87 +36,10 @@ public class TransformationHypergraphMetrics {
     return this.system = system;
   }
   
-  public ResultModelProvider calculate() {
-    if (this.monitor!=null) {
-      this.monitor.subTask("Calculating metrics");
-    }
-    final StateModel state = StateFactory.eINSTANCE.createStateModel();
-    final Node environmentNode = HypergraphFactory.eINSTANCE.createNode();
-    environmentNode.setName("_environment");
-    SystemSetup _createSystemSetup = StateFactory.eINSTANCE.createSystemSetup();
-    state.setMainsystem(_createSystemSetup);
-    SystemSetup _mainsystem = state.getMainsystem();
-    _mainsystem.setSystem(this.system);
-    SystemSetup _mainsystem_1 = state.getMainsystem();
-    Hypergraph _createSystemGraph = this.createSystemGraph(this.system, environmentNode);
-    _mainsystem_1.setSystemGraph(_createSystemGraph);
-    SystemSetup _mainsystem_2 = state.getMainsystem();
-    SystemSetup _mainsystem_3 = state.getMainsystem();
-    RowPatternTable _createRowPatternTable = this.createRowPatternTable(_mainsystem_3);
-    _mainsystem_2.setRowPatternTable(_createRowPatternTable);
-    if (this.monitor!=null) {
-      this.monitor.worked(1);
-    }
-    EList<Node> _nodes = this.system.getNodes();
-    final Consumer<Node> _function = new Consumer<Node>() {
-      public void accept(final Node node) {
-        if (TransformationHypergraphMetrics.this.monitor!=null) {
-          String _name = node.getName();
-          String _plus = ("Calculating metrics - subgraphs" + _name);
-          TransformationHypergraphMetrics.this.monitor.subTask(_plus);
-        }
-        EList<SystemSetup> _subsystems = state.getSubsystems();
-        SystemSetup _mainsystem = state.getMainsystem();
-        SystemSetup _createSetup = TransformationHypergraphMetrics.this.createSetup(node, _mainsystem, environmentNode);
-        _subsystems.add(_createSetup);
-        if (TransformationHypergraphMetrics.this.monitor!=null) {
-          TransformationHypergraphMetrics.this.monitor.worked(1);
-        }
-      }
-    };
-    _nodes.forEach(_function);
-    final ResultModelProvider result = ResultModelProvider.INSTANCE;
-    List<NamedValue> _values = result.getValues();
-    SystemSetup _mainsystem_4 = state.getMainsystem();
-    Hypergraph _system = _mainsystem_4.getSystem();
-    SystemSetup _mainsystem_5 = state.getMainsystem();
-    RowPatternTable _rowPatternTable = _mainsystem_5.getRowPatternTable();
-    double _calculateSize = this.calculateSize(_system, _rowPatternTable);
-    NamedValue _namedValue = new NamedValue("Size", _calculateSize);
-    _values.add(_namedValue);
-    List<NamedValue> _values_1 = result.getValues();
-    SystemSetup _mainsystem_6 = state.getMainsystem();
-    EList<SystemSetup> _subsystems = state.getSubsystems();
-    double _calculateComplexity = this.calculateComplexity(_mainsystem_6, _subsystems);
-    NamedValue _namedValue_1 = new NamedValue("Complexity", _calculateComplexity);
-    _values_1.add(_namedValue_1);
-    return result;
-  }
-  
-  /**
-   * Calculate complexity.
-   */
-  private double calculateComplexity(final SystemSetup setup, final EList<SystemSetup> list) {
-    double complexity = 0;
-    for (int i = 0; (i < setup.getSystem().getNodes().size()); i++) {
-      {
-        final SystemSetup subSystemSetup = list.get(i);
-        double _complexity = complexity;
-        Hypergraph _system = subSystemSetup.getSystem();
-        RowPatternTable _rowPatternTable = subSystemSetup.getRowPatternTable();
-        double _calculateSize = this.calculateSize(_system, _rowPatternTable);
-        complexity = (_complexity + _calculateSize);
-      }
-    }
-    double _complexity = complexity;
-    Hypergraph _system = setup.getSystem();
-    RowPatternTable _rowPatternTable = setup.getRowPatternTable();
-    double _calculateSize = this.calculateSize(_system, _rowPatternTable);
-    complexity = (_complexity - _calculateSize);
-    if (this.monitor!=null) {
-      this.monitor.worked(1);
-    }
-    return complexity;
+  public double calculate() {
+    final Hypergraph systemGraph = this.createSystemGraph(this.system);
+    final RowPatternTable table = this.createRowPatternTable(systemGraph);
+    return this.calculateSize(systemGraph, table);
   }
   
   /**
@@ -188,31 +109,14 @@ public class TransformationHypergraphMetrics {
   }
   
   /**
-   * Create a system setup.
-   */
-  private SystemSetup createSetup(final Node node, final SystemSetup mainSetup, final Node environmentNode) {
-    final SystemSetup setup = StateFactory.eINSTANCE.createSystemSetup();
-    Hypergraph _system = mainSetup.getSystem();
-    Hypergraph _createSubsystem = this.createSubsystem(node, _system);
-    setup.setSystem(_createSubsystem);
-    Hypergraph _system_1 = setup.getSystem();
-    Hypergraph _createSystemGraph = this.createSystemGraph(_system_1, environmentNode);
-    setup.setSystemGraph(_createSystemGraph);
-    RowPatternTable _createRowPatternTable = this.createRowPatternTable(setup);
-    setup.setRowPatternTable(_createRowPatternTable);
-    return setup;
-  }
-  
-  /**
    * Create a row pattern table for a system and a system graph.
    * First, register the edges in the pattern table as column definitions.
    * Second, calculate the pattern row for each node of the system graph.
    * Compact, rows with the same pattern
    */
-  private RowPatternTable createRowPatternTable(final SystemSetup setup) {
+  private RowPatternTable createRowPatternTable(final Hypergraph systemGraph) {
     final RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable();
-    Hypergraph _system = setup.getSystem();
-    EList<Edge> _edges = _system.getEdges();
+    EList<Edge> _edges = systemGraph.getEdges();
     final Consumer<Edge> _function = new Consumer<Edge>() {
       public void accept(final Edge edge) {
         EList<Edge> _edges = patternTable.getEdges();
@@ -220,8 +124,7 @@ public class TransformationHypergraphMetrics {
       }
     };
     _edges.forEach(_function);
-    Hypergraph _systemGraph = setup.getSystemGraph();
-    EList<Node> _nodes = _systemGraph.getNodes();
+    EList<Node> _nodes = systemGraph.getNodes();
     final Consumer<Node> _function_1 = new Consumer<Node>() {
       public void accept(final Node node) {
         EList<RowPattern> _patterns = patternTable.getPatterns();
@@ -292,6 +195,7 @@ public class TransformationHypergraphMetrics {
           _nodes.forEach(_function);
           EList<RowPattern> _patterns_4 = table.getPatterns();
           _patterns_4.remove(j);
+          j--;
         }
       }
     }
@@ -320,35 +224,6 @@ public class TransformationHypergraphMetrics {
   }
   
   /**
-   * Create an subgraph only containing those edges which are connected to the given start node.
-   * 
-   * @param node the start node
-   * @param system the system graph of a system
-   * 
-   * @returns a proper subgraph
-   */
-  private Hypergraph createSubsystem(final Node node, final Hypergraph system) {
-    final Hypergraph subgraph = HypergraphFactory.eINSTANCE.createHypergraph();
-    EList<Edge> _edges = node.getEdges();
-    final Consumer<Edge> _function = new Consumer<Edge>() {
-      public void accept(final Edge it) {
-        EList<Edge> _edges = subgraph.getEdges();
-        _edges.add(it);
-      }
-    };
-    _edges.forEach(_function);
-    EList<Node> _nodes = system.getNodes();
-    final Consumer<Node> _function_1 = new Consumer<Node>() {
-      public void accept(final Node it) {
-        EList<Node> _nodes = subgraph.getNodes();
-        _nodes.add(it);
-      }
-    };
-    _nodes.forEach(_function_1);
-    return subgraph;
-  }
-  
-  /**
    * Create a system graph from a hypergraph of a system by adding an additional not connected
    * node for the environment.
    * 
@@ -356,26 +231,47 @@ public class TransformationHypergraphMetrics {
    * 
    * @returns the system graph (Note: the system graph and the system share nodes)
    */
-  private Hypergraph createSystemGraph(final Hypergraph system, final Node environmentNode) {
+  private Hypergraph createSystemGraph(final Hypergraph system) {
     final Hypergraph systemGraph = HypergraphFactory.eINSTANCE.createHypergraph();
+    final Node environmentNode = HypergraphFactory.eINSTANCE.createNode();
+    environmentNode.setName("_environment");
     EList<Node> _nodes = systemGraph.getNodes();
     _nodes.add(environmentNode);
-    EList<Node> _nodes_1 = system.getNodes();
-    final Consumer<Node> _function = new Consumer<Node>() {
-      public void accept(final Node node) {
-        EList<Node> _nodes = systemGraph.getNodes();
-        _nodes.add(node);
-      }
-    };
-    _nodes_1.forEach(_function);
     EList<Edge> _edges = system.getEdges();
-    final Consumer<Edge> _function_1 = new Consumer<Edge>() {
+    final Consumer<Edge> _function = new Consumer<Edge>() {
       public void accept(final Edge edge) {
         EList<Edge> _edges = systemGraph.getEdges();
-        _edges.add(edge);
+        Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+        _edges.add(_deriveEdge);
       }
     };
-    _edges.forEach(_function_1);
+    _edges.forEach(_function);
+    EList<Node> _nodes_1 = system.getNodes();
+    final Consumer<Node> _function_1 = new Consumer<Node>() {
+      public void accept(final Node node) {
+        final Node derivedNode = TransformationHelper.deriveNode(node);
+        EList<Edge> _edges = node.getEdges();
+        final Consumer<Edge> _function = new Consumer<Edge>() {
+          public void accept(final Edge edge) {
+            EList<Edge> _edges = systemGraph.getEdges();
+            final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
+              public Boolean apply(final Edge it) {
+                EdgeReference _derivedFrom = it.getDerivedFrom();
+                Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
+                return Boolean.valueOf(Objects.equal(_edge, edge));
+              }
+            };
+            final Edge derivedEdge = IterableExtensions.<Edge>findFirst(_edges, _function);
+            EList<Edge> _edges_1 = derivedNode.getEdges();
+            _edges_1.add(derivedEdge);
+          }
+        };
+        _edges.forEach(_function);
+        EList<Node> _nodes = systemGraph.getNodes();
+        _nodes.add(derivedNode);
+      }
+    };
+    _nodes_1.forEach(_function_1);
     return systemGraph;
   }
 }

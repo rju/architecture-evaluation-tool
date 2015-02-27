@@ -22,8 +22,17 @@ import org.eclipse.jdt.core.Flags
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.PartInitException
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView
-import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaClassesToHypergraph
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationMaximalInterconnectedGraph
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationIntermoduleHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationConnectedNodeHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
+import java.util.List
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -60,12 +69,9 @@ class ComplexityAnalysisJob extends Job {
 				
 		var scopes = new GlobalJavaScope(projects, null)
 		
-		val javaToHypergraph = new TransformationJavaClassesToHypergraph(scopes, types, monitor)
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), scopes, types, monitor)
-		val hypergraphMetrics = new TransformationHypergraphMetrics( monitor)
-		
-		javaToModularHypergraph.transform()
-		
+		javaToModularHypergraph.transform
+				
 		for (module : javaToModularHypergraph.modularSystem.modules) {
 			System.out.println("module " + module.name)
 			for (node : module.nodes) {
@@ -79,17 +85,48 @@ class ComplexityAnalysisJob extends Job {
 			}
 		}
 		
-		javaToHypergraph.transform()		
-		hypergraphMetrics.system = javaToHypergraph.system
-		// val result = hypergraphMetrics.calculate()
+		/** Preparing different hypergraphs */
 		
+		// Transformation for MS^(n)
+		val transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(javaToModularHypergraph.modularSystem)
+		// Transformation for MS^*
+		val transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(javaToModularHypergraph.modularSystem)
+		
+		transformationMaximalInterconnectedGraph.transform
+		transformationIntermoduleHyperedgesOnlyGraph.transform
+		
+		/** calculating result metrics */
+		
+		// Calculation for S
+		val metrics = new TransformationHypergraphMetrics(monitor)
+		metrics.setSystem(javaToModularHypergraph.modularSystem)
+		val systemSize = metrics.calculate
+		
+		// Calculation for S -> S^#, S^#_i
+		val complexity = calculateComplexity(javaToModularHypergraph.modularSystem, monitor)	
+		// Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i
+		val complexityMaximalInterconnected = calculateComplexity(transformationMaximalInterconnectedGraph.result, monitor)
+		// Calculation for MS^* -> MS^*#, MS^*#_i
+		val complexityIntermodule = calculateComplexity(transformationIntermoduleHyperedgesOnlyGraph.result, monitor)	
+		
+		/** display results */
+
+		val result = ResultModelProvider.INSTANCE
+
+		val projectName = projects.get(0).project.name
+
+		result.getValues.add(new NamedValue(projectName + " Size", systemSize))
+		result.getValues.add(new NamedValue(projectName + " Complexity", complexity))
+		result.getValues.add(new NamedValue(projectName + " Cohesion", complexityIntermodule/complexityMaximalInterconnected))
+		result.getValues.add(new NamedValue(projectName + " Coupling", complexityIntermodule))
+				
 		monitor.done()
 		
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					// (part as AnalysisResultView).update(result)
+					(part as AnalysisResultView).update(ResultModelProvider.INSTANCE)
 	           } catch (PartInitException e) {
 	                e.printStackTrace()
 	           }
@@ -97,6 +134,62 @@ class ComplexityAnalysisJob extends Job {
      	})
 							
 		return Status.OK_STATUS
+	}
+	
+	/**
+	 * Calculate for a given modular hyper graph:
+	 * - hyperedges only graph
+	 * - hyperedges only graphs for each node in the graph which is connected to the i-th node
+	 * - calculate the size of all graphs
+	 * - calculate the complexity
+	 * 
+	 * @param input a modular system
+	 */
+	private def calculateComplexity(ModularHypergraph input, IProgressMonitor monitor) {
+		monitor?.subTask("Calculating metrics")
+		// S^#
+		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(input)
+		transformationHyperedgesOnlyGraph.transform
+		// S^#_i
+		val transformationConnectedNodeHyperedgesOnlyGraph = 
+			new TransformationConnectedNodeHyperedgesOnlyGraph(transformationHyperedgesOnlyGraph.result)
+		
+		val resultConnectedNodeGraphs = new ArrayList<Hypergraph>() 
+				
+		for (Node node : transformationHyperedgesOnlyGraph.result.nodes) {
+			transformationConnectedNodeHyperedgesOnlyGraph.node = node
+			transformationConnectedNodeHyperedgesOnlyGraph.transform
+			resultConnectedNodeGraphs.add(transformationConnectedNodeHyperedgesOnlyGraph.result)			
+		}
+		
+		val metrics = new TransformationHypergraphMetrics(monitor)
+		
+		metrics.setSystem(transformationHyperedgesOnlyGraph.result)
+		val complexity = calculateComplexity(transformationHyperedgesOnlyGraph.result, resultConnectedNodeGraphs, monitor)
+		monitor?.worked(1)
+		
+		return complexity
+	}
+	
+		/**
+	 * Calculate complexity.
+	 */
+	private def double calculateComplexity(Hypergraph hypergraph, List<Hypergraph> subgraphs, IProgressMonitor monitor) {
+		val metrics = new TransformationHypergraphMetrics(monitor)
+		var double complexity = 0
+		
+		/** Can start at zero, as we ignore environment node by using system and not system graph. */
+		for (var int i=0;i < hypergraph.nodes.size;i++) {
+			metrics.setSystem(subgraphs.get(i))					
+			complexity += metrics.calculate
+		}
+		
+		metrics.setSystem(hypergraph)
+		complexity -= metrics.calculate
+		
+		monitor?.worked(1)
+			
+		return complexity
 	}
 	
 	

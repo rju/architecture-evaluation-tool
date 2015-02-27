@@ -25,7 +25,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransformation 
 		this.startNode = startNode
 	}
 	
-	def getConnectedNodeHyperedgesOnlyGraph() {
+	def getResult() {
 		return this.resultHypergraph
 	}
 	

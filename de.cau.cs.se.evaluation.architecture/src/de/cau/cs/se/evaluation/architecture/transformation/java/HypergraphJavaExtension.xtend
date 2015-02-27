@@ -39,6 +39,17 @@ class HypergraphJavaExtension {
 	}
 	
 	/**
+	 * Create a node for a given method.
+	 */        
+	def static createNodeForMethodName(String methodName, AbstractTypeDeclaration type) {
+		val node = HypergraphFactory.eINSTANCE.createNode
+		node.name = type.determineFullQualifiedName + "." + methodName
+		node.derivedFrom = null
+		
+		return node
+	}
+	
+	/**
 	 * Create a node for a class' implicit constructor
 	 */
 	def static createNodeForImplicitConstructor(AbstractTypeDeclaration type) {

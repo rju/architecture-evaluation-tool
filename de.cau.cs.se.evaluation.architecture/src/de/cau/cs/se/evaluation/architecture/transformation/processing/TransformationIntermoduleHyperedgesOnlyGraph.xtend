@@ -19,7 +19,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph implements ITransformation {
 		this.hypergraph = hypergraph
 	}
 	
-	def ModularHypergraph getIntermoduleHyperedgesOnlyGraph() {
+	def ModularHypergraph getResult() {
 		return this.resultHypergraph
 	}
 	
