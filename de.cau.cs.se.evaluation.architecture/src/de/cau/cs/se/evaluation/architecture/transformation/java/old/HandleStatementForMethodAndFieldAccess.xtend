@@ -1,4 +1,4 @@
-package de.cau.cs.se.evaluation.architecture.transformation.java
+package de.cau.cs.se.evaluation.architecture.transformation.java.old
 
 import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.AssertStatement

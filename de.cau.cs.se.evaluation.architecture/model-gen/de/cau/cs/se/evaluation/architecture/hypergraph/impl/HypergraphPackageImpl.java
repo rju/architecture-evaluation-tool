@@ -2,6 +2,7 @@
  */
 package de.cau.cs.se.evaluation.architecture.hypergraph.impl;
 
+import de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace;
@@ -144,6 +145,13 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass methodTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass callerCalleeTraceEClass = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -499,6 +507,33 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EClass getCallerCalleeTrace() {
+		return callerCalleeTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getCallerCalleeTrace_Caller() {
+		return (EAttribute)callerCalleeTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getCallerCalleeTrace_Callee() {
+		return (EAttribute)callerCalleeTraceEClass.getEStructuralFeatures().get(1);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public HypergraphFactory getHypergraphFactory() {
 		return (HypergraphFactory)getEFactoryInstance();
 	}
@@ -569,6 +604,10 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		methodTraceEClass = createEClass(METHOD_TRACE);
 		createEAttribute(methodTraceEClass, METHOD_TRACE__METHOD);
+
+		callerCalleeTraceEClass = createEClass(CALLER_CALLEE_TRACE);
+		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLER);
+		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLEE);
 	}
 
 	/**
@@ -613,6 +652,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		typeTraceEClass.getESuperTypes().add(this.getNodeReference());
 		fieldTraceEClass.getESuperTypes().add(this.getEdgeReference());
 		methodTraceEClass.getESuperTypes().add(this.getNodeReference());
+		callerCalleeTraceEClass.getESuperTypes().add(this.getEdgeReference());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(hypergraphEClass, Hypergraph.class, "Hypergraph", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -662,6 +702,10 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 
 		initEClass(methodTraceEClass, MethodTrace.class, "MethodTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getMethodTrace_Method(), ecorePackage.getEJavaObject(), "method", null, 1, 1, MethodTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(callerCalleeTraceEClass, CallerCalleeTrace.class, "CallerCalleeTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEAttribute(getCallerCalleeTrace_Caller(), ecorePackage.getEJavaObject(), "caller", null, 1, 1, CallerCalleeTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getCallerCalleeTrace_Callee(), ecorePackage.getEJavaObject(), "callee", null, 1, 1, CallerCalleeTrace.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Create resource
 		createResource(eNS_URI);

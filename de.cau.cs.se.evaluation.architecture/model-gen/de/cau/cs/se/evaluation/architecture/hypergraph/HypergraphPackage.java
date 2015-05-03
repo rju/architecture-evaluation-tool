@@ -700,6 +700,53 @@ public interface HypergraphPackage extends EPackage {
 
 
 	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.CallerCalleeTraceImpl <em>Caller Callee Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.CallerCalleeTraceImpl
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getCallerCalleeTrace()
+	 * @generated
+	 */
+	int CALLER_CALLEE_TRACE = 16;
+
+	/**
+	 * The feature id for the '<em><b>Caller</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CALLER_CALLEE_TRACE__CALLER = EDGE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The feature id for the '<em><b>Callee</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CALLER_CALLEE_TRACE__CALLEE = EDGE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of structural features of the '<em>Caller Callee Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CALLER_CALLEE_TRACE_FEATURE_COUNT = EDGE_REFERENCE_FEATURE_COUNT + 2;
+
+	/**
+	 * The number of operations of the '<em>Caller Callee Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CALLER_CALLEE_TRACE_OPERATION_COUNT = EDGE_REFERENCE_OPERATION_COUNT + 0;
+
+
+	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph <em>Hypergraph</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1036,6 +1083,38 @@ public interface HypergraphPackage extends EPackage {
 	EAttribute getMethodTrace_Method();
 
 	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace <em>Caller Callee Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Caller Callee Trace</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace
+	 * @generated
+	 */
+	EClass getCallerCalleeTrace();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace#getCaller <em>Caller</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Caller</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace#getCaller()
+	 * @see #getCallerCalleeTrace()
+	 * @generated
+	 */
+	EAttribute getCallerCalleeTrace_Caller();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace#getCallee <em>Callee</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Callee</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace#getCallee()
+	 * @see #getCallerCalleeTrace()
+	 * @generated
+	 */
+	EAttribute getCallerCalleeTrace_Callee();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1345,6 +1424,32 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute METHOD_TRACE__METHOD = eINSTANCE.getMethodTrace_Method();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.CallerCalleeTraceImpl <em>Caller Callee Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.CallerCalleeTraceImpl
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getCallerCalleeTrace()
+		 * @generated
+		 */
+		EClass CALLER_CALLEE_TRACE = eINSTANCE.getCallerCalleeTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Caller</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CALLER_CALLEE_TRACE__CALLER = eINSTANCE.getCallerCalleeTrace_Caller();
+
+		/**
+		 * The meta object literal for the '<em><b>Callee</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CALLER_CALLEE_TRACE__CALLEE = eINSTANCE.getCallerCalleeTrace_Callee();
 
 	}
 

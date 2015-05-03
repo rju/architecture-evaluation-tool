@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.IType
 import java.util.ArrayList
 import org.eclipse.jdt.core.IJavaProject
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphMetrics
-import de.cau.cs.se.evaluation.architecture.transformation.java.GlobalJavaScope
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.Flags
 import org.eclipse.ui.PlatformUI
@@ -30,7 +29,6 @@ import de.cau.cs.se.evaluation.architecture.transformation.processing.Transforma
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider
-import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import java.util.List
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
@@ -69,10 +67,11 @@ class ComplexityAnalysisJob extends Job {
 			3 + types.size // graph analysis
 		)
 		monitor.worked(1)
-				
-		var scopes = new GlobalJavaScope(projects, null)
 		
-		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), scopes, types, monitor)
+		// TODO this is crap. the list must carry patterns ITypes
+		val dataTypes = new ArrayList<IType>()
+		
+		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), dataTypes, types, monitor)
 		javaToModularHypergraph.transform
 				
 		for (module : javaToModularHypergraph.modularSystem.modules) {

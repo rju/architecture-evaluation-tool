@@ -1,4 +1,4 @@
-package de.cau.cs.se.evaluation.architecture.transformation.java
+package de.cau.cs.se.evaluation.architecture.transformation.java.old
 
 import org.eclipse.jdt.core.dom.Expression
 import org.eclipse.jdt.core.dom.Annotation
@@ -35,8 +35,8 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.HypergraphJavaExtension.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.VariableDeclarationResolver.findVariableDeclaration
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.old.HypergraphJavaExtension.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.old.VariableDeclarationResolver.findVariableDeclaration
 import static extension de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper.*
 
 import org.eclipse.jdt.core.dom.SimpleName
@@ -194,7 +194,7 @@ class HandleExpressionForMethodAndFieldAccess {
 	 */
 	def checkVariable(VariableDeclarationFragment variable, Edge edge) {
 		if (edge.derivedFrom instanceof FieldTrace) {
-			return edge.name.equals(type.determineFullQualifiedName(variable))
+			return edge.name.equals(type.determineFullyQualifiedName(variable))
 		}
 		return false
 	}
@@ -238,7 +238,7 @@ class HandleExpressionForMethodAndFieldAccess {
 	}
 	
 	def staticInvocation(SimpleName name, Node caller, String calleeName, List<Expression> calleeArguments) {
-		val callee = modularSystem.nodes.findFirst[node | node.name.equals(type.determineFullQualifiedName + "." + calleeName)]
+		val callee = modularSystem.nodes.findFirst[node | node.name.equals(type.determineFullyQualifiedName + "." + calleeName)]
 		if (callee != null) 
 			modularSystem.createEdgeBetweenMethods(caller, callee)
 	}
@@ -264,14 +264,14 @@ class HandleExpressionForMethodAndFieldAccess {
 	private def methodInvocationViaInheritedField(String variableName, Node caller, String calleeName, List<Expression> calleeArguments) {
 		/** fix edge collection */
 		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name =  type.determineFullQualifiedName + "." + variableName
+		edge.name =  type.determineFullyQualifiedName + "." + variableName
 		edge.derivedFrom = null
 		modularSystem.edges.add(edge)
-		var callee = modularSystem.findNodeForMethod(type, type.determineFullQualifiedName + "." + calleeName, calleeArguments)
+		var callee = modularSystem.findNodeForMethod(type, type.determineFullyQualifiedName + "." + calleeName, calleeArguments)
 		if (callee == null) {
 			callee = createNodeForMethodName(calleeName, type)
 			modularSystem.nodes.add(callee)
-			val module = modularSystem.modules.findFirst[module | module.name.equals(type.determineFullQualifiedName)]
+			val module = modularSystem.modules.findFirst[module | module.name.equals(type.determineFullyQualifiedName)]
 			module.nodes.add(callee)
 		}
 		if (!caller.edges.contains(edge)) caller.edges.add(edge)
@@ -375,7 +375,7 @@ class HandleExpressionForMethodAndFieldAccess {
 	 */
 	private dispatch def void findMethodAndFieldCallInExpression(Name expression) {
 		val edge = modularSystem.edges.findFirst[
-			val variableName = type.determineFullQualifiedName + "." + expression.fullyQualifiedName
+			val variableName = type.determineFullyQualifiedName + "." + expression.fullyQualifiedName
 			it.name.equals(variableName)
 		]
 		// TODO make this a function

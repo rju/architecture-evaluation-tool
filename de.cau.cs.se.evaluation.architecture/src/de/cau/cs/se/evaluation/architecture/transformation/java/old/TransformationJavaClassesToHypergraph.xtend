@@ -1,4 +1,4 @@
-package de.cau.cs.se.evaluation.architecture.transformation.java
+package de.cau.cs.se.evaluation.architecture.transformation.java.old
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph

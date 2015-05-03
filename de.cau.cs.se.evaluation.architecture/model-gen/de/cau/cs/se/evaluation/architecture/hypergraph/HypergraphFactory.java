@@ -166,6 +166,15 @@ public interface HypergraphFactory extends EFactory {
 	MethodTrace createMethodTrace();
 
 	/**
+	 * Returns a new object of class '<em>Caller Callee Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Caller Callee Trace</em>'.
+	 * @generated
+	 */
+	CallerCalleeTrace createCallerCalleeTrace();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
