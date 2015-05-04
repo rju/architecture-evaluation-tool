@@ -34,10 +34,15 @@ import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
+import org.eclipse.core.resources.IFile
+import java.io.InputStreamReader
+import java.io.BufferedReader
 
 class ComplexityAnalysisJob extends Job {
 	
 	var types = new ArrayList<IType>()
+	
+	List<String> dataTypePatterns
 	
 	/**
 	 * The constructor scans the selection for files.
@@ -68,10 +73,9 @@ class ComplexityAnalysisJob extends Job {
 		)
 		monitor.worked(1)
 		
-		// TODO this is crap. the list must carry patterns ITypes
-		val dataTypes = new ArrayList<IType>()
 		
-		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), dataTypes, types, monitor)
+		
+		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), dataTypePatterns, types, monitor)
 		javaToModularHypergraph.transform
 				
 		for (module : javaToModularHypergraph.modularSystem.modules) {
@@ -310,12 +314,13 @@ class ComplexityAnalysisJob extends Job {
 	
 	private def dispatch scanForClasses(IProject object) {
 		System.out.println("  IProject " + object.toString)
+		dataTypePatterns = readDataTypes(object.findMember("hypergraph-analysis.cfg") as IFile)
 		if (object.hasNature(JavaCore.NATURE_ID)) {
 			val IJavaProject project = JavaCore.create(object);
 			project.allPackageFragmentRoots.forEach[root | root.checkForTypes]
 		}
 	}
-	
+		
 	private def dispatch scanForClasses(IJavaProject object) {
 		System.out.println("  IJavaProject " + object.elementName)
 		object.allPackageFragmentRoots.forEach[root | root.checkForTypes]
@@ -338,6 +343,20 @@ class ComplexityAnalysisJob extends Job {
 	
 	private def dispatch scanForClasses(Object object) {
 		System.out.println("  Selection=" + object.class.canonicalName + " " + object.toString)
+	}
+	
+	/**
+	 * 
+	 */
+	private def readDataTypes(IFile file) {
+		val List<String> dataTypePatterns = new ArrayList<String>()
+		val reader = new BufferedReader(new InputStreamReader(file.contents))
+		var String line
+		while ((line = reader.readLine()) != null) {
+			dataTypePatterns.add(line.replaceAll("\\.","\\."))
+		}
+		
+		return dataTypePatterns
 	}
 	
 	/** check for types in the project hierarchy */

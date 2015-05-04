@@ -11,6 +11,7 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import de.cau.cs.se.evaluation.architecture.transformation.ITransformation;
+import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEvaluation;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory;
 import java.util.ArrayList;
@@ -30,17 +31,14 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedType;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -62,7 +60,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   
   private final List<AbstractTypeDeclaration> classList;
   
-  private final List<AbstractTypeDeclaration> dataTypeList;
+  private final List<String> dataTypePatterns;
   
   /**
    * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -71,34 +69,31 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * @param scope the global scoper used to resolve classes during transformation
    * @param eclipse progress monitor
    */
-  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final List<IType> dataTypeList, final List<IType> classList, final IProgressMonitor monitor) {
+  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final List<String> dataTypePatterns, final List<IType> classList, final IProgressMonitor monitor) {
     this.project = project;
     ArrayList<AbstractTypeDeclaration> _arrayList = new ArrayList<AbstractTypeDeclaration>();
     this.classList = _arrayList;
-    this.fillClassList(this.classList, classList);
-    ArrayList<AbstractTypeDeclaration> _arrayList_1 = new ArrayList<AbstractTypeDeclaration>();
-    this.dataTypeList = _arrayList_1;
-    this.fillClassList(this.dataTypeList, dataTypeList);
+    this.fillClassList(this.classList, classList, dataTypePatterns);
+    this.dataTypePatterns = dataTypePatterns;
     this.monitor = monitor;
   }
   
-  private void fillClassList(final List<AbstractTypeDeclaration> declarations, final List<IType> types) {
+  private void fillClassList(final List<AbstractTypeDeclaration> declarations, final List<IType> types, final List<String> dataTypePatterns) {
     final Consumer<IType> _function = new Consumer<IType>() {
       public void accept(final IType jdtType) {
         final CompilationUnit unit = TransformationJavaMethodsToModularHypergraph.this.getUnitForType(jdtType, TransformationJavaMethodsToModularHypergraph.this.monitor, TransformationJavaMethodsToModularHypergraph.this.project);
         List _types = unit.types();
         final Consumer<Object> _function = new Consumer<Object>() {
           public void accept(final Object unitType) {
-            boolean _or = false;
             if ((unitType instanceof TypeDeclaration)) {
-              _or = true;
-            } else {
-              _or = (unitType instanceof EnumDeclaration);
-            }
-            if (_or) {
-              final AbstractTypeDeclaration type = ((AbstractTypeDeclaration) unitType);
+              final TypeDeclaration type = ((TypeDeclaration) unitType);
               System.out.println(("type is " + type));
-              declarations.add(type);
+              ITypeBinding _resolveBinding = type.resolveBinding();
+              boolean _isClassDataType = TransformationJavaMethodsToModularHypergraph.this.isClassDataType(_resolveBinding, dataTypePatterns);
+              boolean _not = (!_isClassDataType);
+              if (_not) {
+                declarations.add(type);
+              }
             }
           }
         };
@@ -144,6 +139,9 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
     return this.modularSystem;
   }
   
+  /**
+   * Main transformation routine.
+   */
   public void transform() {
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.modularSystem = _createModularHypergraph;
@@ -159,7 +157,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
     final Consumer<AbstractTypeDeclaration> _function_1 = new Consumer<AbstractTypeDeclaration>() {
       public void accept(final AbstractTypeDeclaration clazz) {
         EList<Edge> _edges = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getEdges();
-        TransformationJavaMethodsToModularHypergraph.this.createEdgesForClassProperties(_edges, clazz, TransformationJavaMethodsToModularHypergraph.this.dataTypeList);
+        TransformationJavaMethodsToModularHypergraph.this.createEdgesForClassProperties(_edges, clazz, TransformationJavaMethodsToModularHypergraph.this.dataTypePatterns);
       }
     };
     this.classList.forEach(_function_1);
@@ -178,16 +176,28 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
     Iterable<AbstractTypeDeclaration> _filter = IterableExtensions.<AbstractTypeDeclaration>filter(this.classList, _function_3);
     final Consumer<AbstractTypeDeclaration> _function_4 = new Consumer<AbstractTypeDeclaration>() {
       public void accept(final AbstractTypeDeclaration clazz) {
-        EList<Node> _nodes = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getNodes();
         ITypeBinding _resolveBinding = clazz.resolveBinding();
-        Node _createNodeForImplicitConstructor = JavaHypergraphElementFactory.createNodeForImplicitConstructor(_resolveBinding);
-        _nodes.add(_createNodeForImplicitConstructor);
+        final Node node = JavaHypergraphElementFactory.createNodeForImplicitConstructor(_resolveBinding);
+        EList<Module> _modules = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getModules();
+        final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
+          public Boolean apply(final Module it) {
+            ModuleReference _derivedFrom = it.getDerivedFrom();
+            Object _type = ((TypeTrace) _derivedFrom).getType();
+            ITypeBinding _resolveBinding = clazz.resolveBinding();
+            return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(_resolveBinding));
+          }
+        };
+        final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
+        EList<Node> _nodes = module.getNodes();
+        _nodes.add(node);
+        EList<Node> _nodes_1 = TransformationJavaMethodsToModularHypergraph.this.modularSystem.getNodes();
+        _nodes_1.add(node);
       }
     };
     _filter.forEach(_function_4);
     final Consumer<AbstractTypeDeclaration> _function_5 = new Consumer<AbstractTypeDeclaration>() {
       public void accept(final AbstractTypeDeclaration clazz) {
-        TransformationJavaMethodsToModularHypergraph.this.resolveEdges(TransformationJavaMethodsToModularHypergraph.this.modularSystem, clazz);
+        TransformationJavaMethodsToModularHypergraph.this.resolveEdges(TransformationJavaMethodsToModularHypergraph.this.modularSystem, TransformationJavaMethodsToModularHypergraph.this.dataTypePatterns, clazz);
       }
     };
     this.classList.forEach(_function_5);
@@ -195,8 +205,11 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   
   /**
    * Create edges for each method found in the observed system.
+   * 
+   * @param graph the hypergraph where the edges will be added to
+   * @param type the type which is processed for edges
    */
-  private void resolveEdges(final ModularHypergraph graph, final AbstractTypeDeclaration type) {
+  private void resolveEdges(final ModularHypergraph graph, final List<String> dataTypePatterns, final AbstractTypeDeclaration type) {
     if ((type instanceof TypeDeclaration)) {
       final TypeDeclaration clazz = ((TypeDeclaration) type);
       MethodDeclaration[] _methods = clazz.getMethods();
@@ -212,7 +225,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
             }
           };
           final Node node = IterableExtensions.<Node>findFirst(_nodes, _function);
-          JavaASTEvaluation.evaluteMethod(graph, node, clazz, method);
+          JavaASTEvaluation.evaluteMethod(graph, dataTypePatterns, node, clazz, method);
         }
       };
       ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function);
@@ -248,7 +261,9 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
             return Boolean.valueOf(method.isConstructor());
           }
         };
-        return IterableExtensions.<MethodDeclaration>exists(((Iterable<MethodDeclaration>)Conversions.doWrapArray(_methods)), _function);
+        boolean _exists = IterableExtensions.<MethodDeclaration>exists(((Iterable<MethodDeclaration>)Conversions.doWrapArray(_methods)), _function);
+        final boolean isImplicit = (!_exists);
+        return isImplicit;
       }
     }
     return false;
@@ -289,13 +304,13 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   /**
    * Create edges for all properties in the given type which are data type properties.
    */
-  private void createEdgesForClassProperties(final EList<Edge> edges, final AbstractTypeDeclaration type, final List<AbstractTypeDeclaration> dataTypes) {
+  private void createEdgesForClassProperties(final EList<Edge> edges, final AbstractTypeDeclaration type, final List<String> dataTypePatterns) {
     if ((type instanceof TypeDeclaration)) {
       FieldDeclaration[] _fields = ((TypeDeclaration)type).getFields();
       final Consumer<FieldDeclaration> _function = new Consumer<FieldDeclaration>() {
         public void accept(final FieldDeclaration field) {
           Type _type = field.getType();
-          boolean _isDataType = TransformationJavaMethodsToModularHypergraph.this.isDataType(_type, dataTypes);
+          boolean _isDataType = TransformationJavaMethodsToModularHypergraph.this.isDataType(_type, dataTypePatterns);
           if (_isDataType) {
             List _fragments = field.fragments();
             final Consumer<VariableDeclarationFragment> _function = new Consumer<VariableDeclarationFragment>() {
@@ -320,20 +335,20 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * 
    * @return returns true if the given type is a data type and not a behavior type.
    */
-  private boolean isDataType(final Type type, final List<AbstractTypeDeclaration> dataTypes) {
+  private boolean isDataType(final Type type, final List<String> dataTypePatterns) {
     boolean _matched = false;
     if (!_matched) {
       if (type instanceof ArrayType) {
         _matched=true;
         Type _elementType = ((ArrayType)type).getElementType();
-        return this.isDataType(_elementType, dataTypes);
+        return this.isDataType(_elementType, dataTypePatterns);
       }
     }
     if (!_matched) {
       if (type instanceof ParameterizedType) {
         _matched=true;
         Type _type = ((ParameterizedType)type).getType();
-        return this.isDataType(_type, dataTypes);
+        return this.isDataType(_type, dataTypePatterns);
       }
     }
     if (!_matched) {
@@ -346,22 +361,20 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
       if (type instanceof QualifiedType) {
         _matched=true;
         Type _qualifier = ((QualifiedType)type).getQualifier();
-        return this.isDataType(_qualifier, dataTypes);
+        return this.isDataType(_qualifier, dataTypePatterns);
       }
     }
     if (!_matched) {
       if (type instanceof SimpleType) {
         _matched=true;
-        final Function1<AbstractTypeDeclaration, Boolean> _function = new Function1<AbstractTypeDeclaration, Boolean>() {
-          public Boolean apply(final AbstractTypeDeclaration dataType) {
-            SimpleName _name = dataType.getName();
-            String _fullyQualifiedName = _name.getFullyQualifiedName();
-            Name _name_1 = ((SimpleType)type).getName();
-            String _fullyQualifiedName_1 = _name_1.getFullyQualifiedName();
-            return Boolean.valueOf(_fullyQualifiedName.equals(_fullyQualifiedName_1));
+        final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
+          public Boolean apply(final String dataTypePattern) {
+            ITypeBinding _resolveBinding = ((SimpleType)type).resolveBinding();
+            String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_resolveBinding);
+            return Boolean.valueOf(_determineFullyQualifiedName.matches(dataTypePattern));
           }
         };
-        return IterableExtensions.<AbstractTypeDeclaration>exists(dataTypes, _function);
+        return IterableExtensions.<String>exists(dataTypePatterns, _function);
       }
     }
     if (!_matched) {
@@ -370,7 +383,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
         List _types = ((UnionType)type).types();
         final Function1<Type, Boolean> _function = new Function1<Type, Boolean>() {
           public Boolean apply(final Type it) {
-            return Boolean.valueOf(TransformationJavaMethodsToModularHypergraph.this.isDataType(it, dataTypes));
+            return Boolean.valueOf(TransformationJavaMethodsToModularHypergraph.this.isDataType(it, dataTypePatterns));
           }
         };
         return IterableExtensions.<Type>forall(_types, _function);
@@ -384,7 +397,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
         boolean _notEquals = (!Objects.equal(_bound, null));
         if (_notEquals) {
           Type _bound_1 = ((WildcardType)type).getBound();
-          _xifexpression = this.isDataType(_bound_1, dataTypes);
+          _xifexpression = this.isDataType(_bound_1, dataTypePatterns);
         } else {
           _xifexpression = true;
         }
@@ -392,5 +405,23 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
       }
     }
     return false;
+  }
+  
+  /**
+   * Determine if the given type is a data type.
+   * 
+   * @param type the type to be evaluated
+   * @param dataTypes a list of data types
+   * 
+   * @return returns true if the given type is a data type and not a behavior type.
+   */
+  private boolean isClassDataType(final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
+    final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
+      public Boolean apply(final String pattern) {
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
+        return Boolean.valueOf(_determineFullyQualifiedName.matches(pattern));
+      }
+    };
+    return IterableExtensions.<String>exists(dataTypePatterns, _function);
   }
 }

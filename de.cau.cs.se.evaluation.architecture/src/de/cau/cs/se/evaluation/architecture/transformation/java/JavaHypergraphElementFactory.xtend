@@ -1,19 +1,15 @@
 package de.cau.cs.se.evaluation.architecture.transformation.java
 
-import org.eclipse.jdt.core.dom.MethodDeclaration
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
+import org.eclipse.jdt.core.dom.ConstructorInvocation
+import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.jdt.core.dom.ITypeBinding
+import org.eclipse.jdt.core.dom.MethodDeclaration
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment
-import org.eclipse.jdt.core.dom.MethodInvocation
-import org.eclipse.jdt.core.dom.ConstructorInvocation
-import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import org.eclipse.emf.common.util.EList
-import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation
-import org.eclipse.jdt.core.dom.ITypeBinding
-import org.eclipse.jdt.core.dom.IMethodBinding
 
 class JavaHypergraphElementFactory {
 		
@@ -33,27 +29,7 @@ class JavaHypergraphElementFactory {
 		
 		return module
 	}
-	
-	/**
-	 * Create a node for a given method.
-	 * 
-	 * @param type 
-	 * @param method
-	 * 
-	 * @return a node
-	 * 
-	 * @deprecated
-	 */
-	def static createNodeForMethod(AbstractTypeDeclaration type, MethodDeclaration method) {
-		val node = HypergraphFactory.eINSTANCE.createNode
-		node.name = determineFullyQualifiedName(type, method)
-		val derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace
-		derivedFrom.method = method
-		node.derivedFrom = derivedFrom
 		
-		return node
-	}
-	
 	/**
 	 * Create a node for a given method.
 	 * 
@@ -117,7 +93,7 @@ class JavaHypergraphElementFactory {
 	 */
 	def static createDataEdge(AbstractTypeDeclaration type, VariableDeclarationFragment fragment) {
 		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name = type.determineFullyQualifiedName(fragment)
+		edge.name = determineFullyQualifiedName(type,fragment)
 		val derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace
 		derivedFrom.field = fragment
 		edge.derivedFrom = derivedFrom
@@ -125,31 +101,9 @@ class JavaHypergraphElementFactory {
 		return edge
 	}
 	
-	
 	/**
-	 * Create a call edge between two methods.
-	 * 
-	 * @param callerType is the class containing the caller method
-	 * @param callerMethod method where the call originates
-	 * @param calleeType is the class containing the callee method
-	 * @param callee the called method 
-	 * 
-	 * @return the edge
-	 */
-	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, AbstractTypeDeclaration calleeType, MethodInvocation calleeMethod) {
-		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
-			+ determineFullyQualifiedName(calleeType, calleeMethod)
-		val derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace
-		derivedFrom.caller = callerMethod
-		derivedFrom.callee = calleeMethod
-		edge.derivedFrom = derivedFrom
-		
-		return edge
-	}
-	
-	/**
-	 * Create a call edge between two methods.
+	 * Create a call edge between a method and an constructor invocation "this(...)".
+	 * This can occur in constructors only.
 	 * 
 	 * @param callerType is the class containing the caller method
 	 * @param callerMethod method where the call originates
@@ -159,19 +113,21 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, AbstractTypeDeclaration calleeType, ConstructorInvocation calleeMethod) {
+		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":this")
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(calleeType, calleeMethod)
 		val derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace
-		derivedFrom.caller = callerMethod
-		derivedFrom.callee = calleeMethod
+		derivedFrom.caller = callerMethod.resolveBinding
+		derivedFrom.callee = calleeMethod.resolveConstructorBinding
 		edge.derivedFrom = derivedFrom
 		
 		return edge
 	}
 	
 	/**
-	 * Create a call edge between two methods.
+	 * Create a call edge between a method and a super constructor invocation "super(...)".
+	 * This can occur in constructors only.
 	 * 
 	 * @param callerType is the class containing the caller method
 	 * @param callerMethod method where the call originates
@@ -181,6 +137,7 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, AbstractTypeDeclaration calleeType, SuperConstructorInvocation calleeMethod) {
+		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":super")
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(calleeType, calleeMethod)
@@ -202,11 +159,12 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, IMethodBinding callee) {
+		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(callee)
 		val derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace
-		derivedFrom.caller = callerMethod
+		derivedFrom.caller = callerMethod.resolveBinding
 		derivedFrom.callee = callee
 		edge.derivedFrom = derivedFrom
 		
@@ -214,14 +172,23 @@ class JavaHypergraphElementFactory {
 	}
 	
 	/**
-	 * Find the node for the given constructor invocation.
+	 * Create a call edge between two methods.
 	 * 
-	 * @param nodes
-	 * @param invocation
+	 * @param caller method where the call originates
+	 * @param callee the called method in form of a method binding
+	 * 
+	 * @return the edge
 	 */
-	def static findNodeForConstructoreInvocation(EList<Node> nodes, ConstructorInvocation invocation) {
-		nodes.findFirst[((it.derivedFrom as MethodTrace).method as MethodDeclaration).
-			resolveBinding.isSubsignature(invocation.resolveConstructorBinding)
-		]
+	def static createCallEdge(IMethodBinding caller, IMethodBinding callee) {
+		System.out.println("createCallEdge " + caller.determineFullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
+		val edge = HypergraphFactory.eINSTANCE.createEdge
+		edge.name = determineFullyQualifiedName(caller) + "::" + determineFullyQualifiedName(callee)
+		val derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace
+		derivedFrom.caller = caller
+		derivedFrom.callee = callee
+		edge.derivedFrom = derivedFrom
+		
+		return edge
 	}
+
 }

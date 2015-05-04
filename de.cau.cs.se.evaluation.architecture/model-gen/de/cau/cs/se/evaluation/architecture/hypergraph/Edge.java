@@ -3,6 +3,7 @@
 package de.cau.cs.se.evaluation.architecture.hypergraph;
 
 
+
 /**
  * <!-- begin-user-doc -->
  * A representation of the model object '<em><b>Edge</b></em>'.

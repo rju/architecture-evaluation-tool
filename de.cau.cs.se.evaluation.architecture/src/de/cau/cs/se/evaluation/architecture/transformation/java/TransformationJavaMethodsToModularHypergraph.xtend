@@ -15,8 +15,6 @@ import org.eclipse.jdt.core.dom.Modifier
 import org.eclipse.jdt.core.IJavaProject
 import java.util.ArrayList
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
-import org.eclipse.jdt.core.dom.EnumDeclaration
-import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.JavaCore
 import org.eclipse.jdt.core.dom.ASTParser
@@ -24,6 +22,7 @@ import org.eclipse.jdt.core.dom.AST
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEvaluation.*
+import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.ArrayType
 import org.eclipse.jdt.core.dom.ParameterizedType
@@ -34,7 +33,6 @@ import org.eclipse.jdt.core.dom.UnionType
 import org.eclipse.jdt.core.dom.WildcardType
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
 import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
-import de.cau.cs.se.evaluation.architecture.hypergraph.Module
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.IMethodBinding
 
@@ -44,7 +42,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	val IJavaProject project
 	val IProgressMonitor monitor
 	val List<AbstractTypeDeclaration> classList
-	val List<AbstractTypeDeclaration> dataTypeList
+	val List<String> dataTypePatterns
 		
 	/**
 	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -53,24 +51,23 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(IJavaProject project, List<IType> dataTypeList, List<IType> classList, IProgressMonitor monitor) {
+	public new(IJavaProject project, List<String> dataTypePatterns, List<IType> classList, IProgressMonitor monitor) {
 		this.project = project
 		this.classList = new ArrayList<AbstractTypeDeclaration>
-		this.classList.fillClassList(classList)
-		this.dataTypeList = new ArrayList<AbstractTypeDeclaration>
-		this.dataTypeList.fillClassList(dataTypeList)
+		this.classList.fillClassList(classList, dataTypePatterns)
+		this.dataTypePatterns = dataTypePatterns
 		this.monitor = monitor
 	}
 	
-	private def void fillClassList(List<AbstractTypeDeclaration> declarations, List<IType> types) {
+	private def void fillClassList(List<AbstractTypeDeclaration> declarations, List<IType> types, List<String> dataTypePatterns) {
 		types.forEach[jdtType |
 			val unit = jdtType.getUnitForType(monitor,project)
 			unit.types.forEach[unitType |
-				if (unitType instanceof TypeDeclaration ||
-					unitType instanceof EnumDeclaration) {
-					val type = unitType as AbstractTypeDeclaration
+				if (unitType instanceof TypeDeclaration) {
+					val type = unitType as TypeDeclaration
 					System.out.println("type is " + type)
-					declarations.add(type)
+					if (!isClassDataType(type.resolveBinding, dataTypePatterns))
+						declarations.add(type)
 			 	}
 			 ]
 		]
@@ -103,28 +100,37 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		return modularSystem
 	}
 	
+	/**
+	 * Main transformation routine.
+	 */
 	override transform() {
 		modularSystem = HypergraphFactory.eINSTANCE.createModularHypergraph
 		// create modules for all classes
 		classList.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding))]
 
 		// define edges for all internal variables of a class
-		classList.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypeList)]
+		classList.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
 
 		// find all method declarations and create nodes for it, grouped by class as modules
 		classList.forEach[clazz | modularSystem.nodes.createNodesForMethods(clazz)]
 		classList.filter[clazz | clazz.hasImplicitConstructor].
-			forEach[clazz | modularSystem.nodes.add(createNodeForImplicitConstructor(clazz.resolveBinding))]
+			forEach[clazz |
+				val node = createNodeForImplicitConstructor(clazz.resolveBinding)
+				val module = modularSystem.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(clazz.resolveBinding)]
+				module.nodes.add(node) 
+				modularSystem.nodes.add(node)
+			]
 		
-		classList.forEach[clazz | resolveEdges(modularSystem, clazz)]
+		classList.forEach[clazz | resolveEdges(modularSystem, dataTypePatterns, clazz)]
 	}
 	
 	/**
 	 * Create edges for each method found in the observed system.
 	 * 
-	 * 
+	 * @param graph the hypergraph where the edges will be added to
+	 * @param type the type which is processed for edges
 	 */
-	private def void resolveEdges(ModularHypergraph graph, AbstractTypeDeclaration type) {
+	private def void resolveEdges(ModularHypergraph graph, List<String> dataTypePatterns, AbstractTypeDeclaration type) {
 		if (type instanceof TypeDeclaration) {
 			val clazz = type as TypeDeclaration
 			clazz.methods.forEach[method |
@@ -132,7 +138,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 					((it.derivedFrom as MethodTrace).method as IMethodBinding).
 						isSubsignature(method.resolveBinding)
 				]
-				evaluteMethod(graph, node, clazz, method)
+				evaluteMethod(graph, dataTypePatterns, node, clazz, method)
 			]
 		}
 	}
@@ -149,7 +155,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		if (type instanceof TypeDeclaration) {
 			val clazz = type as TypeDeclaration
 			if (!clazz.interface && !Modifier.isAbstract(clazz.getModifiers())) {
-				return clazz.methods.exists[method | method.constructor]
+				val isImplicit = !clazz.methods.exists[method | method.constructor]
+				return isImplicit
 			}
 		}
 		
@@ -177,10 +184,10 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	/**
 	 * Create edges for all properties in the given type which are data type properties.
 	 */
-	private def void createEdgesForClassProperties(EList<Edge> edges, AbstractTypeDeclaration type, List<AbstractTypeDeclaration> dataTypes) {
+	private def void createEdgesForClassProperties(EList<Edge> edges, AbstractTypeDeclaration type, List<String> dataTypePatterns) {
 		if (type instanceof TypeDeclaration) {
 			type.fields.forEach[field |
-				if (field.type.isDataType(dataTypes))
+				if (field.type.isDataType(dataTypePatterns))
 					field.fragments.forEach[fragment | edges.add(createDataEdge(type, fragment))]
 			]
 		}
@@ -194,28 +201,41 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * 
 	 * @return returns true if the given type is a data type and not a behavior type.
 	 */
-	private def boolean isDataType(Type type, List<AbstractTypeDeclaration> dataTypes) {
+	private def boolean isDataType(Type type, List<String> dataTypePatterns) {
 		switch(type) {
 			ArrayType:
-				return type.elementType.isDataType(dataTypes)
+				return type.elementType.isDataType(dataTypePatterns)
 			ParameterizedType:
-				return type.type.isDataType(dataTypes)
+				return type.type.isDataType(dataTypePatterns)
 			PrimitiveType: /** primitive types are all data types */
 				return true
 			QualifiedType:
-				return type.qualifier.isDataType(dataTypes) 
+				return type.qualifier.isDataType(dataTypePatterns) 
 			SimpleType:
-				return dataTypes.exists[dataType | dataType.name.fullyQualifiedName.equals(type.name.fullyQualifiedName)]
+				return dataTypePatterns.exists[dataTypePattern | type.resolveBinding.determineFullyQualifiedName.matches(dataTypePattern)]
 			UnionType:
-				return type.types.forall[it.isDataType(dataTypes)]
+				return type.types.forall[it.isDataType(dataTypePatterns)]
 			WildcardType:
 				return if (type.bound != null)
-					type.bound.isDataType(dataTypes)
+					type.bound.isDataType(dataTypePatterns)
 				else
 					true	
 			default:
 				return false
 		}
+	}
+	
+	/**
+	 * Determine if the given type is a data type.
+	 * 
+	 * @param type the type to be evaluated
+	 * @param dataTypes a list of data types
+	 * 
+	 * @return returns true if the given type is a data type and not a behavior type.
+	 */
+	private def boolean isClassDataType(ITypeBinding typeBinding, List<String> dataTypePatterns) {
+		// TODO this might be to simple.
+		return dataTypePatterns.exists[pattern | typeBinding.determineFullyQualifiedName.matches(pattern)]
 	}
 		
 }

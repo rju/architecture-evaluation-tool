@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -46,7 +47,7 @@ public class NameResolutionHelper {
   /**
    * Fully qualified name of a class specified by a class declaration
    */
-  private static String determineFullyQualifiedName(final AbstractTypeDeclaration clazz) {
+  public static String determineFullyQualifiedName(final AbstractTypeDeclaration clazz) {
     ASTNode _parent = clazz.getParent();
     PackageDeclaration _package = ((CompilationUnit) _parent).getPackage();
     Name _name = _package.getName();
@@ -249,6 +250,29 @@ public class NameResolutionHelper {
     } else {
       return result;
     }
+  }
+  
+  /**
+   * Determine the fully qualified name for a variable binding.
+   */
+  public static String determineFullyQualifiedName(final IVariableBinding variableBinding) {
+    String _xifexpression = null;
+    IMethodBinding _declaringMethod = variableBinding.getDeclaringMethod();
+    boolean _notEquals = (!Objects.equal(_declaringMethod, null));
+    if (_notEquals) {
+      IMethodBinding _declaringMethod_1 = variableBinding.getDeclaringMethod();
+      String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringMethod_1);
+      String _plus = (_determineFullyQualifiedName + ".");
+      String _name = variableBinding.getName();
+      _xifexpression = (_plus + _name);
+    } else {
+      ITypeBinding _declaringClass = variableBinding.getDeclaringClass();
+      String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_declaringClass);
+      String _plus_1 = (_determineFullyQualifiedName_1 + ".");
+      String _name_1 = variableBinding.getName();
+      _xifexpression = (_plus_1 + _name_1);
+    }
+    return _xifexpression;
   }
   
   /**

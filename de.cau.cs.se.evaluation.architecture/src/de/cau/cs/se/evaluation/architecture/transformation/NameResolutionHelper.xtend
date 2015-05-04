@@ -1,24 +1,24 @@
 package de.cau.cs.se.evaluation.architecture.transformation
 
-import org.eclipse.jdt.core.dom.MethodDeclaration
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment
-import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
-import org.eclipse.jdt.core.dom.MethodInvocation
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration
-import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.ArrayType
+import org.eclipse.jdt.core.dom.CompilationUnit
+import org.eclipse.jdt.core.dom.ConstructorInvocation
+import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.jdt.core.dom.ITypeBinding
+import org.eclipse.jdt.core.dom.IVariableBinding
+import org.eclipse.jdt.core.dom.MethodDeclaration
+import org.eclipse.jdt.core.dom.MethodInvocation
 import org.eclipse.jdt.core.dom.ParameterizedType
 import org.eclipse.jdt.core.dom.PrimitiveType
 import org.eclipse.jdt.core.dom.QualifiedType
 import org.eclipse.jdt.core.dom.SimpleType
-import org.eclipse.jdt.core.dom.UnionType
-import org.eclipse.jdt.core.dom.WildcardType
-import org.eclipse.jdt.core.dom.Expression
-import org.eclipse.jdt.core.dom.ConstructorInvocation
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation
-import org.eclipse.jdt.core.dom.ITypeBinding
-import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.jdt.core.dom.Type
+import org.eclipse.jdt.core.dom.UnionType
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment
+import org.eclipse.jdt.core.dom.WildcardType
 
 class NameResolutionHelper {
 	/**
@@ -31,7 +31,8 @@ class NameResolutionHelper {
 	/**
 	 * Fully qualified name of a class specified by a class declaration
 	 */
-	private def static determineFullyQualifiedName(AbstractTypeDeclaration clazz) {
+	// TODO make private again
+	def static determineFullyQualifiedName(AbstractTypeDeclaration clazz) {
 		val name = (clazz.parent as CompilationUnit).package.name.fullyQualifiedName + "." + clazz.name.fullyQualifiedName
 		return name
 	}
@@ -101,6 +102,16 @@ class NameResolutionHelper {
 			return result + " throw " + callee.resolveConstructorBinding.exceptionTypes.map[it.qualifiedName].join(",")
 		else
 			return result
+	}
+	
+	/**
+	 * Determine the fully qualified name for a variable binding.
+	 */
+	def static determineFullyQualifiedName(IVariableBinding variableBinding) {
+		if (variableBinding.declaringMethod != null)
+			variableBinding.declaringMethod.determineFullyQualifiedName + "." + variableBinding.name
+		else
+			variableBinding.declaringClass.determineFullyQualifiedName + "." + variableBinding.name
 	}
 	
 	/**

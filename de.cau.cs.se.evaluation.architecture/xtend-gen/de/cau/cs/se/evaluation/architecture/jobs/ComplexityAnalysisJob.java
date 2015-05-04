@@ -1,5 +1,6 @@
 package de.cau.cs.se.evaluation.architecture.jobs;
 
+import com.google.common.base.Objects;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
@@ -15,12 +16,17 @@ import de.cau.cs.se.evaluation.architecture.transformation.processing.Transforma
 import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationIntermoduleHyperedgesOnlyGraph;
 import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationMaximalInterconnectedGraph;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -55,6 +61,8 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 @SuppressWarnings("all")
 public class ComplexityAnalysisJob extends Job {
   private ArrayList<IType> types = new ArrayList<IType>();
+  
+  private List<String> dataTypePatterns;
   
   /**
    * The constructor scans the selection for files.
@@ -100,9 +108,8 @@ public class ComplexityAnalysisJob extends Job {
     int _plus_2 = (_plus_1 + _size_1);
     monitor.beginTask("Determine complexity of inter class dependency", _plus_2);
     monitor.worked(1);
-    final ArrayList<IType> dataTypes = new ArrayList<IType>();
     IJavaProject _get = projects.get(0);
-    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(_get, dataTypes, this.types, monitor);
+    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(_get, this.dataTypePatterns, this.types, monitor);
     javaToModularHypergraph.transform();
     ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();
     EList<Module> _modules = _modularSystem.getModules();
@@ -493,6 +500,9 @@ public class ComplexityAnalysisJob extends Job {
       String _string = object.toString();
       String _plus = ("  IProject " + _string);
       System.out.println(_plus);
+      IResource _findMember = object.findMember("hypergraph-analysis.cfg");
+      List<String> _readDataTypes = this.readDataTypes(((IFile) _findMember));
+      this.dataTypePatterns = _readDataTypes;
       boolean _hasNature = object.hasNature(JavaCore.NATURE_ID);
       if (_hasNature) {
         final IJavaProject project = JavaCore.create(object);
@@ -555,6 +565,23 @@ public class ComplexityAnalysisJob extends Job {
     String _string = object.toString();
     String _plus_2 = (_plus_1 + _string);
     System.out.println(_plus_2);
+  }
+  
+  private List<String> readDataTypes(final IFile file) {
+    try {
+      final List<String> dataTypePatterns = new ArrayList<String>();
+      InputStream _contents = file.getContents();
+      InputStreamReader _inputStreamReader = new InputStreamReader(_contents);
+      final BufferedReader reader = new BufferedReader(_inputStreamReader);
+      String line = null;
+      while ((!Objects.equal((line = reader.readLine()), null))) {
+        String _replaceAll = line.replaceAll("\\.", "\\.");
+        dataTypePatterns.add(_replaceAll);
+      }
+      return dataTypePatterns;
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   /**
