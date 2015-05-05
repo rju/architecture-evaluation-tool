@@ -87,7 +87,6 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
           public void accept(final Object unitType) {
             if ((unitType instanceof TypeDeclaration)) {
               final TypeDeclaration type = ((TypeDeclaration) unitType);
-              System.out.println(("type is " + type));
               ITypeBinding _resolveBinding = type.resolveBinding();
               boolean _isClassDataType = TransformationJavaMethodsToModularHypergraph.this.isClassDataType(_resolveBinding, dataTypePatterns);
               boolean _not = (!_isClassDataType);
@@ -221,7 +220,7 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
               NodeReference _derivedFrom = it.getDerivedFrom();
               Object _method = ((MethodTrace) _derivedFrom).getMethod();
               IMethodBinding _resolveBinding = method.resolveBinding();
-              return Boolean.valueOf(((IMethodBinding) _method).isSubsignature(_resolveBinding));
+              return Boolean.valueOf(((IMethodBinding) _method).isEqualTo(_resolveBinding));
             }
           };
           final Node node = IterableExtensions.<Node>findFirst(_nodes, _function);

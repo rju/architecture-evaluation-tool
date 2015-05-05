@@ -37,6 +37,12 @@ import static extension de.cau.cs.se.evaluation.architecture.transformation.Name
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEvaluation.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphQueryHelper.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
+import org.eclipse.jdt.core.dom.ArrayAccess
+import org.eclipse.jdt.core.dom.QualifiedName
+import org.eclipse.jdt.core.dom.ParenthesizedExpression
+import org.eclipse.jdt.core.dom.CastExpression
+import org.eclipse.jdt.core.dom.BooleanLiteral
+import org.eclipse.jdt.core.dom.SuperMethodInvocation
 
 class JavaASTExpressionEvaluationHelper {
 	
@@ -47,7 +53,7 @@ class JavaASTExpressionEvaluationHelper {
 		TypeDeclaration type, MethodDeclaration method
 	) {
 		val typeBinding = type.resolveBinding
-		if (assignment.leftHandSide.isClassDataProperty(dataTypePatterns, typeBinding, method)) {
+		if (assignment.leftHandSide.isDataPropertyOfClass(dataTypePatterns, typeBinding)) {
 			/** Handle connections via a data edge. */
 			val leftHandSide = assignment.leftHandSide
 			switch(leftHandSide) {
@@ -70,49 +76,93 @@ class JavaASTExpressionEvaluationHelper {
     }
     
     /**
-     * Create call edges for method and constructor calls found on the first level of the right hand side.
-     * For nested expressions call the expression handler.
+     * Create call edges for method and constructor calls found on the first level of the right hand side on an assignment
+     * when the left hand side is a behavior type. For nested expressions call the expression handler.
+     * 
+     * @param expression the expression of the right hand side of the assignment
+     * @param graph the modular hypergraph
+     * @param dataTypePatterns a list of patterns of fully qualified class names of data types
+     * @param typeBinding the binding of the context type
+     * @param node the node of the context (caller)
+     * @param type the context type
+     * @param method the context method
+     * 
      */
-    private static def void composeCallEdgesForAssignmentRightHandSide(Expression expression, ModularHypergraph graph, List<String> dataTypePatterns, 
+    private static def ITypeBinding composeCallEdgesForAssignmentRightHandSide(Expression expression, ModularHypergraph graph, List<String> dataTypePatterns, 
    		ITypeBinding typeBinding, Node node, TypeDeclaration type, MethodDeclaration method
    	) {
    		switch(expression) {
-   			MethodInvocation: {
-   				expression.composeCallEdge(graph, dataTypePatterns, typeBinding, node, type, method)
-   				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, type, method)]
-   			}
-			InfixExpression: {
-				expression.leftOperand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
-				expression.rightOperand?.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+   			ArrayAccess: {
+				expression.index.evaluate(graph, dataTypePatterns, node, type, method)
+				return expression.array.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
 			}
-			ClassInstanceCreation: { 
-				/** 
-				 * data type value initialization => does not cause an edge referencing, 
-				 * however check parameter for call edges.
-				 */
+			CastExpression: expression.expression.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+			ClassInstanceCreation: {
 				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, type, method)]
+				return evaluateRecursivelyInvocationChain(expression.expression, graph, dataTypePatterns, typeBinding, node, type, method, expression.resolveConstructorBinding)
 			}
-			NumberLiteral, SimpleName, StringLiteral: return
+			FieldAccess: {
+				return expression.resolveTypeBinding // TODO we might need to create a data edge here?
+			}
+			InfixExpression: {
+				val result = expression.leftOperand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+				expression.rightOperand?.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+				return result
+			}
+			MethodInvocation: {
+   				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, type, method)]
+   				return evaluateRecursivelyInvocationChain(expression.expression, graph, dataTypePatterns, typeBinding, node, type, method, expression.resolveMethodBinding)
+   			}
+			ParenthesizedExpression: expression.expression.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+			SuperMethodInvocation: {
+				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, type, method)]
+				return evaluateRecursivelyInvocationChain(null, graph, dataTypePatterns, typeBinding, node, type, method, expression.resolveMethodBinding)
+			}
+			BooleanLiteral,
+			NumberLiteral, QualifiedName, SimpleName, StringLiteral, ThisExpression: expression.resolveTypeBinding
 			default:
     			throw new UnsupportedOperationException("Expression type " + expression.class + " is not supported by assignNodesToEdge")
 		}
    	}
    	
+   	
+   	private static def ITypeBinding evaluateRecursivelyInvocationChain(Expression parentExpression, ModularHypergraph graph, List<String> dataTypePatterns, 
+   		ITypeBinding typeBinding, Node node, TypeDeclaration type, MethodDeclaration method, IMethodBinding targetMethodBinding
+   	) {
+   		if (parentExpression != null) {
+			val parentTypeBinding = composeCallEdgesForAssignmentRightHandSide(parentExpression, graph, dataTypePatterns, typeBinding, node, type, method)
+			if (!parentTypeBinding.isDataType(dataTypePatterns)) {				
+				composeCallEdge(graph, dataTypePatterns, node, method.resolveBinding, targetMethodBinding)
+			}
+			return parentTypeBinding
+		} else {
+			if (!targetMethodBinding.declaringClass.isDataType(dataTypePatterns)) {
+				composeCallEdge(graph, dataTypePatterns, node, method.resolveBinding, targetMethodBinding)
+			}
+			return targetMethodBinding.declaringClass
+		}
+   	}
+   	   	
    	/**
    	 * Create an call edge between invocation method (target) and method (source) iff no such edge exists.
    	 */
-   	private static def void composeCallEdge(MethodInvocation invocation, ModularHypergraph graph, 
-   		List<String> dataTypePatterns, ITypeBinding typeBinding, Node node, TypeDeclaration type, MethodDeclaration method
+   	private static def void composeCallEdge(ModularHypergraph graph, List<String> dataTypePatterns, Node node, 
+   		IMethodBinding sourceMethodBinding, IMethodBinding targetMethodBinding
    	) {
-   		var edge = findCallEdge(graph.edges, method.resolveBinding, invocation.resolveMethodBinding)
-   		if (edge == null) {
-   			val targetNode = findNodeForMethodBinding(graph.nodes, invocation.resolveMethodBinding)
-   			edge = createCallEdge(method.resolveBinding, invocation.resolveMethodBinding)
-   			node.edges.add(edge)
-   			targetNode.edges.add(edge)
-   			graph.edges.add(edge)
-   			System.out.println("composeCallEdge " + method.name + "--" + node.name + " " + targetNode.name + " " + edge.name)
-   		}		
+   		var edge = findCallEdge(graph.edges, sourceMethodBinding, targetMethodBinding)
+	   	if (edge == null) {
+	   		val targetNode = findNodeForMethodBinding(graph.nodes, targetMethodBinding)
+	   		if (targetNode != null) {
+	   			edge = createCallEdge(sourceMethodBinding, targetMethodBinding)
+		   		node.edges.add(edge)
+		   		targetNode.edges.add(edge)
+		   		graph.edges.add(edge)
+		   		// System.out.println("composeCallEdge " + sourceMethodBinding.name + "--" + node.name + " " + targetNode.name + " " + edge.name)
+	   		} else {
+	   			// TODO might be a private inner class. Check inner class handling
+	   		}
+	   		
+	   	}		
    	}
     	  
    	/**
@@ -129,7 +179,7 @@ class JavaASTExpressionEvaluationHelper {
 		} else {
 			assignment.rightHandSide.assignNodesToEdge(graph, dataTypePatterns, node, type, method, edge)
 			node.edges.add(edge) // TODO only add if unique
-			System.out.println("handleAssignmentSimpleNameEdgeResolving <" + node.name + "> [" + edge.name + "]")
+			// System.out.println("handleAssignmentSimpleNameEdgeResolving <" + node.name + "> [" + edge.name + "]")
 		}
    	}
     	    
@@ -137,20 +187,32 @@ class JavaASTExpressionEvaluationHelper {
      * Process a class instance creation in a local assignment. 
      */
     def static void processClassInstanceCreation(ClassInstanceCreation instanceCreation, ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration method) {
-    	val typeBinding = instanceCreation.resolveTypeBinding
-    	val constructorBinding = instanceCreation.resolveConstructorBinding
-    	if (typeBinding.isDataType(dataTypePatterns)) {
+    	val calleeTypeBinding = instanceCreation.resolveTypeBinding
+    	val calleeConstructorBinding = instanceCreation.resolveConstructorBinding
+    	val callerBinding = method.resolveBinding
+    	if (calleeTypeBinding.isDataType(dataTypePatterns)) {
     		/** This is an instance creation of a data type and must be ignored. */
     		return
     	} else {
+    		/** check if the class is an anonymous class. */
+    		if (calleeTypeBinding.anonymous) {
+    			/** create a module for each new anonymous class and scan for methods. */
+    			val module = createModuleForTypeBinding(calleeTypeBinding)
+    			graph.modules.add(module)
+    			instanceCreation.anonymousClassDeclaration.resolveBinding.declaredMethods.forEach[anonMethod |
+    				val anonNode = createNodeForMethod(anonMethod)
+    				module.nodes.add(anonNode)
+    				graph.nodes.add(anonNode)
+    			]
+    		}
 	    	/** create call edge as this is a local context. */
-	    	val targetNode = graph.findOrCreateTargetNode(typeBinding, constructorBinding)
+	    	val targetNode = graph.findOrCreateTargetNode(calleeTypeBinding, calleeConstructorBinding)
 	    	
-	    	val edge = createCallEdge(clazz, method, constructorBinding)
+	    	val edge = createCallEdge(callerBinding, calleeConstructorBinding)
 	    	graph.edges.add(edge)
 	    	node.edges.add(edge)
 	    	targetNode.edges.add(edge)
-	    	System.out.println("processClassInstanceCreation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
+	    	// System.out.println("processClassInstanceCreation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
 	    	
 	    	/**
 	    	 * node is the correct source node for evaluate, as all parameters are accessed inside of method and not the
@@ -163,26 +225,40 @@ class JavaASTExpressionEvaluationHelper {
     /**
      * Process a method invocation in an expression. This might be a local method, an external method, or an data type method.
      */
-    def static void processMethodInvocation(MethodInvocation invocation, ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration method) {
-    	val typeBinding = invocation.expression.resolveTypeBinding
+    def static void processMethodInvocation(MethodInvocation invocation, ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration sourceMethod) {
+    	val typeBinding = invocation.resolveMethodBinding.declaringClass
+    	val callerBinding = sourceMethod.resolveBinding
     	if (typeBinding.isDataType(dataTypePatterns)) {
-    		/** This is not a method invocation to be considered in complexity, as it is used with a data type. */
+    		/**
+    		 * It the class of this method is a data type class then ignore it, as methods of data type classes are operations
+    		 * like +, -, *, etc. and are not handled by the complexity measure.
+    		 */
     		return
     	} else {
-    		val targetMethodBinding = invocation.resolveMethodBinding
-    		val targetNode = graph.findOrCreateTargetNode(typeBinding, targetMethodBinding)
+    		val calleeMethodBinding = invocation.resolveMethodBinding
+    		val targetNode = graph.findOrCreateTargetNode(typeBinding, calleeMethodBinding)
     		
-    		val edge = createCallEdge(clazz, method, targetMethodBinding)
+    		val edge = createCallEdge(callerBinding, calleeMethodBinding)
 	    	graph.edges.add(edge)
 	    	node.edges.add(edge)
 	    	targetNode.edges.add(edge)
-	    	System.out.println("processMethodInvocation " + invocation.name.fullyQualifiedName + " - <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
+	    	// System.out.println("processMethodInvocation " + invocation.name.fullyQualifiedName + " - <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
 	    	
 	    	/**
 	    	 * Parameter node is the correct source node to evaluate the parameters, as all parameters
 	    	 * are accessed inside of method and not the instantiated constructor.
 	    	 */
-	    	invocation.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, clazz, method)]
+	    	invocation.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, clazz, sourceMethod)]
+    	}
+    }
+    
+    /**
+     * Create a data edge link form the present method to the data edge corresponding to the field
+     */
+    def static processFieldAccess(FieldAccess field, ModularHypergraph graph, List<String> dataTypePatterns, ITypeBinding typeBinding, Node node) {
+    	if (field.isDataPropertyOfClass(dataTypePatterns, typeBinding)) {
+    		val edge = graph.edges.findDataEdge(field.resolveFieldBinding)
+    		node.edges.add(edge)
     	}
     }
     
@@ -191,7 +267,7 @@ class JavaASTExpressionEvaluationHelper {
      */
 	private static def void assignNodesToEdge(Expression expression, ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration method, Edge edge) {
 		switch(expression) {
-			MethodInvocation: expression.assignNodeToEdge(graph, edge)
+			MethodInvocation: expression.resolveMethodBinding.assignNodeToEdge(graph, edge)
 			InfixExpression: {
 				expression.leftOperand.assignNodesToEdge(graph, dataTypePatterns, node, clazz, method, edge)
 				expression.rightOperand?.assignNodesToEdge(graph, dataTypePatterns, node, clazz, method, edge)	
@@ -203,7 +279,7 @@ class JavaASTExpressionEvaluationHelper {
 				 */
 				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, clazz, method)]
 			}
-			NumberLiteral, SimpleName, StringLiteral: return
+			NumberLiteral, QualifiedName, SimpleName, StringLiteral: return
 			default:
     			throw new UnsupportedOperationException("Expression type " + expression.class + " is not supported by assignNodesToEdge")
 		}
@@ -212,41 +288,13 @@ class JavaASTExpressionEvaluationHelper {
     /**
 	 * Find or create an node for the given invocation and connect it to the data edge.
 	 */
-	private static def assignNodeToEdge(MethodInvocation invocation, ModularHypergraph graph, Edge edge) {
-		val methodBinding = invocation.resolveMethodBinding
+	private static def assignNodeToEdge(IMethodBinding methodBinding, ModularHypergraph graph, Edge edge) {
 		val node = graph.findOrCreateTargetNode(methodBinding.declaringClass, methodBinding)
 		node.edges.add(edge)
-		System.out.println("assignNodeToEdge " + invocation.name.fullyQualifiedName + " - <" + node.name + "> [" + edge.name + "]")
+		// System.out.println("assignNodeToEdge " + methodBinding.name + " - <" + node.name + "> [" + edge.name + "]")
 		// TODO parameter of the method invocation must be processed for call edges
 	}
-    
-    /**
-     * Find the corresponding node in the graph and if none can be found create one.
-     * Missing nodes occur, because framework classes are not automatically scanned form method.
-     * It a new node is created it is also added to the graph.
-     * 
-     * @param graph
-     * @param typeBinding
-     * @param methodBinding
-     * 
-     * @return returns the found or created node 
-     */
-    private def static findOrCreateTargetNode(ModularHypergraph graph, ITypeBinding typeBinding, IMethodBinding methodBinding) {
-    	var targetNode = graph.nodes.findNodeForMethodBinding(methodBinding)
-    	if (targetNode == null) { /** node does not yet exist. It must be a framework class. */
-    		var module = graph.modules.findModule(typeBinding)
-    		if (module == null) { /** Module does not exists. Add it on demand. */
-    			module = createModuleForTypeBinding(typeBinding)
-    			graph.modules.add(module) 
-    		}
-    		targetNode = createNodeForMethod(methodBinding)
-    		module.nodes.add(targetNode)
-    		graph.nodes.add(targetNode)
-    	}
-    	
-    	return targetNode
-    }
-    
+        
     /**
      * Determine if a given type is considered a data type.
      */
@@ -264,22 +312,27 @@ class JavaASTExpressionEvaluationHelper {
      * 
      * @return true for data properties false otherwise
      */
-    private def static boolean isClassDataProperty(Expression expression, List<String> dataTypePatterns, ITypeBinding typeBinding, MethodDeclaration method) {
+    private def static boolean isDataPropertyOfClass(Expression expression, List<String> dataTypePatterns,
+    	ITypeBinding typeBinding
+    ) {
     	switch(expression) {
+    		
     		FieldAccess: {
     			val prefix = expression.expression
     			switch(prefix) {
-    				ThisExpression: expression.name.isClassDataProperty(dataTypePatterns, typeBinding, method)
+    				ParenthesizedExpression: prefix.expression.isDataPropertyOfClass(dataTypePatterns, typeBinding)
+    				ThisExpression: expression.name.isDataPropertyOfClass(dataTypePatterns, typeBinding)
     				default:
     					throw new UnsupportedOperationException("FieldAccess expression type " + expression.class + " is not supported by isClassDataProperty")
     			} 
     		}
-    		SimpleName: {
-    			val global = typeBinding.declaredFields.findFirst[it.name.equals(expression.fullyQualifiedName) && it.type.isDataType(dataTypePatterns)]
-    			return (global != null)
+    		SimpleName: typeBinding.declaredFields.exists[it.name.equals(expression.fullyQualifiedName) && it.type.isDataType(dataTypePatterns)]
+    		QualifiedName: false
+    		ArrayAccess: {
+    			expression.array.isDataPropertyOfClass(dataTypePatterns, typeBinding)
     		}
     		default:
-    			throw new UnsupportedOperationException("Expression type " + expression.class + " is not supported by isClassDataProperty")
+    			return false
     	}
     }
 

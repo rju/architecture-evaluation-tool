@@ -37,6 +37,8 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import org.eclipse.core.resources.IFile
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.swt.widgets.Shell
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -44,12 +46,15 @@ class ComplexityAnalysisJob extends Job {
 	
 	List<String> dataTypePatterns
 	
+	val Shell shell
+	
 	/**
 	 * The constructor scans the selection for files.
 	 * Compare to http://stackoverflow.com/questions/6892294/eclipse-plugin-how-to-get-the-path-to-the-currently-selected-project
 	 */
-	public new (ISelection selection) {
+	public new (ISelection selection, Shell shell) {
 		super("Analysis Complexity")
+		this.shell = shell
 		if (selection instanceof IStructuredSelection) {
 			System.out.println("Got a structured selection");
 			if (selection instanceof ITreeSelection) {
@@ -76,8 +81,9 @@ class ComplexityAnalysisJob extends Job {
 		
 		
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(projects.get(0), dataTypePatterns, types, monitor)
+		monitor.subTask("Reading Project")
 		javaToModularHypergraph.transform
-				
+		/*
 		for (module : javaToModularHypergraph.modularSystem.modules) {
 			System.out.println("module " + module.name)
 			for (node : module.nodes) {
@@ -89,7 +95,7 @@ class ComplexityAnalysisJob extends Job {
 			for (edge : node.edges) {
 				System.out.println("  edge " + edge.name)
 			}
-		}
+		} */
 		
 		/** Preparing different hypergraphs */
 		
@@ -98,7 +104,9 @@ class ComplexityAnalysisJob extends Job {
 		// Transformation for MS^*
 		val transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(javaToModularHypergraph.modularSystem)
 		
+		monitor.subTask("Maximal Interconnected Graph")
 		transformationMaximalInterconnectedGraph.transform
+		monitor.subTask("Intermodule Hyperedges Only Graph")
 		transformationIntermoduleHyperedgesOnlyGraph.transform
 		
 		/** calculating result metrics */
@@ -106,13 +114,17 @@ class ComplexityAnalysisJob extends Job {
 		// Calculation for S
 		val metrics = new TransformationHypergraphMetrics(monitor)
 		metrics.setSystem(javaToModularHypergraph.modularSystem)
+		monitor.subTask("Calculate System Size")
 		val systemSize = metrics.calculate
 		
 		// Calculation for S -> S^#, S^#_i
+		monitor.subTask("Calculate Complexity")
 		val complexity = calculateComplexity(javaToModularHypergraph.modularSystem, monitor)	
 		// Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i
+		monitor.subTask("Calculate Maximal Interconnected Graph Complexity")
 		val complexityMaximalInterconnected = calculateComplexity(transformationMaximalInterconnectedGraph.result, monitor)
 		// Calculation for MS^* -> MS^*#, MS^*#_i
+		monitor.subTask("Calculate Intermodule Complexity")
 		val complexityIntermodule = calculateComplexity(transformationIntermoduleHyperedgesOnlyGraph.result, monitor)	
 		
 		/** display results */
@@ -314,10 +326,15 @@ class ComplexityAnalysisJob extends Job {
 	
 	private def dispatch scanForClasses(IProject object) {
 		System.out.println("  IProject " + object.toString)
-		dataTypePatterns = readDataTypes(object.findMember("hypergraph-analysis.cfg") as IFile)
-		if (object.hasNature(JavaCore.NATURE_ID)) {
-			val IJavaProject project = JavaCore.create(object);
-			project.allPackageFragmentRoots.forEach[root | root.checkForTypes]
+		val dataClassConfig = object.findMember("hypergraph-analysis.cfg") as IFile
+		if (dataClassConfig.isSynchronized(1)) {
+			dataTypePatterns = readDataTypes(dataClassConfig)
+			if (object.hasNature(JavaCore.NATURE_ID)) {
+				val IJavaProject project = JavaCore.create(object);
+				project.allPackageFragmentRoots.forEach[root | root.checkForTypes]
+			}
+		} else {
+			MessageDialog.openError(shell, "Missing Configuration File", "Missing configuration file listing patterns for data type classes.")
 		}
 	}
 		
@@ -389,7 +406,7 @@ class ComplexityAnalysisJob extends Job {
 	 * in compilation units
 	 */
 	private def void checkForTypes(ICompilationUnit unit) {
-		unit.allTypes.forEach[type | if (type instanceof IType) if (!Flags.isAbstract(type.flags)) types.add(type)]
+		unit.allTypes.forEach[type | if (type instanceof IType) types.add(type)]
 	}
 	
 	

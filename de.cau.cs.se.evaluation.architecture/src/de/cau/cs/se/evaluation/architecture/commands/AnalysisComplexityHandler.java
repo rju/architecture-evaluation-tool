@@ -33,7 +33,7 @@ public class AnalysisComplexityHandler extends AbstractHandler implements IHandl
 		final IWorkbenchPage activePage = window.getActivePage();
 		final ISelection selection = activePage.getSelection();
 		if (selection != null) {
-			final Job job = new ComplexityAnalysisJob(selection);
+			final Job job = new ComplexityAnalysisJob(selection, window.getShell());
 			job.schedule();
 			try {
 				activePage.showView(AnalysisResultView.ID);

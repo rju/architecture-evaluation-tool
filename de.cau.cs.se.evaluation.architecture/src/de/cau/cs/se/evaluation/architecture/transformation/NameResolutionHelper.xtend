@@ -40,17 +40,32 @@ class NameResolutionHelper {
 	/**
 	 * Fully qualified name of a class specified by a type binding
 	 */
-	def static determineFullyQualifiedName(ITypeBinding clazz) {
-		val name = clazz.package.name + "." + clazz.name
-		return name
+	def static String determineFullyQualifiedName(ITypeBinding clazz) {
+		if (clazz.anonymous) {
+			return clazz.declaringClass.determineFullyQualifiedName + "." + clazz.interfaces.get(0).name + "$" + clazz.key
+		} else if (clazz.primitive) {
+			return clazz.name
+		} else if (clazz.array) {
+			return clazz.elementType.determineFullyQualifiedName + "[]"
+		} else {
+			if (clazz != null)
+				if (clazz.package != null)
+					return clazz.package.name + "." + clazz.name
+				else
+					throw new Exception("y")
+			else
+				throw new Exception("x")
+		}
 	}
 	
 	/**
 	 * Fully qualified name of a method based on the method binding.
 	 */
 	def static determineFullyQualifiedName(IMethodBinding binding) {
-		val name = binding.declaringClass.determineFullyQualifiedName + "." + binding.name
-		return name
+		if (binding.declaringClass.anonymous && binding.constructor)
+			return binding.declaringClass.determineFullyQualifiedName + "." + binding.declaringClass.interfaces.get(0).name
+		else
+			return binding.declaringClass.determineFullyQualifiedName + "." + binding.name
 	}
 	
 

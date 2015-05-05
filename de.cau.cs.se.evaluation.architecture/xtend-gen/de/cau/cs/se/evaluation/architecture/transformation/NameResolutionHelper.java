@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
@@ -63,24 +64,83 @@ public class NameResolutionHelper {
    * Fully qualified name of a class specified by a type binding
    */
   public static String determineFullyQualifiedName(final ITypeBinding clazz) {
-    IPackageBinding _package = clazz.getPackage();
-    String _name = _package.getName();
-    String _plus = (_name + ".");
-    String _name_1 = clazz.getName();
-    final String name = (_plus + _name_1);
-    return name;
+    try {
+      boolean _isAnonymous = clazz.isAnonymous();
+      if (_isAnonymous) {
+        ITypeBinding _declaringClass = clazz.getDeclaringClass();
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass);
+        String _plus = (_determineFullyQualifiedName + ".");
+        ITypeBinding[] _interfaces = clazz.getInterfaces();
+        ITypeBinding _get = _interfaces[0];
+        String _name = _get.getName();
+        String _plus_1 = (_plus + _name);
+        String _plus_2 = (_plus_1 + "$");
+        String _key = clazz.getKey();
+        return (_plus_2 + _key);
+      } else {
+        boolean _isPrimitive = clazz.isPrimitive();
+        if (_isPrimitive) {
+          return clazz.getName();
+        } else {
+          boolean _isArray = clazz.isArray();
+          if (_isArray) {
+            ITypeBinding _elementType = clazz.getElementType();
+            String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_elementType);
+            return (_determineFullyQualifiedName_1 + "[]");
+          } else {
+            boolean _notEquals = (!Objects.equal(clazz, null));
+            if (_notEquals) {
+              IPackageBinding _package = clazz.getPackage();
+              boolean _notEquals_1 = (!Objects.equal(_package, null));
+              if (_notEquals_1) {
+                IPackageBinding _package_1 = clazz.getPackage();
+                String _name_1 = _package_1.getName();
+                String _plus_3 = (_name_1 + ".");
+                String _name_2 = clazz.getName();
+                return (_plus_3 + _name_2);
+              } else {
+                throw new Exception("y");
+              }
+            } else {
+              throw new Exception("x");
+            }
+          }
+        }
+      }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
   
   /**
    * Fully qualified name of a method based on the method binding.
    */
   public static String determineFullyQualifiedName(final IMethodBinding binding) {
+    boolean _and = false;
     ITypeBinding _declaringClass = binding.getDeclaringClass();
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass);
-    String _plus = (_determineFullyQualifiedName + ".");
-    String _name = binding.getName();
-    final String name = (_plus + _name);
-    return name;
+    boolean _isAnonymous = _declaringClass.isAnonymous();
+    if (!_isAnonymous) {
+      _and = false;
+    } else {
+      boolean _isConstructor = binding.isConstructor();
+      _and = _isConstructor;
+    }
+    if (_and) {
+      ITypeBinding _declaringClass_1 = binding.getDeclaringClass();
+      String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_1);
+      String _plus = (_determineFullyQualifiedName + ".");
+      ITypeBinding _declaringClass_2 = binding.getDeclaringClass();
+      ITypeBinding[] _interfaces = _declaringClass_2.getInterfaces();
+      ITypeBinding _get = _interfaces[0];
+      String _name = _get.getName();
+      return (_plus + _name);
+    } else {
+      ITypeBinding _declaringClass_3 = binding.getDeclaringClass();
+      String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_3);
+      String _plus_1 = (_determineFullyQualifiedName_1 + ".");
+      String _name_1 = binding.getName();
+      return (_plus_1 + _name_1);
+    }
   }
   
   /**

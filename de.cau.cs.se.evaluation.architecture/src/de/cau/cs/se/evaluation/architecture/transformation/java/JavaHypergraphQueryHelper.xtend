@@ -14,7 +14,8 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-
+import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 
 class JavaHypergraphQueryHelper {
 		/**
@@ -46,7 +47,6 @@ class JavaHypergraphQueryHelper {
 	 * Find an edge which has the two corresponding method bindings.
 	 */
 	def static findCallEdge(EList<Edge> edges, IMethodBinding endOne, IMethodBinding endTwo) {
-		System.out.println("findCallEdge " + endOne.determineFullyQualifiedName + " :: " + endTwo.determineFullyQualifiedName)
 		edges.findFirst[edge |
 			if (edge.derivedFrom instanceof CallerCalleeTrace) {
 				val trace = (edge.derivedFrom as CallerCalleeTrace)
@@ -55,7 +55,6 @@ class JavaHypergraphQueryHelper {
 				
 				if ((caller.isEqualTo(endOne) && callee.isEqualTo(endTwo)) ||
 				    (caller.isEqualTo(endTwo) && callee.isEqualTo(endOne))) {
-				    System.out.println("\t " + caller.determineFullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
 				    true
 				} else {
 					false	
@@ -69,7 +68,6 @@ class JavaHypergraphQueryHelper {
 	 * Find an data edge which has the given variable binding.
 	 */
 	def static findDataEdge(EList<Edge> edges, IVariableBinding binding) {
-		System.out.println("findDataEdge " + binding.determineFullyQualifiedName)
 		edges.findFirst[edge |
 			if (edge.derivedFrom instanceof FieldTrace) {
 				val trace = (edge.derivedFrom as FieldTrace).field as VariableDeclarationFragment
@@ -78,4 +76,31 @@ class JavaHypergraphQueryHelper {
 				false
 		]
 	}
+	
+	/**
+     * Find the corresponding node in the graph and if none can be found create one.
+     * Missing nodes occur, because framework classes are not automatically scanned form method.
+     * It a new node is created it is also added to the graph.
+     * 
+     * @param graph
+     * @param typeBinding
+     * @param methodBinding
+     * 
+     * @return returns the found or created node 
+     */
+    def static findOrCreateTargetNode(ModularHypergraph graph, ITypeBinding typeBinding, IMethodBinding methodBinding) {
+    	var targetNode = graph.nodes.findNodeForMethodBinding(methodBinding)
+    	if (targetNode == null) { /** node does not yet exist. It must be a framework class. */
+    		var module = graph.modules.findModule(typeBinding)
+    		if (module == null) { /** Module does not exists. Add it on demand. */
+    			module = createModuleForTypeBinding(typeBinding)
+    			graph.modules.add(module) 
+    		}
+    		targetNode = createNodeForMethod(methodBinding)
+    		module.nodes.add(targetNode)
+    		graph.nodes.add(targetNode)
+    	}
+    	
+    	return targetNode
+    }
 }

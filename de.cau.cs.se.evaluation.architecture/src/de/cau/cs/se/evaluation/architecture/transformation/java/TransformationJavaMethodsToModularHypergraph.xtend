@@ -65,7 +65,6 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 			unit.types.forEach[unitType |
 				if (unitType instanceof TypeDeclaration) {
 					val type = unitType as TypeDeclaration
-					System.out.println("type is " + type)
 					if (!isClassDataType(type.resolveBinding, dataTypePatterns))
 						declarations.add(type)
 			 	}
@@ -136,7 +135,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 			clazz.methods.forEach[method |
 				val node = graph.nodes.findFirst[
 					((it.derivedFrom as MethodTrace).method as IMethodBinding).
-						isSubsignature(method.resolveBinding)
+						isEqualTo(method.resolveBinding)
 				]
 				evaluteMethod(graph, dataTypePatterns, node, clazz, method)
 			]

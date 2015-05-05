@@ -5,7 +5,6 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
-import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
@@ -32,7 +31,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,11 +38,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -64,12 +64,15 @@ public class ComplexityAnalysisJob extends Job {
   
   private List<String> dataTypePatterns;
   
+  private final Shell shell;
+  
   /**
    * The constructor scans the selection for files.
    * Compare to http://stackoverflow.com/questions/6892294/eclipse-plugin-how-to-get-the-path-to-the-currently-selected-project
    */
-  public ComplexityAnalysisJob(final ISelection selection) {
+  public ComplexityAnalysisJob(final ISelection selection, final Shell shell) {
     super("Analysis Complexity");
+    this.shell = shell;
     if ((selection instanceof IStructuredSelection)) {
       System.out.println("Got a structured selection");
       if ((selection instanceof ITreeSelection)) {
@@ -110,51 +113,28 @@ public class ComplexityAnalysisJob extends Job {
     monitor.worked(1);
     IJavaProject _get = projects.get(0);
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(_get, this.dataTypePatterns, this.types, monitor);
+    monitor.subTask("Reading Project");
     javaToModularHypergraph.transform();
     ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();
-    EList<Module> _modules = _modularSystem.getModules();
-    for (final Module module : _modules) {
-      {
-        String _name = module.getName();
-        String _plus_3 = ("module " + _name);
-        System.out.println(_plus_3);
-        EList<Node> _nodes = module.getNodes();
-        for (final Node node : _nodes) {
-          String _name_1 = node.getName();
-          String _plus_4 = ("  node " + _name_1);
-          System.out.println(_plus_4);
-        }
-      }
-    }
+    final TransformationMaximalInterconnectedGraph transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(_modularSystem);
     ModularHypergraph _modularSystem_1 = javaToModularHypergraph.getModularSystem();
-    EList<Node> _nodes = _modularSystem_1.getNodes();
-    for (final Node node : _nodes) {
-      {
-        String _name = node.getName();
-        String _plus_3 = ("node " + _name);
-        System.out.println(_plus_3);
-        EList<Edge> _edges = node.getEdges();
-        for (final Edge edge : _edges) {
-          String _name_1 = edge.getName();
-          String _plus_4 = ("  edge " + _name_1);
-          System.out.println(_plus_4);
-        }
-      }
-    }
-    ModularHypergraph _modularSystem_2 = javaToModularHypergraph.getModularSystem();
-    final TransformationMaximalInterconnectedGraph transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(_modularSystem_2);
-    ModularHypergraph _modularSystem_3 = javaToModularHypergraph.getModularSystem();
-    final TransformationIntermoduleHyperedgesOnlyGraph transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(_modularSystem_3);
+    final TransformationIntermoduleHyperedgesOnlyGraph transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(_modularSystem_1);
+    monitor.subTask("Maximal Interconnected Graph");
     transformationMaximalInterconnectedGraph.transform();
+    monitor.subTask("Intermodule Hyperedges Only Graph");
     transformationIntermoduleHyperedgesOnlyGraph.transform();
     final TransformationHypergraphMetrics metrics = new TransformationHypergraphMetrics(monitor);
-    ModularHypergraph _modularSystem_4 = javaToModularHypergraph.getModularSystem();
-    metrics.setSystem(_modularSystem_4);
+    ModularHypergraph _modularSystem_2 = javaToModularHypergraph.getModularSystem();
+    metrics.setSystem(_modularSystem_2);
+    monitor.subTask("Calculate System Size");
     final double systemSize = metrics.calculate();
-    ModularHypergraph _modularSystem_5 = javaToModularHypergraph.getModularSystem();
-    final double complexity = this.calculateComplexity(_modularSystem_5, monitor);
+    monitor.subTask("Calculate Complexity");
+    ModularHypergraph _modularSystem_3 = javaToModularHypergraph.getModularSystem();
+    final double complexity = this.calculateComplexity(_modularSystem_3, monitor);
+    monitor.subTask("Calculate Maximal Interconnected Graph Complexity");
     ModularHypergraph _result = transformationMaximalInterconnectedGraph.getResult();
     final double complexityMaximalInterconnected = this.calculateComplexity(_result, monitor);
+    monitor.subTask("Calculate Intermodule Complexity");
     ModularHypergraph _result_1 = transformationIntermoduleHyperedgesOnlyGraph.getResult();
     final double complexityIntermodule = this.calculateComplexity(_result_1, monitor);
     final Hypergraph megaModelGraph = this.createMegaModelAnalysis();
@@ -501,18 +481,24 @@ public class ComplexityAnalysisJob extends Job {
       String _plus = ("  IProject " + _string);
       System.out.println(_plus);
       IResource _findMember = object.findMember("hypergraph-analysis.cfg");
-      List<String> _readDataTypes = this.readDataTypes(((IFile) _findMember));
-      this.dataTypePatterns = _readDataTypes;
-      boolean _hasNature = object.hasNature(JavaCore.NATURE_ID);
-      if (_hasNature) {
-        final IJavaProject project = JavaCore.create(object);
-        IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
-        final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
-          public void accept(final IPackageFragmentRoot root) {
-            ComplexityAnalysisJob.this.checkForTypes(root);
-          }
-        };
-        ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
+      final IFile dataClassConfig = ((IFile) _findMember);
+      boolean _isSynchronized = dataClassConfig.isSynchronized(1);
+      if (_isSynchronized) {
+        List<String> _readDataTypes = this.readDataTypes(dataClassConfig);
+        this.dataTypePatterns = _readDataTypes;
+        boolean _hasNature = object.hasNature(JavaCore.NATURE_ID);
+        if (_hasNature) {
+          final IJavaProject project = JavaCore.create(object);
+          IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
+          final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
+            public void accept(final IPackageFragmentRoot root) {
+              ComplexityAnalysisJob.this.checkForTypes(root);
+            }
+          };
+          ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
+        }
+      } else {
+        MessageDialog.openError(this.shell, "Missing Configuration File", "Missing configuration file listing patterns for data type classes.");
       }
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
@@ -634,17 +620,8 @@ public class ComplexityAnalysisJob extends Job {
       IType[] _allTypes = unit.getAllTypes();
       final Consumer<IType> _function = new Consumer<IType>() {
         public void accept(final IType type) {
-          try {
-            if ((type instanceof IType)) {
-              int _flags = type.getFlags();
-              boolean _isAbstract = Flags.isAbstract(_flags);
-              boolean _not = (!_isAbstract);
-              if (_not) {
-                ComplexityAnalysisJob.this.types.add(type);
-              }
-            }
-          } catch (Throwable _e) {
-            throw Exceptions.sneakyThrow(_e);
+          if ((type instanceof IType)) {
+            ComplexityAnalysisJob.this.types.add(type);
           }
         }
       };

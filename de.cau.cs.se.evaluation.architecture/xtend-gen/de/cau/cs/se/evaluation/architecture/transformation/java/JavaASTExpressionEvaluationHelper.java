@@ -12,8 +12,12 @@ import de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphQu
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -29,10 +33,13 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -54,8 +61,8 @@ public class JavaASTExpressionEvaluationHelper {
   public static void processAssignment(final Assignment assignment, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration type, final MethodDeclaration method) {
     final ITypeBinding typeBinding = type.resolveBinding();
     Expression _leftHandSide = assignment.getLeftHandSide();
-    boolean _isClassDataProperty = JavaASTExpressionEvaluationHelper.isClassDataProperty(_leftHandSide, dataTypePatterns, typeBinding, method);
-    if (_isClassDataProperty) {
+    boolean _isDataPropertyOfClass = JavaASTExpressionEvaluationHelper.isDataPropertyOfClass(_leftHandSide, dataTypePatterns, typeBinding);
+    if (_isDataPropertyOfClass) {
       final Expression leftHandSide = assignment.getLeftHandSide();
       boolean _matched = false;
       if (!_matched) {
@@ -97,33 +104,34 @@ public class JavaASTExpressionEvaluationHelper {
   }
   
   /**
-   * Create call edges for method and constructor calls found on the first level of the right hand side.
-   * For nested expressions call the expression handler.
+   * Create call edges for method and constructor calls found on the first level of the right hand side on an assignment
+   * when the left hand side is a behavior type. For nested expressions call the expression handler.
+   * 
+   * @param expression the expression of the right hand side of the assignment
+   * @param graph the modular hypergraph
+   * @param dataTypePatterns a list of patterns of fully qualified class names of data types
+   * @param typeBinding the binding of the context type
+   * @param node the node of the context (caller)
+   * @param type the context type
+   * @param method the context method
    */
-  private static void composeCallEdgesForAssignmentRightHandSide(final Expression expression, final ModularHypergraph graph, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final Node node, final TypeDeclaration type, final MethodDeclaration method) {
+  private static ITypeBinding composeCallEdgesForAssignmentRightHandSide(final Expression expression, final ModularHypergraph graph, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final Node node, final TypeDeclaration type, final MethodDeclaration method) {
+    ITypeBinding _switchResult = null;
     boolean _matched = false;
     if (!_matched) {
-      if (expression instanceof MethodInvocation) {
+      if (expression instanceof ArrayAccess) {
         _matched=true;
-        JavaASTExpressionEvaluationHelper.composeCallEdge(((MethodInvocation)expression), graph, dataTypePatterns, typeBinding, node, type, method);
-        List _arguments = ((MethodInvocation)expression).arguments();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object argument) {
-            JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, type, method);
-          }
-        };
-        _arguments.forEach(_function);
+        Expression _index = ((ArrayAccess)expression).getIndex();
+        JavaASTEvaluation.evaluate(_index, graph, dataTypePatterns, node, type, method);
+        Expression _array = ((ArrayAccess)expression).getArray();
+        return JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_array, graph, dataTypePatterns, typeBinding, node, type, method);
       }
     }
     if (!_matched) {
-      if (expression instanceof InfixExpression) {
+      if (expression instanceof CastExpression) {
         _matched=true;
-        Expression _leftOperand = ((InfixExpression)expression).getLeftOperand();
-        JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_leftOperand, graph, dataTypePatterns, typeBinding, node, type, method);
-        Expression _rightOperand = ((InfixExpression)expression).getRightOperand();
-        if (_rightOperand!=null) {
-          JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_rightOperand, graph, dataTypePatterns, typeBinding, node, type, method);
-        }
+        Expression _expression = ((CastExpression)expression).getExpression();
+        _switchResult = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_expression, graph, dataTypePatterns, typeBinding, node, type, method);
       }
     }
     if (!_matched) {
@@ -136,11 +144,78 @@ public class JavaASTExpressionEvaluationHelper {
           }
         };
         _arguments.forEach(_function);
+        Expression _expression = ((ClassInstanceCreation)expression).getExpression();
+        IMethodBinding _resolveConstructorBinding = ((ClassInstanceCreation)expression).resolveConstructorBinding();
+        return JavaASTExpressionEvaluationHelper.evaluateRecursivelyInvocationChain(_expression, graph, dataTypePatterns, typeBinding, node, type, method, _resolveConstructorBinding);
       }
     }
     if (!_matched) {
-      if (expression instanceof NumberLiteral) {
+      if (expression instanceof FieldAccess) {
         _matched=true;
+        return ((FieldAccess)expression).resolveTypeBinding();
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof InfixExpression) {
+        _matched=true;
+        Expression _leftOperand = ((InfixExpression)expression).getLeftOperand();
+        final ITypeBinding result = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_leftOperand, graph, dataTypePatterns, typeBinding, node, type, method);
+        Expression _rightOperand = ((InfixExpression)expression).getRightOperand();
+        if (_rightOperand!=null) {
+          JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_rightOperand, graph, dataTypePatterns, typeBinding, node, type, method);
+        }
+        return result;
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof MethodInvocation) {
+        _matched=true;
+        List _arguments = ((MethodInvocation)expression).arguments();
+        final Consumer<Object> _function = new Consumer<Object>() {
+          public void accept(final Object argument) {
+            JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, type, method);
+          }
+        };
+        _arguments.forEach(_function);
+        Expression _expression = ((MethodInvocation)expression).getExpression();
+        IMethodBinding _resolveMethodBinding = ((MethodInvocation)expression).resolveMethodBinding();
+        return JavaASTExpressionEvaluationHelper.evaluateRecursivelyInvocationChain(_expression, graph, dataTypePatterns, typeBinding, node, type, method, _resolveMethodBinding);
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof ParenthesizedExpression) {
+        _matched=true;
+        Expression _expression = ((ParenthesizedExpression)expression).getExpression();
+        _switchResult = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_expression, graph, dataTypePatterns, typeBinding, node, type, method);
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof SuperMethodInvocation) {
+        _matched=true;
+        List _arguments = ((SuperMethodInvocation)expression).arguments();
+        final Consumer<Object> _function = new Consumer<Object>() {
+          public void accept(final Object argument) {
+            JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, type, method);
+          }
+        };
+        _arguments.forEach(_function);
+        IMethodBinding _resolveMethodBinding = ((SuperMethodInvocation)expression).resolveMethodBinding();
+        return JavaASTExpressionEvaluationHelper.evaluateRecursivelyInvocationChain(null, graph, dataTypePatterns, typeBinding, node, type, method, _resolveMethodBinding);
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof BooleanLiteral) {
+        _matched=true;
+      }
+      if (!_matched) {
+        if (expression instanceof NumberLiteral) {
+          _matched=true;
+        }
+      }
+      if (!_matched) {
+        if (expression instanceof QualifiedName) {
+          _matched=true;
+        }
       }
       if (!_matched) {
         if (expression instanceof SimpleName) {
@@ -152,8 +227,13 @@ public class JavaASTExpressionEvaluationHelper {
           _matched=true;
         }
       }
+      if (!_matched) {
+        if (expression instanceof ThisExpression) {
+          _matched=true;
+        }
+      }
       if (_matched) {
-        return;
+        _switchResult = expression.resolveTypeBinding();
       }
     }
     if (!_matched) {
@@ -162,43 +242,54 @@ public class JavaASTExpressionEvaluationHelper {
       String _plus_1 = (_plus + " is not supported by assignNodesToEdge");
       throw new UnsupportedOperationException(_plus_1);
     }
+    return _switchResult;
+  }
+  
+  private static ITypeBinding evaluateRecursivelyInvocationChain(final Expression parentExpression, final ModularHypergraph graph, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final Node node, final TypeDeclaration type, final MethodDeclaration method, final IMethodBinding targetMethodBinding) {
+    boolean _notEquals = (!Objects.equal(parentExpression, null));
+    if (_notEquals) {
+      final ITypeBinding parentTypeBinding = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(parentExpression, graph, dataTypePatterns, typeBinding, node, type, method);
+      boolean _isDataType = JavaASTExpressionEvaluationHelper.isDataType(parentTypeBinding, dataTypePatterns);
+      boolean _not = (!_isDataType);
+      if (_not) {
+        IMethodBinding _resolveBinding = method.resolveBinding();
+        JavaASTExpressionEvaluationHelper.composeCallEdge(graph, dataTypePatterns, node, _resolveBinding, targetMethodBinding);
+      }
+      return parentTypeBinding;
+    } else {
+      ITypeBinding _declaringClass = targetMethodBinding.getDeclaringClass();
+      boolean _isDataType_1 = JavaASTExpressionEvaluationHelper.isDataType(_declaringClass, dataTypePatterns);
+      boolean _not_1 = (!_isDataType_1);
+      if (_not_1) {
+        IMethodBinding _resolveBinding_1 = method.resolveBinding();
+        JavaASTExpressionEvaluationHelper.composeCallEdge(graph, dataTypePatterns, node, _resolveBinding_1, targetMethodBinding);
+      }
+      return targetMethodBinding.getDeclaringClass();
+    }
   }
   
   /**
    * Create an call edge between invocation method (target) and method (source) iff no such edge exists.
    */
-  private static void composeCallEdge(final MethodInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final Node node, final TypeDeclaration type, final MethodDeclaration method) {
+  private static void composeCallEdge(final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final IMethodBinding sourceMethodBinding, final IMethodBinding targetMethodBinding) {
     EList<Edge> _edges = graph.getEdges();
-    IMethodBinding _resolveBinding = method.resolveBinding();
-    IMethodBinding _resolveMethodBinding = invocation.resolveMethodBinding();
-    Edge edge = JavaHypergraphQueryHelper.findCallEdge(_edges, _resolveBinding, _resolveMethodBinding);
+    Edge edge = JavaHypergraphQueryHelper.findCallEdge(_edges, sourceMethodBinding, targetMethodBinding);
     boolean _equals = Objects.equal(edge, null);
     if (_equals) {
       EList<Node> _nodes = graph.getNodes();
-      IMethodBinding _resolveMethodBinding_1 = invocation.resolveMethodBinding();
-      final Node targetNode = JavaHypergraphQueryHelper.findNodeForMethodBinding(_nodes, _resolveMethodBinding_1);
-      IMethodBinding _resolveBinding_1 = method.resolveBinding();
-      IMethodBinding _resolveMethodBinding_2 = invocation.resolveMethodBinding();
-      Edge _createCallEdge = JavaHypergraphElementFactory.createCallEdge(_resolveBinding_1, _resolveMethodBinding_2);
-      edge = _createCallEdge;
-      EList<Edge> _edges_1 = node.getEdges();
-      _edges_1.add(edge);
-      EList<Edge> _edges_2 = targetNode.getEdges();
-      _edges_2.add(edge);
-      EList<Edge> _edges_3 = graph.getEdges();
-      _edges_3.add(edge);
-      SimpleName _name = method.getName();
-      String _plus = ("composeCallEdge " + _name);
-      String _plus_1 = (_plus + "--");
-      String _name_1 = node.getName();
-      String _plus_2 = (_plus_1 + _name_1);
-      String _plus_3 = (_plus_2 + " ");
-      String _name_2 = targetNode.getName();
-      String _plus_4 = (_plus_3 + _name_2);
-      String _plus_5 = (_plus_4 + " ");
-      String _name_3 = edge.getName();
-      String _plus_6 = (_plus_5 + _name_3);
-      System.out.println(_plus_6);
+      final Node targetNode = JavaHypergraphQueryHelper.findNodeForMethodBinding(_nodes, targetMethodBinding);
+      boolean _notEquals = (!Objects.equal(targetNode, null));
+      if (_notEquals) {
+        Edge _createCallEdge = JavaHypergraphElementFactory.createCallEdge(sourceMethodBinding, targetMethodBinding);
+        edge = _createCallEdge;
+        EList<Edge> _edges_1 = node.getEdges();
+        _edges_1.add(edge);
+        EList<Edge> _edges_2 = targetNode.getEdges();
+        _edges_2.add(edge);
+        EList<Edge> _edges_3 = graph.getEdges();
+        _edges_3.add(edge);
+      } else {
+      }
     }
   }
   
@@ -226,13 +317,6 @@ public class JavaASTExpressionEvaluationHelper {
       JavaASTExpressionEvaluationHelper.assignNodesToEdge(_rightHandSide, graph, dataTypePatterns, node, type, method, edge);
       EList<Edge> _edges_1 = node.getEdges();
       _edges_1.add(edge);
-      String _name = node.getName();
-      String _plus = ("handleAssignmentSimpleNameEdgeResolving <" + _name);
-      String _plus_1 = (_plus + "> [");
-      String _name_1 = edge.getName();
-      String _plus_2 = (_plus_1 + _name_1);
-      String _plus_3 = (_plus_2 + "]");
-      System.out.println(_plus_3);
     }
   }
   
@@ -240,34 +324,74 @@ public class JavaASTExpressionEvaluationHelper {
    * Process a class instance creation in a local assignment.
    */
   public static void processClassInstanceCreation(final ClassInstanceCreation instanceCreation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
-    final ITypeBinding typeBinding = instanceCreation.resolveTypeBinding();
-    final IMethodBinding constructorBinding = instanceCreation.resolveConstructorBinding();
-    boolean _isDataType = JavaASTExpressionEvaluationHelper.isDataType(typeBinding, dataTypePatterns);
+    final ITypeBinding calleeTypeBinding = instanceCreation.resolveTypeBinding();
+    final IMethodBinding calleeConstructorBinding = instanceCreation.resolveConstructorBinding();
+    final IMethodBinding callerBinding = method.resolveBinding();
+    boolean _isDataType = JavaASTExpressionEvaluationHelper.isDataType(calleeTypeBinding, dataTypePatterns);
     if (_isDataType) {
       return;
     } else {
-      final Node targetNode = JavaASTExpressionEvaluationHelper.findOrCreateTargetNode(graph, typeBinding, constructorBinding);
-      final Edge edge = JavaHypergraphElementFactory.createCallEdge(clazz, method, constructorBinding);
+      boolean _isAnonymous = calleeTypeBinding.isAnonymous();
+      if (_isAnonymous) {
+        final Module module = JavaHypergraphElementFactory.createModuleForTypeBinding(calleeTypeBinding);
+        EList<Module> _modules = graph.getModules();
+        _modules.add(module);
+        AnonymousClassDeclaration _anonymousClassDeclaration = instanceCreation.getAnonymousClassDeclaration();
+        ITypeBinding _resolveBinding = _anonymousClassDeclaration.resolveBinding();
+        IMethodBinding[] _declaredMethods = _resolveBinding.getDeclaredMethods();
+        final Consumer<IMethodBinding> _function = new Consumer<IMethodBinding>() {
+          public void accept(final IMethodBinding anonMethod) {
+            final Node anonNode = JavaHypergraphElementFactory.createNodeForMethod(anonMethod);
+            EList<Node> _nodes = module.getNodes();
+            _nodes.add(anonNode);
+            EList<Node> _nodes_1 = graph.getNodes();
+            _nodes_1.add(anonNode);
+          }
+        };
+        ((List<IMethodBinding>)Conversions.doWrapArray(_declaredMethods)).forEach(_function);
+      }
+      final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeConstructorBinding);
+      final Edge edge = JavaHypergraphElementFactory.createCallEdge(callerBinding, calleeConstructorBinding);
       EList<Edge> _edges = graph.getEdges();
       _edges.add(edge);
       EList<Edge> _edges_1 = node.getEdges();
       _edges_1.add(edge);
       EList<Edge> _edges_2 = targetNode.getEdges();
       _edges_2.add(edge);
-      String _name = node.getName();
-      String _plus = ("processClassInstanceCreation <" + _name);
-      String _plus_1 = (_plus + "> <");
-      String _name_1 = targetNode.getName();
-      String _plus_2 = (_plus_1 + _name_1);
-      String _plus_3 = (_plus_2 + "> [");
-      String _name_2 = edge.getName();
-      String _plus_4 = (_plus_3 + _name_2);
-      String _plus_5 = (_plus_4 + "]");
-      System.out.println(_plus_5);
       List _arguments = instanceCreation.arguments();
-      final Consumer<Object> _function = new Consumer<Object>() {
+      final Consumer<Object> _function_1 = new Consumer<Object>() {
         public void accept(final Object argument) {
           JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, clazz, method);
+        }
+      };
+      _arguments.forEach(_function_1);
+    }
+  }
+  
+  /**
+   * Process a method invocation in an expression. This might be a local method, an external method, or an data type method.
+   */
+  public static void processMethodInvocation(final MethodInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration sourceMethod) {
+    IMethodBinding _resolveMethodBinding = invocation.resolveMethodBinding();
+    final ITypeBinding typeBinding = _resolveMethodBinding.getDeclaringClass();
+    final IMethodBinding callerBinding = sourceMethod.resolveBinding();
+    boolean _isDataType = JavaASTExpressionEvaluationHelper.isDataType(typeBinding, dataTypePatterns);
+    if (_isDataType) {
+      return;
+    } else {
+      final IMethodBinding calleeMethodBinding = invocation.resolveMethodBinding();
+      final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, typeBinding, calleeMethodBinding);
+      final Edge edge = JavaHypergraphElementFactory.createCallEdge(callerBinding, calleeMethodBinding);
+      EList<Edge> _edges = graph.getEdges();
+      _edges.add(edge);
+      EList<Edge> _edges_1 = node.getEdges();
+      _edges_1.add(edge);
+      EList<Edge> _edges_2 = targetNode.getEdges();
+      _edges_2.add(edge);
+      List _arguments = invocation.arguments();
+      final Consumer<Object> _function = new Consumer<Object>() {
+        public void accept(final Object argument) {
+          JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, clazz, sourceMethod);
         }
       };
       _arguments.forEach(_function);
@@ -275,46 +399,23 @@ public class JavaASTExpressionEvaluationHelper {
   }
   
   /**
-   * Process a method invocation in an expression. This might be a local method, an external method, or an data type method.
+   * Create a data edge link form the present method to the data edge corresponding to the field
    */
-  public static void processMethodInvocation(final MethodInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
-    Expression _expression = invocation.getExpression();
-    final ITypeBinding typeBinding = _expression.resolveTypeBinding();
-    boolean _isDataType = JavaASTExpressionEvaluationHelper.isDataType(typeBinding, dataTypePatterns);
-    if (_isDataType) {
-      return;
-    } else {
-      final IMethodBinding targetMethodBinding = invocation.resolveMethodBinding();
-      final Node targetNode = JavaASTExpressionEvaluationHelper.findOrCreateTargetNode(graph, typeBinding, targetMethodBinding);
-      final Edge edge = JavaHypergraphElementFactory.createCallEdge(clazz, method, targetMethodBinding);
-      EList<Edge> _edges = graph.getEdges();
-      _edges.add(edge);
-      EList<Edge> _edges_1 = node.getEdges();
-      _edges_1.add(edge);
-      EList<Edge> _edges_2 = targetNode.getEdges();
-      _edges_2.add(edge);
-      SimpleName _name = invocation.getName();
-      String _fullyQualifiedName = _name.getFullyQualifiedName();
-      String _plus = ("processMethodInvocation " + _fullyQualifiedName);
-      String _plus_1 = (_plus + " - <");
-      String _name_1 = node.getName();
-      String _plus_2 = (_plus_1 + _name_1);
-      String _plus_3 = (_plus_2 + "> <");
-      String _name_2 = targetNode.getName();
-      String _plus_4 = (_plus_3 + _name_2);
-      String _plus_5 = (_plus_4 + "> [");
-      String _name_3 = edge.getName();
-      String _plus_6 = (_plus_5 + _name_3);
-      String _plus_7 = (_plus_6 + "]");
-      System.out.println(_plus_7);
-      List _arguments = invocation.arguments();
-      final Consumer<Object> _function = new Consumer<Object>() {
-        public void accept(final Object argument) {
-          JavaASTEvaluation.evaluate(((Expression) argument), graph, dataTypePatterns, node, clazz, method);
-        }
-      };
-      _arguments.forEach(_function);
+  public static boolean processFieldAccess(final FieldAccess field, final ModularHypergraph graph, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final Node node) {
+    boolean _xifexpression = false;
+    boolean _isDataPropertyOfClass = JavaASTExpressionEvaluationHelper.isDataPropertyOfClass(field, dataTypePatterns, typeBinding);
+    if (_isDataPropertyOfClass) {
+      boolean _xblockexpression = false;
+      {
+        EList<Edge> _edges = graph.getEdges();
+        IVariableBinding _resolveFieldBinding = field.resolveFieldBinding();
+        final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _resolveFieldBinding);
+        EList<Edge> _edges_1 = node.getEdges();
+        _xblockexpression = _edges_1.add(edge);
+      }
+      _xifexpression = _xblockexpression;
     }
+    return _xifexpression;
   }
   
   /**
@@ -325,7 +426,8 @@ public class JavaASTExpressionEvaluationHelper {
     if (!_matched) {
       if (expression instanceof MethodInvocation) {
         _matched=true;
-        JavaASTExpressionEvaluationHelper.assignNodeToEdge(((MethodInvocation)expression), graph, edge);
+        IMethodBinding _resolveMethodBinding = ((MethodInvocation)expression).resolveMethodBinding();
+        JavaASTExpressionEvaluationHelper.assignNodeToEdge(_resolveMethodBinding, graph, edge);
       }
     }
     if (!_matched) {
@@ -356,6 +458,11 @@ public class JavaASTExpressionEvaluationHelper {
         _matched=true;
       }
       if (!_matched) {
+        if (expression instanceof QualifiedName) {
+          _matched=true;
+        }
+      }
+      if (!_matched) {
         if (expression instanceof SimpleName) {
           _matched=true;
         }
@@ -380,58 +487,15 @@ public class JavaASTExpressionEvaluationHelper {
   /**
    * Find or create an node for the given invocation and connect it to the data edge.
    */
-  private static void assignNodeToEdge(final MethodInvocation invocation, final ModularHypergraph graph, final Edge edge) {
-    final IMethodBinding methodBinding = invocation.resolveMethodBinding();
-    ITypeBinding _declaringClass = methodBinding.getDeclaringClass();
-    final Node node = JavaASTExpressionEvaluationHelper.findOrCreateTargetNode(graph, _declaringClass, methodBinding);
-    EList<Edge> _edges = node.getEdges();
-    _edges.add(edge);
-    SimpleName _name = invocation.getName();
-    String _fullyQualifiedName = _name.getFullyQualifiedName();
-    String _plus = ("assignNodeToEdge " + _fullyQualifiedName);
-    String _plus_1 = (_plus + " - <");
-    String _name_1 = node.getName();
-    String _plus_2 = (_plus_1 + _name_1);
-    String _plus_3 = (_plus_2 + "> [");
-    String _name_2 = edge.getName();
-    String _plus_4 = (_plus_3 + _name_2);
-    String _plus_5 = (_plus_4 + "]");
-    System.out.println(_plus_5);
-  }
-  
-  /**
-   * Find the corresponding node in the graph and if none can be found create one.
-   * Missing nodes occur, because framework classes are not automatically scanned form method.
-   * It a new node is created it is also added to the graph.
-   * 
-   * @param graph
-   * @param typeBinding
-   * @param methodBinding
-   * 
-   * @return returns the found or created node
-   */
-  private static Node findOrCreateTargetNode(final ModularHypergraph graph, final ITypeBinding typeBinding, final IMethodBinding methodBinding) {
-    EList<Node> _nodes = graph.getNodes();
-    Node targetNode = JavaHypergraphQueryHelper.findNodeForMethodBinding(_nodes, methodBinding);
-    boolean _equals = Objects.equal(targetNode, null);
-    if (_equals) {
-      EList<Module> _modules = graph.getModules();
-      Module module = JavaHypergraphQueryHelper.findModule(_modules, typeBinding);
-      boolean _equals_1 = Objects.equal(module, null);
-      if (_equals_1) {
-        Module _createModuleForTypeBinding = JavaHypergraphElementFactory.createModuleForTypeBinding(typeBinding);
-        module = _createModuleForTypeBinding;
-        EList<Module> _modules_1 = graph.getModules();
-        _modules_1.add(module);
-      }
-      Node _createNodeForMethod = JavaHypergraphElementFactory.createNodeForMethod(methodBinding);
-      targetNode = _createNodeForMethod;
-      EList<Node> _nodes_1 = module.getNodes();
-      _nodes_1.add(targetNode);
-      EList<Node> _nodes_2 = graph.getNodes();
-      _nodes_2.add(targetNode);
+  private static boolean assignNodeToEdge(final IMethodBinding methodBinding, final ModularHypergraph graph, final Edge edge) {
+    boolean _xblockexpression = false;
+    {
+      ITypeBinding _declaringClass = methodBinding.getDeclaringClass();
+      final Node node = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, _declaringClass, methodBinding);
+      EList<Edge> _edges = node.getEdges();
+      _xblockexpression = _edges.add(edge);
     }
-    return targetNode;
+    return _xblockexpression;
   }
   
   /**
@@ -459,7 +523,7 @@ public class JavaASTExpressionEvaluationHelper {
    * 
    * @return true for data properties false otherwise
    */
-  private static boolean isClassDataProperty(final Expression expression, final List<String> dataTypePatterns, final ITypeBinding typeBinding, final MethodDeclaration method) {
+  private static boolean isDataPropertyOfClass(final Expression expression, final List<String> dataTypePatterns, final ITypeBinding typeBinding) {
     boolean _switchResult = false;
     boolean _matched = false;
     if (!_matched) {
@@ -471,10 +535,17 @@ public class JavaASTExpressionEvaluationHelper {
           boolean _switchResult_1 = false;
           boolean _matched_1 = false;
           if (!_matched_1) {
+            if (prefix instanceof ParenthesizedExpression) {
+              _matched_1=true;
+              Expression _expression = ((ParenthesizedExpression)prefix).getExpression();
+              _switchResult_1 = JavaASTExpressionEvaluationHelper.isDataPropertyOfClass(_expression, dataTypePatterns, typeBinding);
+            }
+          }
+          if (!_matched_1) {
             if (prefix instanceof ThisExpression) {
               _matched_1=true;
               SimpleName _name = ((FieldAccess)expression).getName();
-              _switchResult_1 = JavaASTExpressionEvaluationHelper.isClassDataProperty(_name, dataTypePatterns, typeBinding, method);
+              _switchResult_1 = JavaASTExpressionEvaluationHelper.isDataPropertyOfClass(_name, dataTypePatterns, typeBinding);
             }
           }
           if (!_matched_1) {
@@ -508,15 +579,24 @@ public class JavaASTExpressionEvaluationHelper {
             return Boolean.valueOf(_and);
           }
         };
-        final IVariableBinding global = IterableExtensions.<IVariableBinding>findFirst(((Iterable<IVariableBinding>)Conversions.doWrapArray(_declaredFields)), _function);
-        return (!Objects.equal(global, null));
+        _switchResult = IterableExtensions.<IVariableBinding>exists(((Iterable<IVariableBinding>)Conversions.doWrapArray(_declaredFields)), _function);
       }
     }
     if (!_matched) {
-      Class<? extends Expression> _class = expression.getClass();
-      String _plus = ("Expression type " + _class);
-      String _plus_1 = (_plus + " is not supported by isClassDataProperty");
-      throw new UnsupportedOperationException(_plus_1);
+      if (expression instanceof QualifiedName) {
+        _matched=true;
+        _switchResult = false;
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof ArrayAccess) {
+        _matched=true;
+        Expression _array = ((ArrayAccess)expression).getArray();
+        _switchResult = JavaASTExpressionEvaluationHelper.isDataPropertyOfClass(_array, dataTypePatterns, typeBinding);
+      }
+    }
+    if (!_matched) {
+      return false;
     }
     return _switchResult;
   }
