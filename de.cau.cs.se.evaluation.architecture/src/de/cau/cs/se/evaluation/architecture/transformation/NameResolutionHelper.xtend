@@ -47,13 +47,24 @@ class NameResolutionHelper {
 			return clazz.name
 		} else if (clazz.array) {
 			return clazz.elementType.determineFullyQualifiedName + "[]"
+		} else if (clazz.wildcardType) {
+			if (clazz.wildcard.isUpperbound) {
+				return "<? extends " + clazz.wildcard.determineFullyQualifiedName + ">" 
+			} else {
+				return "<? super " + clazz.wildcard.determineFullyQualifiedName + ">"
+			}
+		} else if (clazz.typeVariable) {
+			// TODO handle getTypeBounds
+			return "<" + clazz.name + " extends >"
+		} else if (clazz.parameterizedType) {
+			return clazz.package.name + "." + clazz.name
 		} else {
-			if (clazz != null)
+			if (clazz != null) {
 				if (clazz.package != null)
 					return clazz.package.name + "." + clazz.name
 				else
 					throw new Exception("y")
-			else
+			} else
 				throw new Exception("x")
 		}
 	}

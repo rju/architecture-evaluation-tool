@@ -88,21 +88,54 @@ public class NameResolutionHelper {
             String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_elementType);
             return (_determineFullyQualifiedName_1 + "[]");
           } else {
-            boolean _notEquals = (!Objects.equal(clazz, null));
-            if (_notEquals) {
-              IPackageBinding _package = clazz.getPackage();
-              boolean _notEquals_1 = (!Objects.equal(_package, null));
-              if (_notEquals_1) {
-                IPackageBinding _package_1 = clazz.getPackage();
-                String _name_1 = _package_1.getName();
-                String _plus_3 = (_name_1 + ".");
-                String _name_2 = clazz.getName();
-                return (_plus_3 + _name_2);
+            boolean _isWildcardType = clazz.isWildcardType();
+            if (_isWildcardType) {
+              ITypeBinding _wildcard = clazz.getWildcard();
+              boolean _isUpperbound = _wildcard.isUpperbound();
+              if (_isUpperbound) {
+                ITypeBinding _wildcard_1 = clazz.getWildcard();
+                String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_1);
+                String _plus_3 = ("<? extends " + _determineFullyQualifiedName_2);
+                return (_plus_3 + ">");
               } else {
-                throw new Exception("y");
+                ITypeBinding _wildcard_2 = clazz.getWildcard();
+                String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_2);
+                String _plus_4 = ("<? super " + _determineFullyQualifiedName_3);
+                return (_plus_4 + ">");
               }
             } else {
-              throw new Exception("x");
+              boolean _isTypeVariable = clazz.isTypeVariable();
+              if (_isTypeVariable) {
+                String _name_1 = clazz.getName();
+                String _plus_5 = ("<" + _name_1);
+                return (_plus_5 + " extends >");
+              } else {
+                boolean _isParameterizedType = clazz.isParameterizedType();
+                if (_isParameterizedType) {
+                  IPackageBinding _package = clazz.getPackage();
+                  String _name_2 = _package.getName();
+                  String _plus_6 = (_name_2 + ".");
+                  String _name_3 = clazz.getName();
+                  return (_plus_6 + _name_3);
+                } else {
+                  boolean _notEquals = (!Objects.equal(clazz, null));
+                  if (_notEquals) {
+                    IPackageBinding _package_1 = clazz.getPackage();
+                    boolean _notEquals_1 = (!Objects.equal(_package_1, null));
+                    if (_notEquals_1) {
+                      IPackageBinding _package_2 = clazz.getPackage();
+                      String _name_4 = _package_2.getName();
+                      String _plus_7 = (_name_4 + ".");
+                      String _name_5 = clazz.getName();
+                      return (_plus_7 + _name_5);
+                    } else {
+                      throw new Exception("y");
+                    }
+                  } else {
+                    throw new Exception("x");
+                  }
+                }
+              }
             }
           }
         }

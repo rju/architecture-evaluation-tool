@@ -197,10 +197,10 @@ class JavaASTEvaluation {
     		SuperMethodInvocation: {
     			val superMethodBinding = expression.resolveMethodBinding
     			val targetNode = findOrCreateTargetNode(graph, superMethodBinding.declaringClass, superMethodBinding)
-    			val edge = createCallEdge(method.resolveBinding, superMethodBinding)  
+    			val edge = createCallEdge(method.resolveBinding, superMethodBinding) 
+    			graph.edges.add(edge) 
     			node.edges.add(edge)
     			targetNode.edges.add(edge)
-    			graph.edges.add(edge)
     		}
     		//SuperMethodReference:
     		TypeLiteral: {
@@ -223,9 +223,9 @@ class JavaASTEvaluation {
     				val targetNode = findOrCreateTargetNode(graph, typeBinding, constructorBinding) 
     				val edge = createCallEdge(method.resolveBinding, constructorBinding) 
     				
+    				graph.edges.add(edge)
     				node.edges.add(edge)
     				targetNode.edges.add(edge)
-    				graph.edges.add(edge)
     			}	
     		}
     		//TypeMethodReference:
@@ -287,8 +287,9 @@ class JavaASTEvaluation {
 		}
 
 		val edge = createCallEdge(clazz, method, methodBinding)
-		targetNode.edges.add(edge)
+		graph.edges.add(edge)
 		node.edges.add(edge)
+		targetNode.edges.add(edge)
 		// System.out.println("handleSuperConstructorInvocation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
 	}
 	
@@ -298,13 +299,19 @@ class JavaASTEvaluation {
  	 * this method to the called constructor and (b) an evaluation of all parameters.
  	 */
 	private def static handleConstructorInvocation(ConstructorInvocation invocation, ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration method) {
-		val edge = createCallEdge(clazz, method, clazz, invocation)
+		val sourceBinding = method.resolveBinding
+		val targetBinding = invocation.resolveConstructorBinding
+		val edge = createCallEdge(sourceBinding, targetBinding)
 		if (!graph.edges.exists[it.name.equals(edge.name)]) {
-			graph.edges.add(edge)
-			val targetNode = graph.nodes.findNodeForMethodBinding(invocation.resolveConstructorBinding)
-			targetNode.edges.add(edge)
-			node.edges.add(edge)
-			// System.out.println("handleConstructorInvocation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
+			var targetNode = graph.nodes.findNodeForMethodBinding(targetBinding)
+			if (targetNode == null) {
+				System.out.println("Missing source node: This is an error!! " + targetBinding.determineFullyQualifiedName)
+			} else {
+				graph.edges.add(edge)
+				targetNode.edges.add(edge)
+				node.edges.add(edge)
+				// System.out.println("handleConstructorInvocation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
+			}
 		}
 		invocation.arguments.forEach[(it as Expression).evaluate(graph, dataTypePatterns, node, clazz, method)]
 	}

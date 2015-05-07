@@ -43,6 +43,10 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression
 import org.eclipse.jdt.core.dom.CastExpression
 import org.eclipse.jdt.core.dom.BooleanLiteral
 import org.eclipse.jdt.core.dom.SuperMethodInvocation
+import org.eclipse.jdt.core.dom.NullLiteral
+import org.eclipse.jdt.core.dom.InstanceofExpression
+import org.eclipse.jdt.core.dom.PrefixExpression
+import org.eclipse.jdt.core.dom.PostfixExpression
 
 class JavaASTExpressionEvaluationHelper {
 	
@@ -104,6 +108,7 @@ class JavaASTExpressionEvaluationHelper {
 			FieldAccess: {
 				return expression.resolveTypeBinding // TODO we might need to create a data edge here?
 			}
+			InstanceofExpression: expression.leftOperand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
 			InfixExpression: {
 				val result = expression.leftOperand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
 				expression.rightOperand?.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
@@ -114,12 +119,15 @@ class JavaASTExpressionEvaluationHelper {
    				return evaluateRecursivelyInvocationChain(expression.expression, graph, dataTypePatterns, typeBinding, node, type, method, expression.resolveMethodBinding)
    			}
 			ParenthesizedExpression: expression.expression.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+			PostfixExpression: expression.operand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
+			PrefixExpression: expression.operand.composeCallEdgesForAssignmentRightHandSide(graph, dataTypePatterns, typeBinding, node, type, method)
 			SuperMethodInvocation: {
 				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, type, method)]
 				return evaluateRecursivelyInvocationChain(null, graph, dataTypePatterns, typeBinding, node, type, method, expression.resolveMethodBinding)
 			}
 			BooleanLiteral,
-			NumberLiteral, QualifiedName, SimpleName, StringLiteral, ThisExpression: expression.resolveTypeBinding
+			NullLiteral, NumberLiteral, 
+			QualifiedName, SimpleName, StringLiteral, ThisExpression: expression.resolveTypeBinding
 			default:
     			throw new UnsupportedOperationException("Expression type " + expression.class + " is not supported by assignNodesToEdge")
 		}
@@ -154,15 +162,15 @@ class JavaASTExpressionEvaluationHelper {
 	   		val targetNode = findNodeForMethodBinding(graph.nodes, targetMethodBinding)
 	   		if (targetNode != null) {
 	   			edge = createCallEdge(sourceMethodBinding, targetMethodBinding)
+	   			graph.edges.add(edge)
 		   		node.edges.add(edge)
 		   		targetNode.edges.add(edge)
-		   		graph.edges.add(edge)
 		   		// System.out.println("composeCallEdge " + sourceMethodBinding.name + "--" + node.name + " " + targetNode.name + " " + edge.name)
 	   		} else {
 	   			// TODO might be a private inner class. Check inner class handling
 	   		}
 	   		
-	   	}		
+	   	}	
    	}
     	  
    	/**
@@ -279,7 +287,9 @@ class JavaASTExpressionEvaluationHelper {
 				 */
 				expression.arguments.forEach[argument | (argument as Expression).evaluate(graph, dataTypePatterns, node, clazz, method)]
 			}
-			NumberLiteral, QualifiedName, SimpleName, StringLiteral: return
+			BooleanLiteral,
+			NullLiteral, NumberLiteral,
+			QualifiedName, SimpleName, StringLiteral: return
 			default:
     			throw new UnsupportedOperationException("Expression type " + expression.class + " is not supported by assignNodesToEdge")
 		}

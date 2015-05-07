@@ -23,6 +23,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -62,6 +63,8 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   
   private final List<String> dataTypePatterns;
   
+  private final List<String> observedSystemPatterns;
+  
   /**
    * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
    * 
@@ -69,34 +72,59 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * @param scope the global scoper used to resolve classes during transformation
    * @param eclipse progress monitor
    */
-  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final List<String> dataTypePatterns, final List<IType> classList, final IProgressMonitor monitor) {
+  public TransformationJavaMethodsToModularHypergraph(final IJavaProject project, final List<IType> classList, final List<String> dataTypePatterns, final List<String> observedSystemPatterns, final IProgressMonitor monitor) {
     this.project = project;
+    this.monitor = monitor;
+    this.dataTypePatterns = dataTypePatterns;
+    this.observedSystemPatterns = observedSystemPatterns;
     ArrayList<AbstractTypeDeclaration> _arrayList = new ArrayList<AbstractTypeDeclaration>();
     this.classList = _arrayList;
-    this.fillClassList(this.classList, classList, dataTypePatterns);
-    this.dataTypePatterns = dataTypePatterns;
-    this.monitor = monitor;
+    this.fillClassList(this.classList, classList, dataTypePatterns, observedSystemPatterns);
   }
   
-  private void fillClassList(final List<AbstractTypeDeclaration> declarations, final List<IType> types, final List<String> dataTypePatterns) {
+  public List<AbstractTypeDeclaration> getClassList() {
+    return this.classList;
+  }
+  
+  /**
+   * Find all classes in the IType list which belong to the observed system.
+   * 
+   * @param classes the classes of the observed system
+   * @param types the types found by scanning the project
+   * @param dataTypePatterns pattern list for data types to be excluded
+   * @param observedSystemPatterns pattern list for classes to be included
+   */
+  private void fillClassList(final List<AbstractTypeDeclaration> declarations, final List<IType> types, final List<String> dataTypePatterns, final List<String> observedSystemPatterns) {
     final Consumer<IType> _function = new Consumer<IType>() {
       public void accept(final IType jdtType) {
-        final CompilationUnit unit = TransformationJavaMethodsToModularHypergraph.this.getUnitForType(jdtType, TransformationJavaMethodsToModularHypergraph.this.monitor, TransformationJavaMethodsToModularHypergraph.this.project);
-        List _types = unit.types();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object unitType) {
-            if ((unitType instanceof TypeDeclaration)) {
-              final TypeDeclaration type = ((TypeDeclaration) unitType);
-              ITypeBinding _resolveBinding = type.resolveBinding();
-              boolean _isClassDataType = TransformationJavaMethodsToModularHypergraph.this.isClassDataType(_resolveBinding, dataTypePatterns);
-              boolean _not = (!_isClassDataType);
-              if (_not) {
-                declarations.add(type);
+        final CompilationUnit unit = TransformationJavaMethodsToModularHypergraph.this.getUnitForType(jdtType, TransformationJavaMethodsToModularHypergraph.this.project);
+        boolean _notEquals = (!Objects.equal(unit, null));
+        if (_notEquals) {
+          List _types = unit.types();
+          final Consumer<Object> _function = new Consumer<Object>() {
+            public void accept(final Object unitType) {
+              if ((unitType instanceof TypeDeclaration)) {
+                final TypeDeclaration type = ((TypeDeclaration) unitType);
+                final ITypeBinding typeBinding = type.resolveBinding();
+                final String name = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
+                final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
+                  public Boolean apply(final String it) {
+                    return Boolean.valueOf(name.matches(it));
+                  }
+                };
+                boolean _exists = IterableExtensions.<String>exists(observedSystemPatterns, _function);
+                if (_exists) {
+                  boolean _isClassDataType = TransformationJavaMethodsToModularHypergraph.this.isClassDataType(typeBinding, dataTypePatterns);
+                  boolean _not = (!_isClassDataType);
+                  if (_not) {
+                    declarations.add(type);
+                  }
+                }
               }
             }
-          }
-        };
-        _types.forEach(_function);
+          };
+          _types.forEach(_function);
+        }
       }
     };
     types.forEach(_function);
@@ -105,27 +133,43 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
   /**
    * Get compilation unit for JDT type.
    */
-  private CompilationUnit getUnitForType(final IType type, final IProgressMonitor monitor, final IJavaProject project) {
+  private CompilationUnit getUnitForType(final IType type, final IJavaProject project) {
     try {
-      final Hashtable options = JavaCore.getOptions();
-      JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
-      final ASTParser parser = ASTParser.newParser(AST.JLS8);
-      parser.setProject(project);
-      parser.setCompilerOptions(options);
-      parser.setKind(ASTParser.K_COMPILATION_UNIT);
-      ICompilationUnit _compilationUnit = type.getCompilationUnit();
-      IBuffer _buffer = _compilationUnit.getBuffer();
-      String _contents = _buffer.getContents();
-      char[] _charArray = _contents.toCharArray();
-      parser.setSource(_charArray);
-      ICompilationUnit _compilationUnit_1 = type.getCompilationUnit();
-      String _elementName = _compilationUnit_1.getElementName();
-      parser.setUnitName(_elementName);
-      parser.setResolveBindings(true);
-      parser.setBindingsRecovery(true);
-      parser.setStatementsRecovery(true);
-      ASTNode _createAST = parser.createAST(null);
-      return ((CompilationUnit) _createAST);
+      IPackageFragment _packageFragment = type.getPackageFragment();
+      String _elementName = _packageFragment.getElementName();
+      String _plus = (_elementName + ".");
+      String _elementName_1 = type.getElementName();
+      final String outerTypeName = (_plus + _elementName_1);
+      final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
+        public Boolean apply(final String it) {
+          return Boolean.valueOf(outerTypeName.matches(it));
+        }
+      };
+      boolean _exists = IterableExtensions.<String>exists(this.observedSystemPatterns, _function);
+      if (_exists) {
+        this.monitor.subTask(("parsing " + outerTypeName));
+        final Hashtable options = JavaCore.getOptions();
+        JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
+        final ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setProject(project);
+        parser.setCompilerOptions(options);
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        ICompilationUnit _compilationUnit = type.getCompilationUnit();
+        IBuffer _buffer = _compilationUnit.getBuffer();
+        String _contents = _buffer.getContents();
+        char[] _charArray = _contents.toCharArray();
+        parser.setSource(_charArray);
+        ICompilationUnit _compilationUnit_1 = type.getCompilationUnit();
+        String _elementName_2 = _compilationUnit_1.getElementName();
+        parser.setUnitName(_elementName_2);
+        parser.setResolveBindings(true);
+        parser.setBindingsRecovery(true);
+        parser.setStatementsRecovery(true);
+        ASTNode _createAST = parser.createAST(null);
+        return ((CompilationUnit) _createAST);
+      } else {
+        return null;
+      }
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
@@ -415,10 +459,10 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
    * @return returns true if the given type is a data type and not a behavior type.
    */
   private boolean isClassDataType(final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
+    final String name = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
     final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
       public Boolean apply(final String pattern) {
-        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
-        return Boolean.valueOf(_determineFullyQualifiedName.matches(pattern));
+        return Boolean.valueOf(name.matches(pattern));
       }
     };
     return IterableExtensions.<String>exists(dataTypePatterns, _function);

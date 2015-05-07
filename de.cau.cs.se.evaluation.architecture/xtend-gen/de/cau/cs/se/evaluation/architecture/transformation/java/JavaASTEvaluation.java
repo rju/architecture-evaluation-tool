@@ -453,11 +453,11 @@ public class JavaASTEvaluation {
         final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, _declaringClass, superMethodBinding);
         IMethodBinding _resolveBinding = method.resolveBinding();
         final Edge edge = JavaHypergraphElementFactory.createCallEdge(_resolveBinding, superMethodBinding);
-        EList<Edge> _edges = node.getEdges();
+        EList<Edge> _edges = graph.getEdges();
         _edges.add(edge);
-        EList<Edge> _edges_1 = targetNode.getEdges();
+        EList<Edge> _edges_1 = node.getEdges();
         _edges_1.add(edge);
-        EList<Edge> _edges_2 = graph.getEdges();
+        EList<Edge> _edges_2 = targetNode.getEdges();
         _edges_2.add(edge);
       }
     }
@@ -507,11 +507,11 @@ public class JavaASTEvaluation {
           final Node targetNode_1 = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, typeBinding, constructorBinding);
           IMethodBinding _resolveBinding = method.resolveBinding();
           final Edge edge = JavaHypergraphElementFactory.createCallEdge(_resolveBinding, constructorBinding);
-          EList<Edge> _edges = node.getEdges();
+          EList<Edge> _edges = graph.getEdges();
           _edges.add(edge);
-          EList<Edge> _edges_1 = targetNode_1.getEdges();
+          EList<Edge> _edges_1 = node.getEdges();
           _edges_1.add(edge);
-          EList<Edge> _edges_2 = graph.getEdges();
+          EList<Edge> _edges_2 = targetNode_1.getEdges();
           _edges_2.add(edge);
         }
       }
@@ -704,10 +704,12 @@ public class JavaASTEvaluation {
         _nodes_2.add(targetNode);
       }
       final Edge edge = JavaHypergraphElementFactory.createCallEdge(clazz, method, methodBinding);
-      EList<Edge> _edges = targetNode.getEdges();
+      EList<Edge> _edges = graph.getEdges();
       _edges.add(edge);
       EList<Edge> _edges_1 = node.getEdges();
-      _xblockexpression = _edges_1.add(edge);
+      _edges_1.add(edge);
+      EList<Edge> _edges_2 = targetNode.getEdges();
+      _xblockexpression = _edges_2.add(edge);
     }
     return _xblockexpression;
   }
@@ -717,7 +719,9 @@ public class JavaASTEvaluation {
    * this method to the called constructor and (b) an evaluation of all parameters.
    */
   private static void handleConstructorInvocation(final ConstructorInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
-    final Edge edge = JavaHypergraphElementFactory.createCallEdge(clazz, method, clazz, invocation);
+    final IMethodBinding sourceBinding = method.resolveBinding();
+    final IMethodBinding targetBinding = invocation.resolveConstructorBinding();
+    final Edge edge = JavaHypergraphElementFactory.createCallEdge(sourceBinding, targetBinding);
     EList<Edge> _edges = graph.getEdges();
     final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
       public Boolean apply(final Edge it) {
@@ -729,15 +733,21 @@ public class JavaASTEvaluation {
     boolean _exists = IterableExtensions.<Edge>exists(_edges, _function);
     boolean _not = (!_exists);
     if (_not) {
-      EList<Edge> _edges_1 = graph.getEdges();
-      _edges_1.add(edge);
       EList<Node> _nodes = graph.getNodes();
-      IMethodBinding _resolveConstructorBinding = invocation.resolveConstructorBinding();
-      final Node targetNode = JavaHypergraphQueryHelper.findNodeForMethodBinding(_nodes, _resolveConstructorBinding);
-      EList<Edge> _edges_2 = targetNode.getEdges();
-      _edges_2.add(edge);
-      EList<Edge> _edges_3 = node.getEdges();
-      _edges_3.add(edge);
+      Node targetNode = JavaHypergraphQueryHelper.findNodeForMethodBinding(_nodes, targetBinding);
+      boolean _equals = Objects.equal(targetNode, null);
+      if (_equals) {
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(targetBinding);
+        String _plus = ("Missing source node: This is an error!! " + _determineFullyQualifiedName);
+        System.out.println(_plus);
+      } else {
+        EList<Edge> _edges_1 = graph.getEdges();
+        _edges_1.add(edge);
+        EList<Edge> _edges_2 = targetNode.getEdges();
+        _edges_2.add(edge);
+        EList<Edge> _edges_3 = node.getEdges();
+        _edges_3.add(edge);
+      }
     }
     List _arguments = invocation.arguments();
     final Consumer<Object> _function_1 = new Consumer<Object>() {

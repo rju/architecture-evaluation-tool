@@ -43,6 +43,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	val IProgressMonitor monitor
 	val List<AbstractTypeDeclaration> classList
 	val List<String> dataTypePatterns
+	val List<String> observedSystemPatterns
 		
 	/**
 	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -51,45 +52,68 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(IJavaProject project, List<String> dataTypePatterns, List<IType> classList, IProgressMonitor monitor) {
+	public new(IJavaProject project, List<IType> classList, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
 		this.project = project
-		this.classList = new ArrayList<AbstractTypeDeclaration>
-		this.classList.fillClassList(classList, dataTypePatterns)
-		this.dataTypePatterns = dataTypePatterns
 		this.monitor = monitor
+		this.dataTypePatterns = dataTypePatterns
+		this.observedSystemPatterns = observedSystemPatterns
+		this.classList = new ArrayList<AbstractTypeDeclaration>
+		this.classList.fillClassList(classList, dataTypePatterns, observedSystemPatterns)
 	}
 	
-	private def void fillClassList(List<AbstractTypeDeclaration> declarations, List<IType> types, List<String> dataTypePatterns) {
+	public def getClassList() {
+		return classList
+	}
+	
+	/**
+	 * Find all classes in the IType list which belong to the observed system.
+	 * 
+	 * @param classes the classes of the observed system
+	 * @param types the types found by scanning the project
+	 * @param dataTypePatterns pattern list for data types to be excluded
+	 * @param observedSystemPatterns pattern list for classes to be included
+	 */
+	private def void fillClassList(List<AbstractTypeDeclaration> declarations, List<IType> types, List<String> dataTypePatterns, List<String> observedSystemPatterns) {
 		types.forEach[jdtType |
-			val unit = jdtType.getUnitForType(monitor,project)
-			unit.types.forEach[unitType |
-				if (unitType instanceof TypeDeclaration) {
-					val type = unitType as TypeDeclaration
-					if (!isClassDataType(type.resolveBinding, dataTypePatterns))
-						declarations.add(type)
-			 	}
-			 ]
+			val unit = jdtType.getUnitForType(project)
+			if (unit != null) {
+				unit.types.forEach[unitType |
+					if (unitType instanceof TypeDeclaration) {
+						val type = unitType as TypeDeclaration
+						val typeBinding = type.resolveBinding
+						val name = typeBinding.determineFullyQualifiedName
+						if (observedSystemPatterns.exists[name.matches(it)])
+							if (!isClassDataType(typeBinding, dataTypePatterns))
+								declarations.add(type)
+				 	}
+				 ]
+			 }
 		]
 	}
 	
 	/**
 	 * Get compilation unit for JDT type.
 	 */
-	private def CompilationUnit getUnitForType(IType type, IProgressMonitor monitor, IJavaProject project) {
-		val options = JavaCore.getOptions()
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
- 		
-		val ASTParser parser = ASTParser.newParser(AST.JLS8)
-		parser.setProject(project)	
- 		parser.setCompilerOptions(options)
- 		parser.kind = ASTParser.K_COMPILATION_UNIT
- 		parser.source = type.compilationUnit.buffer.contents.toCharArray()
- 		parser.unitName = type.compilationUnit.elementName
- 		parser.resolveBindings = true
- 		parser.bindingsRecovery = true
- 		parser.statementsRecovery = true
- 		
- 		return parser.createAST(null) as CompilationUnit
+	private def CompilationUnit getUnitForType(IType type, IJavaProject project) {
+		val outerTypeName = type.packageFragment.elementName + "." + type.elementName
+		if (observedSystemPatterns.exists[outerTypeName.matches(it)]) {
+			monitor.subTask("parsing " + outerTypeName)
+			val options = JavaCore.getOptions()
+			JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
+	 		
+			val ASTParser parser = ASTParser.newParser(AST.JLS8)
+			parser.setProject(project)	
+	 		parser.setCompilerOptions(options)
+	 		parser.kind = ASTParser.K_COMPILATION_UNIT
+	 		parser.source = type.compilationUnit.buffer.contents.toCharArray()
+	 		parser.unitName = type.compilationUnit.elementName
+	 		parser.resolveBindings = true
+	 		parser.bindingsRecovery = true
+	 		parser.statementsRecovery = true
+	 		
+	 		return parser.createAST(null) as CompilationUnit
+	 	} else
+	 		return null
  	}
 	
 	/**
@@ -234,7 +258,8 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 */
 	private def boolean isClassDataType(ITypeBinding typeBinding, List<String> dataTypePatterns) {
 		// TODO this might be to simple.
-		return dataTypePatterns.exists[pattern | typeBinding.determineFullyQualifiedName.matches(pattern)]
+		val name = typeBinding.determineFullyQualifiedName
+		return dataTypePatterns.exists[pattern | name.matches(pattern)]
 	}
 		
 }

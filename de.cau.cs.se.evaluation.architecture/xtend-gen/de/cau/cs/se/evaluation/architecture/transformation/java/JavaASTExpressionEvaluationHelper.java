@@ -29,11 +29,15 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -156,6 +160,13 @@ public class JavaASTExpressionEvaluationHelper {
       }
     }
     if (!_matched) {
+      if (expression instanceof InstanceofExpression) {
+        _matched=true;
+        Expression _leftOperand = ((InstanceofExpression)expression).getLeftOperand();
+        _switchResult = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_leftOperand, graph, dataTypePatterns, typeBinding, node, type, method);
+      }
+    }
+    if (!_matched) {
       if (expression instanceof InfixExpression) {
         _matched=true;
         Expression _leftOperand = ((InfixExpression)expression).getLeftOperand();
@@ -190,6 +201,20 @@ public class JavaASTExpressionEvaluationHelper {
       }
     }
     if (!_matched) {
+      if (expression instanceof PostfixExpression) {
+        _matched=true;
+        Expression _operand = ((PostfixExpression)expression).getOperand();
+        _switchResult = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_operand, graph, dataTypePatterns, typeBinding, node, type, method);
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof PrefixExpression) {
+        _matched=true;
+        Expression _operand = ((PrefixExpression)expression).getOperand();
+        _switchResult = JavaASTExpressionEvaluationHelper.composeCallEdgesForAssignmentRightHandSide(_operand, graph, dataTypePatterns, typeBinding, node, type, method);
+      }
+    }
+    if (!_matched) {
       if (expression instanceof SuperMethodInvocation) {
         _matched=true;
         List _arguments = ((SuperMethodInvocation)expression).arguments();
@@ -206,6 +231,11 @@ public class JavaASTExpressionEvaluationHelper {
     if (!_matched) {
       if (expression instanceof BooleanLiteral) {
         _matched=true;
+      }
+      if (!_matched) {
+        if (expression instanceof NullLiteral) {
+          _matched=true;
+        }
       }
       if (!_matched) {
         if (expression instanceof NumberLiteral) {
@@ -282,11 +312,11 @@ public class JavaASTExpressionEvaluationHelper {
       if (_notEquals) {
         Edge _createCallEdge = JavaHypergraphElementFactory.createCallEdge(sourceMethodBinding, targetMethodBinding);
         edge = _createCallEdge;
-        EList<Edge> _edges_1 = node.getEdges();
+        EList<Edge> _edges_1 = graph.getEdges();
         _edges_1.add(edge);
-        EList<Edge> _edges_2 = targetNode.getEdges();
+        EList<Edge> _edges_2 = node.getEdges();
         _edges_2.add(edge);
-        EList<Edge> _edges_3 = graph.getEdges();
+        EList<Edge> _edges_3 = targetNode.getEdges();
         _edges_3.add(edge);
       } else {
       }
@@ -454,8 +484,18 @@ public class JavaASTExpressionEvaluationHelper {
       }
     }
     if (!_matched) {
-      if (expression instanceof NumberLiteral) {
+      if (expression instanceof BooleanLiteral) {
         _matched=true;
+      }
+      if (!_matched) {
+        if (expression instanceof NullLiteral) {
+          _matched=true;
+        }
+      }
+      if (!_matched) {
+        if (expression instanceof NumberLiteral) {
+          _matched=true;
+        }
       }
       if (!_matched) {
         if (expression instanceof QualifiedName) {
