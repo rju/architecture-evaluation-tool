@@ -1,21 +1,20 @@
 package de.cau.cs.se.evaluation.architecture.transformation.java
 
-import org.eclipse.emf.common.util.EList
-import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import org.eclipse.jdt.core.dom.IMethodBinding
-import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
-import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
-import org.eclipse.jdt.core.dom.ITypeBinding
-import de.cau.cs.se.evaluation.architecture.hypergraph.Module
-import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace
-import org.eclipse.jdt.core.dom.IVariableBinding
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import de.cau.cs.se.evaluation.architecture.hypergraph.FieldTrace
+import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
+import de.cau.cs.se.evaluation.architecture.hypergraph.Module
+import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
+import org.eclipse.emf.common.util.EList
+import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.jdt.core.dom.ITypeBinding
+import org.eclipse.jdt.core.dom.IVariableBinding
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
-import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
-import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
+import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
 
 class JavaHypergraphQueryHelper {
 		/**
