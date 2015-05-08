@@ -1,35 +1,36 @@
 package de.cau.cs.se.evaluation.architecture.jobs
 
-import org.eclipse.core.runtime.jobs.Job
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.ArrayList
+import java.util.List
+import org.eclipse.core.resources.IFile
+import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.core.runtime.Status
+import org.eclipse.core.runtime.jobs.Job
+import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.IJavaProject
+import org.eclipse.jdt.core.IPackageFragment
+import org.eclipse.jdt.core.IPackageFragmentRoot
+import org.eclipse.jdt.core.IType
+import org.eclipse.jdt.core.JavaCore
+import org.eclipse.jdt.core.dom.AST
+import org.eclipse.jdt.core.dom.ASTParser
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
+import org.eclipse.jdt.core.dom.CompilationUnit
+import org.eclipse.jdt.core.dom.ITypeBinding
+import org.eclipse.jdt.core.dom.TypeDeclaration
+import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.jface.viewers.ISelection
-import org.eclipse.swt.widgets.Shell
 import org.eclipse.jface.viewers.IStructuredSelection
 import org.eclipse.jface.viewers.ITreeSelection
 import org.eclipse.jface.viewers.TreeSelection
-import org.eclipse.core.resources.IProject
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.core.resources.IFile
-import java.util.List
-import org.eclipse.core.runtime.Status
-import org.eclipse.jdt.core.JavaCore
-import org.eclipse.jdt.core.IJavaProject
-import java.util.ArrayList
-import java.io.BufferedReader
-import org.eclipse.jdt.core.IPackageFragmentRoot
-import org.eclipse.jdt.core.IPackageFragment
-import org.eclipse.jdt.core.ICompilationUnit
-import org.eclipse.jdt.core.IType
-import java.io.InputStreamReader
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
-import org.eclipse.jdt.core.dom.CompilationUnit
-import org.eclipse.jdt.core.dom.TypeDeclaration
-import org.eclipse.jdt.core.dom.ITypeBinding
-import org.eclipse.jdt.core.dom.ASTParser
-import org.eclipse.jdt.core.dom.AST
+import org.eclipse.swt.widgets.Shell
+import org.eclipse.ui.PartInitException
+import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-
 
 class CollectInputModelJob extends Job {
 	
@@ -123,16 +124,16 @@ class CollectInputModelJob extends Job {
 							return types
 						} 
 					} else {
-						MessageDialog.openError(shell, "Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.")
+						showErrorMessage("Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.")
 					}	
 				} else {
-					MessageDialog.openError(shell, "Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.")
+					showErrorMessage("Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.")
 				}
 			} else {
-				MessageDialog.openError(shell, "Configuration Error", "Data type pattern file (data-type-pattern.cfg) listing patterns for data type classes is missing.")
+				showErrorMessage("Configuration Error", "Data type pattern file (data-type-pattern.cfg) listing patterns for data type classes is missing.")
 			}
 		} else {
-			MessageDialog.openError(shell, "Configuration Error", "Data type pattern file (data-type-pattern.cfg) listing patterns for data type classes is missing.")
+			showErrorMessage("Configuration Error", "Data type pattern file (data-type-pattern.cfg) listing patterns for data type classes is missing.")
 		}
 		
 		return null
@@ -258,6 +259,19 @@ class CollectInputModelJob extends Job {
 				if (!(type as IType).binary) types.add(type)
 			}
 		]
+	}
+	
+	
+	private def showErrorMessage(String title, String message) {
+		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
+       		public override void run() {
+	           try { 
+					MessageDialog.openError(shell, title, message)
+	           } catch (PartInitException e) {
+	                e.printStackTrace()
+	           }
+	    	}
+     	})
 	}
 	
 }
