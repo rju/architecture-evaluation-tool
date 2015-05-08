@@ -140,13 +140,13 @@ public class CollectInputModelJob extends Job {
   /**
    * Scann for classes in project.
    */
-  private List<IType> scanForClasses(final IProject object, final IProgressMonitor monitor) {
+  private List<IType> scanForClasses(final IProject project, final IProgressMonitor monitor) {
     try {
       final ArrayList<IType> types = new ArrayList<IType>();
-      String _name = object.getName();
+      String _name = project.getName();
       String _plus = ("Scanning project " + _name);
       monitor.subTask(_plus);
-      IResource _findMember = object.findMember("data-type-pattern.cfg");
+      IResource _findMember = project.findMember("data-type-pattern.cfg");
       final IFile dataTypePatternsFile = ((IFile) _findMember);
       boolean _notEquals = (!Objects.equal(dataTypePatternsFile, null));
       if (_notEquals) {
@@ -154,7 +154,7 @@ public class CollectInputModelJob extends Job {
         if (_isSynchronized) {
           List<String> _readPattern = this.readPattern(dataTypePatternsFile);
           this.dataTypePatterns = _readPattern;
-          IResource _findMember_1 = object.findMember("observed-system.cfg");
+          IResource _findMember_1 = project.findMember("observed-system.cfg");
           final IFile observedSystemPatternsFile = ((IFile) _findMember_1);
           boolean _notEquals_1 = (!Objects.equal(observedSystemPatternsFile, null));
           if (_notEquals_1) {
@@ -162,10 +162,10 @@ public class CollectInputModelJob extends Job {
             if (_isSynchronized_1) {
               List<String> _readPattern_1 = this.readPattern(observedSystemPatternsFile);
               this.observedSystemPatterns = _readPattern_1;
-              boolean _hasNature = object.hasNature(JavaCore.NATURE_ID);
+              boolean _hasNature = project.hasNature(JavaCore.NATURE_ID);
               if (_hasNature) {
-                final IJavaProject project = JavaCore.create(object);
-                IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
+                final IJavaProject javaProject = JavaCore.create(project);
+                IPackageFragmentRoot[] _allPackageFragmentRoots = javaProject.getAllPackageFragmentRoots();
                 final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
                   public void accept(final IPackageFragmentRoot root) {
                     CollectInputModelJob.this.checkForTypes(types, root, monitor);
