@@ -113,7 +113,7 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, AbstractTypeDeclaration calleeType, ConstructorInvocation calleeMethod) {
-		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":this")
+		// System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":this")
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(calleeType, calleeMethod)
@@ -137,7 +137,7 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, AbstractTypeDeclaration calleeType, SuperConstructorInvocation calleeMethod) {
-		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":super")
+		// System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + calleeType.determineFullyQualifiedName + ":super")
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(calleeType, calleeMethod)
@@ -159,7 +159,7 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(AbstractTypeDeclaration callerType, MethodDeclaration callerMethod, IMethodBinding callee) {
-		System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
+		// System.out.println("createCallEdge " + callerType.determineFullyQualifiedName + ":" + callerMethod.name.fullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(callerType, callerMethod) + "::" 
 			+ determineFullyQualifiedName(callee)
@@ -180,7 +180,7 @@ class JavaHypergraphElementFactory {
 	 * @return the edge
 	 */
 	def static createCallEdge(IMethodBinding caller, IMethodBinding callee) {
-		System.out.println("createCallEdge " + caller.determineFullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
+		// System.out.println("createCallEdge " + caller.determineFullyQualifiedName + " :: " + callee.determineFullyQualifiedName)
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = determineFullyQualifiedName(caller) + "::" + determineFullyQualifiedName(callee)
 		val derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace

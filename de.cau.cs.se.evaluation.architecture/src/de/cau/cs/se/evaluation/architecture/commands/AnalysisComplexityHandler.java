@@ -7,6 +7,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -14,6 +15,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import de.cau.cs.se.evaluation.architecture.jobs.CollectInputModelJob;
 import de.cau.cs.se.evaluation.architecture.jobs.ComplexityAnalysisJob;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 
@@ -33,13 +35,26 @@ public class AnalysisComplexityHandler extends AbstractHandler implements IHandl
 		final IWorkbenchPage activePage = window.getActivePage();
 		final ISelection selection = activePage.getSelection();
 		if (selection != null) {
-			final Job job = new ComplexityAnalysisJob(selection, window.getShell());
-			job.schedule();
+			final CollectInputModelJob collectInputModelJob = new CollectInputModelJob(selection, window.getShell());
+			collectInputModelJob.schedule();
 			try {
-				activePage.showView(AnalysisResultView.ID);
-			} catch (final PartInitException e) {
-				throw new ExecutionException("View initialization failed.", e);
+				collectInputModelJob.join();
+				if (collectInputModelJob.getResult() == Status.OK_STATUS) {
+					final Job job = new ComplexityAnalysisJob(collectInputModelJob.getProject(),
+							collectInputModelJob.getClasses(),
+							collectInputModelJob.getDataTypePatterns(),
+							collectInputModelJob.getObservedSystemPatterns());
+					job.schedule();
+					try {
+						activePage.showView(AnalysisResultView.ID);
+					} catch (final PartInitException e) {
+						throw new ExecutionException("View initialization failed.", e);
+					}
+				}
+			} catch (final InterruptedException e1) {
+				e1.printStackTrace();
 			}
+
 		}
 
 		return null;

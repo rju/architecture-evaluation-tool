@@ -1,47 +1,41 @@
 package de.cau.cs.se.evaluation.architecture.transformation.java
 
-import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
-import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
-import org.eclipse.core.runtime.IProgressMonitor
-import java.util.List
-import org.eclipse.jdt.core.IType
-import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
-import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
+import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
+import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import org.eclipse.jdt.core.dom.TypeDeclaration
-import org.eclipse.jdt.core.dom.Modifier
-
+import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
+import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
+import java.util.List
+import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.emf.common.util.EList
 import org.eclipse.jdt.core.IJavaProject
-import java.util.ArrayList
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
-import org.eclipse.jdt.core.dom.CompilationUnit
-import org.eclipse.jdt.core.JavaCore
-import org.eclipse.jdt.core.dom.ASTParser
-import org.eclipse.jdt.core.dom.AST
-
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEvaluation.*
-import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import org.eclipse.jdt.core.dom.Type
 import org.eclipse.jdt.core.dom.ArrayType
+import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.jdt.core.dom.ITypeBinding
+import org.eclipse.jdt.core.dom.Modifier
 import org.eclipse.jdt.core.dom.ParameterizedType
 import org.eclipse.jdt.core.dom.PrimitiveType
 import org.eclipse.jdt.core.dom.QualifiedType
 import org.eclipse.jdt.core.dom.SimpleType
+import org.eclipse.jdt.core.dom.Type
+import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.UnionType
 import org.eclipse.jdt.core.dom.WildcardType
-import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
-import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
-import org.eclipse.jdt.core.dom.ITypeBinding
-import org.eclipse.jdt.core.dom.IMethodBinding
+
+import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEvaluation.*
+import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
+
+import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
 	var ModularHypergraph modularSystem
 	val IJavaProject project
 	val IProgressMonitor monitor
-	val List<AbstractTypeDeclaration> classList
+	val List<AbstractTypeDeclaration> classes
 	val List<String> dataTypePatterns
 	val List<String> observedSystemPatterns
 		
@@ -52,69 +46,13 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(IJavaProject project, List<IType> classList, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
+	public new(IJavaProject project, List<AbstractTypeDeclaration> classes, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
 		this.project = project
 		this.monitor = monitor
 		this.dataTypePatterns = dataTypePatterns
 		this.observedSystemPatterns = observedSystemPatterns
-		this.classList = new ArrayList<AbstractTypeDeclaration>
-		this.classList.fillClassList(classList, dataTypePatterns, observedSystemPatterns)
+		this.classes = classes 
 	}
-	
-	public def getClassList() {
-		return classList
-	}
-	
-	/**
-	 * Find all classes in the IType list which belong to the observed system.
-	 * 
-	 * @param classes the classes of the observed system
-	 * @param types the types found by scanning the project
-	 * @param dataTypePatterns pattern list for data types to be excluded
-	 * @param observedSystemPatterns pattern list for classes to be included
-	 */
-	private def void fillClassList(List<AbstractTypeDeclaration> declarations, List<IType> types, List<String> dataTypePatterns, List<String> observedSystemPatterns) {
-		types.forEach[jdtType |
-			val unit = jdtType.getUnitForType(project)
-			if (unit != null) {
-				unit.types.forEach[unitType |
-					if (unitType instanceof TypeDeclaration) {
-						val type = unitType as TypeDeclaration
-						val typeBinding = type.resolveBinding
-						val name = typeBinding.determineFullyQualifiedName
-						if (observedSystemPatterns.exists[name.matches(it)])
-							if (!isClassDataType(typeBinding, dataTypePatterns))
-								declarations.add(type)
-				 	}
-				 ]
-			 }
-		]
-	}
-	
-	/**
-	 * Get compilation unit for JDT type.
-	 */
-	private def CompilationUnit getUnitForType(IType type, IJavaProject project) {
-		val outerTypeName = type.packageFragment.elementName + "." + type.elementName
-		if (observedSystemPatterns.exists[outerTypeName.matches(it)]) {
-			monitor.subTask("parsing " + outerTypeName)
-			val options = JavaCore.getOptions()
-			JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
-	 		
-			val ASTParser parser = ASTParser.newParser(AST.JLS8)
-			parser.setProject(project)	
-	 		parser.setCompilerOptions(options)
-	 		parser.kind = ASTParser.K_COMPILATION_UNIT
-	 		parser.source = type.compilationUnit.buffer.contents.toCharArray()
-	 		parser.unitName = type.compilationUnit.elementName
-	 		parser.resolveBindings = true
-	 		parser.bindingsRecovery = true
-	 		parser.statementsRecovery = true
-	 		
-	 		return parser.createAST(null) as CompilationUnit
-	 	} else
-	 		return null
- 	}
 	
 	/**
 	 * Return the generated result.
@@ -129,14 +67,14 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	override transform() {
 		modularSystem = HypergraphFactory.eINSTANCE.createModularHypergraph
 		// create modules for all classes
-		classList.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding))]
+		classes.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding))]
 
 		// define edges for all internal variables of a class
-		classList.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
+		classes.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
 
 		// find all method declarations and create nodes for it, grouped by class as modules
-		classList.forEach[clazz | modularSystem.nodes.createNodesForMethods(clazz)]
-		classList.filter[clazz | clazz.hasImplicitConstructor].
+		classes.forEach[clazz | modularSystem.nodes.createNodesForMethods(clazz)]
+		classes.filter[clazz | clazz.hasImplicitConstructor].
 			forEach[clazz |
 				val node = createNodeForImplicitConstructor(clazz.resolveBinding)
 				val module = modularSystem.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(clazz.resolveBinding)]
@@ -144,7 +82,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 				modularSystem.nodes.add(node)
 			]
 		
-		classList.forEach[clazz | resolveEdges(modularSystem, dataTypePatterns, clazz)]
+		classes.forEach[clazz | resolveEdges(modularSystem, dataTypePatterns, clazz)]
 	}
 	
 	/**
@@ -248,18 +186,6 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		}
 	}
 	
-	/**
-	 * Determine if the given type is a data type.
-	 * 
-	 * @param type the type to be evaluated
-	 * @param dataTypes a list of data types
-	 * 
-	 * @return returns true if the given type is a data type and not a behavior type.
-	 */
-	private def boolean isClassDataType(ITypeBinding typeBinding, List<String> dataTypePatterns) {
-		// TODO this might be to simple.
-		val name = typeBinding.determineFullyQualifiedName
-		return dataTypePatterns.exists[pattern | name.matches(pattern)]
-	}
+	
 		
 }

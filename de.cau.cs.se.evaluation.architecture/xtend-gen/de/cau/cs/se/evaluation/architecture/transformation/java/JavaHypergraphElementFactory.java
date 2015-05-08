@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -122,23 +121,12 @@ public class JavaHypergraphElementFactory {
    * @return the edge
    */
   public static Edge createCallEdge(final AbstractTypeDeclaration callerType, final MethodDeclaration callerMethod, final AbstractTypeDeclaration calleeType, final ConstructorInvocation calleeMethod) {
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType);
-    String _plus = ("createCallEdge " + _determineFullyQualifiedName);
-    String _plus_1 = (_plus + ":");
-    SimpleName _name = callerMethod.getName();
-    String _fullyQualifiedName = _name.getFullyQualifiedName();
-    String _plus_2 = (_plus_1 + _fullyQualifiedName);
-    String _plus_3 = (_plus_2 + " :: ");
-    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(calleeType);
-    String _plus_4 = (_plus_3 + _determineFullyQualifiedName_1);
-    String _plus_5 = (_plus_4 + ":this");
-    System.out.println(_plus_5);
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
-    String _plus_6 = (_determineFullyQualifiedName_2 + "::");
-    String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(calleeType, calleeMethod);
-    String _plus_7 = (_plus_6 + _determineFullyQualifiedName_3);
-    edge.setName(_plus_7);
+    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
+    String _plus = (_determineFullyQualifiedName + "::");
+    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(calleeType, calleeMethod);
+    String _plus_1 = (_plus + _determineFullyQualifiedName_1);
+    edge.setName(_plus_1);
     final CallerCalleeTrace derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace();
     IMethodBinding _resolveBinding = callerMethod.resolveBinding();
     derivedFrom.setCaller(_resolveBinding);
@@ -160,23 +148,12 @@ public class JavaHypergraphElementFactory {
    * @return the edge
    */
   public static Edge createCallEdge(final AbstractTypeDeclaration callerType, final MethodDeclaration callerMethod, final AbstractTypeDeclaration calleeType, final SuperConstructorInvocation calleeMethod) {
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType);
-    String _plus = ("createCallEdge " + _determineFullyQualifiedName);
-    String _plus_1 = (_plus + ":");
-    SimpleName _name = callerMethod.getName();
-    String _fullyQualifiedName = _name.getFullyQualifiedName();
-    String _plus_2 = (_plus_1 + _fullyQualifiedName);
-    String _plus_3 = (_plus_2 + " :: ");
-    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(calleeType);
-    String _plus_4 = (_plus_3 + _determineFullyQualifiedName_1);
-    String _plus_5 = (_plus_4 + ":super");
-    System.out.println(_plus_5);
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
-    String _plus_6 = (_determineFullyQualifiedName_2 + "::");
-    String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(calleeType, calleeMethod);
-    String _plus_7 = (_plus_6 + _determineFullyQualifiedName_3);
-    edge.setName(_plus_7);
+    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
+    String _plus = (_determineFullyQualifiedName + "::");
+    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(calleeType, calleeMethod);
+    String _plus_1 = (_plus + _determineFullyQualifiedName_1);
+    edge.setName(_plus_1);
     final CallerCalleeTrace derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace();
     derivedFrom.setCaller(callerMethod);
     derivedFrom.setCallee(calleeMethod);
@@ -194,22 +171,12 @@ public class JavaHypergraphElementFactory {
    * @return the edge
    */
   public static Edge createCallEdge(final AbstractTypeDeclaration callerType, final MethodDeclaration callerMethod, final IMethodBinding callee) {
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType);
-    String _plus = ("createCallEdge " + _determineFullyQualifiedName);
-    String _plus_1 = (_plus + ":");
-    SimpleName _name = callerMethod.getName();
-    String _fullyQualifiedName = _name.getFullyQualifiedName();
-    String _plus_2 = (_plus_1 + _fullyQualifiedName);
-    String _plus_3 = (_plus_2 + " :: ");
-    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(callee);
-    String _plus_4 = (_plus_3 + _determineFullyQualifiedName_1);
-    System.out.println(_plus_4);
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
-    String _plus_5 = (_determineFullyQualifiedName_2 + "::");
-    String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(callee);
-    String _plus_6 = (_plus_5 + _determineFullyQualifiedName_3);
-    edge.setName(_plus_6);
+    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(callerType, callerMethod);
+    String _plus = (_determineFullyQualifiedName + "::");
+    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(callee);
+    String _plus_1 = (_plus + _determineFullyQualifiedName_1);
+    edge.setName(_plus_1);
     final CallerCalleeTrace derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace();
     IMethodBinding _resolveBinding = callerMethod.resolveBinding();
     derivedFrom.setCaller(_resolveBinding);
@@ -227,18 +194,12 @@ public class JavaHypergraphElementFactory {
    * @return the edge
    */
   public static Edge createCallEdge(final IMethodBinding caller, final IMethodBinding callee) {
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(caller);
-    String _plus = ("createCallEdge " + _determineFullyQualifiedName);
-    String _plus_1 = (_plus + " :: ");
-    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(callee);
-    String _plus_2 = (_plus_1 + _determineFullyQualifiedName_1);
-    System.out.println(_plus_2);
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(caller);
-    String _plus_3 = (_determineFullyQualifiedName_2 + "::");
-    String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(callee);
-    String _plus_4 = (_plus_3 + _determineFullyQualifiedName_3);
-    edge.setName(_plus_4);
+    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(caller);
+    String _plus = (_determineFullyQualifiedName + "::");
+    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(callee);
+    String _plus_1 = (_plus + _determineFullyQualifiedName_1);
+    edge.setName(_plus_1);
     final CallerCalleeTrace derivedFrom = HypergraphFactory.eINSTANCE.createCallerCalleeTrace();
     derivedFrom.setCaller(caller);
     derivedFrom.setCallee(callee);
