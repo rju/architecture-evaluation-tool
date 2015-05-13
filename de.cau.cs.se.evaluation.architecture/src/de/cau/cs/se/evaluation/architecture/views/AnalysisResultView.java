@@ -1,5 +1,7 @@
 package de.cau.cs.se.evaluation.architecture.views;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -36,6 +38,7 @@ public class AnalysisResultView extends ViewPart {
 	public static final String ID = "de.cau.cs.se.evaluation.architecture.views.AnalysisResultView";
 
 	private TableViewer viewer;
+	private Action exportDataAction, exportHypergraphAction, visualizeAction;
 
 
 	/**
@@ -51,6 +54,11 @@ public class AnalysisResultView extends ViewPart {
 	@Override
 	public void createPartControl(final Composite parent) {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		//create Actions
+		this.createActions();
+		//create Toolbar
+		this.createToolbar();
 
 		// create the columns
 		this.createColumns();
@@ -98,6 +106,60 @@ public class AnalysisResultView extends ViewPart {
 			}
 		});
 
+	}
+
+	/**
+	 * Creates Actions for Toolbar.
+	 */
+	private void createActions(){
+
+		final TableViewer temp = this.viewer;//TODO mach was damit
+
+		this.exportDataAction = new Action("export_Data"){
+			@Override
+			public void run(){
+				this.exportData();
+			}
+
+			private void exportData() {
+				// TODO Auto-generated method stub
+			}
+		};
+
+		this.exportHypergraphAction = new Action("export_Graph"){
+			@Override
+			public void run(){
+				this.exportGraph();
+			}
+
+			private void exportGraph() {
+				// TODO Auto-generated method stub
+
+			}
+		};
+
+		this.visualizeAction = new Action("visualize_Graph"){
+			@Override
+			public void run(){
+				this.visualize();
+			}
+
+			private void visualize() {
+				// TODO Auto-generated method stub
+
+			}
+		};
+
+	}
+
+	/**
+	 * Adds Actions to Toolbar.
+	 */
+	private void createToolbar() {
+		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
+		manager.add(this.exportDataAction);
+		manager.add(this.exportHypergraphAction);
+		manager.add(this.visualizeAction);
 	}
 
 	/**
