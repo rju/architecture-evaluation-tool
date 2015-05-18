@@ -1,5 +1,7 @@
 package de.cau.cs.se.evaluation.architecture.views;
 
+import java.io.IOException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -113,17 +115,21 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createActions(){
 
-		final TableViewer temp = this.viewer;//TODO mach was damit
+		final TableViewer temp = this.viewer;
+		final ActionHandler actHandl = new ActionHandler();
 
 		this.exportDataAction = new Action("export_Data"){
 			@Override
 			public void run(){
-				this.exportData();
+				try {
+					actHandl.exportData(temp);
+				} catch (final IOException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Problem in exportData");
+					e.printStackTrace();
+				}
 			}
 
-			private void exportData() {
-				// TODO Auto-generated method stub
-			}
 		};
 
 		this.exportHypergraphAction = new Action("export_Graph"){
