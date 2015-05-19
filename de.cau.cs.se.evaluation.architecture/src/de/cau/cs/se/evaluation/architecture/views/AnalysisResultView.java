@@ -135,24 +135,14 @@ public class AnalysisResultView extends ViewPart {
 		this.exportHypergraphAction = new Action("export_Graph"){
 			@Override
 			public void run(){
-				this.exportGraph();
-			}
-
-			private void exportGraph() {
-				// TODO Auto-generated method stub
-
+				actHandl.exportGraph();
 			}
 		};
 
 		this.visualizeAction = new Action("visualize_Graph"){
 			@Override
 			public void run(){
-				this.visualize();
-			}
-
-			private void visualize() {
-				// TODO Auto-generated method stub
-
+				actHandl.visualize();
 			}
 		};
 

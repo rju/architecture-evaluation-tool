@@ -13,6 +13,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.TableItem;
 
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
+
 class ActionHandler {
 
 
@@ -34,12 +36,13 @@ class ActionHandler {
 				else{
 					loc = fileChooser.getSelectedFile().getAbsolutePath();
 				}
+
 				final File result = new File(loc);
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
-					sb.append(element);
-					sb.append(",");
+					sb.append(((NamedValue)element.getData()).getName() + ": " + ((NamedValue)element.getData()).getValue());
+					sb.append("," + "\n");
 				}
 				br.write(sb.toString());
 				br.close();
@@ -48,11 +51,10 @@ class ActionHandler {
 	}
 
 	protected void exportGraph(){
-
+		MessageDialog.openWarning(null, "Not implemented", "Not implemented yet.");
 	}
 
 	protected void visualize(){
-
+		MessageDialog.openWarning(null, "Not implemented", "Not implemented yet.");
 	}
-
 }
