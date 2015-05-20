@@ -125,7 +125,7 @@ public class AnalysisResultView extends ViewPart {
 					actHandl.exportData(temp);
 				} catch (final IOException e) {
 					// TODO Auto-generated catch block
-					System.out.println("Problem in exportData");
+					System.out.println("Problem in exportDataAction");
 					e.printStackTrace();
 				}
 			}
@@ -135,7 +135,13 @@ public class AnalysisResultView extends ViewPart {
 		this.exportHypergraphAction = new Action("export_Graph"){
 			@Override
 			public void run(){
-				actHandl.exportGraph();
+				try {
+					actHandl.exportGraph(null);
+				} catch (final IOException e) {//TODO model as Parameter
+					// TODO Auto-generated catch block
+					System.out.println("Problem in exportHypergraphAction.");
+					e.printStackTrace();
+				}
 			}
 		};
 
