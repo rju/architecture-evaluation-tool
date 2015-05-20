@@ -58,6 +58,8 @@ public class ComplexityAnalysisJob extends Job {
   
   private final IJavaProject project;
   
+  private TransformationJavaMethodsToModularHypergraph javaToModularHypergraph;
+  
   /**
    * The constructor scans the selection for files.
    * Compare to http://stackoverflow.com/questions/6892294/eclipse-plugin-how-to-get-the-path-to-the-currently-selected-project
@@ -68,13 +70,15 @@ public class ComplexityAnalysisJob extends Job {
     this.classes = classes;
     this.dataTypePatterns = dataTypePatterns;
     this.observedSystemPatterns = observedSystemPatterns;
+    this.javaToModularHypergraph = null;
   }
   
   protected IStatus run(final IProgressMonitor monitor) {
     final ResultModelProvider result = ResultModelProvider.INSTANCE;
     monitor.beginTask("Processing project", 0);
-    final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(this.project, this.classes, this.dataTypePatterns, this.observedSystemPatterns, monitor);
-    javaToModularHypergraph.transform();
+    TransformationJavaMethodsToModularHypergraph _transformationJavaMethodsToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(this.project, this.classes, this.dataTypePatterns, this.observedSystemPatterns, monitor);
+    this.javaToModularHypergraph = _transformationJavaMethodsToModularHypergraph;
+    this.javaToModularHypergraph.transform();
     List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
@@ -86,7 +90,7 @@ public class ComplexityAnalysisJob extends Job {
     IProject _project_1 = this.project.getProject();
     String _name_1 = _project_1.getName();
     String _plus_1 = (_name_1 + " number of modules");
-    ModularHypergraph _modularSystem = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem = this.javaToModularHypergraph.getModularSystem();
     EList<Module> _modules = _modularSystem.getModules();
     int _size_1 = _modules.size();
     NamedValue _namedValue_1 = new NamedValue(_plus_1, _size_1);
@@ -95,7 +99,7 @@ public class ComplexityAnalysisJob extends Job {
     IProject _project_2 = this.project.getProject();
     String _name_2 = _project_2.getName();
     String _plus_2 = (_name_2 + " number of nodes");
-    ModularHypergraph _modularSystem_1 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_1 = this.javaToModularHypergraph.getModularSystem();
     EList<Node> _nodes = _modularSystem_1.getNodes();
     int _size_2 = _nodes.size();
     NamedValue _namedValue_2 = new NamedValue(_plus_2, _size_2);
@@ -104,15 +108,15 @@ public class ComplexityAnalysisJob extends Job {
     IProject _project_3 = this.project.getProject();
     String _name_3 = _project_3.getName();
     String _plus_3 = (_name_3 + " number of edges");
-    ModularHypergraph _modularSystem_2 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_2 = this.javaToModularHypergraph.getModularSystem();
     EList<Edge> _edges = _modularSystem_2.getEdges();
     int _size_3 = _edges.size();
     NamedValue _namedValue_3 = new NamedValue(_plus_3, _size_3);
     _values_3.add(_namedValue_3);
     this.updateView();
-    ModularHypergraph _modularSystem_3 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_3 = this.javaToModularHypergraph.getModularSystem();
     final TransformationMaximalInterconnectedGraph transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(_modularSystem_3);
-    ModularHypergraph _modularSystem_4 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_4 = this.javaToModularHypergraph.getModularSystem();
     final TransformationIntermoduleHyperedgesOnlyGraph transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(_modularSystem_4);
     monitor.subTask("Create maximal interconnected graph");
     transformationMaximalInterconnectedGraph.transform();
@@ -120,12 +124,12 @@ public class ComplexityAnalysisJob extends Job {
     transformationIntermoduleHyperedgesOnlyGraph.transform();
     monitor.beginTask("Calculating metrics", (1 + (3 * 3)));
     final TransformationHypergraphMetrics metrics = new TransformationHypergraphMetrics(monitor);
-    ModularHypergraph _modularSystem_5 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_5 = this.javaToModularHypergraph.getModularSystem();
     metrics.setSystem(_modularSystem_5);
     monitor.subTask("System size");
     final double systemSize = metrics.calculate();
     monitor.worked(1);
-    ModularHypergraph _modularSystem_6 = javaToModularHypergraph.getModularSystem();
+    ModularHypergraph _modularSystem_6 = this.javaToModularHypergraph.getModularSystem();
     final double complexity = this.calculateComplexity(_modularSystem_6, monitor, "Complexity");
     ModularHypergraph _result = transformationMaximalInterconnectedGraph.getResult();
     final double complexityMaximalInterconnected = this.calculateComplexity(_result, monitor, "Maximal interconnected graph complexity");
@@ -171,6 +175,8 @@ public class ComplexityAnalysisJob extends Job {
           IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
           final IViewPart part = _activePage.showView(AnalysisResultView.ID);
           ((AnalysisResultView) part).update(ResultModelProvider.INSTANCE);
+          ModularHypergraph _modularSystem = ComplexityAnalysisJob.this.javaToModularHypergraph.getModularSystem();
+          ((AnalysisResultView) part).updateGraph(_modularSystem);
         } catch (final Throwable _t) {
           if (_t instanceof PartInitException) {
             final PartInitException e = (PartInitException)_t;

@@ -72,7 +72,7 @@ class ActionHandler {
 	protected void exportGraph(final EObject model) throws IOException{
 
 		if (model == null){
-			MessageDialog.openWarning(null, "Missing EPackage", "No Graph (EPackage) found.");
+			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
 		}
 		else{
 			String loc = null;

@@ -44,6 +44,9 @@ class ComplexityAnalysisJob extends Job {
 	
 	val IJavaProject project
 	
+	var TransformationJavaMethodsToModularHypergraph javaToModularHypergraph
+	
+	
 	/**
 	 * The constructor scans the selection for files.
 	 * Compare to http://stackoverflow.com/questions/6892294/eclipse-plugin-how-to-get-the-path-to-the-currently-selected-project
@@ -55,6 +58,7 @@ class ComplexityAnalysisJob extends Job {
 		this.classes = classes
 		this.dataTypePatterns = dataTypePatterns
 		this.observedSystemPatterns = observedSystemPatterns
+		this.javaToModularHypergraph = null
 	}
 	
 	protected override IStatus run(IProgressMonitor monitor) {
@@ -63,9 +67,9 @@ class ComplexityAnalysisJob extends Job {
 		/** construct analysis. */
 		monitor.beginTask("Processing project", 0)
 				
-		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(project, classes, dataTypePatterns, observedSystemPatterns, monitor)
+		this.javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(project, classes, dataTypePatterns, observedSystemPatterns, monitor)
 		
-		javaToModularHypergraph.transform
+		this.javaToModularHypergraph.transform
 
 		result.values.add(new NamedValue(project.project.name + " size of observed system", classes.size))
 		result.values.add(new NamedValue(project.project.name + " number of modules", javaToModularHypergraph.modularSystem.modules.size))
@@ -122,6 +126,7 @@ class ComplexityAnalysisJob extends Job {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
 					(part as AnalysisResultView).update(ResultModelProvider.INSTANCE)
+					(part as AnalysisResultView).updateGraph(javaToModularHypergraph.modularSystem)
 	           } catch (PartInitException e) {
 	                e.printStackTrace()
 	           }

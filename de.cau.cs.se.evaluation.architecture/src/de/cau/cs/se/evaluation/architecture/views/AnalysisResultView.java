@@ -2,6 +2,7 @@ package de.cau.cs.se.evaluation.architecture.views;
 
 import java.io.IOException;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -41,6 +42,7 @@ public class AnalysisResultView extends ViewPart {
 
 	private TableViewer viewer;
 	private Action exportDataAction, exportHypergraphAction, visualizeAction;
+	private EObject graph = null;
 
 
 	/**
@@ -115,14 +117,13 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createActions(){
 
-		final TableViewer temp = this.viewer;
 		final ActionHandler actHandl = new ActionHandler();
 
 		this.exportDataAction = new Action("export_Data"){
 			@Override
 			public void run(){
 				try {
-					actHandl.exportData(temp);
+					actHandl.exportData(AnalysisResultView.this.viewer);
 				} catch (final IOException e) {
 					// TODO Auto-generated catch block
 					System.out.println("Problem in exportDataAction");
@@ -136,8 +137,8 @@ public class AnalysisResultView extends ViewPart {
 			@Override
 			public void run(){
 				try {
-					actHandl.exportGraph(null);
-				} catch (final IOException e) {//TODO model as Parameter
+					actHandl.exportGraph(AnalysisResultView.this.graph);
+				} catch (final IOException e) {
 					// TODO Auto-generated catch block
 					System.out.println("Problem in exportHypergraphAction.");
 					e.printStackTrace();
@@ -172,9 +173,12 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
+	public void updateGraph(final EObject graph){
+		this.graph = graph;
+	}
+
 	public void update(final ResultModelProvider provider) {
 		this.setFocus();
 		this.viewer.refresh();
 	}
-
 }
