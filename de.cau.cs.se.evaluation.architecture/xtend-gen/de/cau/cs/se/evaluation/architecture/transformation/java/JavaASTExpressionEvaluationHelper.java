@@ -589,7 +589,13 @@ public class JavaASTExpressionEvaluationHelper {
             }
           }
           if (!_matched_1) {
-            Class<? extends FieldAccess> _class = ((FieldAccess)expression).getClass();
+            if (prefix instanceof MethodInvocation) {
+              _matched_1=true;
+              _switchResult_1 = false;
+            }
+          }
+          if (!_matched_1) {
+            Class<? extends Expression> _class = prefix.getClass();
             String _plus = ("FieldAccess expression type " + _class);
             String _plus_1 = (_plus + " is not supported by isClassDataProperty");
             throw new UnsupportedOperationException(_plus_1);

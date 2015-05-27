@@ -332,8 +332,9 @@ class JavaASTExpressionEvaluationHelper {
     			switch(prefix) {
     				ParenthesizedExpression: prefix.expression.isDataPropertyOfClass(dataTypePatterns, typeBinding)
     				ThisExpression: expression.name.isDataPropertyOfClass(dataTypePatterns, typeBinding)
+    				MethodInvocation: false // TODO check iff this is always true
     				default:
-    					throw new UnsupportedOperationException("FieldAccess expression type " + expression.class + " is not supported by isClassDataProperty")
+    					throw new UnsupportedOperationException("FieldAccess expression type " + prefix.class + " is not supported by isClassDataProperty")
     			} 
     		}
     		SimpleName: typeBinding.declaredFields.exists[it.name.equals(expression.fullyQualifiedName) && it.type.isDataType(dataTypePatterns)]
