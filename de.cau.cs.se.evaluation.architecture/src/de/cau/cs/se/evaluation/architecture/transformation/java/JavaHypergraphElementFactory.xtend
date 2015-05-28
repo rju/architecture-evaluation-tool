@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.dom.IMethodBinding
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import org.eclipse.jdt.core.dom.IVariableBinding
 
 class JavaHypergraphElementFactory {
 		
@@ -81,21 +81,18 @@ class JavaHypergraphElementFactory {
 		return node
 	}
 	
-	
 	/**
-	 * Create for one VariableDeclarationFragment an data edge. The fragment belongs to
-	 * an FieldDeclaration.
+	 * Create a data edge for an reference of a super class property. Used with framework classes.
 	 * 
-	 * @param type is the class containing the variable declaration
-	 * @param fragment is the variable declaration fragment containing the name
+	 * @param variableBinding is the variable declaration fragment containing the name
 	 * 
 	 * @return the edge
 	 */
-	def static createDataEdge(AbstractTypeDeclaration type, VariableDeclarationFragment fragment) {
+	def static createDataEdge(IVariableBinding variableBinding) {
 		val edge = HypergraphFactory.eINSTANCE.createEdge
-		edge.name = determineFullyQualifiedName(type,fragment)
+		edge.name = determineFullyQualifiedName(variableBinding)
 		val derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace
-		derivedFrom.field = fragment
+		derivedFrom.field = variableBinding
 		edge.derivedFrom = derivedFrom
 		
 		return edge

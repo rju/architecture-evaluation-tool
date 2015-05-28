@@ -8,17 +8,20 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
+import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.jdt.core.dom.IMethodBinding
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.IVariableBinding
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment
+import org.eclipse.jdt.core.dom.SimpleName
 
 import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
 
+import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+
 class JavaHypergraphQueryHelper {
-		/**
-	 * Find the node for the given constructor invocation.
+	/**
+	 * Find the node for the given method invocation.
 	 * 
 	 * @param nodes
 	 * @param binding
@@ -28,7 +31,7 @@ class JavaHypergraphQueryHelper {
 			val derivedFrom = it.derivedFrom
 			switch (derivedFrom) {
 				MethodTrace: (derivedFrom.method as IMethodBinding).isEqualTo(binding)
-				TypeTrace: (derivedFrom.type as ITypeBinding).isEqualTo(binding.declaringClass)
+				TypeTrace: false
 				default:
 					throw new UnsupportedOperationException("Nodes cannot be derived from " + derivedFrom.class)
 			}
@@ -36,10 +39,40 @@ class JavaHypergraphQueryHelper {
 	}
 	
 	/**
+	 * Find the node for the given method invocation.
+	 * 
+	 * @param nodes
+	 * @param binding
+	 */
+	def static findNodeForConstructorBinding(EList<Node> nodes, IMethodBinding binding) {
+		val result = nodes.findNodeForMethodBinding(binding)
+		if (result == null) { /** now check if there is an implicit constructor node. */
+			nodes.findFirst[
+				val derivedFrom = it.derivedFrom
+				switch (derivedFrom) {
+					MethodTrace: false
+					TypeTrace: (derivedFrom.type as ITypeBinding).isEqualTo(binding.declaringClass)
+					default:
+						throw new UnsupportedOperationException("Nodes cannot be derived from " + derivedFrom.class)
+				}
+			]
+		} else
+			return result
+	}
+	
+	/**
 	 * Find a module which corresponds to the type binding.
 	 */
 	def static findModule(EList<Module> modules, ITypeBinding binding) {
 		modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(binding)]
+	}
+	
+	
+	/**
+	 * Find a module which corresponds to the type binding.
+	 */
+	def static findModule(EList<Module> modules, String fullyQualifiedName) {
+		modules.findFirst[it.name.equals(fullyQualifiedName)]
 	}
 	
 	/**
@@ -69,8 +102,8 @@ class JavaHypergraphQueryHelper {
 	def static findDataEdge(EList<Edge> edges, IVariableBinding binding) {
 		edges.findFirst[edge |
 			if (edge.derivedFrom instanceof FieldTrace) {
-				val trace = (edge.derivedFrom as FieldTrace).field as VariableDeclarationFragment
-				trace.resolveBinding.isEqualTo(binding)
+				val trace = (edge.derivedFrom as FieldTrace).field as IVariableBinding
+				trace.isEqualTo(binding)
 			} else
 				false
 		]
@@ -102,4 +135,29 @@ class JavaHypergraphQueryHelper {
     	
     	return targetNode
     }
+    
+    /**
+     * Find the given variable declared in the class given by the typeBinding and check if it is
+     * a data property. 
+     * 
+     * @param property the property name
+     * @param typeBinding the type binding of the class
+     * @param dataTypePatterns a list of patterns used to determine data types
+     * 
+     * @return Returns the variable binding if the property exists and is a data property, else null
+     */
+    def static IVariableBinding findDataPropertyInClass(SimpleName property, ITypeBinding typeBinding, List<String> dataTypePatterns) {
+    	typeBinding.declaredFields.findFirst[it.name.equals(property.fullyQualifiedName) && it.type.isDataType(dataTypePatterns)]
+    } 
+    
+    /**
+     * Determine if a given type is considered a data type.
+     */
+    def static boolean isDataType(ITypeBinding type, List<String> dataTypePatterns) {
+    	if (type.isPrimitive)
+    		return true
+    	else
+    		return dataTypePatterns.exists[type.determineFullyQualifiedName.matches(it)]
+    }
+    
 }

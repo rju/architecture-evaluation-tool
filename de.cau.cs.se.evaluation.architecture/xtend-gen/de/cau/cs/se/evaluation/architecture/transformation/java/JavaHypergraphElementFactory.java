@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 @SuppressWarnings("all")
 public class JavaHypergraphElementFactory {
@@ -91,20 +91,18 @@ public class JavaHypergraphElementFactory {
   }
   
   /**
-   * Create for one VariableDeclarationFragment an data edge. The fragment belongs to
-   * an FieldDeclaration.
+   * Create a data edge for an reference of a super class property. Used with framework classes.
    * 
-   * @param type is the class containing the variable declaration
-   * @param fragment is the variable declaration fragment containing the name
+   * @param variableBinding is the variable declaration fragment containing the name
    * 
    * @return the edge
    */
-  public static Edge createDataEdge(final AbstractTypeDeclaration type, final VariableDeclarationFragment fragment) {
+  public static Edge createDataEdge(final IVariableBinding variableBinding) {
     final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(type, fragment);
+    String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(variableBinding);
     edge.setName(_determineFullyQualifiedName);
     final FieldTrace derivedFrom = HypergraphFactory.eINSTANCE.createFieldTrace();
-    derivedFrom.setField(fragment);
+    derivedFrom.setField(variableBinding);
     edge.setDerivedFrom(derivedFrom);
     return edge;
   }

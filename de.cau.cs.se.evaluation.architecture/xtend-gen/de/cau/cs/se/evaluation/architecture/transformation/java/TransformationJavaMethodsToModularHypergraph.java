@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -249,9 +250,10 @@ public class TransformationJavaMethodsToModularHypergraph implements ITransforma
           boolean _isDataType = TransformationJavaMethodsToModularHypergraph.this.isDataType(_type, dataTypePatterns);
           if (_isDataType) {
             List _fragments = field.fragments();
-            final Consumer<VariableDeclarationFragment> _function = new Consumer<VariableDeclarationFragment>() {
-              public void accept(final VariableDeclarationFragment fragment) {
-                Edge _createDataEdge = JavaHypergraphElementFactory.createDataEdge(type, fragment);
+            final Consumer<Object> _function = new Consumer<Object>() {
+              public void accept(final Object fragment) {
+                IVariableBinding _resolveBinding = ((VariableDeclarationFragment) fragment).resolveBinding();
+                Edge _createDataEdge = JavaHypergraphElementFactory.createDataEdge(_resolveBinding);
                 edges.add(_createDataEdge);
               }
             };

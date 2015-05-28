@@ -29,6 +29,7 @@ import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTEv
 import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
@@ -149,7 +150,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		if (type instanceof TypeDeclaration) {
 			type.fields.forEach[field |
 				if (field.type.isDataType(dataTypePatterns))
-					field.fragments.forEach[fragment | edges.add(createDataEdge(type, fragment))]
+					field.fragments.forEach[fragment | edges.add(createDataEdge((fragment as VariableDeclarationFragment).resolveBinding))]
 			]
 		}
 	}

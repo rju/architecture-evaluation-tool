@@ -12,19 +12,22 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.ModuleReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
+import de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper;
 import de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory;
+import java.util.List;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 @SuppressWarnings("all")
 public class JavaHypergraphQueryHelper {
   /**
-   * Find the node for the given constructor invocation.
+   * Find the node for the given method invocation.
    * 
    * @param nodes
    * @param binding
@@ -47,9 +50,7 @@ public class JavaHypergraphQueryHelper {
           if (!_matched) {
             if (derivedFrom instanceof TypeTrace) {
               _matched=true;
-              Object _type = ((TypeTrace)derivedFrom).getType();
-              ITypeBinding _declaringClass = binding.getDeclaringClass();
-              _switchResult = ((ITypeBinding) _type).isEqualTo(_declaringClass);
+              _switchResult = false;
             }
           }
           if (!_matched) {
@@ -66,6 +67,59 @@ public class JavaHypergraphQueryHelper {
   }
   
   /**
+   * Find the node for the given method invocation.
+   * 
+   * @param nodes
+   * @param binding
+   */
+  public static Node findNodeForConstructorBinding(final EList<Node> nodes, final IMethodBinding binding) {
+    Node _xblockexpression = null;
+    {
+      final Node result = JavaHypergraphQueryHelper.findNodeForMethodBinding(nodes, binding);
+      Node _xifexpression = null;
+      boolean _equals = Objects.equal(result, null);
+      if (_equals) {
+        final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
+          public Boolean apply(final Node it) {
+            boolean _xblockexpression = false;
+            {
+              final NodeReference derivedFrom = it.getDerivedFrom();
+              boolean _switchResult = false;
+              boolean _matched = false;
+              if (!_matched) {
+                if (derivedFrom instanceof MethodTrace) {
+                  _matched=true;
+                  _switchResult = false;
+                }
+              }
+              if (!_matched) {
+                if (derivedFrom instanceof TypeTrace) {
+                  _matched=true;
+                  Object _type = ((TypeTrace)derivedFrom).getType();
+                  ITypeBinding _declaringClass = binding.getDeclaringClass();
+                  _switchResult = ((ITypeBinding) _type).isEqualTo(_declaringClass);
+                }
+              }
+              if (!_matched) {
+                Class<? extends NodeReference> _class = derivedFrom.getClass();
+                String _plus = ("Nodes cannot be derived from " + _class);
+                throw new UnsupportedOperationException(_plus);
+              }
+              _xblockexpression = _switchResult;
+            }
+            return Boolean.valueOf(_xblockexpression);
+          }
+        };
+        _xifexpression = IterableExtensions.<Node>findFirst(nodes, _function);
+      } else {
+        return result;
+      }
+      _xblockexpression = _xifexpression;
+    }
+    return _xblockexpression;
+  }
+  
+  /**
    * Find a module which corresponds to the type binding.
    */
   public static Module findModule(final EList<Module> modules, final ITypeBinding binding) {
@@ -74,6 +128,19 @@ public class JavaHypergraphQueryHelper {
         ModuleReference _derivedFrom = it.getDerivedFrom();
         Object _type = ((TypeTrace) _derivedFrom).getType();
         return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(binding));
+      }
+    };
+    return IterableExtensions.<Module>findFirst(modules, _function);
+  }
+  
+  /**
+   * Find a module which corresponds to the type binding.
+   */
+  public static Module findModule(final EList<Module> modules, final String fullyQualifiedName) {
+    final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
+      public Boolean apply(final Module it) {
+        String _name = it.getName();
+        return Boolean.valueOf(_name.equals(fullyQualifiedName));
       }
     };
     return IterableExtensions.<Module>findFirst(modules, _function);
@@ -149,9 +216,8 @@ public class JavaHypergraphQueryHelper {
           {
             EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
             Object _field = ((FieldTrace) _derivedFrom_1).getField();
-            final VariableDeclarationFragment trace = ((VariableDeclarationFragment) _field);
-            IVariableBinding _resolveBinding = trace.resolveBinding();
-            _xblockexpression = _resolveBinding.isEqualTo(binding);
+            final IVariableBinding trace = ((IVariableBinding) _field);
+            _xblockexpression = trace.isEqualTo(binding);
           }
           _xifexpression = _xblockexpression;
         } else {
@@ -196,5 +262,54 @@ public class JavaHypergraphQueryHelper {
       _nodes_2.add(targetNode);
     }
     return targetNode;
+  }
+  
+  /**
+   * Find the given variable declared in the class given by the typeBinding and check if it is
+   * a data property.
+   * 
+   * @param property the property name
+   * @param typeBinding the type binding of the class
+   * @param dataTypePatterns a list of patterns used to determine data types
+   * 
+   * @return Returns the variable binding if the property exists and is a data property, else null
+   */
+  public static IVariableBinding findDataPropertyInClass(final SimpleName property, final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
+    IVariableBinding[] _declaredFields = typeBinding.getDeclaredFields();
+    final Function1<IVariableBinding, Boolean> _function = new Function1<IVariableBinding, Boolean>() {
+      public Boolean apply(final IVariableBinding it) {
+        boolean _and = false;
+        String _name = it.getName();
+        String _fullyQualifiedName = property.getFullyQualifiedName();
+        boolean _equals = _name.equals(_fullyQualifiedName);
+        if (!_equals) {
+          _and = false;
+        } else {
+          ITypeBinding _type = it.getType();
+          boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_type, dataTypePatterns);
+          _and = _isDataType;
+        }
+        return Boolean.valueOf(_and);
+      }
+    };
+    return IterableExtensions.<IVariableBinding>findFirst(((Iterable<IVariableBinding>)Conversions.doWrapArray(_declaredFields)), _function);
+  }
+  
+  /**
+   * Determine if a given type is considered a data type.
+   */
+  public static boolean isDataType(final ITypeBinding type, final List<String> dataTypePatterns) {
+    boolean _isPrimitive = type.isPrimitive();
+    if (_isPrimitive) {
+      return true;
+    } else {
+      final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
+        public Boolean apply(final String it) {
+          String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(type);
+          return Boolean.valueOf(_determineFullyQualifiedName.matches(it));
+        }
+      };
+      return IterableExtensions.<String>exists(dataTypePatterns, _function);
+    }
   }
 }
