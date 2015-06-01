@@ -125,8 +125,9 @@ class ComplexityAnalysisJob extends Job {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					(part as AnalysisResultView).update(ResultModelProvider.INSTANCE)
 					(part as AnalysisResultView).updateGraph(javaToModularHypergraph.modularSystem)
+					(part as AnalysisResultView).updateProject(project)
+					(part as AnalysisResultView).update(ResultModelProvider.INSTANCE)
 	           } catch (PartInitException e) {
 	                e.printStackTrace()
 	           }

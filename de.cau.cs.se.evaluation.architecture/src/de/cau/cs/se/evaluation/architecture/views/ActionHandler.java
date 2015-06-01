@@ -6,18 +6,18 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
@@ -34,23 +34,33 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Data'-Button in AnalysisResultView.
 	 */
-	protected void exportData(final TableViewer table) throws IOException{
+	protected void exportData(final TableViewer table, final Shell shell, final IJavaProject project) throws IOException{
 		String loc = null;
 		if(table.getTable().getItems().length == 0){
 			MessageDialog.openWarning(null, "Missing values", "There is nothing to export.");
 		}
 		else{
-			final JFrame frame = new JFrame();
+			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+			dialog.setText("Save");
+			if(project != null){
+				dialog.setFilterPath(project.getProject().getLocation().toString());}
+			final String[] filterExt = { "*.csv", "*.*" };
+			dialog.setFilterExtensions(filterExt);
+			final String returnVal = dialog.open();
+
+			/*final JFrame frame = new JFrame();
 			final JFileChooser  fileChooser = new JFileChooser(".");
 			final FileNameExtensionFilter filter = new FileNameExtensionFilter(".csv","csv");
 			fileChooser.setFileFilter(filter);
 			final int returnVal = fileChooser.showSaveDialog(frame);
-			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				if(!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".csv")){
-					loc = fileChooser.getSelectedFile().getAbsolutePath().concat(".csv");
+			if(returnVal == JFileChooser.APPROVE_OPTION) {*/
+
+			if(returnVal != null){
+				if(!returnVal.endsWith(".csv")){
+					loc = returnVal.concat(".csv");
 				}
 				else{
-					loc = fileChooser.getSelectedFile().getAbsolutePath();
+					loc = returnVal;
 				}
 
 				final File result = new File(loc);
@@ -69,24 +79,26 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Graph'-Button in AnalysisResultView.
 	 */
-	protected void exportGraph(final EObject model) throws IOException{
+	protected void exportGraph(final EObject model, final Shell shell, final IJavaProject project) throws IOException{
 
 		if (model == null){
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
 		}
 		else{
 			String loc = null;
-			final JFrame frame = new JFrame();
-			final JFileChooser  fileChooser = new JFileChooser(".");
-			final FileNameExtensionFilter filter = new FileNameExtensionFilter(".ecore","ecore");
-			fileChooser.setFileFilter(filter);
-			final int returnVal = fileChooser.showSaveDialog(frame);
-			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				if(!fileChooser.getSelectedFile().getAbsolutePath().endsWith(".ecore")){
-					loc = fileChooser.getSelectedFile().getAbsolutePath().concat(".ecore");
+			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+			dialog.setText("Save");
+			if(project != null){
+				dialog.setFilterPath(project.getProject().getLocation().toString());}
+			final String[] filterExt = { "*.ecore", "*.*" };
+			dialog.setFilterExtensions(filterExt);
+			final String returnVal = dialog.open();
+			if(returnVal != null){
+				if(!returnVal.endsWith(".ecore")){
+					loc = returnVal.concat(".ecore");
 				}
 				else{
-					loc = fileChooser.getSelectedFile().getAbsolutePath();
+					loc = returnVal;
 				}
 
 				final ResourceSet resourceSet = new ResourceSetImpl();
@@ -119,4 +131,5 @@ class ActionHandler {
 	protected void visualize(){
 		MessageDialog.openWarning(null, "Not implemented", "Not implemented yet.");
 	}
+
 }

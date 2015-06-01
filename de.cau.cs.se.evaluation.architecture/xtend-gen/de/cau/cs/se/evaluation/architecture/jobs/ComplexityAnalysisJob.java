@@ -174,9 +174,10 @@ public class ComplexityAnalysisJob extends Job {
           IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
           IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
           final IViewPart part = _activePage.showView(AnalysisResultView.ID);
-          ((AnalysisResultView) part).update(ResultModelProvider.INSTANCE);
           ModularHypergraph _modularSystem = ComplexityAnalysisJob.this.javaToModularHypergraph.getModularSystem();
           ((AnalysisResultView) part).updateGraph(_modularSystem);
+          ((AnalysisResultView) part).updateProject(ComplexityAnalysisJob.this.project);
+          ((AnalysisResultView) part).update(ResultModelProvider.INSTANCE);
         } catch (final Throwable _t) {
           if (_t instanceof PartInitException) {
             final PartInitException e = (PartInitException)_t;
