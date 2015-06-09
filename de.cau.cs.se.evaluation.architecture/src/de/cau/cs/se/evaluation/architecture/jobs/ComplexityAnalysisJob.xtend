@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
+import org.eclipse.emf.ecore.EObject
 
 class ComplexityAnalysisJob extends Job {
 	
@@ -125,7 +126,7 @@ class ComplexityAnalysisJob extends Job {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					(part as AnalysisResultView).updateGraph(javaToModularHypergraph.modularSystem)
+					(part as AnalysisResultView).updateGraph(javaToModularHypergraph.modularSystem as EObject)
 					(part as AnalysisResultView).updateProject(project)
 					(part as AnalysisResultView).update(ResultModelProvider.INSTANCE)
 	           } catch (PartInitException e) {

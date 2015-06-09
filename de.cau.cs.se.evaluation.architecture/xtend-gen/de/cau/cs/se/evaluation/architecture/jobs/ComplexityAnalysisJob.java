@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.swt.widgets.Display;
@@ -175,7 +176,7 @@ public class ComplexityAnalysisJob extends Job {
           IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
           final IViewPart part = _activePage.showView(AnalysisResultView.ID);
           ModularHypergraph _modularSystem = ComplexityAnalysisJob.this.javaToModularHypergraph.getModularSystem();
-          ((AnalysisResultView) part).updateGraph(_modularSystem);
+          ((AnalysisResultView) part).updateGraph(((EObject) _modularSystem));
           ((AnalysisResultView) part).updateProject(ComplexityAnalysisJob.this.project);
           ((AnalysisResultView) part).update(ResultModelProvider.INSTANCE);
         } catch (final Throwable _t) {

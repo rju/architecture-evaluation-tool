@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 
 /**
@@ -47,14 +48,6 @@ class ActionHandler {
 			final String[] filterExt = { "*.csv", "*.*" };
 			dialog.setFilterExtensions(filterExt);
 			final String returnVal = dialog.open();
-
-			/*final JFrame frame = new JFrame();
-			final JFileChooser  fileChooser = new JFileChooser(".");
-			final FileNameExtensionFilter filter = new FileNameExtensionFilter(".csv","csv");
-			fileChooser.setFileFilter(filter);
-			final int returnVal = fileChooser.showSaveDialog(frame);
-			if(returnVal == JFileChooser.APPROVE_OPTION) {*/
-
 			if(returnVal != null){
 				if(!returnVal.endsWith(".csv")){
 					loc = returnVal.concat(".csv");
@@ -67,8 +60,8 @@ class ActionHandler {
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
-					sb.append(((NamedValue)element.getData()).getName() + ": " + ((NamedValue)element.getData()).getValue());
-					sb.append("," + "\n");
+					sb.append(((NamedValue)element.getData()).getName() + ";" + ((NamedValue)element.getData()).getValue());
+					sb.append("\n");
 				}
 				br.write(sb.toString());
 				br.close();
@@ -90,12 +83,12 @@ class ActionHandler {
 			dialog.setText("Save");
 			if(project != null){
 				dialog.setFilterPath(project.getProject().getLocation().toString());}
-			final String[] filterExt = { "*.ecore", "*.*" };
+			final String[] filterExt = { "*.graph", "*.*" };
 			dialog.setFilterExtensions(filterExt);
 			final String returnVal = dialog.open();
 			if(returnVal != null){
-				if(!returnVal.endsWith(".ecore")){
-					loc = returnVal.concat(".ecore");
+				if(!returnVal.endsWith(".graph")){
+					loc = returnVal.concat(".graph");
 				}
 				else{
 					loc = returnVal;
@@ -104,22 +97,18 @@ class ActionHandler {
 				final ResourceSet resourceSet = new ResourceSetImpl();
 
 				// Register XML Factory implementation to handle .ecore files
-				resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new XMLResourceFactoryImpl());
+				resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("graph", new XMLResourceFactoryImpl());
 
 				// Create empty resource with the given URI
-				final Resource resource = resourceSet.createResource(URI.createURI("./graph.xml"));
+				final Resource resource = resourceSet.createResource(URI.createURI("./graph.xmlS"));
 
 				// Add model to contents list of the resource
-				resource.getContents().add(model);
+				resource.getContents().add(new GraphTransformer().makeSerializable((ModularHypergraph)model));
 
 				// Save the resource
 				final File destination = new File(loc);
 				final FileOutputStream stream = new FileOutputStream(destination);
-				try {
-					resource.save(stream, null);
-				} catch (final IOException e) {
-					e.printStackTrace();
-				}
+				resource.save(stream, null);
 				stream.close();
 			}
 		}
