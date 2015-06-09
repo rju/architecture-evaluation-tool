@@ -1,3 +1,18 @@
+/***************************************************************************
+ * Copyright 2015
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.views;
 
 import java.io.BufferedWriter;
@@ -31,28 +46,33 @@ import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
  */
 class ActionHandler {
 
+	/**
+	 * Default constructor.
+	 */
+	public ActionHandler() {
+		super();
+	}
 
 	/**
 	 * Action-Logic for 'export_Data'-Button in AnalysisResultView.
 	 */
-	protected void exportData(final TableViewer table, final Shell shell, final IJavaProject project) throws IOException{
+	protected void exportData(final TableViewer table, final Shell shell, final IJavaProject project) throws IOException {
 		String loc = null;
-		if(table.getTable().getItems().length == 0){
+		if (table.getTable().getItems().length == 0) {
 			MessageDialog.openWarning(null, "Missing values", "There is nothing to export.");
-		}
-		else{
+		} else {
 			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setText("Save");
-			if(project != null){
-				dialog.setFilterPath(project.getProject().getLocation().toString());}
+			if (project != null) {
+				dialog.setFilterPath(project.getProject().getLocation().toString());
+			}
 			final String[] filterExt = { "*.csv", "*.*" };
 			dialog.setFilterExtensions(filterExt);
 			final String returnVal = dialog.open();
-			if(returnVal != null){
-				if(!returnVal.endsWith(".csv")){
+			if (returnVal != null) {
+				if (!returnVal.endsWith(".csv")) {
 					loc = returnVal.concat(".csv");
-				}
-				else{
+				} else {
 					loc = returnVal;
 				}
 
@@ -60,7 +80,7 @@ class ActionHandler {
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
-					sb.append(((NamedValue)element.getData()).getName() + ";" + ((NamedValue)element.getData()).getValue());
+					sb.append(((NamedValue) element.getData()).getName() + ";" + ((NamedValue) element.getData()).getValue());
 					sb.append("\n");
 				}
 				br.write(sb.toString());
@@ -72,25 +92,24 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Graph'-Button in AnalysisResultView.
 	 */
-	protected void exportGraph(final EObject model, final Shell shell, final IJavaProject project) throws IOException{
+	protected void exportGraph(final EObject model, final Shell shell, final IJavaProject project) throws IOException {
 
-		if (model == null){
+		if (model == null) {
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
-		}
-		else{
+		} else {
 			String loc = null;
 			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setText("Save");
-			if(project != null){
-				dialog.setFilterPath(project.getProject().getLocation().toString());}
+			if (project != null) {
+				dialog.setFilterPath(project.getProject().getLocation().toString());
+			}
 			final String[] filterExt = { "*.graph", "*.*" };
 			dialog.setFilterExtensions(filterExt);
 			final String returnVal = dialog.open();
-			if(returnVal != null){
-				if(!returnVal.endsWith(".graph")){
+			if (returnVal != null) {
+				if (!returnVal.endsWith(".graph")) {
 					loc = returnVal.concat(".graph");
-				}
-				else{
+				} else {
 					loc = returnVal;
 				}
 
@@ -103,7 +122,7 @@ class ActionHandler {
 				final Resource resource = resourceSet.createResource(URI.createURI("./graph.xmlS"));
 
 				// Add model to contents list of the resource
-				resource.getContents().add(new GraphTransformer().makeSerializable((ModularHypergraph)model));
+				resource.getContents().add(new GraphTransformer().makeSerializable((ModularHypergraph) model));
 
 				// Save the resource
 				final File destination = new File(loc);
@@ -117,7 +136,7 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'visualize_Graph'-Button in AnalysisResultView.
 	 */
-	protected void visualize(){
+	protected void visualize() {
 		MessageDialog.openWarning(null, "Not implemented", "Not implemented yet.");
 	}
 

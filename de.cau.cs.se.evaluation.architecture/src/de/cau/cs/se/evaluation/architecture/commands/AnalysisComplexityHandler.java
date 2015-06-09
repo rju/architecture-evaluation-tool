@@ -1,6 +1,18 @@
-/**
+/***************************************************************************
+ * Copyright 2015
  *
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.commands;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -20,10 +32,17 @@ import de.cau.cs.se.evaluation.architecture.jobs.ComplexityAnalysisJob;
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView;
 
 /**
- * @author rju
+ * @author Reiner Jung
  *
  */
 public class AnalysisComplexityHandler extends AbstractHandler implements IHandler {
+
+	/**
+	 * Empty default constructor, as proposed by checkstyle.
+	 */
+	public AnalysisComplexityHandler() {
+		super();
+	}
 
 	/**
 	 * This routine checks if there is an active selection.

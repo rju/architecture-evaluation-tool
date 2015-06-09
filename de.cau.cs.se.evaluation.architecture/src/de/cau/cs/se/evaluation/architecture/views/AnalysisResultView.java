@@ -1,3 +1,18 @@
+/***************************************************************************
+ * Copyright 2015
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.views;
 
 import java.io.IOException;
@@ -6,6 +21,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -16,24 +32,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
 
+import de.cau.cs.se.evaluation.architecture.Activator;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 
 /**
- * This sample class demonstrates how to plug-in a new workbench view. The view
- * shows data obtained from the model. The sample creates a dummy model on the
- * fly, but a real implementation would connect to the model available either in
- * this or another plug-in (e.g. the workspace). The view is connected to the
- * model using a content provider.
- * <p>
- * The view uses a label provider to define how model objects should be
- * presented in the view. Each view can present the same model objects using
- * different labels and icons, if needed. Alternatively, a single label provider
- * can be shared between views in order to ensure that objects of the same type
- * are presented in the same way everywhere.
- * <p>
+ * The Main analysis result view class.
+ *
+ * @author Reiner Jung
  */
-
 public class AnalysisResultView extends ViewPart {
 
 	/**
@@ -42,15 +49,17 @@ public class AnalysisResultView extends ViewPart {
 	public static final String ID = "de.cau.cs.se.evaluation.architecture.views.AnalysisResultView";
 
 	private TableViewer viewer;
-	private Action exportDataAction, exportHypergraphAction, visualizeAction;
+	private Action exportDataAction;
+	private Action exportHypergraphAction;
+	private Action visualizeAction;
 	private EObject graph = null;
 	private IJavaProject project = null;
-
 
 	/**
 	 * The constructor.
 	 */
 	public AnalysisResultView() {
+		super();
 	}
 
 	/**
@@ -61,9 +70,9 @@ public class AnalysisResultView extends ViewPart {
 	public void createPartControl(final Composite parent) {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		//create Actions
+		// create Actions
 		this.createActions();
-		//create Toolbar
+		// create Toolbar
 		this.createToolbar();
 
 		// create the columns
@@ -117,41 +126,43 @@ public class AnalysisResultView extends ViewPart {
 	/**
 	 * Creates Actions for Toolbar.
 	 */
-	private void createActions(){
+	private void createActions() {
 
-		final ActionHandler actHandl = new ActionHandler();
+		final ActionHandler actionHandler = new ActionHandler();
 
-		this.exportDataAction = new Action("export_Data"){
+		this.exportDataAction = new Action("Data Export", Activator.getImageDescriptor("/icons/data-export.gif")) {
 			@Override
-			public void run(){
+			public void run() {
 				try {
-					actHandl.exportData(AnalysisResultView.this.viewer, AnalysisResultView.this.getSite().getShell(), AnalysisResultView.this.project);
+					actionHandler.exportData(AnalysisResultView.this.viewer,
+							AnalysisResultView.this.getSite().getShell(),
+							AnalysisResultView.this.project);
 				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					System.out.println("Problem in exportDataAction");
-					e.printStackTrace();
+					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
+							"Export Error", "Error exporting data set " + e.getLocalizedMessage());
 				}
 			}
 
 		};
 
-		this.exportHypergraphAction = new Action("export_Graph"){
+		this.exportHypergraphAction = new Action("Graph Export", Activator.getImageDescriptor("/icons/graph-export.gif")) {
 			@Override
-			public void run(){
+			public void run() {
 				try {
-					actHandl.exportGraph(AnalysisResultView.this.graph, AnalysisResultView.this.getSite().getShell(), AnalysisResultView.this.project);
+					actionHandler.exportGraph(AnalysisResultView.this.graph,
+							AnalysisResultView.this.getSite().getShell(),
+							AnalysisResultView.this.project);
 				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					System.out.println("Problem in exportHypergraphAction.");
-					e.printStackTrace();
+					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
+							"Export Error", "Error exporting hypergraph " + e.getLocalizedMessage());
 				}
 			}
 		};
 
-		this.visualizeAction = new Action("visualize_Graph"){
+		this.visualizeAction = new Action("Graph Visualization", Activator.getImageDescriptor("/icons/graph.gif")) {
 			@Override
-			public void run(){
-				actHandl.visualize();
+			public void run() {
+				actionHandler.visualize();
 			}
 		};
 
@@ -175,16 +186,19 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
-	public void updateGraph(final EObject graph){
+	public void setGraph(final EObject graph) {
 		this.graph = graph;
 	}
 
-	public void update(final ResultModelProvider provider) {
+	/**
+	 * Trigger the update of the view based on the model data.
+	 */
+	public void update() {
 		this.setFocus();
 		this.viewer.refresh();
 	}
 
-	public void updateProject(final IJavaProject project){
+	public void setProject(final IJavaProject project) {
 		this.project = project;
 	}
 }
