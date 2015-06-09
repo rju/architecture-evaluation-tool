@@ -26,7 +26,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
@@ -103,23 +103,23 @@ class ActionHandler {
 			if (project != null) {
 				dialog.setFilterPath(project.getProject().getLocation().toString());
 			}
-			final String[] filterExt = { "*.graph", "*.*" };
+			final String[] filterExt = { "*.xmi", "*.*" };
 			dialog.setFilterExtensions(filterExt);
 			final String returnVal = dialog.open();
 			if (returnVal != null) {
-				if (!returnVal.endsWith(".graph")) {
-					loc = returnVal.concat(".graph");
+				if (!returnVal.endsWith(".xmi")) {
+					loc = returnVal.concat(".xmi");
 				} else {
 					loc = returnVal;
 				}
 
 				final ResourceSet resourceSet = new ResourceSetImpl();
 
-				// Register XML Factory implementation to handle .ecore files
-				resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("graph", new XMLResourceFactoryImpl());
+				// Register XMI Factory implementation to handle .ecore files
+				resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
 
 				// Create empty resource with the given URI
-				final Resource resource = resourceSet.createResource(URI.createURI("./graph.xmlS"));
+				final Resource resource = resourceSet.createResource(URI.createURI(loc));
 
 				// Add model to contents list of the resource
 				resource.getContents().add(new GraphTransformer().makeSerializable((ModularHypergraph) model));

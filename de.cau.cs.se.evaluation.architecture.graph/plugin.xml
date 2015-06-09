@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="de.cau.cs.kieler.klighd.diagramSyntheses">
+   <diagramSynthesis
+         class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagramSynthesis"
+         id="de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagramSynthesis">
+   </diagramSynthesis>
+   </extension>
+<extension
+      point="org.eclipse.ui.commands">
+   <category
+         description="ModularHypergraph diagrams"
+         id="de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagrams"
+         name="ModularHypergraphDiagrams">
+   </category>
+   <command
+         categoryId="de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagrams"
+         defaultHandler="de.cau.cs.se.evaluation.architecture.graph.OpenDiagramHandler"
+         description="Primitive helper command that opens KLighD-based ModularHypergraph diagrams."
+         id="de.cau.cs.se.evaluation.architecture.graph.openModularHypergraphDiagram"
+         name="Open ModularHypergraph diagram">
+   </command>
+</extension>
+
+<extension
+      point="org.eclipse.ui.menus">
+   <menuContribution
+        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+	     <command
+            commandId="de.cau.cs.se.evaluation.architecture.graph.openModularHypergraphDiagram"
+            label="Open ModularHypergraph diagram"
+            style="push">
+         </command>
+	  </menuContribution>
+	  <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+	     <command
+            commandId="de.cau.cs.se.evaluation.architecture.graph.openModularHypergraphDiagram"
+            label="Open ModularHypergraph diagram"
+            style="push">
+         </command>
+	  </menuContribution>
+   <!-- the following might be obsolete -->
+   <menuContribution
+         locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+      <command
+            commandId="de.cau.cs.se.evaluation.architecture.graph.openModularHypergraphDiagram"
+            label="Open ModularHypergraph diagram"
+            style="push">
+         <visibleWhen
+               checkEnabled="false">
+            <iterate ifEmpty="false" operator="or">
+               <or>
+                   <instanceof
+                         value="de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph">
+                   </instanceof>
+               </or>
+            </iterate>
+         </visibleWhen>
+      </command>
+   </menuContribution>
+   
+</extension>
+
+</plugin>
