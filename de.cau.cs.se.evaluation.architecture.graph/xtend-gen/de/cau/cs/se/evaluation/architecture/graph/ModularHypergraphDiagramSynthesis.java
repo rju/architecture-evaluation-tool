@@ -20,6 +20,7 @@ import de.cau.cs.kieler.core.krendering.KAreaPlacementData;
 import de.cau.cs.kieler.core.krendering.KColor;
 import de.cau.cs.kieler.core.krendering.KEllipse;
 import de.cau.cs.kieler.core.krendering.KGridPlacement;
+import de.cau.cs.kieler.core.krendering.KRectangle;
 import de.cau.cs.kieler.core.krendering.KRenderingFactory;
 import de.cau.cs.kieler.core.krendering.KRoundedRectangle;
 import de.cau.cs.kieler.core.krendering.KText;
@@ -126,20 +127,24 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             KGridPlacement _setGridPlacement = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.setGridPlacement(it, 2);
             KGridPlacement _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setGridPlacement, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 2, 0);
             ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 2, 0);
-            String _name = module.getName();
-            KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
-            KText _associateWith = ModularHypergraphDiagramSynthesis.this.<KText>associateWith(_addText, module);
-            final Procedure1<KText> _function = new Procedure1<KText>() {
-              public void apply(final KText it) {
-                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 15);
-                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, true);
-                it.setCursorSelectable(true);
-                KAreaPlacementData _setAreaPlacementData = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setAreaPlacementData(it);
-                KAreaPlacementData _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setAreaPlacementData, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 1, 0.5f);
-                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 10, 0);
+            KRectangle _addRectangle = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addRectangle(it);
+            final Procedure1<KRectangle> _function = new Procedure1<KRectangle>() {
+              public void apply(final KRectangle it) {
+                String _name = module.getName();
+                KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
+                KText _associateWith = ModularHypergraphDiagramSynthesis.this.<KText>associateWith(_addText, module);
+                final Procedure1<KText> _function = new Procedure1<KText>() {
+                  public void apply(final KText it) {
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 18);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, true);
+                    it.setCursorSelectable(true);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it, 1, 1, 1, 1);
+                  }
+                };
+                ObjectExtensions.<KText>operator_doubleArrow(_associateWith, _function);
               }
             };
-            ObjectExtensions.<KText>operator_doubleArrow(_associateWith, _function);
+            ObjectExtensions.<KRectangle>operator_doubleArrow(_addRectangle, _function);
           }
         };
         ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function);
