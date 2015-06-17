@@ -37,6 +37,14 @@ import de.cau.cs.kieler.kiml.options.Direction
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference
+import java.util.ArrayList
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
+import de.cau.cs.kieler.kiml.klayoutdata.KLayoutData
+import de.cau.cs.kieler.klighd.util.KlighdSemanticDiagramData
+import de.cau.cs.kieler.klighd.util.KlighdProperties
+import de.cau.cs.kieler.klighd.KlighdConstants
+import de.cau.cs.kieler.kiml.options.EdgeType
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -49,7 +57,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     @Inject extension KPolylineExtensions
     @Inject extension KColorExtensions
     extension KRenderingFactory = KRenderingFactory.eINSTANCE
-    
+
     
     override KNode transform(ModularHypergraph model) {
         val root = model.createNode().associateWith(model);
@@ -60,6 +68,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             it.addLayoutParam(LayoutOptions::DIRECTION, Direction::UP)
             
             model.modules.forEach[module | it.children += module.createModule]
+            createEdges(model.nodes)
         ]
         
         return root;
@@ -72,7 +81,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	 */
 	def createModule(Module module) {
 		// TODO a module should be a rectangle with preferably round corners,
-		// a centered name, and a set of nodes inside. 
+		// a top-left name, and a set of nodes inside. 
 		module.createNode().associateWith(module) => [
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
@@ -80,6 +89,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 it.shadow = "black".color
                 it.setGridPlacement(2).from(LEFT, 2, 0, TOP, 2, 0).to(RIGHT, 2, 0, BOTTOM, 2, 0)
                 it.addRectangle => [
+                it.invisible = true
                 it.addText(module.name).associateWith(module) => [
                 	it.fontSize = 18
                 	it.fontBold = true
@@ -88,11 +98,11 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 	//it.setLeftTopAlignedPointPlacementData(1,1,1,1)
                 	//it.setAreaPlacementData.from(LEFT, 1, 0, TOP, 1, 0.5f).to(RIGHT, 20, 0, TOP, 20, 0.5f)               	
                 ]
+                ]  
+                module.nodes.forEach[node | module.createNode().children += node.createGraphNode]
                 ]
-                //module.nodes.forEach[node | it.  children += node.createGraphNode]
 			]
-			module.nodes.forEach[node | it.children += node.createGraphNode]
-		]
+			//module.nodes.forEach[node | it.children += node.createGraphNode]
 	}
 	
 	/**
@@ -114,6 +124,50 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 			]
 		]
 	}
-
-    
+	
+	def createEdges(EList<Node> nodes){
+		for (var i = 0; i<nodes.size; i++){
+			//for (var j = 0; j<nodes.get(i).getEdges.size; j++){
+			for(Edge j : nodes.get(i).edges){
+				var temp = findNode(j, nodes, nodes.get(i))
+				if(temp != null){
+				val child = temp//getKNode(root)
+				val parent = nodes.get(i)//getKNode(root)
+			new Pair(child,parent).createEdge() => [
+				
+            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
+            //add semantic data
+            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA, 
+                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
+    	    
+    	    it.source = child.node;
+	        it.target = parent.node;
+	        it.data addPolyline() => [
+                it.lineWidth = 2;
+                it.foreground = "gray25".color
+                //it.addInheritanceTriangleArrowDecorator();
+	        ]		    
+		]
+				}
+			}
+		}
+	}
+	
+	def Node findNode(Edge edge, EList<Node> nodes, Node parent){
+		var Node result = null
+		System.out.println(edge.name)
+		//TODO teste ob es ein(?) anderen(!) Node mit der gleicher Edge gibt (oder mehr)
+		for (var i = 0; i<nodes.size; i++){
+			var test1 = nodes.get(i)
+			if(nodes.get(i) != parent){
+				var test = nodes.get(i).getEdges.size
+		//for (var j = 0; j<nodes.get(i).getEdges.size; j++){
+		for(Edge j : nodes.get(i).edges){
+			System.out.println(j.name)
+			if(edge.name.equals(j.name)){
+				result = nodes.get(i)
+			}
+		}}}
+		return result
+	}  
 }

@@ -15,11 +15,14 @@
  */
 package de.cau.cs.se.evaluation.architecture.graph;
 
+import com.google.common.base.Objects;
+import de.cau.cs.kieler.core.kgraph.KEdge;
 import de.cau.cs.kieler.core.kgraph.KNode;
 import de.cau.cs.kieler.core.krendering.KAreaPlacementData;
 import de.cau.cs.kieler.core.krendering.KColor;
 import de.cau.cs.kieler.core.krendering.KEllipse;
 import de.cau.cs.kieler.core.krendering.KGridPlacement;
+import de.cau.cs.kieler.core.krendering.KPolyline;
 import de.cau.cs.kieler.core.krendering.KRectangle;
 import de.cau.cs.kieler.core.krendering.KRenderingFactory;
 import de.cau.cs.kieler.core.krendering.KRoundedRectangle;
@@ -32,9 +35,15 @@ import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions;
+import de.cau.cs.kieler.kiml.klayoutdata.KLayoutData;
 import de.cau.cs.kieler.kiml.options.Direction;
+import de.cau.cs.kieler.kiml.options.EdgeType;
 import de.cau.cs.kieler.kiml.options.LayoutOptions;
+import de.cau.cs.kieler.klighd.KlighdConstants;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
+import de.cau.cs.kieler.klighd.util.KlighdProperties;
+import de.cau.cs.kieler.klighd.util.KlighdSemanticDiagramData;
+import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
@@ -43,6 +52,7 @@ import javax.inject.Inject;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
+import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
@@ -99,6 +109,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           }
         };
         _modules.forEach(_function);
+        EList<Node> _nodes = model.getNodes();
+        ModularHypergraphDiagramSynthesis.this.createEdges(_nodes);
       }
     };
     ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
@@ -130,6 +142,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             KRectangle _addRectangle = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addRectangle(it);
             final Procedure1<KRectangle> _function = new Procedure1<KRectangle>() {
               public void apply(final KRectangle it) {
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setInvisible(it, true);
                 String _name = module.getName();
                 KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
                 KText _associateWith = ModularHypergraphDiagramSynthesis.this.<KText>associateWith(_addText, module);
@@ -145,18 +158,19 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
               }
             };
             ObjectExtensions.<KRectangle>operator_doubleArrow(_addRectangle, _function);
+            EList<Node> _nodes = module.getNodes();
+            final Consumer<Node> _function_1 = new Consumer<Node>() {
+              public void accept(final Node node) {
+                KNode _createNode = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.createNode(module);
+                EList<KNode> _children = _createNode.getChildren();
+                KNode _createGraphNode = ModularHypergraphDiagramSynthesis.this.createGraphNode(node);
+                _children.add(_createGraphNode);
+              }
+            };
+            _nodes.forEach(_function_1);
           }
         };
         ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function);
-        EList<Node> _nodes = module.getNodes();
-        final Consumer<Node> _function_1 = new Consumer<Node>() {
-          public void accept(final Node node) {
-            EList<KNode> _children = it.getChildren();
-            KNode _createGraphNode = ModularHypergraphDiagramSynthesis.this.createGraphNode(node);
-            _children.add(_createGraphNode);
-          }
-        };
-        _nodes.forEach(_function_1);
       }
     };
     return ObjectExtensions.<KNode>operator_doubleArrow(_associateWith, _function);
@@ -198,5 +212,82 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
       }
     };
     return ObjectExtensions.<KNode>operator_doubleArrow(_associateWith, _function);
+  }
+  
+  public void createEdges(final EList<Node> nodes) {
+    for (int i = 0; (i < nodes.size()); i++) {
+      Node _get = nodes.get(i);
+      EList<Edge> _edges = _get.getEdges();
+      for (final Edge j : _edges) {
+        {
+          Node _get_1 = nodes.get(i);
+          Node temp = this.findNode(j, nodes, _get_1);
+          boolean _notEquals = (!Objects.equal(temp, null));
+          if (_notEquals) {
+            final Node child = temp;
+            final Node parent = nodes.get(i);
+            Pair<Node, Node> _pair = new Pair<Node, Node>(child, parent);
+            KEdge _createEdge = this._kEdgeExtensions.createEdge(_pair);
+            final Procedure1<KEdge> _function = new Procedure1<KEdge>() {
+              public void apply(final KEdge it) {
+                ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.<EdgeType>addLayoutParam(it, LayoutOptions.EDGE_TYPE, EdgeType.GENERALIZATION);
+                KLayoutData _data = it.<KLayoutData>getData(KLayoutData.class);
+                KlighdSemanticDiagramData _of = KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence");
+                _data.<KlighdSemanticDiagramData>setProperty(KlighdProperties.SEMANTIC_DATA, _of);
+                KNode _node = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.getNode(child);
+                it.setSource(_node);
+                KNode _node_1 = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.getNode(parent);
+                it.setTarget(_node_1);
+                it.getData();
+                KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
+                final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
+                  public void apply(final KPolyline it) {
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
+                    KColor _color = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("gray25");
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setForeground(it, _color);
+                  }
+                };
+                ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+              }
+            };
+            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
+          }
+        }
+      }
+    }
+  }
+  
+  public Node findNode(final Edge edge, final EList<Node> nodes, final Node parent) {
+    Node result = null;
+    String _name = edge.getName();
+    System.out.println(_name);
+    for (int i = 0; (i < nodes.size()); i++) {
+      {
+        Node test1 = nodes.get(i);
+        Node _get = nodes.get(i);
+        boolean _notEquals = (!Objects.equal(_get, parent));
+        if (_notEquals) {
+          Node _get_1 = nodes.get(i);
+          EList<Edge> _edges = _get_1.getEdges();
+          int test = _edges.size();
+          Node _get_2 = nodes.get(i);
+          EList<Edge> _edges_1 = _get_2.getEdges();
+          for (final Edge j : _edges_1) {
+            {
+              String _name_1 = j.getName();
+              System.out.println(_name_1);
+              String _name_2 = edge.getName();
+              String _name_3 = j.getName();
+              boolean _equals = _name_2.equals(_name_3);
+              if (_equals) {
+                Node _get_3 = nodes.get(i);
+                result = _get_3;
+              }
+            }
+          }
+        }
+      }
+    }
+    return result;
   }
 }
