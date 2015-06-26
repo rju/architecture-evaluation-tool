@@ -15,11 +15,25 @@
  ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.transformation.metrics;
 
-
+/**
+ * Data type class used to store name value pairs in a list. This is
+ * used to populate the view of the analysis result view.
+ *
+ * @author Reiner Jung
+ *
+ */
 public class NamedValue {
 	private String name;
 	private double value;
 
+	/**
+	 * Create one new name value pair.
+	 *
+	 * @param name
+	 *            the name or label to be displayed in the table
+	 * @param value
+	 *            the value associated for this label
+	 */
 	public NamedValue(final String name, final double value) {
 		this.name = name;
 		this.value = value;
@@ -40,7 +54,5 @@ public class NamedValue {
 	public void setValue(final double value) {
 		this.value = value;
 	}
-
-
 
 }
