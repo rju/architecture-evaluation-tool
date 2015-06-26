@@ -45,6 +45,8 @@ import de.cau.cs.kieler.klighd.util.KlighdSemanticDiagramData
 import de.cau.cs.kieler.klighd.util.KlighdProperties
 import de.cau.cs.kieler.klighd.KlighdConstants
 import de.cau.cs.kieler.kiml.options.EdgeType
+import de.cau.cs.kieler.core.krendering.KRendering
+import de.cau.cs.kieler.core.krendering.KRectangle
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -87,39 +89,44 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, "LemonChiffon".color, 0)
                 it.shadow = "black".color
-                it.setGridPlacement(2).from(LEFT, 2, 0, TOP, 2, 0).to(RIGHT, 2, 0, BOTTOM, 2, 0)
+                it.setGridPlacement(1).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
                 it.addRectangle => [
-                it.invisible = true
-                it.addText(module.name).associateWith(module) => [
-                	it.fontSize = 18
-                	it.fontBold = true
-                	it.cursorSelectable = true
-                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)
-                	//it.setLeftTopAlignedPointPlacementData(1,1,1,1)
-                	//it.setAreaPlacementData.from(LEFT, 1, 0, TOP, 1, 0.5f).to(RIGHT, 20, 0, TOP, 20, 0.5f)               	
+	                it.invisible = true
+	                it.addText(module.name) => [
+	                	it.fontSize = 18
+	                	it.fontBold = true
+	                	it.cursorSelectable = true
+	                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)
+	                	//it.setLeftTopAlignedPointPlacementData(1,1,1,1)
+	                	//it.setAreaPlacementData.from(LEFT, 1, 0, TOP, 1, 0.5f).to(RIGHT, 20, 0, TOP, 20, 0.5f)               	
+	                ]
                 ]
-                ]  
-                module.nodes.forEach[node | module.createNode().children += node.createGraphNode]
+                it.addRectangle => [
+                	it.invisible = true
+                	it.setGridPlacement(2).from(LEFT, 2, 0, TOP, 2, 0).to(RIGHT, 2, 0, BOTTOM, 2, 0)
+                	module.nodes.forEach[node | node.createGraphNode(it)]
                 ]
-			]
-			//module.nodes.forEach[node | it.children += node.createGraphNode]
+            ]
+		]
+		//module.nodes.forEach[node | it.children += node.createGraphNode]
 	}
-	
+			
 	/**
 	 * Draw a single node as a circle with its name at the center.
 	 * 
 	 * @param node the node to be rendered
 	 */
-	def createGraphNode(Node node) {
-		node.createNode().associateWith(node) => [
+	def createGraphNode(Node node, KRectangle parent) {
+		parent => [
 			it.addEllipse => [
+				it.associateWith(node)
 				it.lineWidth = 2
                 it.background = "white".color
-                it.addText(node.name).associateWith(node) => [
+                it.setAreaPlacementData.from(LEFT, 20, 0, TOP, 10, 0.5f).to(RIGHT, 20, 0, BOTTOM, 10, 0)
+                it.addText(node.name) => [
                 	it.fontSize = 15
-                	it.fontBold = true
+                	it.fontBold = false
                 	it.cursorSelectable = true
-                	it.setAreaPlacementData.from(LEFT, 20, 0, TOP, 1, 0.5f).to(RIGHT, 20, 0, BOTTOM, 10, 0)
                 ]
 			]
 		]

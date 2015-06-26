@@ -136,16 +136,15 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it, _color, _color_1, 0);
             KColor _color_2 = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("black");
             ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setShadow(it, _color_2);
-            KGridPlacement _setGridPlacement = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.setGridPlacement(it, 2);
-            KGridPlacement _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setGridPlacement, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 2, 0);
-            ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 2, 0);
+            KGridPlacement _setGridPlacement = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.setGridPlacement(it, 1);
+            KGridPlacement _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setGridPlacement, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 10, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 10, 0);
+            ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 10, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 10, 0);
             KRectangle _addRectangle = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addRectangle(it);
             final Procedure1<KRectangle> _function = new Procedure1<KRectangle>() {
               public void apply(final KRectangle it) {
                 ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setInvisible(it, true);
                 String _name = module.getName();
                 KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
-                KText _associateWith = ModularHypergraphDiagramSynthesis.this.<KText>associateWith(_addText, module);
                 final Procedure1<KText> _function = new Procedure1<KText>() {
                   public void apply(final KText it) {
                     ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 18);
@@ -154,20 +153,27 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
                     ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it, 1, 1, 1, 1);
                   }
                 };
-                ObjectExtensions.<KText>operator_doubleArrow(_associateWith, _function);
+                ObjectExtensions.<KText>operator_doubleArrow(_addText, _function);
               }
             };
             ObjectExtensions.<KRectangle>operator_doubleArrow(_addRectangle, _function);
-            EList<Node> _nodes = module.getNodes();
-            final Consumer<Node> _function_1 = new Consumer<Node>() {
-              public void accept(final Node node) {
-                KNode _createNode = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.createNode(module);
-                EList<KNode> _children = _createNode.getChildren();
-                KNode _createGraphNode = ModularHypergraphDiagramSynthesis.this.createGraphNode(node);
-                _children.add(_createGraphNode);
+            KRectangle _addRectangle_1 = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addRectangle(it);
+            final Procedure1<KRectangle> _function_1 = new Procedure1<KRectangle>() {
+              public void apply(final KRectangle it) {
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setInvisible(it, true);
+                KGridPlacement _setGridPlacement = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.setGridPlacement(it, 2);
+                KGridPlacement _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setGridPlacement, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 2, 0);
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 2, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 2, 0);
+                EList<Node> _nodes = module.getNodes();
+                final Consumer<Node> _function = new Consumer<Node>() {
+                  public void accept(final Node node) {
+                    ModularHypergraphDiagramSynthesis.this.createGraphNode(node, it);
+                  }
+                };
+                _nodes.forEach(_function);
               }
             };
-            _nodes.forEach(_function_1);
+            ObjectExtensions.<KRectangle>operator_doubleArrow(_addRectangle_1, _function_1);
           }
         };
         ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function);
@@ -181,37 +187,35 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    * 
    * @param node the node to be rendered
    */
-  public KNode createGraphNode(final Node node) {
-    KNode _createNode = this._kNodeExtensions.createNode(node);
-    KNode _associateWith = this.<KNode>associateWith(_createNode, node);
-    final Procedure1<KNode> _function = new Procedure1<KNode>() {
-      public void apply(final KNode it) {
-        KEllipse _addEllipse = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.addEllipse(it);
+  public KRectangle createGraphNode(final Node node, final KRectangle parent) {
+    final Procedure1<KRectangle> _function = new Procedure1<KRectangle>() {
+      public void apply(final KRectangle it) {
+        KEllipse _addEllipse = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addEllipse(it);
         final Procedure1<KEllipse> _function = new Procedure1<KEllipse>() {
           public void apply(final KEllipse it) {
+            ModularHypergraphDiagramSynthesis.this.<KEllipse>associateWith(it, node);
             ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
             KColor _color = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("white");
             ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setBackground(it, _color);
+            KAreaPlacementData _setAreaPlacementData = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setAreaPlacementData(it);
+            KAreaPlacementData _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setAreaPlacementData, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 10, 0.5f);
+            ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 10, 0);
             String _name = node.getName();
             KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
-            KText _associateWith = ModularHypergraphDiagramSynthesis.this.<KText>associateWith(_addText, node);
             final Procedure1<KText> _function = new Procedure1<KText>() {
               public void apply(final KText it) {
                 ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 15);
-                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, true);
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, false);
                 it.setCursorSelectable(true);
-                KAreaPlacementData _setAreaPlacementData = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setAreaPlacementData(it);
-                KAreaPlacementData _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setAreaPlacementData, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 1, 0.5f);
-                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 20, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 10, 0);
               }
             };
-            ObjectExtensions.<KText>operator_doubleArrow(_associateWith, _function);
+            ObjectExtensions.<KText>operator_doubleArrow(_addText, _function);
           }
         };
         ObjectExtensions.<KEllipse>operator_doubleArrow(_addEllipse, _function);
       }
     };
-    return ObjectExtensions.<KNode>operator_doubleArrow(_associateWith, _function);
+    return ObjectExtensions.<KRectangle>operator_doubleArrow(parent, _function);
   }
   
   public void createEdges(final EList<Node> nodes) {
