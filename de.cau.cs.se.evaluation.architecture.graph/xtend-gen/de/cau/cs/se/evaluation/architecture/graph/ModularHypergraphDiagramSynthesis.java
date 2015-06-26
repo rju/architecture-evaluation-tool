@@ -22,7 +22,6 @@ import de.cau.cs.kieler.core.krendering.KAreaPlacementData;
 import de.cau.cs.kieler.core.krendering.KColor;
 import de.cau.cs.kieler.core.krendering.KEllipse;
 import de.cau.cs.kieler.core.krendering.KGridPlacement;
-import de.cau.cs.kieler.core.krendering.KPolyline;
 import de.cau.cs.kieler.core.krendering.KRectangle;
 import de.cau.cs.kieler.core.krendering.KRenderingFactory;
 import de.cau.cs.kieler.core.krendering.KRoundedRectangle;
@@ -35,24 +34,23 @@ import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions;
 import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions;
-import de.cau.cs.kieler.kiml.klayoutdata.KLayoutData;
 import de.cau.cs.kieler.kiml.options.Direction;
 import de.cau.cs.kieler.kiml.options.EdgeType;
 import de.cau.cs.kieler.kiml.options.LayoutOptions;
-import de.cau.cs.kieler.klighd.KlighdConstants;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
-import de.cau.cs.kieler.klighd.util.KlighdProperties;
-import de.cau.cs.kieler.klighd.util.KlighdSemanticDiagramData;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
-import org.eclipse.xtext.xbase.lib.Pair;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 @SuppressWarnings("all")
@@ -92,6 +90,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   @Extension
   private KRenderingFactory _kRenderingFactory = KRenderingFactory.eINSTANCE;
   
+  private HashMap nodeMap = new HashMap<Object, Object>();
+  
   public KNode transform(final ModularHypergraph model) {
     KNode _createNode = this._kNodeExtensions.createNode(model);
     final KNode root = this.<KNode>associateWith(_createNode, model);
@@ -109,8 +109,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           }
         };
         _modules.forEach(_function);
-        EList<Node> _nodes = model.getNodes();
-        ModularHypergraphDiagramSynthesis.this.createEdges(_nodes);
+        EList<Edge> _edges = model.getEdges();
+        ModularHypergraphDiagramSynthesis.this.createEdges(_edges);
       }
     };
     ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
@@ -147,7 +147,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
                 KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
                 final Procedure1<KText> _function = new Procedure1<KText>() {
                   public void apply(final KText it) {
-                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 18);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontSize(it, 16);
                     ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, true);
                     it.setCursorSelectable(true);
                     ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it, 1, 1, 1, 1);
@@ -210,6 +210,10 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
               }
             };
             ObjectExtensions.<KText>operator_doubleArrow(_addText, _function);
+            String _name_1 = node.getName();
+            it.setId(_name_1);
+            String _name_2 = node.getName();
+            ModularHypergraphDiagramSynthesis.this.nodeMap.put(_name_2, it);
           }
         };
         ObjectExtensions.<KEllipse>operator_doubleArrow(_addEllipse, _function);
@@ -218,80 +222,98 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return ObjectExtensions.<KRectangle>operator_doubleArrow(parent, _function);
   }
   
-  public void createEdges(final EList<Node> nodes) {
-    for (int i = 0; (i < nodes.size()); i++) {
-      Node _get = nodes.get(i);
-      EList<Edge> _edges = _get.getEdges();
-      for (final Edge j : _edges) {
-        {
-          Node _get_1 = nodes.get(i);
-          Node temp = this.findNode(j, nodes, _get_1);
-          boolean _notEquals = (!Objects.equal(temp, null));
-          if (_notEquals) {
-            final Node child = temp;
-            final Node parent = nodes.get(i);
-            Pair<Node, Node> _pair = new Pair<Node, Node>(child, parent);
-            KEdge _createEdge = this._kEdgeExtensions.createEdge(_pair);
-            final Procedure1<KEdge> _function = new Procedure1<KEdge>() {
-              public void apply(final KEdge it) {
-                ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.<EdgeType>addLayoutParam(it, LayoutOptions.EDGE_TYPE, EdgeType.GENERALIZATION);
-                KLayoutData _data = it.<KLayoutData>getData(KLayoutData.class);
-                KlighdSemanticDiagramData _of = KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence");
-                _data.<KlighdSemanticDiagramData>setProperty(KlighdProperties.SEMANTIC_DATA, _of);
-                KNode _node = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.getNode(child);
-                it.setSource(_node);
-                KNode _node_1 = ModularHypergraphDiagramSynthesis.this._kNodeExtensions.getNode(parent);
-                it.setTarget(_node_1);
-                it.getData();
-                KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
-                final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
-                  public void apply(final KPolyline it) {
-                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
-                    KColor _color = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("gray25");
-                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setForeground(it, _color);
-                  }
-                };
-                ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
-              }
-            };
-            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
-          }
+  /**
+   * def createEdges(EList<Node> nodes){
+   * for (var i = 0; i<nodes.size; i++){
+   * //for (var j = 0; j<nodes.get(i).getEdges.size; j++){
+   * for(Edge j : nodes.get(i).edges){
+   * var temp = findNode(j, nodes, nodes.get(i))
+   * if(temp != null){
+   * val child = temp
+   * val parent = nodes.get(i)
+   * //				new Pair(child, parent).createEdge() => [
+   * //		            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
+   * //		            // add semantic data
+   * //		            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA,
+   * //		                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
+   * //		    	    it.source = child.node
+   * //			        it.target = parent.node
+   * //			        it.data addPolyline() => [
+   * //		                it.lineWidth = 2
+   * //		                it.foreground = "gray25".color
+   * //		                it.addInheritanceTriangleArrowDecorator()
+   * //			        ]
+   * //				]
+   * child.createEdge(parent)=>[
+   * it.addPolyline => [
+   * it.lineWidth = 2
+   * it.foreground = "gray25".color
+   * ]
+   * ]
+   * 
+   * }
+   * }
+   * }
+   * }
+   * 
+   * def Node findNode(Edge edge, EList<Node> nodes, Node parent){
+   * var Node result = null
+   * //System.out.println(edge.name)
+   * //TODO teste ob es ein(?) anderen(!) Node mit der gleicher Edge gibt (oder mehr)
+   * for (var i = 0; i<nodes.size; i++){
+   * if(nodes.get(i) != parent){
+   * for(Edge j : nodes.get(i).edges){
+   * //System.out.println(j.name)
+   * if(edge.name.equals(j.name)){
+   * result = nodes.get(i)
+   * }
+   * }}}
+   * return result
+   * }
+   * }
+   */
+  public void createEdges(final EList<Edge> edges) {
+    for (final Edge j : edges) {
+      {
+        String _name = j.getName();
+        ArrayList<String> nodes = this.parseEdgeName(_name);
+        boolean _notEquals = (!Objects.equal(nodes, null));
+        if (_notEquals) {
+          String _get = nodes.get(0);
+          Object _get_1 = this.nodeMap.get(_get);
+          final KNode first = this._kNodeExtensions.getNode(_get_1);
+          String _get_2 = nodes.get(1);
+          Object _get_3 = this.nodeMap.get(_get_2);
+          final KNode second = this._kNodeExtensions.getNode(_get_3);
+          KEdge _createEdge = this._kEdgeExtensions.createEdge();
+          final Procedure1<KEdge> _function = new Procedure1<KEdge>() {
+            public void apply(final KEdge it) {
+              it.setSource(first);
+              it.setTarget(second);
+              ModularHypergraphDiagramSynthesis.this.<KEdge, EdgeType>setLayoutOption(it, LayoutOptions.EDGE_TYPE, EdgeType.UNDIRECTED);
+              ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it, 2);
+            }
+          };
+          ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
         }
       }
     }
   }
   
-  public Node findNode(final Edge edge, final EList<Node> nodes, final Node parent) {
-    Node result = null;
-    String _name = edge.getName();
-    System.out.println(_name);
-    for (int i = 0; (i < nodes.size()); i++) {
-      {
-        Node test1 = nodes.get(i);
-        Node _get = nodes.get(i);
-        boolean _notEquals = (!Objects.equal(_get, parent));
-        if (_notEquals) {
-          Node _get_1 = nodes.get(i);
-          EList<Edge> _edges = _get_1.getEdges();
-          int test = _edges.size();
-          Node _get_2 = nodes.get(i);
-          EList<Edge> _edges_1 = _get_2.getEdges();
-          for (final Edge j : _edges_1) {
-            {
-              String _name_1 = j.getName();
-              System.out.println(_name_1);
-              String _name_2 = edge.getName();
-              String _name_3 = j.getName();
-              boolean _equals = _name_2.equals(_name_3);
-              if (_equals) {
-                Node _get_3 = nodes.get(i);
-                result = _get_3;
-              }
-            }
-          }
-        }
-      }
+  public ArrayList<String> parseEdgeName(final String edgeName) {
+    String[] nodes = edgeName.split("::");
+    final String[] _converted_nodes = (String[])nodes;
+    int _size = ((List<String>)Conversions.doWrapArray(_converted_nodes)).size();
+    boolean _equals = (_size == 2);
+    if (_equals) {
+      ArrayList<String> result = new ArrayList<String>(0);
+      String _get = nodes[0];
+      result.add(_get);
+      String _get_1 = nodes[1];
+      result.add(_get_1);
+      return result;
+    } else {
+      return null;
     }
-    return result;
   }
 }

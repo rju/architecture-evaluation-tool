@@ -47,6 +47,8 @@ import de.cau.cs.kieler.klighd.KlighdConstants
 import de.cau.cs.kieler.kiml.options.EdgeType
 import de.cau.cs.kieler.core.krendering.KRendering
 import de.cau.cs.kieler.core.krendering.KRectangle
+import org.eclipse.emf.ecore.EClass
+import java.util.HashMap
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -59,6 +61,8 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     @Inject extension KPolylineExtensions
     @Inject extension KColorExtensions
     extension KRenderingFactory = KRenderingFactory.eINSTANCE
+    
+    var HashMap nodeMap = new HashMap()
 
     
     override KNode transform(ModularHypergraph model) {
@@ -70,7 +74,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             it.addLayoutParam(LayoutOptions::DIRECTION, Direction::UP)
             
             model.modules.forEach[module | it.children += module.createModule]
-            createEdges(model.nodes)
+            createEdges(model.edges)
         ]
         
         return root;
@@ -93,12 +97,10 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 it.addRectangle => [
 	                it.invisible = true
 	                it.addText(module.name) => [
-	                	it.fontSize = 18
+	                	it.fontSize = 16
 	                	it.fontBold = true
 	                	it.cursorSelectable = true
-	                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)
-	                	//it.setLeftTopAlignedPointPlacementData(1,1,1,1)
-	                	//it.setAreaPlacementData.from(LEFT, 1, 0, TOP, 1, 0.5f).to(RIGHT, 20, 0, TOP, 20, 0.5f)               	
+	                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
 	                ]
                 ]
                 it.addRectangle => [
@@ -128,33 +130,41 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 	it.fontBold = false
                 	it.cursorSelectable = true
                 ]
+                it.id = node.name
+                nodeMap.put(node.name, it)//node?
 			]
 		]
 	}
-	
+
+/* 	
 	def createEdges(EList<Node> nodes){
 		for (var i = 0; i<nodes.size; i++){
 			//for (var j = 0; j<nodes.get(i).getEdges.size; j++){
 			for(Edge j : nodes.get(i).edges){
 				var temp = findNode(j, nodes, nodes.get(i))
 				if(temp != null){
-				val child = temp//getKNode(root)
-				val parent = nodes.get(i)//getKNode(root)
-			new Pair(child,parent).createEdge() => [
-				
-            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
-            //add semantic data
-            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA, 
-                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
-    	    
-    	    it.source = child.node;
-	        it.target = parent.node;
-	        it.data addPolyline() => [
-                it.lineWidth = 2;
-                it.foreground = "gray25".color
-                //it.addInheritanceTriangleArrowDecorator();
-	        ]		    
-		]
+				val child = temp
+				val parent = nodes.get(i)
+//				new Pair(child, parent).createEdge() => [
+//		            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
+//		            // add semantic data
+//		            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA, 
+//		                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
+//		    	    it.source = child.node
+//			        it.target = parent.node
+//			        it.data addPolyline() => [
+//		                it.lineWidth = 2
+//		                it.foreground = "gray25".color
+//		                it.addInheritanceTriangleArrowDecorator()
+//			        ]		    
+//				]
+				child.createEdge(parent)=>[
+					it.addPolyline => [
+		                it.lineWidth = 2
+		                it.foreground = "gray25".color
+						]						
+					]
+					
 				}
 			}
 		}
@@ -162,19 +172,63 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	
 	def Node findNode(Edge edge, EList<Node> nodes, Node parent){
 		var Node result = null
-		System.out.println(edge.name)
+		//System.out.println(edge.name)
 		//TODO teste ob es ein(?) anderen(!) Node mit der gleicher Edge gibt (oder mehr)
 		for (var i = 0; i<nodes.size; i++){
-			var test1 = nodes.get(i)
 			if(nodes.get(i) != parent){
-				var test = nodes.get(i).getEdges.size
-		//for (var j = 0; j<nodes.get(i).getEdges.size; j++){
 		for(Edge j : nodes.get(i).edges){
-			System.out.println(j.name)
+			//System.out.println(j.name)
 			if(edge.name.equals(j.name)){
 				result = nodes.get(i)
 			}
 		}}}
 		return result
 	}  
+}
+*/
+
+//TODO
+def createEdges(EList<Edge> edges){
+	for(Edge j : edges){
+		var ArrayList<String> nodes = j.name.parseEdgeName
+		if(nodes != null){
+			/* 
+			System.out.println("")
+			System.out.println(nodes.get(0))
+			System.out.println(nodes.get(1))
+			System.out.println(nodeMap.get(nodes.get(0)) != null)
+			System.out.println(nodeMap.get(nodes.get(1))!= null)
+			System.out.println(nodeMap.get(nodes.get(0)))
+			System.out.println(nodeMap.get(nodes.get(1)))
+			System.out.println(nodeMap.get(nodes.get(0)).node)
+			System.out.println(nodeMap.get(nodes.get(1)).node) 
+			*/
+			
+			val first = nodeMap.get(nodes.get(0)).node
+			val second = nodeMap.get(nodes.get(1)).node
+			
+			createEdge => [
+                it.source = first
+                it.target = second
+                it.setLayoutOption(LayoutOptions.EDGE_TYPE, EdgeType.UNDIRECTED)
+                it.addPolyline(2)           
+			]
+		}
+	}
+}
+
+//gets Nodes based on EdgeName
+def ArrayList<String> parseEdgeName(String edgeName){
+	var String[] nodes = edgeName.split("::")
+	if(nodes.size == 2){
+		var result = new ArrayList(0)
+		result.add(nodes.get(0))
+		result.add(nodes.get(1))
+		return result
+	}
+	else {
+		return null
+	}
+}
+
 }
