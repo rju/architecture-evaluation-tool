@@ -32,7 +32,7 @@ public interface NamedElement extends EObject {
 	 * @return the value of the '<em>Name</em>' attribute.
 	 * @see #setName(String)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getNamedElement_Name()
-	 * @model id="true" required="true"
+	 * @model required="true"
 	 * @generated
 	 */
 	String getName();

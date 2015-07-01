@@ -52,37 +52,7 @@ class NameResolutionHelper {
 		return name
 	}
 	
-	/**
-	 * Fully qualified name of a class specified by a type binding
-	 */
-	def static String determineFullyQualifiedName(ITypeBinding clazz) {
-		if (clazz.anonymous) {
-			return clazz.declaringClass.determineFullyQualifiedName + "." + clazz.interfaces.get(0).name + "$" + clazz.key
-		} else if (clazz.primitive) {
-			return clazz.name
-		} else if (clazz.array) {
-			return clazz.elementType.determineFullyQualifiedName + "[]"
-		} else if (clazz.wildcardType) {
-			if (clazz.wildcard.isUpperbound) {
-				return "<? extends " + clazz.wildcard.determineFullyQualifiedName + ">" 
-			} else {
-				return "<? super " + clazz.wildcard.determineFullyQualifiedName + ">"
-			}
-		} else if (clazz.typeVariable) {
-			// TODO handle getTypeBounds
-			return "<" + clazz.name + " extends >"
-		} else if (clazz.parameterizedType) {
-			return clazz.package.name + "." + clazz.name
-		} else {
-			if (clazz != null) {
-				if (clazz.package != null)
-					return clazz.package.name + "." + clazz.name
-				else
-					throw new Exception("y")
-			} else
-				throw new Exception("x")
-		}
-	}
+	
 	
 	/**
 	 * Fully qualified name of a method based on the method binding.
@@ -94,16 +64,15 @@ class NameResolutionHelper {
 			return binding.declaringClass.determineFullyQualifiedName + "." + binding.name
 	}
 	
-
 	/**
 	 * Determine the name of a calling method.
 	 */
 	def static determineFullyQualifiedName(AbstractTypeDeclaration clazz, MethodDeclaration method) {
 		val result = clazz.determineFullyQualifiedName + "." + method.name.fullyQualifiedName + "(" + 
-			method.parameters.map[(it as SingleVariableDeclaration).type.determineFullyQualifiedName].join(',') + ") : " +
+			method.parameters.map[(it as SingleVariableDeclaration).type.determineFullyQualifiedName].join(', ') + ") : " +
 			method.returnType2.determineFullyQualifiedName
 		if (method.thrownExceptionTypes.size > 0) 
-			return result + " throw " + method.thrownExceptionTypes.map[(it as Type).determineFullyQualifiedName].join(",")
+			return result + " throw " + method.thrownExceptionTypes.map[(it as Type).determineFullyQualifiedName].join(", ")
 		else
 			return result
 	}
@@ -113,10 +82,10 @@ class NameResolutionHelper {
 	 */
 	def static determineFullyQualifiedName(AbstractTypeDeclaration clazz, MethodInvocation callee) {
 		val result = clazz.determineFullyQualifiedName + "." + callee.name.fullyQualifiedName + "(" + 
-			callee.resolveMethodBinding.parameterTypes.map[it.qualifiedName].join(",") + ") : " +
+			callee.resolveMethodBinding.parameterTypes.map[it.qualifiedName].join(", ") + ") : " +
 			callee.resolveMethodBinding.returnType.qualifiedName
 		if (callee.resolveMethodBinding.exceptionTypes.length > 0)
-			return result + " throw " + callee.resolveMethodBinding.exceptionTypes.map[it.qualifiedName].join(",")
+			return result + " throw " + callee.resolveMethodBinding.exceptionTypes.map[it.qualifiedName].join(", ")
 		else
 			return result
 	}
@@ -126,9 +95,9 @@ class NameResolutionHelper {
 	 */
 	def static determineFullyQualifiedName(AbstractTypeDeclaration clazz, ConstructorInvocation callee) {
 		val result = clazz.determineFullyQualifiedName + "." + clazz.name.fullyQualifiedName + "(" + 
-			callee.resolveConstructorBinding.parameterTypes.map[it.qualifiedName].join(",") + ") "
+			callee.resolveConstructorBinding.parameterTypes.map[it.qualifiedName].join(", ") + ")"
 		if (callee.resolveConstructorBinding.exceptionTypes.length > 0)
-			return result + " throw " + callee.resolveConstructorBinding.exceptionTypes.map[it.qualifiedName].join(",")
+			return result + " throw " + callee.resolveConstructorBinding.exceptionTypes.map[it.qualifiedName].join(", ")
 		else
 			return result
 	}
@@ -138,9 +107,9 @@ class NameResolutionHelper {
 	 */
 	def static determineFullyQualifiedName(AbstractTypeDeclaration clazz, SuperConstructorInvocation callee) {
 		val result = clazz.determineFullyQualifiedName + "." + clazz.name.fullyQualifiedName + "(" + 
-			callee.resolveConstructorBinding.parameterTypes.map[it.qualifiedName].join(",") + ") "
+			callee.resolveConstructorBinding.parameterTypes.map[it.qualifiedName].join(", ") + ")"
 		if (callee.resolveConstructorBinding.exceptionTypes.length > 0)
-			return result + " throw " + callee.resolveConstructorBinding.exceptionTypes.map[it.qualifiedName].join(",")
+			return result + " throw " + callee.resolveConstructorBinding.exceptionTypes.map[it.qualifiedName].join(", ") + ";"
 		else
 			return result
 	}
@@ -163,7 +132,7 @@ class NameResolutionHelper {
 			ArrayType:
 				return type.elementType.determineFullyQualifiedName() + "[]"
 			ParameterizedType:
-				return type.type.determineFullyQualifiedName() + "<" + type.typeArguments.map[(it as Type).determineFullyQualifiedName].join(",") + ">"
+				return type.type.determineFullyQualifiedName() + "?G" + type.typeArguments.map[(it as Type).determineFullyQualifiedName].join(", ") + ";"
 			PrimitiveType: /** primitive types are all data types */
 				return switch (type.primitiveTypeCode) {
 					case PrimitiveType.BOOLEAN: "boolean"
@@ -178,7 +147,7 @@ class NameResolutionHelper {
 				}
 			QualifiedType:
 				return if (type.name != null && type.qualifier != null)
-					type.name.fullyQualifiedName + "." + type.qualifier.determineFullyQualifiedName
+					'L' + type.name.fullyQualifiedName + "." + type.qualifier.determineFullyQualifiedName + ';'
 				else if (type.name != null)
 					type.name.fullyQualifiedName
 				else
@@ -189,11 +158,44 @@ class NameResolutionHelper {
 				return type.types.map[(it as Type).determineFullyQualifiedName].join("+")
 			WildcardType:
 				if (type.upperBound)
-					return "? extends " + type.bound.determineFullyQualifiedName
+					return "extends " + type.bound.determineFullyQualifiedName + ";"
 				else
-					return "? super " + type.bound.determineFullyQualifiedName
+					return "super " + type.bound.determineFullyQualifiedName + ";"
 			default:
 				return "ERROR"
 		}
 	}
+	
+	/**
+	 * Fully qualified name of a class specified by a type binding
+	 */
+	def static String determineFullyQualifiedName(ITypeBinding clazz) {
+		if (clazz.anonymous) {
+			return clazz.declaringClass.determineFullyQualifiedName + "." + clazz.interfaces.get(0).name + "$" + clazz.key
+		} else if (clazz.primitive) {
+			return clazz.binaryName
+		} else if (clazz.array) {
+			return clazz.elementType.determineFullyQualifiedName + "[]"
+		} else if (clazz.wildcardType) {
+			if (clazz.wildcard.isUpperbound) {
+				return "extends " + clazz.wildcard.determineFullyQualifiedName + ";" 
+			} else {
+				return "super " + clazz.wildcard.determineFullyQualifiedName + ";"
+			}
+		} else if (clazz.typeVariable) {
+			// TODO handle getTypeBounds
+			return "extends " + clazz.name + ";"
+		} else if (clazz.parameterizedType) {
+			return clazz.package.name + "." + clazz.name
+		} else {
+			if (clazz != null) {
+				if (clazz.package != null)
+					return clazz.package.name + "." + clazz.name
+				else
+					throw new Exception("y")
+			} else
+				throw new Exception("x")
+		}
+	}
+	
 }

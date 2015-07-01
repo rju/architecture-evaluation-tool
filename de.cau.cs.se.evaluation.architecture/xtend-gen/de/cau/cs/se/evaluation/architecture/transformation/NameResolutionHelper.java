@@ -76,91 +76,6 @@ public class NameResolutionHelper {
   }
   
   /**
-   * Fully qualified name of a class specified by a type binding
-   */
-  public static String determineFullyQualifiedName(final ITypeBinding clazz) {
-    try {
-      boolean _isAnonymous = clazz.isAnonymous();
-      if (_isAnonymous) {
-        ITypeBinding _declaringClass = clazz.getDeclaringClass();
-        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass);
-        String _plus = (_determineFullyQualifiedName + ".");
-        ITypeBinding[] _interfaces = clazz.getInterfaces();
-        ITypeBinding _get = _interfaces[0];
-        String _name = _get.getName();
-        String _plus_1 = (_plus + _name);
-        String _plus_2 = (_plus_1 + "$");
-        String _key = clazz.getKey();
-        return (_plus_2 + _key);
-      } else {
-        boolean _isPrimitive = clazz.isPrimitive();
-        if (_isPrimitive) {
-          return clazz.getName();
-        } else {
-          boolean _isArray = clazz.isArray();
-          if (_isArray) {
-            ITypeBinding _elementType = clazz.getElementType();
-            String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_elementType);
-            return (_determineFullyQualifiedName_1 + "[]");
-          } else {
-            boolean _isWildcardType = clazz.isWildcardType();
-            if (_isWildcardType) {
-              ITypeBinding _wildcard = clazz.getWildcard();
-              boolean _isUpperbound = _wildcard.isUpperbound();
-              if (_isUpperbound) {
-                ITypeBinding _wildcard_1 = clazz.getWildcard();
-                String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_1);
-                String _plus_3 = ("<? extends " + _determineFullyQualifiedName_2);
-                return (_plus_3 + ">");
-              } else {
-                ITypeBinding _wildcard_2 = clazz.getWildcard();
-                String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_2);
-                String _plus_4 = ("<? super " + _determineFullyQualifiedName_3);
-                return (_plus_4 + ">");
-              }
-            } else {
-              boolean _isTypeVariable = clazz.isTypeVariable();
-              if (_isTypeVariable) {
-                String _name_1 = clazz.getName();
-                String _plus_5 = ("<" + _name_1);
-                return (_plus_5 + " extends >");
-              } else {
-                boolean _isParameterizedType = clazz.isParameterizedType();
-                if (_isParameterizedType) {
-                  IPackageBinding _package = clazz.getPackage();
-                  String _name_2 = _package.getName();
-                  String _plus_6 = (_name_2 + ".");
-                  String _name_3 = clazz.getName();
-                  return (_plus_6 + _name_3);
-                } else {
-                  boolean _notEquals = (!Objects.equal(clazz, null));
-                  if (_notEquals) {
-                    IPackageBinding _package_1 = clazz.getPackage();
-                    boolean _notEquals_1 = (!Objects.equal(_package_1, null));
-                    if (_notEquals_1) {
-                      IPackageBinding _package_2 = clazz.getPackage();
-                      String _name_4 = _package_2.getName();
-                      String _plus_7 = (_name_4 + ".");
-                      String _name_5 = clazz.getName();
-                      return (_plus_7 + _name_5);
-                    } else {
-                      throw new Exception("y");
-                    }
-                  } else {
-                    throw new Exception("x");
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-  
-  /**
    * Fully qualified name of a method based on the method binding.
    */
   public static String determineFullyQualifiedName(final IMethodBinding binding) {
@@ -209,7 +124,7 @@ public class NameResolutionHelper {
       }
     };
     List<String> _map = ListExtensions.<Object, String>map(_parameters, _function);
-    String _join = IterableExtensions.join(_map, ",");
+    String _join = IterableExtensions.join(_map, ", ");
     String _plus_3 = (_plus_2 + _join);
     String _plus_4 = (_plus_3 + ") : ");
     Type _returnType2 = method.getReturnType2();
@@ -226,7 +141,7 @@ public class NameResolutionHelper {
         }
       };
       List<String> _map_1 = ListExtensions.<Object, String>map(_thrownExceptionTypes_1, _function_1);
-      String _join_1 = IterableExtensions.join(_map_1, ",");
+      String _join_1 = IterableExtensions.join(_map_1, ", ");
       return ((result + " throw ") + _join_1);
     } else {
       return result;
@@ -251,7 +166,7 @@ public class NameResolutionHelper {
       }
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
-    String _join = IterableExtensions.join(_map, ",");
+    String _join = IterableExtensions.join(_map, ", ");
     String _plus_3 = (_plus_2 + _join);
     String _plus_4 = (_plus_3 + ") : ");
     IMethodBinding _resolveMethodBinding_1 = callee.resolveMethodBinding();
@@ -271,7 +186,7 @@ public class NameResolutionHelper {
         }
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
-      String _join_1 = IterableExtensions.join(_map_1, ",");
+      String _join_1 = IterableExtensions.join(_map_1, ", ");
       return ((result + " throw ") + _join_1);
     } else {
       return result;
@@ -296,9 +211,9 @@ public class NameResolutionHelper {
       }
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
-    String _join = IterableExtensions.join(_map, ",");
+    String _join = IterableExtensions.join(_map, ", ");
     String _plus_3 = (_plus_2 + _join);
-    final String result = (_plus_3 + ") ");
+    final String result = (_plus_3 + ")");
     IMethodBinding _resolveConstructorBinding_1 = callee.resolveConstructorBinding();
     ITypeBinding[] _exceptionTypes = _resolveConstructorBinding_1.getExceptionTypes();
     int _length = _exceptionTypes.length;
@@ -312,7 +227,7 @@ public class NameResolutionHelper {
         }
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
-      String _join_1 = IterableExtensions.join(_map_1, ",");
+      String _join_1 = IterableExtensions.join(_map_1, ", ");
       return ((result + " throw ") + _join_1);
     } else {
       return result;
@@ -337,9 +252,9 @@ public class NameResolutionHelper {
       }
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
-    String _join = IterableExtensions.join(_map, ",");
+    String _join = IterableExtensions.join(_map, ", ");
     String _plus_3 = (_plus_2 + _join);
-    final String result = (_plus_3 + ") ");
+    final String result = (_plus_3 + ")");
     IMethodBinding _resolveConstructorBinding_1 = callee.resolveConstructorBinding();
     ITypeBinding[] _exceptionTypes = _resolveConstructorBinding_1.getExceptionTypes();
     int _length = _exceptionTypes.length;
@@ -353,8 +268,9 @@ public class NameResolutionHelper {
         }
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
-      String _join_1 = IterableExtensions.join(_map_1, ",");
-      return ((result + " throw ") + _join_1);
+      String _join_1 = IterableExtensions.join(_map_1, ", ");
+      String _plus_4 = ((result + " throw ") + _join_1);
+      return (_plus_4 + ";");
     } else {
       return result;
     }
@@ -401,7 +317,7 @@ public class NameResolutionHelper {
         _matched=true;
         Type _type = ((ParameterizedType)type).getType();
         String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_type);
-        String _plus = (_determineFullyQualifiedName + "<");
+        String _plus = (_determineFullyQualifiedName + "?G");
         List _typeArguments = ((ParameterizedType)type).typeArguments();
         final Function1<Object, String> _function = new Function1<Object, String>() {
           public String apply(final Object it) {
@@ -409,9 +325,9 @@ public class NameResolutionHelper {
           }
         };
         List<String> _map = ListExtensions.<Object, String>map(_typeArguments, _function);
-        String _join = IterableExtensions.join(_map, ",");
+        String _join = IterableExtensions.join(_map, ", ");
         String _plus_1 = (_plus + _join);
-        return (_plus_1 + ">");
+        return (_plus_1 + ";");
       }
     }
     if (!_matched) {
@@ -494,10 +410,12 @@ public class NameResolutionHelper {
         if (_and) {
           SimpleName _name_1 = ((QualifiedType)type).getName();
           String _fullyQualifiedName = _name_1.getFullyQualifiedName();
-          String _plus = (_fullyQualifiedName + ".");
+          String _plus = ("L" + _fullyQualifiedName);
+          String _plus_1 = (_plus + ".");
           Type _qualifier_1 = ((QualifiedType)type).getQualifier();
           String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_qualifier_1);
-          _xifexpression = (_plus + _determineFullyQualifiedName);
+          String _plus_2 = (_plus_1 + _determineFullyQualifiedName);
+          _xifexpression = (_plus_2 + ";");
         } else {
           String _xifexpression_1 = null;
           SimpleName _name_2 = ((QualifiedType)type).getName();
@@ -541,14 +459,101 @@ public class NameResolutionHelper {
         if (_isUpperBound) {
           Type _bound = ((WildcardType)type).getBound();
           String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_bound);
-          return ("? extends " + _determineFullyQualifiedName);
+          String _plus = ("extends " + _determineFullyQualifiedName);
+          return (_plus + ";");
         } else {
           Type _bound_1 = ((WildcardType)type).getBound();
           String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_bound_1);
-          return ("? super " + _determineFullyQualifiedName_1);
+          String _plus_1 = ("super " + _determineFullyQualifiedName_1);
+          return (_plus_1 + ";");
         }
       }
     }
     return "ERROR";
+  }
+  
+  /**
+   * Fully qualified name of a class specified by a type binding
+   */
+  public static String determineFullyQualifiedName(final ITypeBinding clazz) {
+    try {
+      boolean _isAnonymous = clazz.isAnonymous();
+      if (_isAnonymous) {
+        ITypeBinding _declaringClass = clazz.getDeclaringClass();
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass);
+        String _plus = (_determineFullyQualifiedName + ".");
+        ITypeBinding[] _interfaces = clazz.getInterfaces();
+        ITypeBinding _get = _interfaces[0];
+        String _name = _get.getName();
+        String _plus_1 = (_plus + _name);
+        String _plus_2 = (_plus_1 + "$");
+        String _key = clazz.getKey();
+        return (_plus_2 + _key);
+      } else {
+        boolean _isPrimitive = clazz.isPrimitive();
+        if (_isPrimitive) {
+          return clazz.getBinaryName();
+        } else {
+          boolean _isArray = clazz.isArray();
+          if (_isArray) {
+            ITypeBinding _elementType = clazz.getElementType();
+            String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_elementType);
+            return (_determineFullyQualifiedName_1 + "[]");
+          } else {
+            boolean _isWildcardType = clazz.isWildcardType();
+            if (_isWildcardType) {
+              ITypeBinding _wildcard = clazz.getWildcard();
+              boolean _isUpperbound = _wildcard.isUpperbound();
+              if (_isUpperbound) {
+                ITypeBinding _wildcard_1 = clazz.getWildcard();
+                String _determineFullyQualifiedName_2 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_1);
+                String _plus_3 = ("extends " + _determineFullyQualifiedName_2);
+                return (_plus_3 + ";");
+              } else {
+                ITypeBinding _wildcard_2 = clazz.getWildcard();
+                String _determineFullyQualifiedName_3 = NameResolutionHelper.determineFullyQualifiedName(_wildcard_2);
+                String _plus_4 = ("super " + _determineFullyQualifiedName_3);
+                return (_plus_4 + ";");
+              }
+            } else {
+              boolean _isTypeVariable = clazz.isTypeVariable();
+              if (_isTypeVariable) {
+                String _name_1 = clazz.getName();
+                String _plus_5 = ("extends " + _name_1);
+                return (_plus_5 + ";");
+              } else {
+                boolean _isParameterizedType = clazz.isParameterizedType();
+                if (_isParameterizedType) {
+                  IPackageBinding _package = clazz.getPackage();
+                  String _name_2 = _package.getName();
+                  String _plus_6 = (_name_2 + ".");
+                  String _name_3 = clazz.getName();
+                  return (_plus_6 + _name_3);
+                } else {
+                  boolean _notEquals = (!Objects.equal(clazz, null));
+                  if (_notEquals) {
+                    IPackageBinding _package_1 = clazz.getPackage();
+                    boolean _notEquals_1 = (!Objects.equal(_package_1, null));
+                    if (_notEquals_1) {
+                      IPackageBinding _package_2 = clazz.getPackage();
+                      String _name_4 = _package_2.getName();
+                      String _plus_7 = (_name_4 + ".");
+                      String _name_5 = clazz.getName();
+                      return (_plus_7 + _name_5);
+                    } else {
+                      throw new Exception("y");
+                    }
+                  } else {
+                    throw new Exception("x");
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
   }
 }

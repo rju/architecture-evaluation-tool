@@ -22,7 +22,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 
 /**
@@ -91,7 +91,7 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Graph'-Button in AnalysisResultView.
 	 */
-	protected void exportGraph(final EObject model, final Shell shell, final IJavaProject project) throws IOException {
+	protected void exportGraph(final ModularHypergraph model, final Shell shell, final IJavaProject project) throws IOException {
 
 		if (model == null) {
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
@@ -121,7 +121,7 @@ class ActionHandler {
 				final Resource resource = resourceSet.createResource(URI.createURI(loc));
 
 				// Add model to contents list of the resource
-				resource.getContents().add(model); // new GraphTransformer().makeSerializable((ModularHypergraph) model));
+				resource.getContents().add(model);
 
 				// Save the resource
 				final File destination = new File(loc);

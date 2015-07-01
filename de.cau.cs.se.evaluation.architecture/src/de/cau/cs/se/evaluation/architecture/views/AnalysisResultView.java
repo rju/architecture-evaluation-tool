@@ -17,7 +17,6 @@ package de.cau.cs.se.evaluation.architecture.views;
 
 import java.io.IOException;
 
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
@@ -33,6 +32,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
 
 import de.cau.cs.se.evaluation.architecture.Activator;
+import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 
@@ -52,7 +52,7 @@ public class AnalysisResultView extends ViewPart {
 	private Action exportDataAction;
 	private Action exportHypergraphAction;
 	private Action visualizeAction;
-	private EObject graph = null;
+	private ModularHypergraph graph = null;
 	private IJavaProject project = null;
 
 	/**
@@ -186,7 +186,7 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
-	public void setGraph(final EObject graph) {
+	public void setGraph(final ModularHypergraph graph) {
 		this.graph = graph;
 	}
 
