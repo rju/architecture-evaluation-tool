@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
-import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 
 /**
@@ -122,7 +121,7 @@ class ActionHandler {
 				final Resource resource = resourceSet.createResource(URI.createURI(loc));
 
 				// Add model to contents list of the resource
-				resource.getContents().add(new GraphTransformer().makeSerializable((ModularHypergraph) model));
+				resource.getContents().add(model); // new GraphTransformer().makeSerializable((ModularHypergraph) model));
 
 				// Save the resource
 				final File destination = new File(loc);

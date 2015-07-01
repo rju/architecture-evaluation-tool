@@ -31,7 +31,7 @@ public interface MethodTrace extends NodeReference {
 	 * @return the value of the '<em>Method</em>' attribute.
 	 * @see #setMethod(Object)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getMethodTrace_Method()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Object getMethod();

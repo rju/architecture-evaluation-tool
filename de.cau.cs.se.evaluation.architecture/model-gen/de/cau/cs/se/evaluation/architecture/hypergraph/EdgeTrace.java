@@ -31,7 +31,7 @@ public interface EdgeTrace extends EdgeReference {
 	 * @return the value of the '<em>Edge</em>' reference.
 	 * @see #setEdge(Edge)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getEdgeTrace_Edge()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Edge getEdge();

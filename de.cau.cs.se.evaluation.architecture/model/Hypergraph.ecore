@@ -33,10 +33,12 @@
         iD="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="NodeTrace" eSuperTypes="#//NodeReference">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="node" lowerBound="1" eType="#//Node"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="node" lowerBound="1" eType="#//Node"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EdgeTrace" eSuperTypes="#//EdgeReference">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="edge" lowerBound="1" eType="#//Edge"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="edge" lowerBound="1" eType="#//Edge"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="GenericTrace" eSuperTypes="#//NodeReference #//EdgeReference #//ModuleReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="resourceId" lowerBound="1"
@@ -46,23 +48,28 @@
   <eClassifiers xsi:type="ecore:EClass" name="EdgeReference"/>
   <eClassifiers xsi:type="ecore:EClass" name="ModuleTrace" eSuperTypes="#//ModuleReference">
     <eStructuralFeatures xsi:type="ecore:EReference" name="module" lowerBound="1"
-        eType="#//Module"/>
+        eType="#//Module" transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ModuleReference"/>
   <eClassifiers xsi:type="ecore:EClass" name="TypeTrace" eSuperTypes="#//ModuleReference #//NodeReference">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FieldTrace" eSuperTypes="#//EdgeReference">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="field" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="field" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="MethodTrace" eSuperTypes="#//NodeReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="method" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"
+        transient="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CallerCalleeTrace" eSuperTypes="#//EdgeReference">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="caller" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"
+        transient="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="callee" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"
+        transient="true"/>
   </eClassifiers>
 </ecore:EPackage>

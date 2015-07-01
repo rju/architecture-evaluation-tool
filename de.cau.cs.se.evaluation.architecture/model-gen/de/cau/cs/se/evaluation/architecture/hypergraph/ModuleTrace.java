@@ -31,7 +31,7 @@ public interface ModuleTrace extends ModuleReference {
 	 * @return the value of the '<em>Module</em>' reference.
 	 * @see #setModule(Module)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getModuleTrace_Module()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Module getModule();

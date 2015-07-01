@@ -31,7 +31,7 @@ public interface TypeTrace extends ModuleReference, NodeReference {
 	 * @return the value of the '<em>Type</em>' attribute.
 	 * @see #setType(Object)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getTypeTrace_Type()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Object getType();

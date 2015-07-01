@@ -31,7 +31,7 @@ public interface NodeTrace extends NodeReference {
 	 * @return the value of the '<em>Node</em>' reference.
 	 * @see #setNode(Node)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getNodeTrace_Node()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Node getNode();

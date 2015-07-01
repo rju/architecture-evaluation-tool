@@ -271,10 +271,10 @@ public class JavaASTExpressionEvaluationHelper {
    * @param dataTypePatterns a list of patterns to identify data types
    */
   public static Boolean processFieldAccess(final FieldAccess fieldAccess, final Node sourceNode, final ITypeBinding contextTypeBinding, final ModularHypergraph graph, final List<String> dataTypePatterns) {
-    boolean _xblockexpression = false;
+    Boolean _xblockexpression = null;
     {
       final Expression prefix = fieldAccess.getExpression();
-      boolean _switchResult = false;
+      Boolean _switchResult = null;
       boolean _matched = false;
       if (!_matched) {
         if (prefix instanceof ThisExpression) {
@@ -291,9 +291,13 @@ public class JavaASTExpressionEvaluationHelper {
               boolean _xifexpression_1 = false;
               boolean _equals = Objects.equal(edge, null);
               if (_equals) {
+                Class<? extends ThisExpression> _class = ((ThisExpression)prefix).getClass();
+                String _plus = ("Missing edge for a data type property. Prefix " + _class);
+                String _plus_1 = (_plus + " field ");
                 IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
-                String _plus = ((("Hoopsy " + prefix) + " ") + _resolveFieldBinding_1);
-                System.out.println(_plus);
+                String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
+                String _plus_3 = (_plus_2 + " in processFieldAccess");
+                throw new UnsupportedOperationException(_plus_3);
               } else {
                 EList<Edge> _edges_1 = sourceNode.getEdges();
                 _xifexpression_1 = _edges_1.add(edge);
@@ -302,7 +306,13 @@ public class JavaASTExpressionEvaluationHelper {
             }
             _xifexpression = _xblockexpression_1;
           }
-          _switchResult = _xifexpression;
+          _switchResult = Boolean.valueOf(_xifexpression);
+        }
+      }
+      if (!_matched) {
+        if (prefix instanceof MethodInvocation) {
+          _matched=true;
+          _switchResult = null;
         }
       }
       if (!_matched) {
@@ -313,7 +323,7 @@ public class JavaASTExpressionEvaluationHelper {
       }
       _xblockexpression = _switchResult;
     }
-    return Boolean.valueOf(_xblockexpression);
+    return _xblockexpression;
   }
   
   /**

@@ -31,7 +31,7 @@ public interface FieldTrace extends EdgeReference {
 	 * @return the value of the '<em>Field</em>' attribute.
 	 * @see #setField(Object)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getFieldTrace_Field()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Object getField();

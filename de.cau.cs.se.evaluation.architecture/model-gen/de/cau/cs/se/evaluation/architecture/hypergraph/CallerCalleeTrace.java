@@ -32,7 +32,7 @@ public interface CallerCalleeTrace extends EdgeReference {
 	 * @return the value of the '<em>Caller</em>' attribute.
 	 * @see #setCaller(Object)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getCallerCalleeTrace_Caller()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Object getCaller();
@@ -58,7 +58,7 @@ public interface CallerCalleeTrace extends EdgeReference {
 	 * @return the value of the '<em>Callee</em>' attribute.
 	 * @see #setCallee(Object)
 	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getCallerCalleeTrace_Callee()
-	 * @model required="true"
+	 * @model required="true" transient="true"
 	 * @generated
 	 */
 	Object getCallee();

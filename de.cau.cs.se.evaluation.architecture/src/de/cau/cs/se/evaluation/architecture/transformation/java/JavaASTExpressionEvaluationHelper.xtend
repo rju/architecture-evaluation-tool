@@ -212,11 +212,19 @@ class JavaASTExpressionEvaluationHelper {
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge == null) {
-		    			System.out.println("Hoopsy " + prefix + " " + fieldAccess.resolveFieldBinding)	
+		    			throw new UnsupportedOperationException("Missing edge for a data type property. Prefix " + 
+		    				prefix.class + " field " + fieldAccess.resolveFieldBinding + " in processFieldAccess"
+		    			)
 		    		} else {
 			    		sourceNode.edges.add(edge)
 			    	}
 		    	}
+	    	}
+	    	MethodInvocation: { 
+	    	/** 
+	    	 * this is not a field access, to a field of the context type. 
+	    	 * It is a method invocation, and is handled elsewhere
+	    	 */
 	    	}
 			// TODO other prefixes might contain method calls add evaluate here accordingly
 	    	default:
