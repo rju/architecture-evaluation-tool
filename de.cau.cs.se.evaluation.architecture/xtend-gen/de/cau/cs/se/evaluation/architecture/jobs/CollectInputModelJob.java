@@ -139,29 +139,67 @@ public class CollectInputModelJob extends Job {
         Iterator _iterator = treeSelection.iterator();
         final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
           public Boolean apply(final Object element) {
-            return Boolean.valueOf((element instanceof IProject));
+            boolean _or = false;
+            if ((element instanceof IProject)) {
+              _or = true;
+            } else {
+              _or = (element instanceof IJavaProject);
+            }
+            return Boolean.valueOf(_or);
           }
         };
         final Object selectedElement = IteratorExtensions.<Object>findFirst(_iterator, _function);
         boolean _notEquals = (!Objects.equal(selectedElement, null));
         if (_notEquals) {
-          return this.scanForClasses(((IProject) selectedElement), monitor);
+          boolean _matched = false;
+          if (!_matched) {
+            if (selectedElement instanceof IProject) {
+              _matched=true;
+              IJavaProject _javaProject = this.getJavaProject(((IProject)selectedElement));
+              List<IType> _scanForClasses = null;
+              if (_javaProject!=null) {
+                _scanForClasses=this.scanForClasses(_javaProject, monitor);
+              }
+              return _scanForClasses;
+            }
+          }
+          if (!_matched) {
+            if (selectedElement instanceof IJavaProject) {
+              _matched=true;
+              return this.scanForClasses(((IJavaProject)selectedElement), monitor);
+            }
+          }
         }
       }
     }
     return null;
   }
   
+  private IJavaProject getJavaProject(final IProject project) {
+    try {
+      boolean _hasNature = project.hasNature(JavaCore.NATURE_ID);
+      if (_hasNature) {
+        return JavaCore.create(project);
+      } else {
+        return null;
+      }
+    } catch (Throwable _e) {
+      throw Exceptions.sneakyThrow(_e);
+    }
+  }
+  
   /**
    * Scann for classes in project.
    */
-  private List<IType> scanForClasses(final IProject project, final IProgressMonitor monitor) {
+  private List<IType> scanForClasses(final IJavaProject project, final IProgressMonitor monitor) {
     try {
       final ArrayList<IType> types = new ArrayList<IType>();
-      String _name = project.getName();
+      IProject _project = project.getProject();
+      String _name = _project.getName();
       String _plus = ("Scanning project " + _name);
       monitor.subTask(_plus);
-      IResource _findMember = project.findMember("data-type-pattern.cfg");
+      IProject _project_1 = project.getProject();
+      IResource _findMember = _project_1.findMember("data-type-pattern.cfg");
       final IFile dataTypePatternsFile = ((IFile) _findMember);
       boolean _notEquals = (!Objects.equal(dataTypePatternsFile, null));
       if (_notEquals) {
@@ -169,7 +207,8 @@ public class CollectInputModelJob extends Job {
         if (_isSynchronized) {
           List<String> _readPattern = this.readPattern(dataTypePatternsFile);
           this.dataTypePatterns = _readPattern;
-          IResource _findMember_1 = project.findMember("observed-system.cfg");
+          IProject _project_2 = project.getProject();
+          IResource _findMember_1 = _project_2.findMember("observed-system.cfg");
           final IFile observedSystemPatternsFile = ((IFile) _findMember_1);
           boolean _notEquals_1 = (!Objects.equal(observedSystemPatternsFile, null));
           if (_notEquals_1) {
@@ -177,18 +216,14 @@ public class CollectInputModelJob extends Job {
             if (_isSynchronized_1) {
               List<String> _readPattern_1 = this.readPattern(observedSystemPatternsFile);
               this.observedSystemPatterns = _readPattern_1;
-              boolean _hasNature = project.hasNature(JavaCore.NATURE_ID);
-              if (_hasNature) {
-                final IJavaProject javaProject = JavaCore.create(project);
-                IPackageFragmentRoot[] _allPackageFragmentRoots = javaProject.getAllPackageFragmentRoots();
-                final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
-                  public void accept(final IPackageFragmentRoot root) {
-                    CollectInputModelJob.this.checkForTypes(types, root, monitor);
-                  }
-                };
-                ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
-                return types;
-              }
+              IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
+              final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
+                public void accept(final IPackageFragmentRoot root) {
+                  CollectInputModelJob.this.checkForTypes(types, root, monitor);
+                }
+              };
+              ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
+              return types;
             } else {
               this.showErrorMessage("Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.");
             }

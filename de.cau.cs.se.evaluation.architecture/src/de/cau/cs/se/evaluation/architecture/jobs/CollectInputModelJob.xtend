@@ -46,6 +46,7 @@ import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import org.eclipse.jdt.internal.core.JavaProject
 
 class CollectInputModelJob extends Job {
 	
@@ -106,38 +107,48 @@ class CollectInputModelJob extends Job {
 	/**
 	 * Determine class files.
 	 */
-	private def determineClassFiles(IProgressMonitor monitor) {
+	private def List<IType> determineClassFiles(IProgressMonitor monitor) {
 		if (this.selection instanceof IStructuredSelection) {
 			if (this.selection instanceof ITreeSelection) {
 				val TreeSelection treeSelection = selection as TreeSelection
 				
-				val selectedElement = treeSelection.iterator.findFirst[element | (element instanceof IProject)]
-				if (selectedElement != null)
-					return (selectedElement as IProject).scanForClasses(monitor)
+				val selectedElement = treeSelection.iterator.findFirst[element | (element instanceof IProject) || (element instanceof IJavaProject)]
+				if (selectedElement != null) {
+					switch (selectedElement) {
+						IProject: return selectedElement.getJavaProject?.scanForClasses(monitor)
+						IJavaProject: return selectedElement.scanForClasses(monitor)
+					} 
+				}
+					
+				
 			}
 		}
 		return null
 	}
 	
+	private def IJavaProject getJavaProject(IProject project) {
+		if (project.hasNature(JavaCore.NATURE_ID)) {
+			return JavaCore.create(project)
+		} else
+			return null
+	}
+	
 	/**
 	 * Scann for classes in project.
 	 */
-	private def List<IType> scanForClasses(IProject project, IProgressMonitor monitor) {
+	private def List<IType> scanForClasses(IJavaProject project, IProgressMonitor monitor) {
 		val types = new ArrayList<IType>()
-		monitor.subTask("Scanning project " + project.name)
-		val dataTypePatternsFile = project.findMember("data-type-pattern.cfg") as IFile
+		monitor.subTask("Scanning project " + project.project.name)
+		val dataTypePatternsFile = project.project.findMember("data-type-pattern.cfg") as IFile
 		if (dataTypePatternsFile != null) {
 			if (dataTypePatternsFile.isSynchronized(1)) {
 				dataTypePatterns = readPattern(dataTypePatternsFile)
-				val observedSystemPatternsFile = project.findMember("observed-system.cfg") as IFile
+				val observedSystemPatternsFile = project.project.findMember("observed-system.cfg") as IFile
 				if (observedSystemPatternsFile != null) {
 					if (observedSystemPatternsFile.isSynchronized(1)) {
 						observedSystemPatterns  = readPattern(observedSystemPatternsFile)
-						if (project.hasNature(JavaCore.NATURE_ID)) {
-							val IJavaProject javaProject = JavaCore.create(project);
-							javaProject.allPackageFragmentRoots.forEach[root | types.checkForTypes(root, monitor)]
-							return types
-						} 
+						project.allPackageFragmentRoots.forEach[root | types.checkForTypes(root, monitor)]
+						return types
 					} else {
 						showErrorMessage("Configuration Error", "Observed system file (observed-system.cfg) listing patterns for classes of the observed system is missing.")
 					}	

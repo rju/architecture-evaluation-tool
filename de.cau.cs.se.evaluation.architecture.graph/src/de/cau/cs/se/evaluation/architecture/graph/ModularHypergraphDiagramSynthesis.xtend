@@ -49,6 +49,9 @@ import de.cau.cs.kieler.core.krendering.KRendering
 import de.cau.cs.kieler.core.krendering.KRectangle
 import org.eclipse.emf.ecore.EClass
 import java.util.HashMap
+import java.util.Map
+import de.cau.cs.kieler.core.kgraph.KEdge
+import de.cau.cs.kieler.core.krendering.LineStyle
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -62,7 +65,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     @Inject extension KColorExtensions
     extension KRenderingFactory = KRenderingFactory.eINSTANCE
     
-    var HashMap nodeMap = new HashMap()
+    var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
 
     
     override KNode transform(ModularHypergraph model) {
@@ -74,12 +77,12 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             it.addLayoutParam(LayoutOptions::DIRECTION, Direction::UP)
             
             model.modules.forEach[module | it.children += module.createModule]
-            createEdges(model.edges)
+            model.edges.forEach[edge | edge.createGraphEdge(model.nodes, it.children)]
         ]
         
         return root;
     }
-	
+		
 	/**
 	 * Draw module as a rectangle with its nodes inside.
 	 * 
@@ -88,7 +91,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	def createModule(Module module) {
 		// TODO a module should be a rectangle with preferably round corners,
 		// a top-left name, and a set of nodes inside. 
-		module.createNode().associateWith(module) => [
+		val moduleNode = module.createNode().associateWith(module)
+		
+		moduleNode => [
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, "LemonChiffon".color, 0)
@@ -105,12 +110,11 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 ]
                 it.addRectangle => [
                 	it.invisible = true
-                	it.setGridPlacement(2).from(LEFT, 2, 0, TOP, 2, 0).to(RIGHT, 2, 0, BOTTOM, 2, 0)
-                	module.nodes.forEach[node | node.createGraphNode(it)]
+                	it.setGridPlacement(2).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
+                	module.nodes.forEach[node | node.createGraphNode(it, moduleNode.children)]
                 ]
             ]
 		]
-		//module.nodes.forEach[node | it.children += node.createGraphNode]
 	}
 			
 	/**
@@ -118,22 +122,25 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	 * 
 	 * @param node the node to be rendered
 	 */
-	def createGraphNode(Node node, KRectangle parent) {
-		parent => [
-			it.addEllipse => [
+	private def createGraphNode(Node node, KRectangle parent, EList<KNode> siblings) {
+		val kNode = node.createNode()
+		nodeMap.put(node, kNode)
+		kNode => [
+			parent.children += it.addEllipse => [
 				it.associateWith(node)
 				it.lineWidth = 2
                 it.background = "white".color
-                it.setAreaPlacementData.from(LEFT, 20, 0, TOP, 10, 0.5f).to(RIGHT, 20, 0, BOTTOM, 10, 0)
+                it.setAreaPlacementData.from(LEFT, 20, 0, TOP, 20, 0.5f).to(RIGHT, 20, 0, BOTTOM, 20, 0)
                 it.addText(node.name) => [
                 	it.fontSize = 15
                 	it.fontBold = false
                 	it.cursorSelectable = true
                 ]
                 it.id = node.name
-                nodeMap.put(node.name, it)//node?
 			]
-		]
+		] 
+		
+		siblings.add(kNode)
 	}
 
 /* 	
@@ -187,48 +194,41 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 }
 */
 
-//TODO
-def createEdges(EList<Edge> edges){
-	for(Edge j : edges){
-		var ArrayList<String> nodes = j.name.parseEdgeName
-		if(nodes != null){
-			/* 
-			System.out.println("")
-			System.out.println(nodes.get(0))
-			System.out.println(nodes.get(1))
-			System.out.println(nodeMap.get(nodes.get(0)) != null)
-			System.out.println(nodeMap.get(nodes.get(1))!= null)
-			System.out.println(nodeMap.get(nodes.get(0)))
-			System.out.println(nodeMap.get(nodes.get(1)))
-			System.out.println(nodeMap.get(nodes.get(0)).node)
-			System.out.println(nodeMap.get(nodes.get(1)).node) 
-			*/
-			
-			val first = nodeMap.get(nodes.get(0)).node
-			val second = nodeMap.get(nodes.get(1)).node
-			
-			createEdge => [
-                it.source = first
-                it.target = second
-                it.setLayoutOption(LayoutOptions.EDGE_TYPE, EdgeType.UNDIRECTED)
-                it.addPolyline(2)           
+	private def createGraphEdge(Edge edge, EList<Node> nodes, EList<KNode> siblings) {		
+		val referencedNodes = nodes.filter[node | node.edges.exists[it.equals(edge)]]
+		System.out.println("graph edge " + edge.name + " size " + referencedNodes.size )
+		if (referencedNodes.size > 1) {
+			if (referencedNodes == 2) { /** direct link */
+				drawEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)))
+			} else { /** hyper edge */
+				siblings += drawHyperEdge(edge, referencedNodes)
+			}
+		}		
+	}
+	
+	private def drawHyperEdge(Edge edge, Iterable<Node> nodes) {
+		val edgeNode = edge.createNode => [
+			it.addEllipse() => [
+				it.lineWidth = 2
+				it.addText(edge.name)
 			]
-		}
+		]
+		
+		nodes.forEach[node | drawEdge(edgeNode, nodeMap.get(node))]
+		System.out.println("edge " + edgeNode)
+		return edgeNode
 	}
-}
-
-//gets Nodes based on EdgeName
-def ArrayList<String> parseEdgeName(String edgeName){
-	var String[] nodes = edgeName.split("::")
-	if(nodes.size == 2){
-		var result = new ArrayList(0)
-		result.add(nodes.get(0))
-		result.add(nodes.get(1))
-		return result
+	
+	private def drawEdge(KNode left, KNode right) {
+		System.out.println("draw edge " + left + " " + right)
+		createEdge() => [
+			it.source = left
+            it.target = right
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]
 	}
-	else {
-		return null
-	}
-}
 
 }
