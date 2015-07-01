@@ -40,6 +40,7 @@ import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions;
 import de.cau.cs.kieler.kiml.options.Direction;
 import de.cau.cs.kieler.kiml.options.LayoutOptions;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
+import de.cau.cs.kieler.klighd.syntheses.DiagramSyntheses;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Module;
@@ -100,7 +101,9 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     final KNode root = this.<KNode>associateWith(_createNode, model);
     final Procedure1<KNode> _function = new Procedure1<KNode>() {
       public void apply(final KNode it) {
-        ModularHypergraphDiagramSynthesis.this._kNodeExtensions.<String>addLayoutParam(it, LayoutOptions.ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.planarization");
+        ModularHypergraphDiagramSynthesis.this.<KNode, String>setLayoutOption(it, LayoutOptions.ALGORITHM, "de.cau.cs.kieler.klay.layered");
+        DiagramSyntheses.<KNode>setLayoutOption(it, "layoutHierarchy", "true");
+        DiagramSyntheses.<KNode>setLayoutOption(it, "mergeEdges", "true");
         ModularHypergraphDiagramSynthesis.this._kNodeExtensions.<Float>addLayoutParam(it, LayoutOptions.SPACING, Float.valueOf(75f));
         ModularHypergraphDiagramSynthesis.this._kNodeExtensions.<Direction>addLayoutParam(it, LayoutOptions.DIRECTION, Direction.UP);
         EList<Module> _modules = model.getModules();
@@ -244,56 +247,6 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return _xblockexpression;
   }
   
-  /**
-   * def createEdges(EList<Node> nodes){
-   * for (var i = 0; i<nodes.size; i++){
-   * //for (var j = 0; j<nodes.get(i).getEdges.size; j++){
-   * for(Edge j : nodes.get(i).edges){
-   * var temp = findNode(j, nodes, nodes.get(i))
-   * if(temp != null){
-   * val child = temp
-   * val parent = nodes.get(i)
-   * //				new Pair(child, parent).createEdge() => [
-   * //		            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
-   * //		            // add semantic data
-   * //		            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA,
-   * //		                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
-   * //		    	    it.source = child.node
-   * //			        it.target = parent.node
-   * //			        it.data addPolyline() => [
-   * //		                it.lineWidth = 2
-   * //		                it.foreground = "gray25".color
-   * //		                it.addInheritanceTriangleArrowDecorator()
-   * //			        ]
-   * //				]
-   * child.createEdge(parent)=>[
-   * it.addPolyline => [
-   * it.lineWidth = 2
-   * it.foreground = "gray25".color
-   * ]
-   * ]
-   * 
-   * }
-   * }
-   * }
-   * }
-   * 
-   * def Node findNode(Edge edge, EList<Node> nodes, Node parent){
-   * var Node result = null
-   * //System.out.println(edge.name)
-   * //TODO teste ob es ein(?) anderen(!) Node mit der gleicher Edge gibt (oder mehr)
-   * for (var i = 0; i<nodes.size; i++){
-   * if(nodes.get(i) != parent){
-   * for(Edge j : nodes.get(i).edges){
-   * //System.out.println(j.name)
-   * if(edge.name.equals(j.name)){
-   * result = nodes.get(i)
-   * }
-   * }}}
-   * return result
-   * }
-   * }
-   */
   private Object createGraphEdge(final Edge edge, final EList<Node> nodes, final EList<KNode> siblings) {
     Object _xblockexpression = null;
     {

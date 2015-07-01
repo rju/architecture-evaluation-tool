@@ -72,7 +72,13 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
         val root = model.createNode().associateWith(model);
         
         root => [
-        	it.addLayoutParam(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.planarization")
+        	//it.addLayoutParam(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.planarization")
+            it.setLayoutOption(LayoutOptions.ALGORITHM, "de.cau.cs.kieler.klay.layered")
+            
+            // de.cau.cs.kieler.klay.layered.properties.Properties
+            it.setLayoutOption("layoutHierarchy", "true")
+            it.setLayoutOption("mergeEdges", "true")
+            
             it.addLayoutParam(LayoutOptions::SPACING, 75f)
             it.addLayoutParam(LayoutOptions::DIRECTION, Direction::UP)
             
@@ -142,57 +148,6 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		
 		siblings.add(kNode)
 	}
-
-/* 	
-	def createEdges(EList<Node> nodes){
-		for (var i = 0; i<nodes.size; i++){
-			//for (var j = 0; j<nodes.get(i).getEdges.size; j++){
-			for(Edge j : nodes.get(i).edges){
-				var temp = findNode(j, nodes, nodes.get(i))
-				if(temp != null){
-				val child = temp
-				val parent = nodes.get(i)
-//				new Pair(child, parent).createEdge() => [
-//		            it.addLayoutParam(LayoutOptions::EDGE_TYPE, EdgeType::GENERALIZATION);
-//		            // add semantic data
-//		            it.getData(typeof(KLayoutData)).setProperty(KlighdProperties.SEMANTIC_DATA, 
-//		                        KlighdSemanticDiagramData.of(KlighdConstants.SEMANTIC_DATA_CLASS, "inheritence"))
-//		    	    it.source = child.node
-//			        it.target = parent.node
-//			        it.data addPolyline() => [
-//		                it.lineWidth = 2
-//		                it.foreground = "gray25".color
-//		                it.addInheritanceTriangleArrowDecorator()
-//			        ]		    
-//				]
-				child.createEdge(parent)=>[
-					it.addPolyline => [
-		                it.lineWidth = 2
-		                it.foreground = "gray25".color
-						]						
-					]
-					
-				}
-			}
-		}
-	}
-	
-	def Node findNode(Edge edge, EList<Node> nodes, Node parent){
-		var Node result = null
-		//System.out.println(edge.name)
-		//TODO teste ob es ein(?) anderen(!) Node mit der gleicher Edge gibt (oder mehr)
-		for (var i = 0; i<nodes.size; i++){
-			if(nodes.get(i) != parent){
-		for(Edge j : nodes.get(i).edges){
-			//System.out.println(j.name)
-			if(edge.name.equals(j.name)){
-				result = nodes.get(i)
-			}
-		}}}
-		return result
-	}  
-}
-*/
 
 	private def createGraphEdge(Edge edge, EList<Node> nodes, EList<KNode> siblings) {		
 		val referencedNodes = nodes.filter[node | node.edges.exists[it.equals(edge)]]
