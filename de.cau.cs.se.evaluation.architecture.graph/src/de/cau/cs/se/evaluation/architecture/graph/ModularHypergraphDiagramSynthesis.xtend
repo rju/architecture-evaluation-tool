@@ -52,6 +52,10 @@ import java.util.HashMap
 import java.util.Map
 import de.cau.cs.kieler.core.kgraph.KEdge
 import de.cau.cs.kieler.core.krendering.LineStyle
+import de.cau.cs.kieler.kiml.options.EdgeRouting
+import de.cau.cs.kieler.core.krendering.LineJoin
+import de.cau.cs.kieler.core.krendering.KContainerRendering
+import de.cau.cs.kieler.kiml.options.PortConstraints
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -73,14 +77,16 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
         
         root => [
         	//it.addLayoutParam(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.planarization")
-            it.setLayoutOption(LayoutOptions.ALGORITHM, "de.cau.cs.kieler.klay.layered")
+            it.addLayoutParam(LayoutOptions.ALGORITHM, "de.cau.cs.kieler.klay.layered")
             
             // de.cau.cs.kieler.klay.layered.properties.Properties
-            it.setLayoutOption("layoutHierarchy", "true")
             it.setLayoutOption("mergeEdges", "true")
-            
+            it.addLayoutParam(LayoutOptions.LAYOUT_HIERARCHY, true)
+
             it.addLayoutParam(LayoutOptions::SPACING, 75f)
             it.addLayoutParam(LayoutOptions::DIRECTION, Direction::UP)
+            it.addLayoutParam(LayoutOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
+            it.setLayoutOption(LayoutOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
             
             model.modules.forEach[module | it.children += module.createModule]
             model.edges.forEach[edge | edge.createGraphEdge(model.nodes, it.children)]
@@ -98,8 +104,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		// TODO a module should be a rectangle with preferably round corners,
 		// a top-left name, and a set of nodes inside. 
 		val moduleNode = module.createNode().associateWith(module)
+		moduleNode.setLayoutOption(LayoutOptions.EDGE_ROUTING, EdgeRouting.POLYLINE)
 		
-		moduleNode => [
+		moduleNode => [	
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, "LemonChiffon".color, 0)
@@ -108,17 +115,16 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 it.addRectangle => [
 	                it.invisible = true
 	                it.addText(module.name) => [
-	                	it.fontSize = 16
 	                	it.fontBold = true
 	                	it.cursorSelectable = true
 	                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
 	                ]
                 ]
-                it.addRectangle => [
-                	it.invisible = true
-                	it.setGridPlacement(2).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
-                	module.nodes.forEach[node | node.createGraphNode(it, moduleNode.children)]
-                ]
+                //it.addRectangle => [
+                //	it.invisible =true
+                //	it.setGridPlacement(2).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)     	
+                	module.nodes.forEach[node | node.createGraphNode(it, module, moduleNode)]
+                //]
             ]
 		]
 	}
@@ -128,53 +134,63 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	 * 
 	 * @param node the node to be rendered
 	 */
-	private def createGraphNode(Node node, KRectangle parent, EList<KNode> siblings) {
-		val kNode = node.createNode()
+	private def createGraphNode(Node node, KContainerRendering parent, Module module, KNode moduleNode) {
+		val kNode = node.createNode().associateWith(node)
 		nodeMap.put(node, kNode)
+		moduleNode.children += kNode
+		
 		kNode => [
-			parent.children += it.addEllipse => [
-				it.associateWith(node)
+			//it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			//node.edges.forEach[graphEdge | graphEdge.createEdgePort(it, graphEdge.name)]
+			parent.children.add(it.addEllipse => [
 				it.lineWidth = 2
                 it.background = "white".color
-                it.setAreaPlacementData.from(LEFT, 20, 0, TOP, 20, 0.5f).to(RIGHT, 20, 0, BOTTOM, 20, 0)
-                it.addText(node.name) => [
-                	it.fontSize = 15
-                	it.fontBold = false
+                it.setSurroundingSpace(10,0,10,0)
+                it.addText(node.name.substring(module.name.length+1)) => [
+                	it.setSurroundingSpace(10,0,10,0)
                 	it.cursorSelectable = true
                 ]
-                it.id = node.name
-			]
+			])
 		] 
 		
-		siblings.add(kNode)
+	}
+	
+	private def createEdgePort(Edge edge, KNode kNode, String label) {
+		kNode.ports.add(createPort() => [
+    		it.setPortSize(2,2)
+    		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
+                
+            // last but not least add a label exhibiting the ports name
+            //it.addInsidePortLabel(label, 8, KlighdConstants.DEFAULT_FONT_NAME)
+    	])
 	}
 
 	private def createGraphEdge(Edge edge, EList<Node> nodes, EList<KNode> siblings) {		
 		val referencedNodes = nodes.filter[node | node.edges.exists[it.equals(edge)]]
 		System.out.println("graph edge " + edge.name + " size " + referencedNodes.size )
 		if (referencedNodes.size > 1) {
-			if (referencedNodes == 2) { /** direct link */
-				drawEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)))
+			if (referencedNodes.size == 2) { /** direct link */
+				drawEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)), edge)
 			} else { /** hyper edge */
 				siblings += drawHyperEdge(edge, referencedNodes)
 			}
 		}		
 	}
 	
-	private def drawHyperEdge(Edge edge, Iterable<Node> nodes) {
-		val edgeNode = edge.createNode => [
+ 	private def drawHyperEdge(Edge graphEdge, Iterable<Node> nodes) {
+		val edgeNode = graphEdge.createNode => [
 			it.addEllipse() => [
 				it.lineWidth = 2
-				it.addText(edge.name)
+				//it.addText(graphEdge.name)
 			]
 		]
 		
-		nodes.forEach[node | drawEdge(edgeNode, nodeMap.get(node))]
+		nodes.forEach[node | drawEdge(edgeNode, nodeMap.get(node), graphEdge)]
 		System.out.println("edge " + edgeNode)
 		return edgeNode
 	}
 	
-	private def drawEdge(KNode left, KNode right) {
+	private def drawEdge(KNode left, KNode right, Edge graphEdge) {
 		System.out.println("draw edge " + left + " " + right)
 		createEdge() => [
 			it.source = left

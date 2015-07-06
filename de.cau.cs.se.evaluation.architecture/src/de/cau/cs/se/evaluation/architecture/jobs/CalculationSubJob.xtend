@@ -35,6 +35,7 @@ class CalculationSubJob extends Job {
 	}
 	
 	override protected run(IProgressMonitor monitor) {
+		// TODO determine size
 		var Node node 
 		while ((node = parent.getNextConnectedNodeTask) != null) {
 			// S^#_i

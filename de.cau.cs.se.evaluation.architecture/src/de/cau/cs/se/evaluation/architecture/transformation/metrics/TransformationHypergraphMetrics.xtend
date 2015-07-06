@@ -33,12 +33,20 @@ class TransformationHypergraphMetrics {
 	val IProgressMonitor monitor
 	var Hypergraph system
 	
-	new () {
-		this.monitor = null
-	}
+	val String name
+	
+	val boolean subtask
 	
 	new(IProgressMonitor monitor) {
 		this.monitor = monitor
+		this.name = ""
+		this.subtask = true
+	}
+	
+	new(IProgressMonitor monitor, String name) {
+		this.monitor = monitor
+		this.name = name
+		this.subtask = false
 	}
 	
 	public def setSystem(Hypergraph system) {
@@ -46,10 +54,13 @@ class TransformationHypergraphMetrics {
 	}
 	
 	public def double calculate() {
+		if (!subtask) monitor.beginTask(this.name, (system.edges.size + system.nodes.size)*2 + system.nodes.size)
 		val systemGraph = createSystemGraph(system)
-		val table = systemGraph.createRowPatternTable		
+		val table = systemGraph.createRowPatternTable
 			
-		return calculateSize(systemGraph, table)
+		val result = calculateSize(systemGraph, table)
+		if (!subtask) monitor.done
+		return result
 	}
 	
 
@@ -60,6 +71,7 @@ class TransformationHypergraphMetrics {
 		var double size = 0
 		
 		for (var int i=0;i<system.nodes.size;i++) {
+			if (!subtask) monitor?.worked(1)
 			val probability = table.patterns.lookupProbability(system.nodes.get(i), system)
 			if (probability > 0.0d) 
 				size+= (-log2(probability))
@@ -67,7 +79,7 @@ class TransformationHypergraphMetrics {
 				System.out.println("Disconnected component. Result is tainted.")
 		}
 		
-		monitor?.worked(1)
+		if (subtask) monitor?.worked(1)
 		
 		return size
 	}
@@ -100,9 +112,10 @@ class TransformationHypergraphMetrics {
 	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph) {
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
 		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
-		
+		if (!subtask) monitor?.worked(system.edges.size)
 		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
 		patternTable.compactPatternTable
+		if (!subtask) monitor?.worked(system.nodes.size)
 				
 		return patternTable	
 	}
@@ -168,6 +181,7 @@ class TransformationHypergraphMetrics {
 		systemGraph.nodes.add(environmentNode)
 		
 		system.edges.forEach[edge | systemGraph.edges.add(edge.deriveEdge)]
+		if (!subtask) monitor?.worked(system.edges.size)
 		system.nodes.forEach[node |
 			val derivedNode = node.deriveNode 
 			node.edges.forEach[edge |
@@ -176,6 +190,7 @@ class TransformationHypergraphMetrics {
 			]
 			systemGraph.nodes.add(derivedNode)
 		]
+		if (!subtask) monitor?.worked(system.nodes.size)
 					
 		return systemGraph
 	}
