@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.IVariableBinding
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
 
 class JavaHypergraphElementFactory {
 		
@@ -17,12 +18,14 @@ class JavaHypergraphElementFactory {
 	 * Create a module for the given class or interface.
 	 * 
 	 * @param type referencing a class or interface
+	 * @param kind defines what kind of module this is
 	 * 
 	 * @return one new module
 	 */
-	def static createModuleForTypeBinding(ITypeBinding type) {
+	def static createModuleForTypeBinding(ITypeBinding type, EModuleKind kind) {
 		val module = HypergraphFactory.eINSTANCE.createModule
 		module.name = type.determineFullyQualifiedName
+		module.kind = kind
 		val derivedFrom = HypergraphFactory.eINSTANCE.createTypeTrace
 		derivedFrom.type = type
 		module.derivedFrom = derivedFrom

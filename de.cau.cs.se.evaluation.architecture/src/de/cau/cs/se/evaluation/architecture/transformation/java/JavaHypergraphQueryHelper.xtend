@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.SimpleName
 import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphElementFactory.*
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
 
 class JavaHypergraphQueryHelper {
 	/**
@@ -64,7 +65,7 @@ class JavaHypergraphQueryHelper {
 	 * Find a module which corresponds to the type binding.
 	 */
 	def static findModule(EList<Module> modules, ITypeBinding binding) {
-		modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(binding)]
+		modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isEqualTo(binding)]
 	}
 	
 	
@@ -125,7 +126,7 @@ class JavaHypergraphQueryHelper {
     	if (targetNode == null) { /** node does not yet exist. It must be a framework class. */
     		var module = graph.modules.findModule(typeBinding)
     		if (module == null) { /** Module does not exists. Add it on demand. */
-    			module = createModuleForTypeBinding(typeBinding)
+    			module = createModuleForTypeBinding(typeBinding, EModuleKind.FRAMEWORK)
     			graph.modules.add(module) 
     		}
     		targetNode = createNodeForMethod(methodBinding)

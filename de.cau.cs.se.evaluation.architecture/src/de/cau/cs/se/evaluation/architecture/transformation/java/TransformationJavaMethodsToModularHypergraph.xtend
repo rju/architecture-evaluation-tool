@@ -30,6 +30,7 @@ import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHyper
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
 
 class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
@@ -68,7 +69,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	override transform() {
 		modularSystem = HypergraphFactory.eINSTANCE.createModularHypergraph
 		// create modules for all classes
-		classes.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding))]
+		classes.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
 
 		// define edges for all internal variables of a class
 		classes.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]

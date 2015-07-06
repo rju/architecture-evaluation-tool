@@ -17,6 +17,13 @@
         eType="#//Node"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="derivedFrom" eType="#//ModuleReference"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" lowerBound="1" eType="#//EModuleKind"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="EModuleKind">
+    <eLiterals name="SYSTEM"/>
+    <eLiterals name="FRAMEWORK" value="1"/>
+    <eLiterals name="ANONYMOUS" value="2"/>
+    <eLiterals name="INTERFACE" value="3"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Node" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="edges" upperBound="-1"

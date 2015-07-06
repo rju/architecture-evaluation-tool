@@ -14,6 +14,7 @@ import org.eclipse.emf.common.util.EList;
  * <ul>
  *   <li>{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getNodes <em>Nodes</em>}</li>
  *   <li>{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getDerivedFrom <em>Derived From</em>}</li>
+ *   <li>{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getKind <em>Kind</em>}</li>
  * </ul>
  * </p>
  *
@@ -63,5 +64,34 @@ public interface Module extends NamedElement {
 	 * @generated
 	 */
 	void setDerivedFrom(ModuleReference value);
+
+	/**
+	 * Returns the value of the '<em><b>Kind</b></em>' attribute.
+	 * The literals are from the enumeration {@link de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind}.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Kind</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Kind</em>' attribute.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+	 * @see #setKind(EModuleKind)
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage#getModule_Kind()
+	 * @model required="true"
+	 * @generated
+	 */
+	EModuleKind getKind();
+
+	/**
+	 * Sets the value of the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getKind <em>Kind</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Kind</em>' attribute.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+	 * @see #getKind()
+	 * @generated
+	 */
+	void setKind(EModuleKind value);
 
 } // Module

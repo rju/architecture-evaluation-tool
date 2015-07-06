@@ -5,6 +5,7 @@ package de.cau.cs.se.evaluation.architecture.hypergraph.impl;
 import de.cau.cs.se.evaluation.architecture.hypergraph.*;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 
@@ -75,6 +76,36 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 			case HypergraphPackage.CALLER_CALLEE_TRACE: return createCallerCalleeTrace();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Object createFromString(EDataType eDataType, String initialValue) {
+		switch (eDataType.getClassifierID()) {
+			case HypergraphPackage.EMODULE_KIND:
+				return createEModuleKindFromString(eDataType, initialValue);
+			default:
+				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
+		}
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public String convertToString(EDataType eDataType, Object instanceValue) {
+		switch (eDataType.getClassifierID()) {
+			case HypergraphPackage.EMODULE_KIND:
+				return convertEModuleKindToString(eDataType, instanceValue);
+			default:
+				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
 		}
 	}
 
@@ -246,6 +277,26 @@ public class HypergraphFactoryImpl extends EFactoryImpl implements HypergraphFac
 	public CallerCalleeTrace createCallerCalleeTrace() {
 		CallerCalleeTraceImpl callerCalleeTrace = new CallerCalleeTraceImpl();
 		return callerCalleeTrace;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EModuleKind createEModuleKindFromString(EDataType eDataType, String initialValue) {
+		EModuleKind result = EModuleKind.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertEModuleKindToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
 	}
 
 	/**

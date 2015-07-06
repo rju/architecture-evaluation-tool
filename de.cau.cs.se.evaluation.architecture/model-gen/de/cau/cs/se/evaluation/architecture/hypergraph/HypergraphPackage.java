@@ -4,6 +4,7 @@ package de.cau.cs.se.evaluation.architecture.hypergraph;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 
@@ -232,13 +233,22 @@ public interface HypergraphPackage extends EPackage {
 	int MODULE__DERIVED_FROM = NAMED_ELEMENT_FEATURE_COUNT + 1;
 
 	/**
+	 * The feature id for the '<em><b>Kind</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODULE__KIND = NAMED_ELEMENT_FEATURE_COUNT + 2;
+
+	/**
 	 * The number of structural features of the '<em>Module</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int MODULE_FEATURE_COUNT = NAMED_ELEMENT_FEATURE_COUNT + 2;
+	int MODULE_FEATURE_COUNT = NAMED_ELEMENT_FEATURE_COUNT + 3;
 
 	/**
 	 * The number of operations of the '<em>Module</em>' class.
@@ -747,6 +757,17 @@ public interface HypergraphPackage extends EPackage {
 
 
 	/**
+	 * The meta object id for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind <em>EModule Kind</em>}' enum.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getEModuleKind()
+	 * @generated
+	 */
+	int EMODULE_KIND = 17;
+
+
+	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph <em>Hypergraph</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -830,6 +851,17 @@ public interface HypergraphPackage extends EPackage {
 	 * @generated
 	 */
 	EReference getModule_DerivedFrom();
+
+	/**
+	 * Returns the meta object for the attribute '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Module#getKind <em>Kind</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Kind</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.Module#getKind()
+	 * @see #getModule()
+	 * @generated
+	 */
+	EAttribute getModule_Kind();
 
 	/**
 	 * Returns the meta object for class '{@link de.cau.cs.se.evaluation.architecture.hypergraph.Node <em>Node</em>}'.
@@ -1115,6 +1147,16 @@ public interface HypergraphPackage extends EPackage {
 	EAttribute getCallerCalleeTrace_Callee();
 
 	/**
+	 * Returns the meta object for enum '{@link de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind <em>EModule Kind</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for enum '<em>EModule Kind</em>'.
+	 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+	 * @generated
+	 */
+	EEnum getEModuleKind();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1206,6 +1248,14 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EReference MODULE__DERIVED_FROM = eINSTANCE.getModule_DerivedFrom();
+
+		/**
+		 * The meta object literal for the '<em><b>Kind</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute MODULE__KIND = eINSTANCE.getModule_Kind();
 
 		/**
 		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.impl.NodeImpl <em>Node</em>}' class.
@@ -1450,6 +1500,16 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute CALLER_CALLEE_TRACE__CALLEE = eINSTANCE.getCallerCalleeTrace_Callee();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind <em>EModule Kind</em>}' enum.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+		 * @see de.cau.cs.se.evaluation.architecture.hypergraph.impl.HypergraphPackageImpl#getEModuleKind()
+		 * @generated
+		 */
+		EEnum EMODULE_KIND = eINSTANCE.getEModuleKind();
 
 	}
 

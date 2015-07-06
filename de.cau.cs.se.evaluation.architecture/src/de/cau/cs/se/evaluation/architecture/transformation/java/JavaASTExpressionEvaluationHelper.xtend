@@ -21,6 +21,7 @@ import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHyper
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphQueryHelper.*
 import org.eclipse.jdt.core.dom.QualifiedName
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
 
 class JavaASTExpressionEvaluationHelper {
 	
@@ -74,7 +75,7 @@ class JavaASTExpressionEvaluationHelper {
     		/** check if the class is an anonymous class. */
     		if (calleeTypeBinding.anonymous) {
     			/** create a module for each new anonymous class and scan for methods. */
-    			val module = createModuleForTypeBinding(calleeTypeBinding)
+    			val module = createModuleForTypeBinding(calleeTypeBinding, EModuleKind.ANONYMOUS)
     			graph.modules.add(module)
     			callee.anonymousClassDeclaration.resolveBinding.declaredMethods.forEach[anonMethod |
     				val anonNode = createNodeForMethod(anonMethod)

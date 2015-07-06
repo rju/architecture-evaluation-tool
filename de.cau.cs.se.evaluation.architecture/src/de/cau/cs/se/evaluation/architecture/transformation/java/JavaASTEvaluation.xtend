@@ -40,6 +40,7 @@ import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHyper
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphQueryHelper.*
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
 
 class JavaASTEvaluation {
 	
@@ -152,7 +153,7 @@ class JavaASTEvaluation {
 			}
 		]
 		if (module == null) {
-			module = createModuleForTypeBinding(invocation.resolveConstructorBinding.declaringClass)
+			module = createModuleForTypeBinding(invocation.resolveConstructorBinding.declaringClass, EModuleKind.FRAMEWORK)
 			graph.modules.add(module)
 		}
 		

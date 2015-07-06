@@ -3,6 +3,7 @@
 package de.cau.cs.se.evaluation.architecture.hypergraph.impl;
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.CallerCalleeTrace;
+import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind;
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeReference;
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace;
@@ -23,6 +24,7 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace;
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
@@ -152,6 +154,13 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass callerCalleeTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EEnum eModuleKindEEnum = null;
 
 	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
@@ -284,6 +293,15 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 */
 	public EReference getModule_DerivedFrom() {
 		return (EReference)moduleEClass.getEStructuralFeatures().get(1);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EAttribute getModule_Kind() {
+		return (EAttribute)moduleEClass.getEStructuralFeatures().get(2);
 	}
 
 	/**
@@ -534,6 +552,15 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EEnum getEModuleKind() {
+		return eModuleKindEEnum;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public HypergraphFactory getHypergraphFactory() {
 		return (HypergraphFactory)getEFactoryInstance();
 	}
@@ -567,6 +594,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		moduleEClass = createEClass(MODULE);
 		createEReference(moduleEClass, MODULE__NODES);
 		createEReference(moduleEClass, MODULE__DERIVED_FROM);
+		createEAttribute(moduleEClass, MODULE__KIND);
 
 		nodeEClass = createEClass(NODE);
 		createEReference(nodeEClass, NODE__EDGES);
@@ -608,6 +636,9 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		callerCalleeTraceEClass = createEClass(CALLER_CALLEE_TRACE);
 		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLER);
 		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLEE);
+
+		// Create enums
+		eModuleKindEEnum = createEEnum(EMODULE_KIND);
 	}
 
 	/**
@@ -665,6 +696,7 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		initEClass(moduleEClass, Module.class, "Module", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getModule_Nodes(), this.getNode(), null, "nodes", null, 0, -1, Module.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getModule_DerivedFrom(), this.getModuleReference(), null, "derivedFrom", null, 0, 1, Module.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getModule_Kind(), this.getEModuleKind(), "kind", null, 1, 1, Module.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(nodeEClass, Node.class, "Node", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getNode_Edges(), this.getEdge(), null, "edges", null, 0, -1, Node.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
@@ -706,6 +738,13 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		initEClass(callerCalleeTraceEClass, CallerCalleeTrace.class, "CallerCalleeTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getCallerCalleeTrace_Caller(), ecorePackage.getEJavaObject(), "caller", null, 1, 1, CallerCalleeTrace.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getCallerCalleeTrace_Callee(), ecorePackage.getEJavaObject(), "callee", null, 1, 1, CallerCalleeTrace.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		// Initialize enums and add enum literals
+		initEEnum(eModuleKindEEnum, EModuleKind.class, "EModuleKind");
+		addEEnumLiteral(eModuleKindEEnum, EModuleKind.SYSTEM);
+		addEEnumLiteral(eModuleKindEEnum, EModuleKind.FRAMEWORK);
+		addEEnumLiteral(eModuleKindEEnum, EModuleKind.ANONYMOUS);
+		addEEnumLiteral(eModuleKindEEnum, EModuleKind.INTERFACE);
 
 		// Create resource
 		createResource(eNS_URI);
