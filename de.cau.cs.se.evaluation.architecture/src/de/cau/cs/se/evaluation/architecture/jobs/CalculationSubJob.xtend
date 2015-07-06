@@ -35,9 +35,11 @@ class CalculationSubJob extends Job {
 	}
 	
 	override protected run(IProgressMonitor monitor) {
-		// TODO determine size
+		monitor.beginTask("Processing graphs.",0)
 		var Node node 
+		var int i = 0
 		while ((node = parent.getNextConnectedNodeTask) != null) {
+			monitor.subTask("task " + i++)
 			// S^#_i
 			val transformationConnectedNodeHyperedgesOnlyGraph = 
 				new TransformationConnectedNodeHyperedgesOnlyGraph(input)
@@ -46,6 +48,8 @@ class CalculationSubJob extends Job {
 			transformationConnectedNodeHyperedgesOnlyGraph.transform
 			parent.deliverResult(transformationConnectedNodeHyperedgesOnlyGraph.result)
 		}
+		
+		monitor.done
 		
 		return Status.OK_STATUS
 	}

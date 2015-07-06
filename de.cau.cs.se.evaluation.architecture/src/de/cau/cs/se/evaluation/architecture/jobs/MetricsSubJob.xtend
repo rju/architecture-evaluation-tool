@@ -31,7 +31,7 @@ class MetricsSubJob extends Job {
 	}
 	
 	override protected run(IProgressMonitor monitor) {
-		val metrics = new TransformationHypergraphMetrics(monitor)
+		val metrics = new TransformationHypergraphMetrics(monitor, "S^#_i Metric")
 		var Hypergraph subgraph
 		while ((subgraph = parent.getNextSubgraph) != null) {
 			metrics.setSystem(subgraph)

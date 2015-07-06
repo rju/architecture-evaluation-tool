@@ -40,6 +40,8 @@ import org.eclipse.emf.ecore.EObject
 
 class ComplexityAnalysisJob extends Job {
 	
+	private static val PARALLEL_TASKS = 8 
+	
 	val List<AbstractTypeDeclaration> classes 
 					
 	val List<String> dataTypePatterns
@@ -62,6 +64,7 @@ class ComplexityAnalysisJob extends Job {
 	
 	var TransformationJavaMethodsToModularHypergraph javaToModularHypergraph
 	
+	var IProgressMonitor monitor
 	
 	/**
 	 * The constructor scans the selection for files.
@@ -78,19 +81,22 @@ class ComplexityAnalysisJob extends Job {
 	}
 	
 	protected override IStatus run(IProgressMonitor monitor) {
+		this.monitor = monitor
 		// set total number of work units
 		val result = ResultModelProvider.INSTANCE
 		/** construct analysis. */
-		monitor.beginTask("Processing project", 0)
+		this.monitor.beginTask("Processing project", 3)
 				
 		this.javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(project, classes, dataTypePatterns, observedSystemPatterns, monitor)
 		
 		this.javaToModularHypergraph.transform
+		this.monitor.worked(1)
 
 		result.values.add(new NamedValue(project.project.name + " size of observed system", classes.size))
 		result.values.add(new NamedValue(project.project.name + " number of modules", javaToModularHypergraph.modularSystem.modules.size))
 		result.values.add(new NamedValue(project.project.name + " number of nodes",javaToModularHypergraph.modularSystem.nodes.size))
 		result.values.add(new NamedValue(project.project.name + " number of edges",javaToModularHypergraph.modularSystem.edges.size))
+		
 		updateView()
 						
 		/** Preparing different hypergraphs */
@@ -102,18 +108,17 @@ class ComplexityAnalysisJob extends Job {
 		
 		monitor.subTask("Create maximal interconnected graph")
 		transformationMaximalInterconnectedGraph.transform
+		this.monitor.worked(1)
 		monitor.subTask("Create intermodule hyperedges only graph")
 		transformationIntermoduleHyperedgesOnlyGraph.transform
+		this.monitor.worked(1)
 		
 		/** calculating result metrics */
-		monitor.beginTask("Calculating metrics", 1+3*3)
 		// Calculation for S
-		val metrics = new TransformationHypergraphMetrics(monitor)
+		val metrics = new TransformationHypergraphMetrics(monitor, "Calculate system size")
 		metrics.setSystem(javaToModularHypergraph.modularSystem)
-		monitor.subTask("System size")
 		val systemSize = metrics.calculate
-		monitor.worked(1)
-		
+
 		// Calculation for S -> S^#, S^#_i
 		val complexity = calculateComplexity(javaToModularHypergraph.modularSystem, monitor, "Complexity")
 		// Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i
@@ -161,33 +166,20 @@ class ComplexityAnalysisJob extends Job {
 	 * @param input a modular system
 	 */
 	private def calculateComplexity(Hypergraph input, IProgressMonitor monitor, String message) {
-		monitor?.subTask(message + " - S^#")
-		// S^#
+		monitor.beginTask(message + " - S^#", input.nodes.size + 1)
+		/** S^# (hyperedges only graph) */
 		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(input)
 		transformationHyperedgesOnlyGraph.transform
-		monitor?.worked(1)
+		monitor.worked(1)
 		
-		// S^#_i
+		/** S^#_i (hyperedges only graphs for each node graph) */
 		//val transformationConnectedNodeHyperedgesOnlyGraph = 
 		//	new TransformationConnectedNodeHyperedgesOnlyGraph(transformationHyperedgesOnlyGraph.result)
 		
 		//val resultConnectedNodeGraphs = new ArrayList<Hypergraph>() 
 		
-		// var int i = 0
-	
-		var List<Job> jobs = new ArrayList<Job>()
+		//var int i = 0
 		
-		resultConnectedNodeGraphs = new ArrayList<Hypergraph>() 
-		globalHyperEdgesOnlyGraphNodes = transformationHyperedgesOnlyGraph.result.nodes.iterator
-				
-		for (var int j=0;j<8;j++) {
-			val job = new CalculationSubJob("S^#_i " + j, this, transformationHyperedgesOnlyGraph.result)
-			jobs.add(job)
-			job.schedule
-		}
-		
-		jobs.forEach[it.join]
-				
 		//for (Node node : transformationHyperedgesOnlyGraph.result.nodes) {
 		//	monitor?.subTask(message + " - S^#_" + i)
 			
@@ -196,15 +188,23 @@ class ComplexityAnalysisJob extends Job {
 		//	resultConnectedNodeGraphs.add(transformationConnectedNodeHyperedgesOnlyGraph.result)
 		//	i++			
 		//}
-		monitor?.worked(1)
+	
+		var List<Job> jobs = new ArrayList<Job>()
 		
-		val metrics = new TransformationHypergraphMetrics(monitor)
+		resultConnectedNodeGraphs = new ArrayList<Hypergraph>() 
+		globalHyperEdgesOnlyGraphNodes = transformationHyperedgesOnlyGraph.result.nodes.iterator
+				
+		for (var int j=0;j<PARALLEL_TASKS;j++) {
+			val job = new CalculationSubJob("S^#_i " + j, this, transformationHyperedgesOnlyGraph.result)
+			jobs.add(job)
+			job.schedule
+		}
 		
-		metrics.setSystem(transformationHyperedgesOnlyGraph.result)
-		monitor?.subTask(message + " - calculate")
+		jobs.forEach[it.join]
+
+		/** calculate size of S^# and S^#_i */
 		val complexity = calculateComplexity(transformationHyperedgesOnlyGraph.result, resultConnectedNodeGraphs, monitor)
-		monitor?.worked(1)
-		
+				
 		return complexity
 	}
 	
@@ -222,6 +222,7 @@ class ComplexityAnalysisJob extends Job {
 	 * Used for the parallelization. Deliver the result
 	 */
 	synchronized def deliverResult(Hypergraph hypergraph) {
+		this.monitor.worked(1)
 		resultConnectedNodeGraphs.add(hypergraph)
 	}
 	
@@ -244,7 +245,7 @@ class ComplexityAnalysisJob extends Job {
 		globalMetricsSubGraphTotal = hypergraph.nodes.size
 		
 		var List<Job> jobs = new ArrayList<Job>()
-		for (var int j=0;j<8;j++) {
+		for (var int j=0;j<PARALLEL_TASKS;j++) {
 			val job = new MetricsSubJob("Metrics " + j, this)
 			jobs.add(job)
 			job.schedule
@@ -252,7 +253,7 @@ class ComplexityAnalysisJob extends Job {
 		
 		jobs.forEach[it.join]
 		
-		val metrics = new TransformationHypergraphMetrics(monitor)
+		val metrics = new TransformationHypergraphMetrics(monitor, "S^#")
 		/** the rest stays in both versions */
 		metrics.setSystem(hypergraph)
 		complexity -= metrics.calculate
