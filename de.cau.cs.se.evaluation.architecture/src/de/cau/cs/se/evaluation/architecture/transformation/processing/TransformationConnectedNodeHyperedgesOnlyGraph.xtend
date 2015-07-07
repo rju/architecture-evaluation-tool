@@ -48,7 +48,6 @@ class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransformation 
 	 * Find all nodes connected to the start node and create a graph for it.
 	 */
 	override transform() {
-		
 		// find start node
 		val selectedNode = if (hypergraph.nodes.contains(startNode)) startNode else null
 		if (selectedNode != null) {	

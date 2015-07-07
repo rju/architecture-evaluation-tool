@@ -79,8 +79,8 @@ class ActionHandler {
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
-					sb.append(((NamedValue) element.getData()).getName() + ";" + ((NamedValue) element.getData()).getValue());
-					sb.append("\n");
+					final NamedValue data = (NamedValue) (element.getData());
+					sb.append(data.getProjectName() + ";" + data.getPropertyName() + ";" + data.getValue() + "\n");
 				}
 				br.write(sb.toString());
 				br.close();

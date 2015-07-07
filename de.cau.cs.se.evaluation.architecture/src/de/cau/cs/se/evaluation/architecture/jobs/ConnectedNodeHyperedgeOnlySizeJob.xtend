@@ -21,32 +21,40 @@ import de.cau.cs.se.evaluation.architecture.transformation.processing.Transforma
 import org.eclipse.core.runtime.Status
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
+import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphSize
 
-class CalculationSubJob extends Job {
+/**
+ * Determine a connected node hyperedges only graph and calculate
+ * its size.
+ */
+class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 		
-	ComplexityAnalysisJob parent
+	CalculateComplexity parent
 	
 	Hypergraph input
 		
-	new(String name, ComplexityAnalysisJob parent, Hypergraph input) {
+	new(String name, CalculateComplexity parent, Hypergraph input) {
 		super(name)
 		this.parent = parent
 		this.input = input
 	}
 	
 	override protected run(IProgressMonitor monitor) {
-		monitor.beginTask("Processing graphs.",0)
 		var Node node 
 		var int i = 0
+		val transformationConnectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(input)
+		val transformationHypergraphSize = new TransformationHypergraphSize(monitor)
+		
 		while ((node = parent.getNextConnectedNodeTask) != null) {
-			monitor.subTask("task " + i++)
-			// S^#_i
-			val transformationConnectedNodeHyperedgesOnlyGraph = 
-				new TransformationConnectedNodeHyperedgesOnlyGraph(input)
-			
+			monitor.beginTask("Determine S^#_" + i + ")", 0)
+			// S^#_i	
 			transformationConnectedNodeHyperedgesOnlyGraph.node = node
 			transformationConnectedNodeHyperedgesOnlyGraph.transform
-			parent.deliverResult(transformationConnectedNodeHyperedgesOnlyGraph.result)
+			
+			transformationHypergraphSize.name = "Determine Size(S^#_" + i + ")"
+			transformationHypergraphSize.system = transformationConnectedNodeHyperedgesOnlyGraph.result
+			
+			parent.deliverConnectedNodeHyperedgesOnlySizeResult(transformationHypergraphSize.calculate)
 		}
 		
 		monitor.done

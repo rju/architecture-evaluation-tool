@@ -98,14 +98,25 @@ public class AnalysisResultView extends ViewPart {
 
 	private void createColumns() {
 		// create a column for the first name
-		final TableViewerColumn columnName = new TableViewerColumn(this.viewer, SWT.NONE);
-		columnName.getColumn().setWidth(200);
-		columnName.getColumn().setText("Name");
-		columnName.setLabelProvider(new ColumnLabelProvider() {
+		final TableViewerColumn columnProject = new TableViewerColumn(this.viewer, SWT.NONE);
+		columnProject.getColumn().setWidth(200);
+		columnProject.getColumn().setText("Project");
+		columnProject.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
 				final NamedValue value = (NamedValue) element;
-				return value.getName();
+				return value.getProjectName();
+			}
+		});
+
+		final TableViewerColumn columnProperty = new TableViewerColumn(this.viewer, SWT.NONE);
+		columnProperty.getColumn().setWidth(200);
+		columnProperty.getColumn().setText("Property");
+		columnProperty.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(final Object element) {
+				final NamedValue value = (NamedValue) element;
+				return value.getPropertyName();
 			}
 		});
 

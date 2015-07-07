@@ -36,7 +36,6 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	
 	var ModularHypergraph modularSystem
 	val IJavaProject project
-	val IProgressMonitor monitor
 	val List<AbstractTypeDeclaration> classes
 	val List<String> dataTypePatterns
 	val List<String> observedSystemPatterns
@@ -50,7 +49,6 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 */
 	public new(IJavaProject project, List<AbstractTypeDeclaration> classes, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
 		this.project = project
-		this.monitor = monitor
 		this.dataTypePatterns = dataTypePatterns
 		this.observedSystemPatterns = observedSystemPatterns
 		this.classes = classes 

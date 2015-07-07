@@ -28,23 +28,29 @@ import org.eclipse.core.runtime.IProgressMonitor
 import static extension de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper.*
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace
 
-class TransformationHypergraphMetrics {
+/**
+ * Calculate the information size of a hypergraph.
+ */
+class TransformationHypergraphSize {
 	
 	val IProgressMonitor monitor
 	var Hypergraph system
 	
-	val String name
+	var String name
 		
-	new(IProgressMonitor monitor, String name) {
+	new(IProgressMonitor monitor) {
 		this.monitor = monitor
+	}
+	
+	def setName(String name) {
 		this.name = name
 	}
 	
-	public def setSystem(Hypergraph system) {
+	def setSystem(Hypergraph system) {
 		this.system = system
 	}
 	
-	public def double calculate() {
+	def double calculate() {
 		monitor.beginTask(this.name, (system.edges.size + system.nodes.size)*2 + system.nodes.size)
 		val systemGraph = createSystemGraph(system)
 		val table = systemGraph.createRowPatternTable

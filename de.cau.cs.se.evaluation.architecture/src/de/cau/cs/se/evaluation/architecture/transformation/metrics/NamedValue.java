@@ -23,36 +23,36 @@ package de.cau.cs.se.evaluation.architecture.transformation.metrics;
  *
  */
 public class NamedValue {
-	private String name;
-	private double value;
+	private final String projectName;
+	private final String propertyName;
+	private final double value;
 
 	/**
 	 * Create one new name value pair.
 	 *
-	 * @param name
-	 *            the name or label to be displayed in the table
+	 * @param projectName
+	 *            the name to be displayed in the table as project name
+	 * @param propertyName
+	 *            the name to be displayed in the table as property name
 	 * @param value
 	 *            the value associated for this label
 	 */
-	public NamedValue(final String name, final double value) {
-		this.name = name;
+	public NamedValue(final String projectName, final String propertyName, final double value) {
+		this.projectName = projectName;
+		this.propertyName = propertyName;
 		this.value = value;
 	}
 
-	public String getName() {
-		return this.name;
+	public String getProjectName() {
+		return this.projectName;
 	}
 
-	public void setName(final String name) {
-		this.name = name;
+	public String getPropertyName() {
+		return this.propertyName;
 	}
 
 	public double getValue() {
 		return this.value;
-	}
-
-	public void setValue(final double value) {
-		this.value = value;
 	}
 
 }
