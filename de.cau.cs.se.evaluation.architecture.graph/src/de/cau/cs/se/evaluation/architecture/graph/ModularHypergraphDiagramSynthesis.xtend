@@ -73,16 +73,42 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     @Inject extension KPolylineExtensions
     @Inject extension KColorExtensions
     extension KRenderingFactory = KRenderingFactory.eINSTANCE
-		       
+		     
+		     
+	/** changes in visualization */
     private static val VISIBLE_NODES_NAME = "Nodes Visible"
     private static val VISIBLE_NODES_NO = "Modules only"
     private static val VISIBLE_NODES_YES = "Show nodes in modules"
-        
+    
+    /** changes in layout direction */
+    private static val DIRECTION_NAME = "Layout Direction"
+    private static val DIRECTION_UP = "up"
+    private static val DIRECTION_DOWN = "down"
+    private static val DIRECTION_LEFT = "left"
+    private static val DIRECTION_RIGHT = "right"
+    
+    /** changes in edge routing */
+    private static val ROUTING_NAME = "Edge Routing"
+    private static val ROUTING_POLYLINE = "polyline"
+    private static val ROUTING_ORTHOGONAL = "orthogonal"
+    private static val ROUTING_SPLINES = "splines"
+    
+    private static val SPACING_NAME = "Spacing"
+    
     /**
      * The filter option definition that allows users to customize the constructed class diagrams.
      */
     private static val SynthesisOption VISIBLE_NODES = SynthesisOption::createChoiceOption(VISIBLE_NODES_NAME,
        ImmutableList::of(VISIBLE_NODES_YES, VISIBLE_NODES_NO), VISIBLE_NODES_NO)
+       
+    private static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
+       ImmutableList::of(DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT), DIRECTION_LEFT)
+       
+    private static val SynthesisOption ROUTING = SynthesisOption::createChoiceOption(ROUTING_NAME,
+       ImmutableList::of(ROUTING_POLYLINE, ROUTING_ORTHOGONAL, ROUTING_SPLINES), ROUTING_ORTHOGONAL)
+       
+   	private static val SynthesisOption SPACING = SynthesisOption::createRangeOption(SPACING_NAME, 5f, 200f, 50f)
+       
     
     var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
     var Map<Module,KNode> moduleMap = new HashMap<Module,KNode>()
@@ -94,7 +120,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
      * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
      */
     override public getDisplayedSynthesisOptions() {
-        return ImmutableList::of(VISIBLE_NODES)
+        return ImmutableList::of(VISIBLE_NODES, DIRECTION, ROUTING, SPACING)
     }
 
     
@@ -105,21 +131,25 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             // de.cau.cs.kieler.klay.layered.properties.Properties
             it.setLayoutOption(Properties.MERGE_EDGES, true)
             it.setLayoutOption(LayoutOptions.LAYOUT_HIERARCHY, true)
+            it.setLayoutOption(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.klay.layered")	
 
-            it.setLayoutOption(LayoutOptions::SPACING, 75f)
-            it.setLayoutOption(LayoutOptions::DIRECTION, Direction::UP)
-            it.setLayoutOption(LayoutOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
+            it.setLayoutOption(LayoutOptions::SPACING, SPACING.objectValue as Float)
+            it.setLayoutOption(LayoutOptions::DIRECTION, switch(DIRECTION.objectValue) {
+            	case DIRECTION_UP: Direction::UP
+            	case DIRECTION_DOWN: Direction::DOWN
+            	case DIRECTION_LEFT: Direction::LEFT
+            	case DIRECTION_RIGHT: Direction::RIGHT
+            })
+            it.setLayoutOption(LayoutOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
+            	case ROUTING_POLYLINE: EdgeRouting::POLYLINE
+            	case ROUTING_ORTHOGONAL: EdgeRouting::ORTHOGONAL
+            	case ROUTING_SPLINES: EdgeRouting::SPLINES
+            })
             
             if (VISIBLE_NODES.objectValue == VISIBLE_NODES_NO) {
-            	//it.setLayoutOption(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.planarization")
-            	it.setLayoutOption(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.klay.layered")
-                it.setLayoutOption(LayoutOptions::EDGE_ROUTING, EdgeRouting::ORTHOGONAL)
-                it.setLayoutOption(LayoutOptions::DIRECTION, Direction::LEFT)
-	
             	hypergraph.modules.forEach[module | root.children += module.createEmptyModule]
             	hypergraph.modules.forEach[module | module.createCombindEdges(hypergraph)]
             } else {
-            	it.setLayoutOption(LayoutOptions.ALGORITHM, "de.cau.cs.kieler.klay.layered")
         		hypergraph.modules.forEach[module | root.children += module.createModuleWithNodes]
         		hypergraph.edges.forEach[edge | edge.createGraphEdge(hypergraph.nodes, root.children)]    	
             }      
@@ -155,17 +185,33 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		targetModules.forEach[module, count | createAggregatedEdge(sourceModule, module, count) ]
 	}
 	
-	private def createAggregatedEdge(Module sourceModule, Module targetModule, Integer width) {
+	private def createAggregatedEdge(Module sourceModule, Module targetModule, Integer size) {
 		val sourceNode = moduleMap.get(sourceModule)
 		val targetNode = moduleMap.get(targetModule)
 		
+		val lineWidth = if (size <= 1)
+    		1
+    	else if (size <= 3)
+    		2
+    	else if (size <= 7)
+    		3
+    	else if (size <= 10)
+    		4
+    	else if (size <= 15)
+    		5
+    	else if (size <= 20)
+    		6
+    	else
+    		7
+    	val portSize = lineWidth + 2
+		
 		val sourcePort = createPort() => [
-   			it.setPortSize(2,2)
+   			it.setPortSize(portSize,portSize)
     		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
     	]
     	
     	val targetPort = createPort() => [
-   			it.setPortSize(2,2)
+   			it.setPortSize(portSize,portSize)
     		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
     	]
 		
@@ -178,7 +224,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             it.target = targetNode
             it.targetPort = targetPort
             it.addPolyline => [
-            	it.lineWidth = width
+            	it.lineWidth = lineWidth
             	it.lineStyle = LineStyle.SOLID
             ]
 		]
