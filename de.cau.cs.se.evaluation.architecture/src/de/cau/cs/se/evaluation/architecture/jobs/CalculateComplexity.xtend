@@ -37,7 +37,8 @@ class CalculateComplexity {
 	def calculate(Hypergraph input, String message) {
 		monitor.beginTask(message + " - S^#", input.nodes.size + 1)
 		/** S^# (hyperedges only graph) */
-		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(input)
+		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
+		transformationHyperedgesOnlyGraph.input = input
 		transformationHyperedgesOnlyGraph.transform
 		monitor.worked(1)
 		
@@ -60,9 +61,9 @@ class CalculateComplexity {
 		/** calculate size of S^# and S^#_i */
 		val size = new TransformationHypergraphSize(monitor)
 		size.name = "S^#"
-		size.system = transformationHyperedgesOnlyGraph.result
+		size.input = transformationHyperedgesOnlyGraph.result
 		
-		this.complexity -= size.calculate
+		this.complexity -= size.transform
 				
 		return this.complexity
 	}

@@ -42,19 +42,18 @@ class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 	override protected run(IProgressMonitor monitor) {
 		var Node node 
 		var int i = 0
-		val transformationConnectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(input)
+		val transformationConnectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(monitor)
+		transformationConnectedNodeHyperedgesOnlyGraph.input = input
 		val transformationHypergraphSize = new TransformationHypergraphSize(monitor)
 		
 		while ((node = parent.getNextConnectedNodeTask) != null) {
 			monitor.beginTask("Determine S^#_" + i + ")", 0)
 			// S^#_i	
 			transformationConnectedNodeHyperedgesOnlyGraph.node = node
-			transformationConnectedNodeHyperedgesOnlyGraph.transform
-			
 			transformationHypergraphSize.name = "Determine Size(S^#_" + i + ")"
-			transformationHypergraphSize.system = transformationConnectedNodeHyperedgesOnlyGraph.result
+			transformationHypergraphSize.input = transformationConnectedNodeHyperedgesOnlyGraph.transform
 			
-			parent.deliverConnectedNodeHyperedgesOnlySizeResult(transformationHypergraphSize.calculate)
+			parent.deliverConnectedNodeHyperedgesOnlySizeResult(transformationHypergraphSize.transform)
 		}
 		
 		monitor.done

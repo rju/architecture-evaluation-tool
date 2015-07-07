@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
 
 /**
  * Handles Actions for Buttons in AnalysisResultView.

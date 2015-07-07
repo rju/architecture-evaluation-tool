@@ -41,6 +41,7 @@ import static extension de.cau.cs.se.evaluation.architecture.transformation.Name
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.evaluation.architecture.transformation.java.JavaHypergraphQueryHelper.*
 import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+import org.eclipse.jdt.core.dom.ContinueStatement
 
 class JavaASTEvaluation {
 	
@@ -130,7 +131,7 @@ class JavaASTEvaluation {
     			statement.expression.evaluate(node, graph, dataTypePatterns)
     			statement.body.evaluateStatement(graph, dataTypePatterns, node, clazz, method)
     		}
-			BreakStatement, EmptyStatement: return
+			BreakStatement, ContinueStatement, EmptyStatement: return
     		default:
     			throw new UnsupportedOperationException("Expressions of type " + statement.class + " are not supported.")
 		}
@@ -191,7 +192,7 @@ class JavaASTEvaluation {
 		if (!graph.edges.exists[it.name.equals(edge.name)]) {
 			var targetNode = graph.nodes.findNodeForConstructorBinding(targetBinding)
 			if (targetNode == null) {
-				System.out.println("Missing source node: This is an error!! " + targetBinding.determineFullyQualifiedName)
+				throw new UnsupportedOperationException("Missing source node: This is an error!! " + targetBinding.determineFullyQualifiedName)
 			} else {
 				graph.edges.add(edge)
 				targetNode.edges.add(edge)

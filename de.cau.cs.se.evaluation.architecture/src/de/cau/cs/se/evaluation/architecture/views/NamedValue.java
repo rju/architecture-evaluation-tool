@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package de.cau.cs.se.evaluation.architecture.transformation.metrics;
+package de.cau.cs.se.evaluation.architecture.views;
 
 /**
  * Data type class used to store name value pairs in a list. This is

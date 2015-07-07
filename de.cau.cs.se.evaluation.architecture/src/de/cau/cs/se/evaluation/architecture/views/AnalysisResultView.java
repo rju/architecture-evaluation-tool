@@ -33,8 +33,6 @@ import org.eclipse.ui.part.ViewPart;
 
 import de.cau.cs.se.evaluation.architecture.Activator;
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue;
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider;
 
 /**
  * The Main analysis result view class.

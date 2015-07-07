@@ -16,8 +16,8 @@
 package de.cau.cs.se.evaluation.architecture.jobs
 
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.NamedValue
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.ResultModelProvider
+import de.cau.cs.se.evaluation.architecture.views.NamedValue
+import de.cau.cs.se.evaluation.architecture.views.ResultModelProvider
 import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphSize
 import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationIntermoduleHyperedgesOnlyGraph
 import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationMaximalInterconnectedGraph
@@ -61,24 +61,27 @@ class ComplexityAnalysisJob extends Job {
 		/** construct analysis. */
 		monitor.beginTask("Processing project", 3)
 				
-		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(project, classes, dataTypePatterns, observedSystemPatterns, monitor)
+		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(project, dataTypePatterns, observedSystemPatterns, monitor)
+		javaToModularHypergraph.input = this.classes
 		javaToModularHypergraph.transform
 		
 		monitor.worked(1)
 
-		result.values.add(new NamedValue(project.project.name, "size of observed system", classes.size))
-		result.values.add(new NamedValue(project.project.name, "number of modules", javaToModularHypergraph.modularSystem.modules.size))
-		result.values.add(new NamedValue(project.project.name, "number of nodes", javaToModularHypergraph.modularSystem.nodes.size))
-		result.values.add(new NamedValue(project.project.name, "number of edges", javaToModularHypergraph.modularSystem.edges.size))
+		result.values.add(new NamedValue(project.project.name, "size of observed system", this.classes.size))
+		result.values.add(new NamedValue(project.project.name, "number of modules", javaToModularHypergraph.result.modules.size))
+		result.values.add(new NamedValue(project.project.name, "number of nodes", javaToModularHypergraph.result.nodes.size))
+		result.values.add(new NamedValue(project.project.name, "number of edges", javaToModularHypergraph.result.edges.size))
 		
 		updateView(javaToModularHypergraph)
 						
 		/** Preparing different hypergraphs */
 		
 		// Transformation for MS^(n)
-		val transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(javaToModularHypergraph.modularSystem)
+		val transformationMaximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
+		transformationMaximalInterconnectedGraph.input = javaToModularHypergraph.result
 		// Transformation for MS^*
-		val transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(javaToModularHypergraph.modularSystem)
+		val transformationIntermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
+		transformationIntermoduleHyperedgesOnlyGraph.input = javaToModularHypergraph.result
 		
 		monitor.subTask("Create maximal interconnected graph")
 		transformationMaximalInterconnectedGraph.transform
@@ -92,14 +95,14 @@ class ComplexityAnalysisJob extends Job {
 		// Calculation for S
 		val transformationHypergraphSize = new TransformationHypergraphSize(monitor)
 		transformationHypergraphSize.name = "Calculate system size"
-		transformationHypergraphSize.system = javaToModularHypergraph.modularSystem
-		val systemSize = transformationHypergraphSize.calculate
+		transformationHypergraphSize.input = javaToModularHypergraph.result
+		val systemSize = transformationHypergraphSize.transform
 		
 		/** Calculate graph complexities */
 		val calculateComplexity = new CalculateComplexity(monitor)
 
 		// Calculation for S -> S^#, S^#_i
-		val complexity = calculateComplexity.calculate(javaToModularHypergraph.modularSystem, "Primary graph complexity")
+		val complexity = calculateComplexity.calculate(javaToModularHypergraph.result, "Primary graph complexity")
 		// Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i
 		val complexityMaximalInterconnected = calculateComplexity.calculate(transformationMaximalInterconnectedGraph.result, 
 			"Maximal interconnected graph complexity"
@@ -125,7 +128,7 @@ class ComplexityAnalysisJob extends Job {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					(part as AnalysisResultView).setGraph(javaToModularHypergraph.modularSystem)
+					(part as AnalysisResultView).setGraph(javaToModularHypergraph.result)
 					(part as AnalysisResultView).setProject(project)
 					(part as AnalysisResultView).update()
 	           } catch (PartInitException e) {

@@ -49,6 +49,7 @@ class JavaASTExpressionEvaluationHelper {
 			}
 		} else {
 			// TODO this should not happen when the Java model is complete. Maybe issue a warning.
+			throw new UnsupportedOperationException("Field binding could not be resolved. Java model incomplete.")
 		}
 	}
    	
@@ -213,9 +214,14 @@ class JavaASTExpressionEvaluationHelper {
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge == null) {
-		    			throw new UnsupportedOperationException("Missing edge for a data type property. Prefix " + 
-		    				prefix.class + " field " + fieldAccess.resolveFieldBinding + " in processFieldAccess"
-		    			)
+		    			// TODO how can this happen?
+		    			System.out.println("Missing edge for a data type property. " + 
+		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
+		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
+		    			//" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
+		    			//" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
+		    			//)
 		    		} else {
 			    		sourceNode.edges.add(edge)
 			    	}
@@ -229,7 +235,7 @@ class JavaASTExpressionEvaluationHelper {
 	    	}
 			// TODO other prefixes might contain method calls add evaluate here accordingly
 	    	default:
-	    		throw new UnsupportedOperationException("Prefix type not supported "+ prefix.class + " in processFieldAccess")
+	    		throw new UnsupportedOperationException("Prefix type not supported " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
 	    }    	
     }
        	

@@ -27,32 +27,26 @@ import org.eclipse.core.runtime.IProgressMonitor
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper.*
 import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace
+import de.cau.cs.se.evaluation.architecture.transformation.AbstractTransformation
 
 /**
  * Calculate the information size of a hypergraph.
  */
-class TransformationHypergraphSize {
-	
-	val IProgressMonitor monitor
-	var Hypergraph system
-	
+class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Double> {
+
 	var String name
-		
-	new(IProgressMonitor monitor) {
-		this.monitor = monitor
-	}
 	
+	new(IProgressMonitor monitor) {
+		super(monitor)
+	}
+		
 	def setName(String name) {
 		this.name = name
 	}
-	
-	def setSystem(Hypergraph system) {
-		this.system = system
-	}
-	
-	def double calculate() {
-		monitor.beginTask(this.name, (system.edges.size + system.nodes.size)*2 + system.nodes.size)
-		val systemGraph = createSystemGraph(system)
+
+	override transform() {
+		monitor.beginTask(this.name, (this.input.edges.size + this.input.nodes.size)*2 + this.input.nodes.size)
+		val systemGraph = createSystemGraph(this.input)
 		val table = systemGraph.createRowPatternTable
 					
 		val result = calculateSize(systemGraph, table)
@@ -107,10 +101,10 @@ class TransformationHypergraphSize {
 	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph) {
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
 		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
-		monitor.worked(system.edges.size)
+		monitor.worked(this.input.edges.size)
 		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
 		patternTable.compactPatternTable
-		monitor.worked(system.nodes.size)
+		monitor.worked(this.input.nodes.size)
 				
 		return patternTable	
 	}

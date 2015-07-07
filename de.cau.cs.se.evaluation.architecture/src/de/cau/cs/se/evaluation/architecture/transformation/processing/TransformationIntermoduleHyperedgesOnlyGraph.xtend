@@ -15,7 +15,6 @@
  ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.transformation.processing
 
-import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
@@ -24,59 +23,56 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.Module
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace
+import de.cau.cs.se.evaluation.architecture.transformation.AbstractTransformation
+import org.eclipse.core.runtime.IProgressMonitor
 
-class TransformationIntermoduleHyperedgesOnlyGraph implements ITransformation {
-	
-	val ModularHypergraph hypergraph
-	var ModularHypergraph resultHypergraph
-	
-	new (ModularHypergraph hypergraph) {
-		this.hypergraph = hypergraph
+/**
+ * Create a intermodule only hypergraph.
+ */
+class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
+
+	new(IProgressMonitor monitor) {
+		super(monitor)
 	}
 	
-	def ModularHypergraph getResult() {
-		return this.resultHypergraph
-	}
-	
-	/**
-	 * Create a intermodule only hypergraph.
-	 */
 	override transform() {
-		resultHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph
+		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		// detect all edges crossing module boundaries
-		val interModuleEdges = hypergraph.edges.filter[edge | edge.isIntermoduleEdge(hypergraph.nodes, hypergraph.modules)]
+		val interModuleEdges = this.input.edges.filter[edge | edge.isIntermoduleEdge(this.input.nodes, this.input.modules)]
 		// copy those edges to new graph
 		// copy all nodes connected to those edges
 		interModuleEdges.forEach[edge | 
 			val derivedEdge = TransformationHelper.deriveEdge(edge)
-			resultHypergraph.edges.add(derivedEdge)
-			hypergraph.nodes.filter[node | node.edges.contains(edge)].forEach[node |
-				var derivedNode = resultHypergraph.nodes.findFirst[derivedNode | 
+			this.result.edges.add(derivedEdge)
+			this.input.nodes.filter[node | node.edges.contains(edge)].forEach[node |
+				var derivedNode = this.result.nodes.findFirst[derivedNode | 
 					(derivedNode.derivedFrom as NodeTrace).node == node
 				]
 				if (derivedNode == null) {
 					derivedNode = TransformationHelper.deriveNode(node)
-					resultHypergraph.nodes.add(derivedNode)
+					this.result.nodes.add(derivedNode)
 				}
 				derivedNode.edges.add(derivedEdge)
 			]
 		]
 		// copy modules
-		hypergraph.modules.forEach[module |
+		this.input.modules.forEach[module |
 			val derivedModule = TransformationHelper.deriveModule(module)
 			module.nodes.forEach[node | 
-				val derivedNode = resultHypergraph.nodes.findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node]
+				val derivedNode = this.result.nodes.findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node]
 				if (derivedNode != null) {
 					derivedModule.nodes.add(derivedNode)
 				}
 			]
 		]
+		
+		return this.result
 	}
 	
 	/**
 	 * Check if the edge is an intermodule edge.
 	 */
-	def Boolean isIntermoduleEdge(Edge edge, EList<Node> nodes, EList<Module> modules) {
+	private def Boolean isIntermoduleEdge(Edge edge, EList<Node> nodes, EList<Module> modules) {
 		val connectedNodes = nodes.filter[node | node.edges.contains(edge)]
 		val involvedModules = modules.filter[module | module.nodes.intersects(connectedNodes)]
 		return involvedModules.size > 1

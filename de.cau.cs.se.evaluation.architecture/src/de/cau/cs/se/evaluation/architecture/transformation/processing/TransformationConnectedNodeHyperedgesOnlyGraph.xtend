@@ -15,7 +15,6 @@
  ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.transformation.processing
 
-import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphFactory
@@ -24,24 +23,23 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.EdgeTrace
 import de.cau.cs.se.evaluation.architecture.hypergraph.Edge
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace
+import org.eclipse.core.runtime.IProgressMonitor
+import de.cau.cs.se.evaluation.architecture.transformation.AbstractTransformation
 
-class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransformation {
+/**
+ * Create a hypergraph for a given hypergraph which contains only
+ * those nodes which are connected by edges with the startNode. 
+ */
+class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformation<Hypergraph, Hypergraph> {
+		
+	var Node startNode
 	
-	val Hypergraph hypergraph
-	var Hypergraph resultHypergraph = null
-	
-	Node startNode
-	
-	new (Hypergraph hypergraph) {
-		this.hypergraph = hypergraph
+	new(IProgressMonitor monitor) {
+		super(monitor)
 	}
-	
+			
 	def void setNode(Node startNode) {
 		this.startNode = startNode
-	}
-	
-	def getResult() {
-		return this.resultHypergraph
 	}
 	
 	/**
@@ -49,18 +47,21 @@ class TransformationConnectedNodeHyperedgesOnlyGraph implements ITransformation 
 	 */
 	override transform() {
 		// find start node
-		val selectedNode = if (hypergraph.nodes.contains(startNode)) startNode else null
+		val selectedNode = if (this.input.nodes.contains(startNode)) startNode else null
 		if (selectedNode != null) {	
-			resultHypergraph = HypergraphFactory.eINSTANCE.createHypergraph
-			resultHypergraph.nodes.add(TransformationHelper.deriveNode(selectedNode))
+			this.result = HypergraphFactory.eINSTANCE.createHypergraph
+			this.result.nodes.add(TransformationHelper.deriveNode(selectedNode))
 			// find all connected edges and copy them
-			selectedNode.edges.forEach[edge | resultHypergraph.edges.add(TransformationHelper.deriveEdge(edge))]
+			selectedNode.edges.forEach[edge | this.result.edges.add(TransformationHelper.deriveEdge(edge))]
 			// find all connected nodes
-			resultHypergraph.edges.forEach[edge | createAndLinkNodesConnectedToEdge(edge, hypergraph.nodes, resultHypergraph.nodes)]
-		} 
+			this.result.edges.forEach[edge | createAndLinkNodesConnectedToEdge(edge, this.input.nodes, this.result.nodes)]
+			
+			return this.result
+		} else
+			null
 	}
 	
-	def createAndLinkNodesConnectedToEdge(Edge edge, EList<Node> originalNodes, EList<Node> nodes) {
+	private def createAndLinkNodesConnectedToEdge(Edge edge, EList<Node> originalNodes, EList<Node> nodes) {
 		val originalEdge = (edge.derivedFrom as EdgeTrace).edge
 		for (Node originalNode : originalNodes) {
 			if (originalNode.edges.contains(originalEdge)) {

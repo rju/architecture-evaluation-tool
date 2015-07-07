@@ -15,10 +15,30 @@
  ***************************************************************************/
 package de.cau.cs.se.evaluation.architecture.transformation
 
-interface ITransformation {
+import org.eclipse.core.runtime.IProgressMonitor
+
+/**
+ * Abstract transformation class also defining the general interface
+ * of transformations.
+ */
+abstract class AbstractTransformation<S,T> {
 	
-	/**
-	 * Trigger graph transformation.
-	 */
-	def void transform()
+	val protected IProgressMonitor monitor
+	var protected T result
+	var protected S input
+		
+	new(IProgressMonitor monitor) {
+		this.monitor = monitor
+	}
+	
+	def T transform()
+	
+	def T getResult() {
+		this.result
+	}
+	
+	def void setInput(S input) {
+		this.input = input
+	}
+	
 }

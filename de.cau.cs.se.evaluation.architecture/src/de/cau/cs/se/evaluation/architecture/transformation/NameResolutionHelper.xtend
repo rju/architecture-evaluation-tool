@@ -58,9 +58,18 @@ class NameResolutionHelper {
 	 * Fully qualified name of a method based on the method binding.
 	 */
 	def static determineFullyQualifiedName(IMethodBinding binding) {
-		if (binding.declaringClass.anonymous && binding.constructor)
-			return binding.declaringClass.determineFullyQualifiedName + "." + binding.declaringClass.interfaces.get(0).name
-		else
+		if (binding.declaringClass.anonymous && binding.constructor) {
+			val typeName = if (binding.declaringClass.interfaces != null) {
+				if (binding.declaringClass.interfaces.size > 0) {
+					"." + binding.declaringClass.interfaces.get(0).name
+				} else
+					""
+			} else if (binding.declaringClass.superclass != null)
+				"." + binding.declaringClass.superclass
+			else
+				""
+			return binding.declaringClass.determineFullyQualifiedName + "." + typeName
+		} else
 			return binding.declaringClass.determineFullyQualifiedName + "." + binding.name
 	}
 	
@@ -171,7 +180,16 @@ class NameResolutionHelper {
 	 */
 	def static String determineFullyQualifiedName(ITypeBinding clazz) {
 		if (clazz.anonymous) {
-			return clazz.declaringClass.determineFullyQualifiedName + "." + clazz.interfaces.get(0).name + "$" + clazz.key
+			val typeName = if (clazz.interfaces != null) {
+				if (clazz.interfaces.size > 0) {
+					"." + clazz.interfaces.get(0).name
+				} else
+					""
+			} else if (clazz.superclass != null)
+				"." + clazz.superclass
+			else
+				""
+			return clazz.declaringClass.determineFullyQualifiedName + typeName + "$" + clazz.key
 		} else if (clazz.primitive) {
 			return clazz.binaryName
 		} else if (clazz.array) {

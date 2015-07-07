@@ -6,7 +6,6 @@ import de.cau.cs.se.evaluation.architecture.hypergraph.MethodTrace
 import de.cau.cs.se.evaluation.architecture.hypergraph.ModularHypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import de.cau.cs.se.evaluation.architecture.hypergraph.TypeTrace
-import de.cau.cs.se.evaluation.architecture.transformation.ITransformation
 import java.util.List
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.emf.common.util.EList
@@ -31,12 +30,11 @@ import static de.cau.cs.se.evaluation.architecture.transformation.java.JavaHyper
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import de.cau.cs.se.evaluation.architecture.hypergraph.EModuleKind
+import de.cau.cs.se.evaluation.architecture.transformation.AbstractTransformation
 
-class TransformationJavaMethodsToModularHypergraph implements ITransformation {
+class TransformationJavaMethodsToModularHypergraph extends AbstractTransformation<List<AbstractTypeDeclaration>,ModularHypergraph> {
 	
-	var ModularHypergraph modularSystem
 	val IJavaProject project
-	val List<AbstractTypeDeclaration> classes
 	val List<String> dataTypePatterns
 	val List<String> observedSystemPatterns
 		
@@ -47,42 +45,37 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(IJavaProject project, List<AbstractTypeDeclaration> classes, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
+	public new(IJavaProject project, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
+		super(monitor)
 		this.project = project
 		this.dataTypePatterns = dataTypePatterns
-		this.observedSystemPatterns = observedSystemPatterns
-		this.classes = classes 
+		this.observedSystemPatterns = observedSystemPatterns 
 	}
-	
-	/**
-	 * Return the generated result.
-	 */
-	def ModularHypergraph getModularSystem() {
-		return modularSystem
-	}
-	
+		
 	/**
 	 * Main transformation routine.
 	 */
 	override transform() {
-		modularSystem = HypergraphFactory.eINSTANCE.createModularHypergraph
+		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		// create modules for all classes
-		classes.forEach[clazz | modularSystem.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
+		input.forEach[clazz | result.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
 
 		// define edges for all internal variables of a class
-		classes.forEach[clazz | modularSystem.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
+		input.forEach[clazz | result.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
 
 		// find all method declarations and create nodes for it, grouped by class as modules
-		classes.forEach[clazz | modularSystem.nodes.createNodesForMethods(clazz)]
-		classes.filter[clazz | clazz.hasImplicitConstructor].
+		input.forEach[clazz | result.nodes.createNodesForMethods(clazz)]
+		input.filter[clazz | clazz.hasImplicitConstructor].
 			forEach[clazz |
 				val node = createNodeForImplicitConstructor(clazz.resolveBinding)
-				val module = modularSystem.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(clazz.resolveBinding)]
+				val module = result.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(clazz.resolveBinding)]
 				module.nodes.add(node) 
-				modularSystem.nodes.add(node)
+				result.nodes.add(node)
 			]
 		
-		classes.forEach[clazz | resolveEdges(modularSystem, dataTypePatterns, clazz)]
+		input.forEach[clazz | resolveEdges(result, dataTypePatterns, clazz)]
+		
+		return result
 	}
 	
 	/**
@@ -123,7 +116,6 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 		
 		return false
 	}
-	
 
 	/**
 	 * Create all nodes for a class.
@@ -133,7 +125,7 @@ class TransformationJavaMethodsToModularHypergraph implements ITransformation {
 	 */
 	private def void createNodesForMethods(EList<Node> nodes, AbstractTypeDeclaration type) {
 		if (type instanceof TypeDeclaration) {
-			val module = modularSystem.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(type.resolveBinding)]
+			val module = result.modules.findFirst[((it.derivedFrom as TypeTrace).type as ITypeBinding).isSubTypeCompatible(type.resolveBinding)]
 			type.methods.forEach[method |
 				val node = createNodeForMethod(method.resolveBinding)
 				nodes.add(node)
