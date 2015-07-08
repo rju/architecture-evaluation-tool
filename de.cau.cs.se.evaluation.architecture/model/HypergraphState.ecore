@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="state" nsURI="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
+    nsPrefix="state">
+  <eClassifiers xsi:type="ecore:EClass" name="StateModel">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subsystems" upperBound="-1"
+        eType="#//SystemSetup" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="mainsystem" lowerBound="1"
+        eType="#//SystemSetup" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SystemSetup">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rowPatternTable" lowerBound="1"
+        eType="#//RowPatternTable" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="system" lowerBound="1"
+        eType="ecore:EClass Hypergraph.ecore#//Hypergraph" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="systemGraph" lowerBound="1"
+        eType="ecore:EClass Hypergraph.ecore#//Hypergraph" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RowPatternTable">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="edges" upperBound="-1"
+        eType="ecore:EClass Hypergraph.ecore#//Edge" eKeys="Hypergraph.ecore#//NamedElement/name"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="patterns" upperBound="-1"
+        eType="#//RowPattern" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RowPattern">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nodes" lowerBound="1" upperBound="-1"
+        eType="ecore:EClass Hypergraph.ecore#//Node"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pattern" unique="false"
+        upperBound="-1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+</ecore:EPackage>

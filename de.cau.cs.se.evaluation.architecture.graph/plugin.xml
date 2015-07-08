@@ -17,7 +17,7 @@
    </category>
    <command
          categoryId="de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagrams"
-         defaultHandler="de.cau.cs.se.evaluation.architecture.graph.OpenDiagramHandler"
+         defaultHandler="de.cau.cs.se.software.evaluation.graph.OpenDiagramHandler"
          description="Primitive helper command that opens KLighD-based ModularHypergraph diagrams."
          id="de.cau.cs.se.evaluation.architecture.graph.openModularHypergraphDiagram"
          name="Open ModularHypergraph diagram">

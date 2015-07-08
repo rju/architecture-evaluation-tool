@@ -12,7 +12,7 @@
             name="Analysis Result View"
             icon="icons/sample.gif"
             category="de.cau.cs.se.evaluation.architecture"
-            class="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView"
+            class="de.cau.cs.se.software.evaluation.views.AnalysisResultView"
             id="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView">
       </view>
    </extension>
@@ -38,7 +38,7 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="de.cau.cs.se.evaluation.architecture.commands.AnalysisComplexityHandler"
+            defaultHandler="de.cau.cs.se.software.evaluation.commands.AnalysisComplexityHandler"
             id="de.cau.cs.se.evaluation.architecture.commands.analysis"
             name="Analysis Complexity">
       </command>
@@ -86,8 +86,16 @@
       <!-- @generated Hypergraph -->
       <package
             uri="http://evaluation.se.cs.cau.de/hypergraph"
-            class="de.cau.cs.se.evaluation.architecture.hypergraph.HypergraphPackage"
+            class="de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage"
             genModel="model/Hypergraph.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated HypergraphState -->
+      <package
+            uri="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
+            class="de.cau.cs.se.software.evaluation.state.StatePackage"
+            genModel="model/HypergraphState.genmodel"/>
    </extension>
 
 </plugin>

@@ -1,22 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="de.cau.cs.se.evaluation.architecture/model-gen/"
-    modelPluginID="architecture" modelName="Hypergraph" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="de.cau.cs.se.software.evaluation/model-gen/" modelPluginID="de.cau.cs.se.software.evaluation"
+    modelName="Hypergraph" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="5.0" copyrightFields="false"
     operationReflection="true" importOrganizing="true">
   <foreignModel>Hypergraph.ecore</foreignModel>
-  <genPackages prefix="Hypergraph" basePackage="de.cau.cs.se.evaluation.architecture"
+  <genPackages prefix="Hypergraph" basePackage="de.cau.cs.se.software.evaluation"
       disposableProviderFactory="true" ecorePackage="Hypergraph.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Hypergraph.ecore#//EModuleKind">
+      <genEnumLiterals ecoreEnumLiteral="Hypergraph.ecore#//EModuleKind/SYSTEM"/>
+      <genEnumLiterals ecoreEnumLiteral="Hypergraph.ecore#//EModuleKind/FRAMEWORK"/>
+      <genEnumLiterals ecoreEnumLiteral="Hypergraph.ecore#//EModuleKind/ANONYMOUS"/>
+      <genEnumLiterals ecoreEnumLiteral="Hypergraph.ecore#//EModuleKind/INTERFACE"/>
+    </genEnums>
     <genClasses ecoreClass="Hypergraph.ecore#//Hypergraph">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Hypergraph/nodes"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Hypergraph/edges"/>
     </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//ModularHypergraph">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//ModularHypergraph/modules"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//Module">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Module/nodes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Module/derivedFrom"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//Module/kind"/>
+    </genClasses>
     <genClasses ecoreClass="Hypergraph.ecore#//Node">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Node/edges"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Node/derivedFrom"/>
     </genClasses>
-    <genClasses ecoreClass="Hypergraph.ecore#//Edge"/>
+    <genClasses ecoreClass="Hypergraph.ecore#//Edge">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//Edge/derivedFrom"/>
+    </genClasses>
     <genClasses ecoreClass="Hypergraph.ecore#//NamedElement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//NamedElement/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//NodeTrace">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//NodeTrace/node"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//EdgeTrace">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//EdgeTrace/edge"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//GenericTrace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//GenericTrace/resourceId"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//NodeReference"/>
+    <genClasses ecoreClass="Hypergraph.ecore#//EdgeReference"/>
+    <genClasses ecoreClass="Hypergraph.ecore#//ModuleTrace">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Hypergraph.ecore#//ModuleTrace/module"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//ModuleReference"/>
+    <genClasses ecoreClass="Hypergraph.ecore#//TypeTrace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//TypeTrace/type"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//FieldTrace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//FieldTrace/field"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//MethodTrace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//MethodTrace/method"/>
+    </genClasses>
+    <genClasses ecoreClass="Hypergraph.ecore#//CallerCalleeTrace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//CallerCalleeTrace/caller"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Hypergraph.ecore#//CallerCalleeTrace/callee"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
