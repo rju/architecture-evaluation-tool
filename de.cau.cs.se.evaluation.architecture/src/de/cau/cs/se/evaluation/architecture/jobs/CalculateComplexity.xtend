@@ -38,13 +38,13 @@ class CalculateComplexity {
 		this.monitor.beginTask(message, input.nodes.size + 1)
 		
 		/** S^# (hyperedges only graph) */
-		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
-		transformationHyperedgesOnlyGraph.input = input
-		transformationHyperedgesOnlyGraph.transform
+		val hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
+		hyperedgesOnlyGraph.input = input
+		hyperedgesOnlyGraph.transform
 		this.monitor.worked(1)
 		
 		/** S^#_i (hyperedges only graphs for each node graph) */	
-		globalHyperEdgesOnlyGraphNodes = transformationHyperedgesOnlyGraph.result.nodes.iterator
+		globalHyperEdgesOnlyGraphNodes = hyperedgesOnlyGraph.result.nodes.iterator
 		
 		complexity = 0
 		
@@ -52,19 +52,21 @@ class CalculateComplexity {
 		
 		/** construct S^#_i and calculate the size of S^#_i */
 		for (var int j=0;j<PARALLEL_TASKS;j++) {
-			val job = new ConnectedNodeHyperedgeOnlySizeJob("S^#_i " + j, this, transformationHyperedgesOnlyGraph.result)
+			val job = new ConnectedNodeHyperedgeOnlySizeJob("S^#_i " + j, this, hyperedgesOnlyGraph.result)
 			jobs.add(job)
 			job.schedule
 		}
 		
-		jobs.forEach[it.join]
-
 		/** calculate size of S^# and S^#_i */
 		val size = new TransformationHypergraphSize(monitor)
-		size.name = "S^#"
-		size.input = transformationHyperedgesOnlyGraph.result
+		size.name = "Determine Size(S^#)"
+		size.input = hyperedgesOnlyGraph.result
+		size.transform
 		
-		this.complexity -= size.transform
+		/** wait for subtasks. */
+		jobs.forEach[it.join]
+
+		this.complexity -= size.result
 				
 		return this.complexity
 	}
