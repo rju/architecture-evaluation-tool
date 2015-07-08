@@ -2,13 +2,13 @@ package de.cau.cs.se.evaluation.architecture.jobs
 
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
-import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationHypergraphSize
 import java.util.Iterator
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
 import java.util.List
 import org.eclipse.core.runtime.jobs.Job
 import java.util.ArrayList
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphSize
 
 class CalculateComplexity {
 	

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package de.cau.cs.se.evaluation.architecture.transformation.metrics
+package de.cau.cs.se.evaluation.architecture.transformation.metric
 
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.state.StateFactory

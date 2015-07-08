@@ -17,11 +17,11 @@ package de.cau.cs.se.evaluation.architecture.jobs
 
 import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.core.runtime.IProgressMonitor
-import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationConnectedNodeHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationConnectedNodeHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationHypergraphSize
 import org.eclipse.core.runtime.Status
 import de.cau.cs.se.evaluation.architecture.hypergraph.Hypergraph
 import de.cau.cs.se.evaluation.architecture.hypergraph.Node
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphSize
 
 /**
  * Determine a connected node hyperedges only graph and calculate

@@ -18,9 +18,9 @@ package de.cau.cs.se.evaluation.architecture.jobs
 import de.cau.cs.se.evaluation.architecture.transformation.java.TransformationJavaMethodsToModularHypergraph
 import de.cau.cs.se.evaluation.architecture.views.NamedValue
 import de.cau.cs.se.evaluation.architecture.views.ResultModelProvider
-import de.cau.cs.se.evaluation.architecture.transformation.metrics.TransformationHypergraphSize
-import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationIntermoduleHyperedgesOnlyGraph
-import de.cau.cs.se.evaluation.architecture.transformation.processing.TransformationMaximalInterconnectedGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationHypergraphSize
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph
+import de.cau.cs.se.evaluation.architecture.transformation.metric.TransformationMaximalInterconnectedGraph
 import de.cau.cs.se.evaluation.architecture.views.AnalysisResultView
 import java.util.List
 import org.eclipse.core.runtime.IProgressMonitor
