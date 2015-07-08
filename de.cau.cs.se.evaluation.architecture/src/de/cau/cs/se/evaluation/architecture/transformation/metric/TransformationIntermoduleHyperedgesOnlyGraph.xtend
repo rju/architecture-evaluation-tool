@@ -25,6 +25,8 @@ import de.cau.cs.se.evaluation.architecture.transformation.TransformationHelper
 import de.cau.cs.se.evaluation.architecture.hypergraph.NodeTrace
 import de.cau.cs.se.evaluation.architecture.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
+import java.util.HashMap
+import java.util.Map
 
 /**
  * Create a intermodule only hypergraph.
@@ -44,9 +46,13 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		/** detect all edges crossing module boundaries */
+		val moduleNodeMap = new HashMap<Node,Module>()
+		this.input.modules.forEach[module |
+			module.nodes.forEach[moduleNodeMap.put(it, module)]
+		]
 		val interModuleEdges = this.input.edges.filter[edge | 
 			monitor.worked(this.input.nodes.size + this.input.modules.size)
-			edge.isIntermoduleEdge(this.input.nodes, this.input.modules)			
+			edge.isIntermoduleEdge(moduleNodeMap, this.input.nodes)			
 		]
 		
 		/** 
@@ -85,18 +91,23 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		return this.result
 	}
 	
-	// TODO the following is flipping slow. A faster algorithm to detect inter module edges would be preferable.
-	// Most likely it is better to start with the modules and look for edges
 	
 	/**
 	 * Check if the edge is an intermodule edge.
 	 */
-	private def Boolean isIntermoduleEdge(Edge edge, EList<Node> nodes, EList<Module> modules) {
+	private def Boolean isIntermoduleEdge(Edge edge, Map<Node,Module> moduleNodeMap, EList<Node> nodes) {
 		val connectedNodes = nodes.filter[node | node.edges.contains(edge)]
-		val involvedModules = modules.filter[module |
-			module.nodes.exists[moduleNode | connectedNodes.exists[it == moduleNode]] 
-		]
-		return involvedModules.size > 1
+		var Module lastMatch = null
+		for (Node node : connectedNodes) {
+			val match = moduleNodeMap.get(node)
+			if (lastMatch != null) {
+				if (lastMatch != match)
+					return true
+			}
+			lastMatch = match
+		}
+		
+		return false
 	}
 	
 }
