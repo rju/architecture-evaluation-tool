@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+    http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.cau.cs.se.software.evaluation</groupId>
+    <artifactId>de.cau.cs.se.software.evaluation.releng</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Static software analysis based an hypergraphs</name>
+
+    <properties>
+        <tycho.version>0.23.0</tycho.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+        <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
+        <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly</kieler-repo.url>
+    </properties>
+
+	<modules>
+        <module>../de.cau.cs.se.software.evaluation</module>
+        <module>../de.cau.cs.se.software.evaluation.graph</module>
+        <module>../de.cau.cs.se.software.evaluation.feature</module>
+        <module>../de.cau.cs.se.software.evaluation.updatesite</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>eclipse</id>
+            <url>${eclipse-repo.url}</url>
+            <layout>p2</layout>
+        </repository>
+		<repository>
+            <id>kieler</id>
+            <url>${kieler-repo.url}</url>
+            <layout>p2</layout>
+        </repository>
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <environments>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>macosx</os>
+                            <ws>cocoa</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                    </environments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project> 

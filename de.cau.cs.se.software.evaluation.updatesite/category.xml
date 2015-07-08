@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/de.cau.cs.se.software.evaluation.feature_1.0.0.qualifier.jar" id="de.cau.cs.se.software.evaluation.feature" version="1.0.0.qualifier">
+      <category name="de.cau.cs.se.software.evaluation"/>
+   </feature>
+   <category-def name="de.cau.cs.se.software.evaluation" label="Hypergraph based Software Evaluattion"/>
+</site>
