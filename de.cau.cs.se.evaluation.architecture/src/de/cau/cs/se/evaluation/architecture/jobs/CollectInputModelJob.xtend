@@ -46,7 +46,6 @@ import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.evaluation.architecture.transformation.NameResolutionHelper.*
-import org.eclipse.jdt.internal.core.JavaProject
 
 class CollectInputModelJob extends Job {
 	

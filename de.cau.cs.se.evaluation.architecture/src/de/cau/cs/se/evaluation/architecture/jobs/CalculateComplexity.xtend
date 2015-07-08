@@ -35,12 +35,13 @@ class CalculateComplexity {
 	 * @param input a modular system
 	 */
 	def calculate(Hypergraph input, String message) {
-		monitor.beginTask(message + " - S^#", input.nodes.size + 1)
+		this.monitor.beginTask(message, input.nodes.size + 1)
+		
 		/** S^# (hyperedges only graph) */
 		val transformationHyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
 		transformationHyperedgesOnlyGraph.input = input
 		transformationHyperedgesOnlyGraph.transform
-		monitor.worked(1)
+		this.monitor.worked(1)
 		
 		/** S^#_i (hyperedges only graphs for each node graph) */	
 		globalHyperEdgesOnlyGraphNodes = transformationHyperedgesOnlyGraph.result.nodes.iterator

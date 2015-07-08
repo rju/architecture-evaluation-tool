@@ -28,12 +28,12 @@ import org.eclipse.core.runtime.IProgressMonitor
  * Copy only connected nodes to the result graph.
  */
 class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergraph, Hypergraph> {
-		
+			
 	new(IProgressMonitor monitor) {
 		super(monitor)
 	}
 	
-	override transform() {
+	override transform() {		
 		result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
 			result.edges.add(TransformationHelper.deriveEdge(edge))
@@ -48,5 +48,6 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 		
 		return result		
 	}
+
 	
 }

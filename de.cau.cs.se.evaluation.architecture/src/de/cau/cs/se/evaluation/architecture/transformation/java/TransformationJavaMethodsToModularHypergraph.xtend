@@ -56,15 +56,25 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	 * Main transformation routine.
 	 */
 	override transform() {
+		monitor.beginTask("Process java project " + this.project.elementName,
+			input.size + // modules
+			input.size + // properties for each class
+			input.size + // methods
+			input.size + // implicit constructors
+			input.size // edges
+		)
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
-		// create modules for all classes
+		/** create modules for all classes */
 		input.forEach[clazz | result.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
+		monitor.worked(this.input.size)
 
-		// define edges for all internal variables of a class
+		/** define edges for all internal variables of a class */
 		input.forEach[clazz | result.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
-
-		// find all method declarations and create nodes for it, grouped by class as modules
+		monitor.worked(this.input.size)
+		
+		/** find all method declarations and create nodes for it, grouped by class as modules */
 		input.forEach[clazz | result.nodes.createNodesForMethods(clazz)]
+		monitor.worked(this.input.size)
 		input.filter[clazz | clazz.hasImplicitConstructor].
 			forEach[clazz |
 				val node = createNodeForImplicitConstructor(clazz.resolveBinding)
@@ -72,8 +82,11 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 				module.nodes.add(node) 
 				result.nodes.add(node)
 			]
+		monitor.worked(this.input.size)
 		
+		/** resolve edges */
 		input.forEach[clazz | resolveEdges(result, dataTypePatterns, clazz)]
+		monitor.worked(this.input.size)
 		
 		return result
 	}

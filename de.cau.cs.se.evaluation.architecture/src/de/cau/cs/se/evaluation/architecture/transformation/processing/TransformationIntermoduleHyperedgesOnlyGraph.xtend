@@ -36,11 +36,23 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 	}
 	
 	override transform() {
+		monitor.beginTask("Create intermodule hyperedges only graph",
+			this.input.edges.size * (this.input.nodes.size + this.input.modules.size) + // find all intermodule edges
+			this.input.edges.size * this.input.nodes.size + // upper bound of node and edge iteration
+			this.input.modules.size * this.input.nodes.size // copy modules
+		)
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
-		// detect all edges crossing module boundaries
-		val interModuleEdges = this.input.edges.filter[edge | edge.isIntermoduleEdge(this.input.nodes, this.input.modules)]
-		// copy those edges to new graph
-		// copy all nodes connected to those edges
+		
+		/** detect all edges crossing module boundaries */
+		val interModuleEdges = this.input.edges.filter[edge | 
+			monitor.worked(this.input.nodes.size + this.input.modules.size)
+			edge.isIntermoduleEdge(this.input.nodes, this.input.modules)			
+		]
+		
+		/** 
+		 * copy those edges to new graph
+		 * copy all nodes connected to those edges
+		 */
 		interModuleEdges.forEach[edge | 
 			val derivedEdge = TransformationHelper.deriveEdge(edge)
 			this.result.edges.add(derivedEdge)
@@ -54,8 +66,11 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 				}
 				derivedNode.edges.add(derivedEdge)
 			]
+			monitor.worked(this.input.nodes.size)
 		]
-		// copy modules
+		monitor.worked(this.input.nodes.size * (this.input.edges.size-interModuleEdges.size))
+		
+		/** copy modules */
 		this.input.modules.forEach[module |
 			val derivedModule = TransformationHelper.deriveModule(module)
 			module.nodes.forEach[node | 
@@ -64,26 +79,24 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 					derivedModule.nodes.add(derivedNode)
 				}
 			]
+			monitor.worked(this.input.nodes.size)
 		]
 		
 		return this.result
 	}
+	
+	// TODO the following is flipping slow. A faster algorithm to detect inter module edges would be preferable.
+	// Most likely it is better to start with the modules and look for edges
 	
 	/**
 	 * Check if the edge is an intermodule edge.
 	 */
 	private def Boolean isIntermoduleEdge(Edge edge, EList<Node> nodes, EList<Module> modules) {
 		val connectedNodes = nodes.filter[node | node.edges.contains(edge)]
-		val involvedModules = modules.filter[module | module.nodes.intersects(connectedNodes)]
+		val involvedModules = modules.filter[module |
+			module.nodes.exists[moduleNode | connectedNodes.exists[it == moduleNode]] 
+		]
 		return involvedModules.size > 1
-	}
-	
-	/**
-	 * Check if the intersection of both sets is not empty. 
-	 */
-	def Boolean intersects(EList<Node> set1, Iterable<Node> set2) {
-		val interset = set1.filter[nodeSet1 | set2.exists[nodeSet2 | nodeSet2 == nodeSet1]]
-		return !interset.empty
 	}
 	
 }

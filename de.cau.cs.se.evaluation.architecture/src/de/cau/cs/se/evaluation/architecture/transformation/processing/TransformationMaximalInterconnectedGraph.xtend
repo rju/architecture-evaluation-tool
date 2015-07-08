@@ -30,10 +30,17 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 	}
 	
 	override transform() {
+		monitor.beginTask("Create maximal interconnected graph",
+			this.input.nodes.size + // copy nodes
+			this.input.modules.size * this.input.nodes.size + // copy modules and assign nodes
+			this.input.nodes.size * this.input.nodes.size // create edges
+		)
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
-		// copy all nodes
+		/** copy all nodes */
 		this.input.nodes.forEach[this.result.nodes.add(TransformationHelper.deriveNode(it))]
-		// copy module boundaries
+		monitor.worked(this.input.nodes.size)
+		
+		/** copy module boundaries */
 		this.input.modules.forEach[module |
 			val derivedModule = TransformationHelper.deriveModule(module)
 			module.nodes.forEach[node | 
@@ -41,8 +48,9 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 					findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node])
 			]
 			this.result.modules.add(derivedModule)
+			monitor.worked(this.input.nodes.size)
 		]
-		// create one simple edge between every node
+		/** create one simple edge between every node */
 		this.result.nodes.forEach[startNode,startIndex |
 			for(var index = startIndex + 1; index < this.result.nodes.size; index++) {
 				val endNode = this.result.nodes.get(index)
@@ -52,6 +60,7 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 				endNode.edges.add(edge)
 				this.result.edges.add(edge)
 			}
+			monitor.worked(this.input.nodes.size)
 		]
 		
 		return this.result
