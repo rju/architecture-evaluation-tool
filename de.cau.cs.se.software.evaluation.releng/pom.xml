@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
         <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
         <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly</kieler-repo.url>
+        <checkstyle.config.location>../cs-conf.xml</checkstyle.config.location>
     </properties>
 
 	<modules>
@@ -83,7 +84,7 @@
                 </configuration>
             </plugin>
             
-            <!-- ceckstyle plugin -->
+            <!-- checkstyle plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
