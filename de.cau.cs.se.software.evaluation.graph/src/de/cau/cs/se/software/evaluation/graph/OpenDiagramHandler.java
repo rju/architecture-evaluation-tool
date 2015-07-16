@@ -83,7 +83,7 @@ public class OpenDiagramHandler extends AbstractHandler {
 				model = sSelection.getFirstElement();
 			}
 
-			DiagramViewManager.createView("de.cau.cs.se.evaluation.architecture.graph.ModularHypergraphDiagram",
+			DiagramViewManager.createView(ModularHypergraphDiagramSynthesis.class.getCanonicalName(),
 					"ModularHypergraph Diagram", model, KlighdSynthesisProperties.create());
 		} else {
 			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Unsupported element",

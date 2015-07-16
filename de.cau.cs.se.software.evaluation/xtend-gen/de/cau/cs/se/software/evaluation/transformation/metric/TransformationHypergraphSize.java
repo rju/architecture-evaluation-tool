@@ -62,8 +62,9 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     this.monitor.beginTask(this.name, _plus_1);
     final Hypergraph systemGraph = this.createSystemGraph(this.input);
     final RowPatternTable table = this.createRowPatternTable(systemGraph);
-    final double result = this.calculateSize(systemGraph, table);
-    return Double.valueOf(result);
+    double _calculateSize = this.calculateSize(systemGraph, table);
+    this.result = Double.valueOf(_calculateSize);
+    return this.result;
   }
   
   /**

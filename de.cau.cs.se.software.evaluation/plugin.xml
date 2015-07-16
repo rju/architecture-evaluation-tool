@@ -6,14 +6,14 @@
          point="org.eclipse.ui.views">
       <category
             name="Code and Model Analysis"
-            id="de.cau.cs.se.evaluation.architecture">
+            id="de.cau.cs.se.software.evaluation">
       </category>
       <view
             name="Analysis Result View"
             icon="icons/sample.gif"
-            category="de.cau.cs.se.evaluation.architecture"
+            category="de.cau.cs.se.software.evaluation"
             class="de.cau.cs.se.software.evaluation.views.AnalysisResultView"
-            id="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView">
+            id="de.cau.cs.se.software.evaluation.views.AnalysisResultView">
       </view>
    </extension>
    <extension
@@ -24,7 +24,7 @@
                ratio="0.5"
                relative="org.eclipse.ui.views.ProblemView"
                relationship="right"
-               id="de.cau.cs.se.evaluation.architecture.views.AnalysisResultView">
+               id="de.cau.cs.se.software.evaluation.views.AnalysisResultView">
          </view>
       </perspectiveExtension>
    </extension>
@@ -32,14 +32,14 @@
       <!-- @generated HypergraphMetricsState -->
       <package
             uri="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
-            class="de.cau.cs.se.evaluation.architecture.state.StatePackage"
-            genModel="model/HypergraphMetricsState.genmodel"/>
+            class="de.cau.cs.se.software.evaluation.state.StatePackage"
+            genModel="model/HypergraphState.genmodel"/>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="de.cau.cs.se.software.evaluation.commands.AnalysisComplexityHandler"
-            id="de.cau.cs.se.evaluation.architecture.commands.analysis"
+            id="de.cau.cs.se.software.evaluation.commands.analysis"
             name="Analysis Complexity">
       </command>
    </extension>
@@ -48,11 +48,11 @@
       <menuContribution
         locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
 	     <!-- menu
-	           id="de.cau.cs.se.evaluation.architecture.popups"
+	           id="de.cau.cs.se.software.evaluation.popups"
 	           label="Analysis Complexity">
 	     </menu -->
 	     <command
-	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	           commandId="de.cau.cs.se.software.evaluation.commands.analysis"
 	                  label="Analysis Complexity"
 	                  style="push"
 	                  tooltip="Run the complexity analysis">
@@ -61,20 +61,20 @@
 	  <menuContribution
         locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
 	     <!-- menu
-	           id="de.cau.cs.se.evaluation.architecture.popups"
+	           id="de.cau.cs.se.software.evaluation.popups"
 	           label="Analysis Complexity">
 	     </menu -->
 	     <command
-	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	           commandId="de.cau.cs.se.software.evaluation.commands.analysis"
 	                  label="Analysis Complexity"
 	                  style="push"
 	                  tooltip="Run the complexity analysis">
 	     </command>
 	  </menuContribution>
 	  <menuContribution
-	        locationURI="popup:de.cau.cs.se.evaluation.architecture.popups?after=additions">
+	        locationURI="popup:de.cau.cs.se.software.evaluation.popups?after=additions">
 	     <command
-	           commandId="de.cau.cs.se.evaluation.architecture.commands.analysis"
+	           commandId="de.cau.cs.se.software.evaluation.commands.analysis"
 	                  label="Analysis Complexity"
 	                  style="push"
 	                  tooltip="Run the complexity analysis">

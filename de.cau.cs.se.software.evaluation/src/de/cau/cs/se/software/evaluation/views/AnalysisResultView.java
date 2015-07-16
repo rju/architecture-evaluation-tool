@@ -44,7 +44,7 @@ public class AnalysisResultView extends ViewPart {
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
-	public static final String ID = "de.cau.cs.se..views.AnalysisResultView";
+	public static final String ID = "de.cau.cs.se.software.evaluation.views.AnalysisResultView";
 
 	private TableViewer viewer;
 	private Action exportDataAction;
