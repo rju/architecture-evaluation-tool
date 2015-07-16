@@ -49,7 +49,7 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		val systemGraph = createSystemGraph(this.input)
 		val table = systemGraph.createRowPatternTable
 					
-		result = calculateSize(systemGraph, table)
+		this.result = calculateSize(systemGraph, table)
 
 		return result
 	}

@@ -34,19 +34,19 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 	}
 	
 	override transform() {		
-		result = HypergraphFactory.eINSTANCE.createHypergraph
+		this.result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
-			result.edges.add(TransformationHelper.deriveEdge(edge))
+			this.result.edges.add(TransformationHelper.deriveEdge(edge))
 		}
 		for (Node node : input.nodes) {
 			if (node.edges.size > 0) {
 				val resultNode = TransformationHelper.deriveNode(node)
 				node.edges.forEach[edge | resultNode.edges.add(result.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
-				result.nodes.add(resultNode)
+				this.result.nodes.add(resultNode)
 			}
 		}
 		
-		return result		
+		return this.result		
 	}
 
 	
