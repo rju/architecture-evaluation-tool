@@ -106,13 +106,22 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   private KRenderingFactory _kRenderingFactory = KRenderingFactory.eINSTANCE;
   
   /**
-   * changes in visualization
+   * changes in visualization nodes on off
    */
   private final static String VISIBLE_NODES_NAME = "Nodes Visible";
   
   private final static String VISIBLE_NODES_NO = "Modules only";
   
   private final static String VISIBLE_NODES_YES = "Show nodes in modules";
+  
+  /**
+   * changes in visualization anonymous classes on off
+   */
+  private final static String VISIBLE_ANONYMOUS_NAME = "Anonymous Classes";
+  
+  private final static String VISIBLE_ANONYMOUS_NO = "hidden";
+  
+  private final static String VISIBLE_ANONYMOUS_YES = "visible";
   
   /**
    * changes in layout direction
@@ -146,6 +155,9 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   private final static SynthesisOption VISIBLE_NODES = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NAME, 
     ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.VISIBLE_NODES_YES, ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NO), ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NO);
   
+  private final static SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NAME, 
+    ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO), ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
+  
   private final static SynthesisOption DIRECTION = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.DIRECTION_NAME, 
     ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.DIRECTION_UP, ModularHypergraphDiagramSynthesis.DIRECTION_DOWN, ModularHypergraphDiagramSynthesis.DIRECTION_LEFT, ModularHypergraphDiagramSynthesis.DIRECTION_RIGHT), ModularHypergraphDiagramSynthesis.DIRECTION_LEFT);
   
@@ -166,7 +178,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
    */
   public List<SynthesisOption> getDisplayedSynthesisOptions() {
-    return ImmutableList.<SynthesisOption>of(ModularHypergraphDiagramSynthesis.VISIBLE_NODES, ModularHypergraphDiagramSynthesis.DIRECTION, ModularHypergraphDiagramSynthesis.ROUTING, ModularHypergraphDiagramSynthesis.SPACING);
+    return ImmutableList.<SynthesisOption>of(ModularHypergraphDiagramSynthesis.VISIBLE_NODES, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS, ModularHypergraphDiagramSynthesis.DIRECTION, ModularHypergraphDiagramSynthesis.ROUTING, ModularHypergraphDiagramSynthesis.SPACING);
   }
   
   public KNode transform(final ModularHypergraph hypergraph) {
@@ -235,16 +247,42 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           EList<Module> _modules = hypergraph.getModules();
           final Consumer<Module> _function = new Consumer<Module>() {
             public void accept(final Module module) {
-              EList<KNode> _children = root.getChildren();
-              KNode _createEmptyModule = ModularHypergraphDiagramSynthesis.this.createEmptyModule(module);
-              _children.add(_createEmptyModule);
+              boolean _and = false;
+              EModuleKind _kind = module.getKind();
+              boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
+              if (!_equals) {
+                _and = false;
+              } else {
+                Object _objectValue = ModularHypergraphDiagramSynthesis.this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+                boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
+                _and = _equals_1;
+              }
+              boolean _not = (!_and);
+              if (_not) {
+                EList<KNode> _children = root.getChildren();
+                KNode _createEmptyModule = ModularHypergraphDiagramSynthesis.this.createEmptyModule(module);
+                _children.add(_createEmptyModule);
+              }
             }
           };
           _modules.forEach(_function);
           EList<Module> _modules_1 = hypergraph.getModules();
           final Consumer<Module> _function_1 = new Consumer<Module>() {
             public void accept(final Module module) {
-              ModularHypergraphDiagramSynthesis.this.createCombindEdges(module, hypergraph);
+              boolean _and = false;
+              EModuleKind _kind = module.getKind();
+              boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
+              if (!_equals) {
+                _and = false;
+              } else {
+                Object _objectValue = ModularHypergraphDiagramSynthesis.this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+                boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
+                _and = _equals_1;
+              }
+              boolean _not = (!_and);
+              if (_not) {
+                ModularHypergraphDiagramSynthesis.this.createCombindEdges(module, hypergraph);
+              }
             }
           };
           _modules_1.forEach(_function_1);
@@ -330,21 +368,30 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
                 }
               };
               final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_1);
-              final Function1<Module, Boolean> _function_2 = new Function1<Module, Boolean>() {
-                public Boolean apply(final Module it) {
-                  return Boolean.valueOf(it.equals(targetModule));
-                }
-              };
-              boolean _exists_1 = IterableExtensions.<Module>exists(ModularHypergraphDiagramSynthesis.this.processedModules, _function_2);
-              boolean _not_1 = (!_exists_1);
-              if (_not_1) {
-                Integer value = targetModules.get(targetModule);
-                boolean _equals = Objects.equal(value, null);
-                if (_equals) {
-                  targetModules.put(targetModule, Integer.valueOf(1));
-                } else {
-                  targetModules.put(targetModule, Integer.valueOf(((value).intValue() + 1)));
-                }
+              boolean _and = false;
+              EModuleKind _kind = targetModule.getKind();
+              boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
+              if (!_equals) {
+                _and = false;
+              } else {
+                Object _objectValue = ModularHypergraphDiagramSynthesis.this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+                boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
+                _and = _equals_1;
+              }
+              if (_and) {
+                List<Module> _computeTransitiveModules = ModularHypergraphDiagramSynthesis.this.computeTransitiveModules(targetModule, hypergraph);
+                final Consumer<Module> _function_2 = new Consumer<Module>() {
+                  public void accept(final Module transitive) {
+                    boolean _equals = transitive.equals(sourceModule);
+                    boolean _not = (!_equals);
+                    if (_not) {
+                      ModularHypergraphDiagramSynthesis.this.registerConnection(targetModules, targetModule);
+                    }
+                  }
+                };
+                _computeTransitiveModules.forEach(_function_2);
+              } else {
+                ModularHypergraphDiagramSynthesis.this.registerConnection(targetModules, targetModule);
               }
             }
           }
@@ -361,6 +408,123 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     targetModules.forEach(_function_2);
   }
   
+  /**
+   * Calculate transitive set of modules.
+   */
+  private List<Module> computeTransitiveModules(final Module sourceModule, final ModularHypergraph hypergraph) {
+    final ArrayList<Module> transitiveModules = new ArrayList<Module>();
+    final ArrayList<Edge> edges = new ArrayList<Edge>();
+    EList<Node> _nodes = sourceModule.getNodes();
+    final Consumer<Node> _function = new Consumer<Node>() {
+      public void accept(final Node node) {
+        EList<Edge> _edges = node.getEdges();
+        final Consumer<Edge> _function = new Consumer<Edge>() {
+          public void accept(final Edge it) {
+            ModularHypergraphDiagramSynthesis.this.addUnique(edges, it);
+          }
+        };
+        _edges.forEach(_function);
+      }
+    };
+    _nodes.forEach(_function);
+    final Consumer<Edge> _function_1 = new Consumer<Edge>() {
+      public void accept(final Edge edge) {
+        EList<Node> _nodes = hypergraph.getNodes();
+        final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
+          public Boolean apply(final Node node) {
+            EList<Edge> _edges = node.getEdges();
+            final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
+              public Boolean apply(final Edge it) {
+                return Boolean.valueOf(it.equals(edge));
+              }
+            };
+            return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges, _function));
+          }
+        };
+        Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes, _function);
+        final Consumer<Node> _function_1 = new Consumer<Node>() {
+          public void accept(final Node node) {
+            EList<Node> _nodes = sourceModule.getNodes();
+            final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
+              public Boolean apply(final Node it) {
+                return Boolean.valueOf(it.equals(node));
+              }
+            };
+            boolean _exists = IterableExtensions.<Node>exists(_nodes, _function);
+            boolean _not = (!_exists);
+            if (_not) {
+              EList<Module> _modules = hypergraph.getModules();
+              final Function1<Module, Boolean> _function_1 = new Function1<Module, Boolean>() {
+                public Boolean apply(final Module module) {
+                  EList<Node> _nodes = module.getNodes();
+                  final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
+                    public Boolean apply(final Node it) {
+                      return Boolean.valueOf(it.equals(node));
+                    }
+                  };
+                  return Boolean.valueOf(IterableExtensions.<Node>exists(_nodes, _function));
+                }
+              };
+              final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_1);
+              boolean _and = false;
+              EModuleKind _kind = targetModule.getKind();
+              boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
+              if (!_equals) {
+                _and = false;
+              } else {
+                Object _objectValue = ModularHypergraphDiagramSynthesis.this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+                boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
+                _and = _equals_1;
+              }
+              if (_and) {
+                List<Module> _computeTransitiveModules = ModularHypergraphDiagramSynthesis.this.computeTransitiveModules(targetModule, hypergraph);
+                ModularHypergraphDiagramSynthesis.this.addAllUnique(transitiveModules, _computeTransitiveModules);
+              } else {
+                ModularHypergraphDiagramSynthesis.this.addUnique(transitiveModules, targetModule);
+              }
+            }
+          }
+        };
+        _filter.forEach(_function_1);
+      }
+    };
+    edges.forEach(_function_1);
+    return transitiveModules;
+  }
+  
+  /**
+   * Register a target module or increase its hit count.
+   */
+  private Integer registerConnection(final HashMap<Module, Integer> targetModules, final Module targetModule) {
+    Integer _xifexpression = null;
+    final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
+      public Boolean apply(final Module it) {
+        return Boolean.valueOf(it.equals(targetModule));
+      }
+    };
+    boolean _exists = IterableExtensions.<Module>exists(this.processedModules, _function);
+    boolean _not = (!_exists);
+    if (_not) {
+      Integer _xblockexpression = null;
+      {
+        Integer value = targetModules.get(targetModule);
+        Integer _xifexpression_1 = null;
+        boolean _equals = Objects.equal(value, null);
+        if (_equals) {
+          _xifexpression_1 = targetModules.put(targetModule, Integer.valueOf(1));
+        } else {
+          _xifexpression_1 = targetModules.put(targetModule, Integer.valueOf(((value).intValue() + 1)));
+        }
+        _xblockexpression = _xifexpression_1;
+      }
+      _xifexpression = _xblockexpression;
+    }
+    return _xifexpression;
+  }
+  
+  /**
+   * Create an edge in the correct width for an aggregated edge.
+   */
   private KEdge createAggregatedEdge(final Module sourceModule, final Module targetModule, final Integer size) {
     KEdge _xblockexpression = null;
     {
@@ -452,7 +616,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return _xblockexpression;
   }
   
-  private boolean addUnique(final ArrayList<Edge> edges, final Edge edge) {
+  private boolean addUnique(final List<Edge> edges, final Edge edge) {
     boolean _xifexpression = false;
     boolean _contains = edges.contains(edge);
     boolean _not = (!_contains);
@@ -462,36 +626,81 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return _xifexpression;
   }
   
+  private boolean addUnique(final List<Module> modules, final Module module) {
+    boolean _xifexpression = false;
+    boolean _contains = modules.contains(module);
+    boolean _not = (!_contains);
+    if (_not) {
+      _xifexpression = modules.add(module);
+    }
+    return _xifexpression;
+  }
+  
+  private void addAllUnique(final List<Module> modules, final List<Module> additionalModules) {
+    final Consumer<Module> _function = new Consumer<Module>() {
+      public void accept(final Module it) {
+        ModularHypergraphDiagramSynthesis.this.addUnique(modules, it);
+      }
+    };
+    additionalModules.forEach(_function);
+  }
+  
   /**
    * Create module without nodes for simple display.
    */
   private KNode createEmptyModule(final Module module) {
+    KColor _switchResult = null;
+    EModuleKind _kind = module.getKind();
+    if (_kind != null) {
+      switch (_kind) {
+        case SYSTEM:
+          _switchResult = this._kColorExtensions.getColor("LemonChiffon");
+          break;
+        case FRAMEWORK:
+          _switchResult = this._kColorExtensions.getColor("Blue");
+          break;
+        case ANONYMOUS:
+          _switchResult = this._kColorExtensions.getColor("Orange");
+          break;
+        case INTERFACE:
+          _switchResult = this._kColorExtensions.getColor("White");
+          break;
+        default:
+          break;
+      }
+    }
+    final KColor otherColor = _switchResult;
+    String _xifexpression = null;
+    EModuleKind _kind_1 = module.getKind();
+    boolean _equals = Objects.equal(_kind_1, EModuleKind.ANONYMOUS);
+    if (_equals) {
+      String _xblockexpression = null;
+      {
+        String _name = module.getName();
+        final int separator = _name.lastIndexOf("$");
+        String _name_1 = module.getName();
+        _xblockexpression = _name_1.substring(0, separator);
+      }
+      _xifexpression = _xblockexpression;
+    } else {
+      _xifexpression = module.getName();
+    }
+    final String moduleQualifier = _xifexpression;
+    final int separator = moduleQualifier.lastIndexOf(".");
+    String _substring = moduleQualifier.substring(0, separator);
+    String _substring_1 = moduleQualifier.substring((separator + 1));
+    return this.drawEmptyModule(module, _substring, _substring_1, otherColor);
+  }
+  
+  /**
+   * Draw the empty module.
+   */
+  private KNode drawEmptyModule(final Module module, final String packageName, final String moduleName, final KColor otherColor) {
     KNode _xblockexpression = null;
     {
       KNode _createNode = this._kNodeExtensions.createNode(module);
       final KNode moduleNode = this.<KNode>associateWith(_createNode, module);
       this.moduleMap.put(module, moduleNode);
-      KColor _switchResult = null;
-      EModuleKind _kind = module.getKind();
-      if (_kind != null) {
-        switch (_kind) {
-          case SYSTEM:
-            _switchResult = this._kColorExtensions.getColor("LemonChiffon");
-            break;
-          case FRAMEWORK:
-            _switchResult = this._kColorExtensions.getColor("Blue");
-            break;
-          case ANONYMOUS:
-            _switchResult = this._kColorExtensions.getColor("Orange");
-            break;
-          case INTERFACE:
-            _switchResult = this._kColorExtensions.getColor("White");
-            break;
-          default:
-            break;
-        }
-      }
-      final KColor otherColor = _switchResult;
       final Procedure1<KNode> _function = new Procedure1<KNode>() {
         public void apply(final KNode it) {
           ModularHypergraphDiagramSynthesis.this.<KNode, Float>setLayoutOption(it, LayoutOptions.PORT_SPACING, Float.valueOf(20f));
@@ -508,16 +717,24 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
               KGridPlacement _setGridPlacement = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.setGridPlacement(it, 1);
               KGridPlacement _from = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.from(_setGridPlacement, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.LEFT, 10, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.TOP, 20, 0);
               ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.to(_from, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.RIGHT, 10, 0, ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.BOTTOM, 20, 0);
-              String _name = module.getName();
-              KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, _name);
+              KText _addText = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, packageName);
               final Procedure1<KText> _function = new Procedure1<KText>() {
+                public void apply(final KText it) {
+                  ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, false);
+                  it.setCursorSelectable(false);
+                  ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it, 1, 1, 1, 1);
+                }
+              };
+              ObjectExtensions.<KText>operator_doubleArrow(_addText, _function);
+              KText _addText_1 = ModularHypergraphDiagramSynthesis.this._kContainerRenderingExtensions.addText(it, moduleName);
+              final Procedure1<KText> _function_1 = new Procedure1<KText>() {
                 public void apply(final KText it) {
                   ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setFontBold(it, true);
                   it.setCursorSelectable(true);
                   ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it, 1, 1, 1, 1);
                 }
               };
-              ObjectExtensions.<KText>operator_doubleArrow(_addText, _function);
+              ObjectExtensions.<KText>operator_doubleArrow(_addText_1, _function_1);
             }
           };
           ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function);

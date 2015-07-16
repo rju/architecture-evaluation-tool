@@ -61,6 +61,9 @@ import com.google.common.collect.ImmutableList
 import de.cau.cs.kieler.klighd.SynthesisOption
 import de.cau.cs.kieler.kiml.options.SizeConstraint
 import java.util.EnumSet
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+import java.util.List
+import de.cau.cs.kieler.core.krendering.KColor
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -75,10 +78,15 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     extension KRenderingFactory = KRenderingFactory.eINSTANCE
 		     
 		     
-	/** changes in visualization */
+	/** changes in visualization nodes on off */
     private static val VISIBLE_NODES_NAME = "Nodes Visible"
     private static val VISIBLE_NODES_NO = "Modules only"
     private static val VISIBLE_NODES_YES = "Show nodes in modules"
+    
+    /** changes in visualization anonymous classes on off */
+    private static val VISIBLE_ANONYMOUS_NAME = "Anonymous Classes"
+    private static val VISIBLE_ANONYMOUS_NO = "hidden"
+    private static val VISIBLE_ANONYMOUS_YES = "visible"
     
     /** changes in layout direction */
     private static val DIRECTION_NAME = "Layout Direction"
@@ -101,6 +109,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     private static val SynthesisOption VISIBLE_NODES = SynthesisOption::createChoiceOption(VISIBLE_NODES_NAME,
        ImmutableList::of(VISIBLE_NODES_YES, VISIBLE_NODES_NO), VISIBLE_NODES_NO)
        
+    private static val SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption::createChoiceOption(VISIBLE_ANONYMOUS_NAME,
+       ImmutableList::of(VISIBLE_ANONYMOUS_YES, VISIBLE_ANONYMOUS_NO), VISIBLE_ANONYMOUS_NO)
+       
     private static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
        ImmutableList::of(DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT), DIRECTION_LEFT)
        
@@ -120,7 +131,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
      * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
      */
     override public getDisplayedSynthesisOptions() {
-        return ImmutableList::of(VISIBLE_NODES, DIRECTION, ROUTING, SPACING)
+        return ImmutableList::of(VISIBLE_NODES, VISIBLE_ANONYMOUS, DIRECTION, ROUTING, SPACING)
     }
 
     
@@ -147,8 +158,14 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             })
             
             if (VISIBLE_NODES.objectValue == VISIBLE_NODES_NO) {
-            	hypergraph.modules.forEach[module | root.children += module.createEmptyModule]
-            	hypergraph.modules.forEach[module | module.createCombindEdges(hypergraph)]
+            	hypergraph.modules.forEach[module | 
+            		if (!(module.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO)) 
+						root.children += module.createEmptyModule
+            	]
+            	hypergraph.modules.forEach[module | 
+            		if (!(module.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO)) 
+            			module.createCombindEdges(hypergraph)
+            	]
             } else {
         		hypergraph.modules.forEach[module | root.children += module.createModuleWithNodes]
         		hypergraph.edges.forEach[edge | edge.createGraphEdge(hypergraph.nodes, root.children)]    	
@@ -170,13 +187,14 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 				if (!sourceModule.nodes.exists[it.equals(node)]) {
 					/** external node, determine module */
 					val targetModule = hypergraph.modules.findFirst[module | module.nodes.exists[it.equals(node)]]
-					if (!processedModules.exists[it.equals(targetModule)]) {
-						var value = targetModules.get(targetModule)
-						if (value == null) {
-							targetModules.put(targetModule,1)
-						} else {
-							targetModules.put(targetModule,value+1)
-						}
+					if (targetModule.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO) {
+						/** module is not shown, compute transitive set. */
+						targetModule.computeTransitiveModules(hypergraph).forEach[transitive |
+							if (!transitive.equals(sourceModule))
+								targetModules.registerConnection(targetModule)
+						]
+					} else {
+						targetModules.registerConnection(targetModule)
 					}
 				}
 			]
@@ -185,6 +203,50 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		targetModules.forEach[module, count | createAggregatedEdge(sourceModule, module, count) ]
 	}
 	
+	/**
+	 * Calculate transitive set of modules.
+	 */
+	private def List<Module> computeTransitiveModules(Module sourceModule, ModularHypergraph hypergraph) {
+		val transitiveModules = new ArrayList<Module>()
+		
+		val edges = new ArrayList<Edge>()
+		sourceModule.nodes.forEach[node | node.edges.forEach[edges.addUnique(it)]]
+		
+		edges.forEach[edge |
+			hypergraph.nodes.filter[node | node.edges.exists[it.equals(edge)]].forEach[node |
+				if (!sourceModule.nodes.exists[it.equals(node)]) {
+					val targetModule = hypergraph.modules.findFirst[module | module.nodes.exists[it.equals(node)]]
+					if (targetModule.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO) {
+						/** module is not shown, compute transitive set. */
+						transitiveModules.addAllUnique(targetModule.computeTransitiveModules(hypergraph))
+					} else {
+						transitiveModules.addUnique(targetModule)
+					}
+				}
+			]
+		]
+		
+		
+		return transitiveModules
+	}
+	
+	/**
+	 * Register a target module or increase its hit count.
+	 */
+	private def registerConnection(HashMap<Module, Integer> targetModules, Module targetModule) {
+		if (!processedModules.exists[it.equals(targetModule)]) {
+			var value = targetModules.get(targetModule)
+			if (value == null) {
+				targetModules.put(targetModule,1)
+			} else {
+				targetModules.put(targetModule,value+1)
+			}
+		}
+	}
+	
+	/**
+	 * Create an edge in the correct width for an aggregated edge.
+	 */
 	private def createAggregatedEdge(Module sourceModule, Module targetModule, Integer size) {
 		val sourceNode = moduleMap.get(sourceModule)
 		val targetNode = moduleMap.get(targetModule)
@@ -230,10 +292,20 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		]
 	}
 	
-	private def addUnique(ArrayList<Edge> edges, Edge edge) {
+	private def addUnique(List<Edge> edges, Edge edge) {
 		if (!edges.contains(edge)) {
 			edges.add(edge)
 		}
+	}
+	
+	private def addUnique(List<Module> modules, Module module) {
+		if (!modules.contains(module)) {
+			modules.add(module)
+		}
+	}
+	
+	private def addAllUnique(List<Module> modules, List<Module> additionalModules) {
+		additionalModules.forEach[modules.addUnique(it)]
 	}
     
     
@@ -241,16 +313,34 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
      * Create module without nodes for simple display.
      */
     private def KNode createEmptyModule(Module module) {
-		val moduleNode = module.createNode().associateWith(module)
-		moduleMap.put(module, moduleNode)
-		
-		val otherColor = switch (module.kind) {
+    	val otherColor = switch (module.kind) {
 			case SYSTEM: "LemonChiffon".color
 			case FRAMEWORK: "Blue".color
 			case ANONYMOUS: "Orange".color
 			case INTERFACE: "White".color
 		}
-			
+		
+		val moduleQualifier = if (module.kind == EModuleKind.ANONYMOUS) {
+			val separator = module.name.lastIndexOf('$')
+			module.name.substring(0,separator)
+		} else
+			module.name
+		val separator = moduleQualifier.lastIndexOf('.')
+		return drawEmptyModule(module, 
+			moduleQualifier.substring(0,separator), 
+			moduleQualifier.substring(separator+1),
+			otherColor
+		)
+	}
+	
+	/**
+	 * Draw the empty module.
+	 */
+	private def KNode drawEmptyModule(Module module, String packageName, String moduleName, KColor otherColor) {
+		val moduleNode = module.createNode().associateWith(module)
+		moduleMap.put(module, moduleNode)
+		
+		
 		moduleNode => [
 			it.setLayoutOption(LayoutOptions::PORT_SPACING, 20f)
 			it.setLayoutOption(LayoutOptions::SIZE_CONSTRAINT, SizeConstraint.minimumSizeWithPorts)
@@ -259,10 +349,15 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 it.setBackgroundGradient("white".color, otherColor, 0)
                 it.shadow = "black".color
                 it.setGridPlacement(1).from(LEFT, 10, 0, TOP, 20, 0).to(RIGHT, 10, 0, BOTTOM, 20, 0)
-                it.addText(module.name) => [
-                	it.fontBold = true
-                	it.cursorSelectable = true
-                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
+	            it.addText(packageName) => [
+	              	it.fontBold = false
+	               	it.cursorSelectable = false
+	               	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
+	            ]
+	            it.addText(moduleName) => [
+	               	it.fontBold = true
+	               	it.cursorSelectable = true
+	               	it.setLeftTopAlignedPointPlacementData(1,1,1,1)
                 ]
             ]
 		]
