@@ -26,7 +26,6 @@
     <property name="charset"        value=""/> JVM file.encoding property
     !-->
 
-
     <!--
      !________________________________________________________________________________________
      !
@@ -1211,6 +1210,10 @@
             <property name="allowEmptyMethods"      value="true"/>
         </module>
 
+    </module>
+
+    <module name="SuppressionFilter">
+        <property name="file" value="../suppressions.xml" />
     </module>
 
 </module>
