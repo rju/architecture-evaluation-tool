@@ -64,6 +64,8 @@ import java.util.EnumSet
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import java.util.List
 import de.cau.cs.kieler.core.krendering.KColor
+import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout
+import de.cau.cs.kieler.kiml.klayoutdata.KInsets
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -370,26 +372,27 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	 */
 	private def createModuleWithNodes(Module module) {
 		// TODO a module should be a rectangle with preferably round corners,
-		// a top-left name, and a set of nodes inside. 
+		// a top-left name, and a set of nodes inside.
+						 
 		val moduleNode = module.createNode().associateWith(module)
-		
+		moduleNode.getData(KShapeLayout).insets.top = 15 //bringt nicht wirklich Effekt
+
 		moduleNode => [	
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, "LemonChiffon".color, 0)
                 it.shadow = "black".color
                 it.setGridPlacement(1).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
-                it.addRectangle => [
-	                it.invisible = true
-	                it.addText(module.name) => [
-	                	it.fontBold = true
-	                	it.cursorSelectable = true
-	                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
-	                ]
+                it.addText(module.name) => [
+                	it.fontBold = true
+                	it.cursorSelectable = true
+                	it.setLeftTopAlignedPointPlacementData(1,1,1,1)            	
                 ]
+                it.addChildArea()             
                 //it.addRectangle => [
                 //	it.invisible =true
-                //	it.setGridPlacement(2).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)     	
+                //	it.setGridPlacement(2).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
+   	
                 	module.nodes.forEach[node | node.createGraphNode(it, module, moduleNode)]
                 //]
             ]
@@ -405,11 +408,10 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		val kNode = node.createNode().associateWith(node)
 		nodeMap.put(node, kNode)
 		moduleNode.children += kNode
-		
 		kNode => [
 			//it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
 			//node.edges.forEach[graphEdge | graphEdge.createEdgePort(it, graphEdge.name)]
-			parent.children.add(it.addEllipse => [
+			it.addEllipse => [
 				it.lineWidth = 2
                 it.background = "white".color
                 it.setSurroundingSpace(10,0,10,0)
@@ -417,7 +419,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
                 	it.setSurroundingSpace(10,0,10,0)
                 	it.cursorSelectable = true
                 ]
-			])
+			]
 		] 
 		
 	}
