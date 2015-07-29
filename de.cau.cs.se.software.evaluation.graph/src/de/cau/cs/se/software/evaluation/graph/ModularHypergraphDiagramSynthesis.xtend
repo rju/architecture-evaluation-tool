@@ -66,6 +66,7 @@ import java.util.List
 import de.cau.cs.kieler.core.krendering.KColor
 import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout
 import de.cau.cs.kieler.kiml.klayoutdata.KInsets
+import de.cau.cs.kieler.core.kgraph.KPort
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -125,6 +126,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     
     var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
     var Map<Module,KNode> moduleMap = new HashMap<Module,KNode>()
+    var Map<String,KPort> portMap = new HashMap<String,KPort>()
     var processedModules = new ArrayList<Module>()
        
     /**
@@ -371,7 +373,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	 * @param module the module to be rendered
 	 */
 	private def createModuleWithNodes(Module module) {
-		// TODO a module should be a rectangle with preferably round corners,
+		// a module should be a rectangle with preferably round corners,
 		// a top-left name, and a set of nodes inside.
 						 
 		val moduleNode = module.createNode().associateWith(module)
@@ -411,7 +413,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		kNode => [
 			//it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
 			//node.edges.forEach[graphEdge | graphEdge.createEdgePort(it, graphEdge.name)]
-			it.addEllipse => [
+			it.addEllipse => [ 
 				it.lineWidth = 2
                 it.background = "white".color
                 it.setSurroundingSpace(10,0,10,0)
@@ -424,14 +426,15 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		
 	}
 	
-	private def createEdgePort(Edge edge, KNode kNode, String label) {
+	//create iff not exists & add to portMap & return port
+	private def KPort getOrCreateEdgePort(KNode kNode, String label) {
+		if (portMap.get(label) == null){
 		kNode.ports.add(createPort() => [
     		it.setPortSize(2,2)
     		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
-                
-            // last but not least add a label exhibiting the ports name
-            //it.addInsidePortLabel(label, 8, KlighdConstants.DEFAULT_FONT_NAME)
-    	])
+    		portMap.put(label,it)
+    	])}
+    	return portMap.get(label)
 	}
 
 	private def createGraphEdge(Edge edge, EList<Node> nodes, EList<KNode> siblings) {		
@@ -461,6 +464,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	
 	private def drawEdge(KNode left, KNode right, Edge graphEdge) {
 		System.out.println("draw edge " + left + " " + right)
+		
+		//draw edges direct iff same parentNodes
+		if(left.parent.equals(right.parent)){		
 		createEdge() => [
 			it.source = left
             it.target = right
@@ -468,7 +474,47 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             	it.lineWidth = 2
             	it.lineStyle = LineStyle.SOLID
             ]
-		]
+		]}
+			
+		//else use ports		
+		else{		
+			//Edge from inner-Node to parentPort (left) (iff not exists yet)
+			if(portMap.get(left.toString + '_to_' + right.parent.toString) == null){
+			createEdge() => [
+			it.source = left
+			it.sourcePort = getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString)
+			it.targetPort = getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
+            it.target = left.parent
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]}
+			//Edge between parentPorts (iff not exists yet)
+			if (portMap.get(right.parent.toString + '_to_' + left.parent.toString) == null){
+			createEdge() => [
+			it.source = left.parent
+			it.sourcePort = getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
+			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
+            it.target = right.parent
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]}
+			//Edge from inner-Node to parentPort (right) (iff not exists yet)
+			if (portMap.get(right.toString + '_to_' + left.parent.toString) == null){
+			createEdge() => [
+			it.source = right
+			it.sourcePort = getOrCreateEdgePort(right, right.toString + '_to_' + left.parent.toString)
+			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
+            it.target = right.parent
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]}		
+		}
 	}
 
 }

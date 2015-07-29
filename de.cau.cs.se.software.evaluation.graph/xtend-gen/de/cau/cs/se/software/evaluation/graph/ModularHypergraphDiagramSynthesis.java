@@ -171,6 +171,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   
   private Map<Module, KNode> moduleMap = new HashMap<Module, KNode>();
   
+  private Map<String, KPort> portMap = new HashMap<String, KPort>();
+  
   private ArrayList<Module> processedModules = new ArrayList<Module>();
   
   /**
@@ -846,20 +848,26 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return _xblockexpression;
   }
   
-  private boolean createEdgePort(final Edge edge, final KNode kNode, final String label) {
-    EList<KPort> _ports = kNode.getPorts();
-    KPort _createPort = this._kPortExtensions.createPort();
-    final Procedure1<KPort> _function = new Procedure1<KPort>() {
-      public void apply(final KPort it) {
-        ModularHypergraphDiagramSynthesis.this._kPortExtensions.setPortSize(it, 2, 2);
-        KRectangle _addRectangle = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.addRectangle(it);
-        KColor _color = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("black");
-        KRectangle _setBackground = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KRectangle>setBackground(_addRectangle, _color);
-        ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineJoin(_setBackground, LineJoin.JOIN_ROUND);
-      }
-    };
-    KPort _doubleArrow = ObjectExtensions.<KPort>operator_doubleArrow(_createPort, _function);
-    return _ports.add(_doubleArrow);
+  private KPort getOrCreateEdgePort(final KNode kNode, final String label) {
+    KPort _get = this.portMap.get(label);
+    boolean _equals = Objects.equal(_get, null);
+    if (_equals) {
+      EList<KPort> _ports = kNode.getPorts();
+      KPort _createPort = this._kPortExtensions.createPort();
+      final Procedure1<KPort> _function = new Procedure1<KPort>() {
+        public void apply(final KPort it) {
+          ModularHypergraphDiagramSynthesis.this._kPortExtensions.setPortSize(it, 2, 2);
+          KRectangle _addRectangle = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.addRectangle(it);
+          KColor _color = ModularHypergraphDiagramSynthesis.this._kColorExtensions.getColor("black");
+          KRectangle _setBackground = ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.<KRectangle>setBackground(_addRectangle, _color);
+          ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineJoin(_setBackground, LineJoin.JOIN_ROUND);
+          ModularHypergraphDiagramSynthesis.this.portMap.put(label, it);
+        }
+      };
+      KPort _doubleArrow = ObjectExtensions.<KPort>operator_doubleArrow(_createPort, _function);
+      _ports.add(_doubleArrow);
+    }
+    return this.portMap.get(label);
   }
   
   private Object createGraphEdge(final Edge edge, final EList<Node> nodes, final EList<KNode> siblings) {
@@ -936,22 +944,166 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     KEdge _xblockexpression = null;
     {
       System.out.println(((("draw edge " + left) + " ") + right));
-      KEdge _createEdge = this._kEdgeExtensions.createEdge();
-      final Procedure1<KEdge> _function = new Procedure1<KEdge>() {
-        public void apply(final KEdge it) {
-          it.setSource(left);
-          it.setTarget(right);
-          KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
-          final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
-            public void apply(final KPolyline it) {
-              ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
-              ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineStyle(it, LineStyle.SOLID);
-            }
-          };
-          ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+      KEdge _xifexpression = null;
+      KNode _parent = left.getParent();
+      KNode _parent_1 = right.getParent();
+      boolean _equals = _parent.equals(_parent_1);
+      if (_equals) {
+        KEdge _createEdge = this._kEdgeExtensions.createEdge();
+        final Procedure1<KEdge> _function = new Procedure1<KEdge>() {
+          public void apply(final KEdge it) {
+            it.setSource(left);
+            it.setTarget(right);
+            KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
+            final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
+              public void apply(final KPolyline it) {
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
+                ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineStyle(it, LineStyle.SOLID);
+              }
+            };
+            ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+          }
+        };
+        _xifexpression = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
+      } else {
+        KEdge _xblockexpression_1 = null;
+        {
+          String _string = left.toString();
+          String _plus = (_string + "_to_");
+          KNode _parent_2 = right.getParent();
+          String _string_1 = _parent_2.toString();
+          String _plus_1 = (_plus + _string_1);
+          KPort _get = this.portMap.get(_plus_1);
+          boolean _equals_1 = Objects.equal(_get, null);
+          if (_equals_1) {
+            KEdge _createEdge_1 = this._kEdgeExtensions.createEdge();
+            final Procedure1<KEdge> _function_1 = new Procedure1<KEdge>() {
+              public void apply(final KEdge it) {
+                it.setSource(left);
+                String _string = left.toString();
+                String _plus = (_string + "_to_");
+                KNode _parent = right.getParent();
+                String _string_1 = _parent.toString();
+                String _plus_1 = (_plus + _string_1);
+                KPort _orCreateEdgePort = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(left, _plus_1);
+                it.setSourcePort(_orCreateEdgePort);
+                KNode _parent_1 = left.getParent();
+                KNode _parent_2 = left.getParent();
+                String _string_2 = _parent_2.toString();
+                String _plus_2 = (_string_2 + "_to_");
+                KNode _parent_3 = right.getParent();
+                String _string_3 = _parent_3.toString();
+                String _plus_3 = (_plus_2 + _string_3);
+                KPort _orCreateEdgePort_1 = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent_1, _plus_3);
+                it.setTargetPort(_orCreateEdgePort_1);
+                KNode _parent_4 = left.getParent();
+                it.setTarget(_parent_4);
+                KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
+                final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
+                  public void apply(final KPolyline it) {
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineStyle(it, LineStyle.SOLID);
+                  }
+                };
+                ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+              }
+            };
+            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_1, _function_1);
+          }
+          KNode _parent_3 = right.getParent();
+          String _string_2 = _parent_3.toString();
+          String _plus_2 = (_string_2 + "_to_");
+          KNode _parent_4 = left.getParent();
+          String _string_3 = _parent_4.toString();
+          String _plus_3 = (_plus_2 + _string_3);
+          KPort _get_1 = this.portMap.get(_plus_3);
+          boolean _equals_2 = Objects.equal(_get_1, null);
+          if (_equals_2) {
+            KEdge _createEdge_2 = this._kEdgeExtensions.createEdge();
+            final Procedure1<KEdge> _function_2 = new Procedure1<KEdge>() {
+              public void apply(final KEdge it) {
+                KNode _parent = left.getParent();
+                it.setSource(_parent);
+                KNode _parent_1 = left.getParent();
+                KNode _parent_2 = left.getParent();
+                String _string = _parent_2.toString();
+                String _plus = (_string + "_to_");
+                KNode _parent_3 = right.getParent();
+                String _string_1 = _parent_3.toString();
+                String _plus_1 = (_plus + _string_1);
+                KPort _orCreateEdgePort = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent_1, _plus_1);
+                it.setSourcePort(_orCreateEdgePort);
+                KNode _parent_4 = right.getParent();
+                KNode _parent_5 = right.getParent();
+                String _string_2 = _parent_5.toString();
+                String _plus_2 = (_string_2 + "_to_");
+                KNode _parent_6 = left.getParent();
+                String _string_3 = _parent_6.toString();
+                String _plus_3 = (_plus_2 + _string_3);
+                KPort _orCreateEdgePort_1 = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent_4, _plus_3);
+                it.setTargetPort(_orCreateEdgePort_1);
+                KNode _parent_7 = right.getParent();
+                it.setTarget(_parent_7);
+                KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
+                final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
+                  public void apply(final KPolyline it) {
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineStyle(it, LineStyle.SOLID);
+                  }
+                };
+                ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+              }
+            };
+            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_2, _function_2);
+          }
+          KEdge _xifexpression_1 = null;
+          String _string_4 = right.toString();
+          String _plus_4 = (_string_4 + "_to_");
+          KNode _parent_5 = left.getParent();
+          String _string_5 = _parent_5.toString();
+          String _plus_5 = (_plus_4 + _string_5);
+          KPort _get_2 = this.portMap.get(_plus_5);
+          boolean _equals_3 = Objects.equal(_get_2, null);
+          if (_equals_3) {
+            KEdge _createEdge_3 = this._kEdgeExtensions.createEdge();
+            final Procedure1<KEdge> _function_3 = new Procedure1<KEdge>() {
+              public void apply(final KEdge it) {
+                it.setSource(right);
+                String _string = right.toString();
+                String _plus = (_string + "_to_");
+                KNode _parent = left.getParent();
+                String _string_1 = _parent.toString();
+                String _plus_1 = (_plus + _string_1);
+                KPort _orCreateEdgePort = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(right, _plus_1);
+                it.setSourcePort(_orCreateEdgePort);
+                KNode _parent_1 = right.getParent();
+                KNode _parent_2 = right.getParent();
+                String _string_2 = _parent_2.toString();
+                String _plus_2 = (_string_2 + "_to_");
+                KNode _parent_3 = left.getParent();
+                String _string_3 = _parent_3.toString();
+                String _plus_3 = (_plus_2 + _string_3);
+                KPort _orCreateEdgePort_1 = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent_1, _plus_3);
+                it.setTargetPort(_orCreateEdgePort_1);
+                KNode _parent_4 = right.getParent();
+                it.setTarget(_parent_4);
+                KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
+                final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
+                  public void apply(final KPolyline it) {
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineWidth(it, 2);
+                    ModularHypergraphDiagramSynthesis.this._kRenderingExtensions.setLineStyle(it, LineStyle.SOLID);
+                  }
+                };
+                ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function);
+              }
+            };
+            _xifexpression_1 = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_3, _function_3);
+          }
+          _xblockexpression_1 = _xifexpression_1;
         }
-      };
-      _xblockexpression = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
+        _xifexpression = _xblockexpression_1;
+      }
+      _xblockexpression = _xifexpression;
     }
     return _xblockexpression;
   }
