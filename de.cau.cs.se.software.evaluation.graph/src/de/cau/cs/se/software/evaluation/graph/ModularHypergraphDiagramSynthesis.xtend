@@ -439,7 +439,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 
 	private def createGraphEdge(Edge edge, EList<Node> nodes, EList<KNode> siblings) {		
 		val referencedNodes = nodes.filter[node | node.edges.exists[it.equals(edge)]]
-		System.out.println("graph edge " + edge.name + " size " + referencedNodes.size )
+		//System.out.println("graph edge " + edge.name + " size " + referencedNodes.size )
 		if (referencedNodes.size > 1) {
 			if (referencedNodes.size == 2) { /** direct link */
 				drawEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)), edge)
@@ -455,18 +455,17 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 				it.lineWidth = 2
 				//it.addText(graphEdge.name)
 			]
-		]
-		
+		]		
 		nodes.forEach[node | drawEdge(edgeNode, nodeMap.get(node), graphEdge)]
-		System.out.println("edge " + edgeNode)
+		//System.out.println("edge " + edgeNode)
 		return edgeNode
 	}
 	
 	private def drawEdge(KNode left, KNode right, Edge graphEdge) {
-		System.out.println("draw edge " + left + " " + right)
+		//System.out.println("draw edge " + left + " " + right)
 		
 		//draw edges direct iff same parentNodes
-		if(left.parent.equals(right.parent)){		
+		if(right.parent.equals(left.parent)){		
 		createEdge() => [
 			it.source = left
             it.target = right
@@ -477,7 +476,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		]}
 			
 		//else use ports		
-		else{		
+		else{
+			//if no HyperEdgePart
+			if(left.parent != null){		
 			//Edge from inner-Node to parentPort (left) (iff not exists yet)
 			if(portMap.get(left.toString + '_to_' + right.parent.toString) == null){
 			createEdge() => [
@@ -514,6 +515,33 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             	it.lineStyle = LineStyle.SOLID
             ]
 		]}		
+		}
+		//if HyperEdgePart
+		else{
+			//Edge between parentPort and HyperEdgeNode
+			createEdge() => [
+			it.source = left
+			it.sourcePort = getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString)
+			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
+            it.target = right.parent
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]
+			//Edge from inner-Node to parentPort (right)
+			createEdge() => [
+			it.source = right
+			it.sourcePort = getOrCreateEdgePort(right, right.toString + '_to_' + left.toString)
+			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
+            it.target = right.parent
+            it.addPolyline => [
+            	it.lineWidth = 2
+            	it.lineStyle = LineStyle.SOLID
+            ]
+		]		
+					
+			}			
 		}
 	}
 
