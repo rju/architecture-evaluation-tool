@@ -1104,22 +1104,18 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             public void apply(final KEdge it) {
               it.setSource(left);
               String _string = left.toString();
-              String _plus = (_string + "_to_");
-              KNode _parent = right.getParent();
-              String _string_1 = _parent.toString();
-              String _plus_1 = (_plus + _string_1);
-              KPort _orCreateEdgePort = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(left, _plus_1);
+              KPort _orCreateEdgePort = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(left, _string);
               it.setSourcePort(_orCreateEdgePort);
+              KNode _parent = right.getParent();
               KNode _parent_1 = right.getParent();
-              KNode _parent_2 = right.getParent();
-              String _string_2 = _parent_2.toString();
-              String _plus_2 = (_string_2 + "_to_");
-              String _string_3 = left.toString();
-              String _plus_3 = (_plus_2 + _string_3);
-              KPort _orCreateEdgePort_1 = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent_1, _plus_3);
+              String _string_1 = _parent_1.toString();
+              String _plus = (_string_1 + "_to_");
+              String _string_2 = left.toString();
+              String _plus_1 = (_plus + _string_2);
+              KPort _orCreateEdgePort_1 = ModularHypergraphDiagramSynthesis.this.getOrCreateEdgePort(_parent, _plus_1);
               it.setTargetPort(_orCreateEdgePort_1);
-              KNode _parent_3 = right.getParent();
-              it.setTarget(_parent_3);
+              KNode _parent_2 = right.getParent();
+              it.setTarget(_parent_2);
               KPolyline _addPolyline = ModularHypergraphDiagramSynthesis.this._kEdgeExtensions.addPolyline(it);
               final Procedure1<KPolyline> _function = new Procedure1<KPolyline>() {
                 public void apply(final KPolyline it) {

@@ -521,7 +521,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 			//Edge between parentPort and HyperEdgeNode
 			createEdge() => [
 			it.source = left
-			it.sourcePort = getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString)
+			it.sourcePort = getOrCreateEdgePort(left, left.toString)
 			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
             it.target = right.parent
             it.addPolyline => [
