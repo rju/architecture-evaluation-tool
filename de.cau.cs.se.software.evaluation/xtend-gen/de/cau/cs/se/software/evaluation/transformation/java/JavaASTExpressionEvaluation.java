@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -185,9 +186,15 @@ public class JavaASTExpressionEvaluation {
       }
     }
     if (!_matched) {
+      if (expression instanceof LambdaExpression) {
+        _matched=true;
+        JavaASTExpressionEvaluationHelper.processLambdaExpression(((LambdaExpression)expression), sourceNode, graph, dataTypePatterns);
+      }
+    }
+    if (!_matched) {
       if (expression instanceof MethodInvocation) {
         _matched=true;
-        JavaASTExpressionEvaluationHelper.processMethodInvocation(((MethodInvocation)expression), graph, dataTypePatterns, sourceNode);
+        JavaASTExpressionEvaluationHelper.processMethodInvocation(((MethodInvocation)expression), sourceNode, graph, dataTypePatterns);
       }
     }
     if (!_matched) {

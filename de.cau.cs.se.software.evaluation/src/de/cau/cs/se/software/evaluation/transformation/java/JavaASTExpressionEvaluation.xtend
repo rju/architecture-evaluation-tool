@@ -36,6 +36,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluationHelper.*
 import org.eclipse.jdt.core.dom.QualifiedName
+import org.eclipse.jdt.core.dom.LambdaExpression
+import org.eclipse.jdt.core.dom.Block
 
 class JavaASTExpressionEvaluation {
 
@@ -89,8 +91,8 @@ class JavaASTExpressionEvaluation {
 				expression.rightOperand?.evaluate(sourceNode, graph, dataTypePatterns)
 			}
     		InstanceofExpression: expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns)
-    		//LambdaExpression:
-    		MethodInvocation: expression.processMethodInvocation(graph, dataTypePatterns, sourceNode)
+    		LambdaExpression: expression.processLambdaExpression(sourceNode, graph, dataTypePatterns)
+    		MethodInvocation: expression.processMethodInvocation(sourceNode, graph, dataTypePatterns)
     		//MethodReference:
     		//Name:
     		ParenthesizedExpression: expression.expression.evaluate(sourceNode, graph, dataTypePatterns)

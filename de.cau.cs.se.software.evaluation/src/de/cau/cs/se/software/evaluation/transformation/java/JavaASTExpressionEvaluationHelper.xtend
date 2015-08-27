@@ -1,5 +1,6 @@
 package de.cau.cs.se.software.evaluation.transformation.java
 
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Node
@@ -11,6 +12,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.IVariableBinding
 import org.eclipse.jdt.core.dom.MethodInvocation
+import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.SimpleName
 import org.eclipse.jdt.core.dom.SuperFieldAccess
 import org.eclipse.jdt.core.dom.SuperMethodInvocation
@@ -20,8 +22,9 @@ import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergrap
 
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
-import org.eclipse.jdt.core.dom.QualifiedName
-import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+import org.eclipse.jdt.core.dom.Statement
+import org.eclipse.jdt.core.dom.LambdaExpression
+import org.eclipse.jdt.core.dom.Block
 
 class JavaASTExpressionEvaluationHelper {
 	
@@ -108,8 +111,8 @@ class JavaASTExpressionEvaluationHelper {
      * @param graph the hypergraph
      * @param dataTypePatterns a list of patterns to identify data types
      */
-    def static void processMethodInvocation(MethodInvocation callee, ModularHypergraph graph, 
-    	List<String> dataTypePatterns, Node sourceNode
+    def static void processMethodInvocation(MethodInvocation callee, Node sourceNode, 
+    	ModularHypergraph graph, List<String> dataTypePatterns 
     ) {
     	val calleeTypeBinding = callee.resolveMethodBinding.declaringClass
     	/**
@@ -128,6 +131,14 @@ class JavaASTExpressionEvaluationHelper {
 	    	 */
 	    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
     	}
+    }
+    
+    def static processLambdaExpression(LambdaExpression lambda, Node sourceNode, ModularHypergraph graph, List<String> dataTypePatterns) {
+    	val body = lambda.body
+    	switch (body) {
+    		Block: JavaASTEvaluation.evaluateBody(body, sourceNode, graph, dataTypePatterns)
+    		Expression: body.evaluate(sourceNode, graph, dataTypePatterns)
+    	}	
     }
     
     /**

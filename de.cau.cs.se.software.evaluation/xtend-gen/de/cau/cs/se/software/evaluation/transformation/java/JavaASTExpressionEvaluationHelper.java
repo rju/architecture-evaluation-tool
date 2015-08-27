@@ -8,13 +8,16 @@ import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeReference;
+import de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -22,6 +25,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -130,7 +134,7 @@ public class JavaASTExpressionEvaluationHelper {
    * @param graph the hypergraph
    * @param dataTypePatterns a list of patterns to identify data types
    */
-  public static void processMethodInvocation(final MethodInvocation callee, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode) {
+  public static void processMethodInvocation(final MethodInvocation callee, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
     IMethodBinding _resolveMethodBinding = callee.resolveMethodBinding();
     final ITypeBinding calleeTypeBinding = _resolveMethodBinding.getDeclaringClass();
     boolean _isDataType = JavaHypergraphQueryHelper.isDataType(calleeTypeBinding, dataTypePatterns);
@@ -144,6 +148,23 @@ public class JavaASTExpressionEvaluationHelper {
         JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
       };
       _arguments.forEach(_function);
+    }
+  }
+  
+  public static void processLambdaExpression(final LambdaExpression lambda, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
+    final ASTNode body = lambda.getBody();
+    boolean _matched = false;
+    if (!_matched) {
+      if (body instanceof Block) {
+        _matched=true;
+        JavaASTEvaluation.evaluateBody(((Block)body), sourceNode, graph, dataTypePatterns);
+      }
+    }
+    if (!_matched) {
+      if (body instanceof Expression) {
+        _matched=true;
+        JavaASTExpressionEvaluation.evaluate(((Expression)body), sourceNode, graph, dataTypePatterns);
+      }
     }
   }
   

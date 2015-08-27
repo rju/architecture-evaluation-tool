@@ -88,6 +88,14 @@ public class JavaASTEvaluation {
     }
   }
   
+  public static void evaluateBody(final Block body, final Node sourceNode, final ModularHypergraph hypergraph, final List<String> dataTypePatterns) {
+    List _statements = body.statements();
+    final Consumer<Object> _function = (Object it) -> {
+      JavaASTEvaluation.evaluateStatement(((Statement) it), hypergraph, dataTypePatterns, sourceNode, null, null);
+    };
+    _statements.forEach(_function);
+  }
+  
   /**
    * Evaluate a single statement.
    * 
@@ -98,13 +106,13 @@ public class JavaASTEvaluation {
    * @param clazz the context class
    * @param method the context method
    */
-  private static void evaluateStatement(final Statement statement, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
+  private static void evaluateStatement(final Statement statement, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode, final TypeDeclaration clazz, final MethodDeclaration method) {
     boolean _matched = false;
     if (!_matched) {
       if (statement instanceof AssertStatement) {
         _matched=true;
         Expression _expression = ((AssertStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
       }
     }
     if (!_matched) {
@@ -112,7 +120,7 @@ public class JavaASTEvaluation {
         _matched=true;
         List _statements = ((Block)statement).statements();
         final Consumer<Object> _function = (Object it) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode, clazz, method);
         };
         _statements.forEach(_function);
       }
@@ -120,63 +128,63 @@ public class JavaASTEvaluation {
     if (!_matched) {
       if (statement instanceof ConstructorInvocation) {
         _matched=true;
-        JavaASTEvaluation.handleConstructorInvocation(((ConstructorInvocation)statement), graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.handleConstructorInvocation(((ConstructorInvocation)statement), graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
       if (statement instanceof DoStatement) {
         _matched=true;
         Expression _expression = ((DoStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((DoStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
       if (statement instanceof EnhancedForStatement) {
         _matched=true;
         Expression _expression = ((EnhancedForStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((EnhancedForStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
       if (statement instanceof ExpressionStatement) {
         _matched=true;
         Expression _expression = ((ExpressionStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
       }
     }
     if (!_matched) {
       if (statement instanceof ForStatement) {
         _matched=true;
         Expression _expression = ((ForStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         List _initializers = ((ForStatement)statement).initializers();
         final Consumer<Object> _function = (Object it) -> {
-          JavaASTExpressionEvaluation.evaluate(((Expression) it), node, graph, dataTypePatterns);
+          JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
         };
         _initializers.forEach(_function);
         List _updaters = ((ForStatement)statement).updaters();
         final Consumer<Object> _function_1 = (Object it) -> {
-          JavaASTExpressionEvaluation.evaluate(((Expression) it), node, graph, dataTypePatterns);
+          JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
         };
         _updaters.forEach(_function_1);
         Statement _body = ((ForStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
       if (statement instanceof IfStatement) {
         _matched=true;
         Expression _expression = ((IfStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _thenStatement = ((IfStatement)statement).getThenStatement();
-        JavaASTEvaluation.evaluateStatement(_thenStatement, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_thenStatement, graph, dataTypePatterns, sourceNode, clazz, method);
         Statement _elseStatement = ((IfStatement)statement).getElseStatement();
         if (_elseStatement!=null) {
-          JavaASTEvaluation.evaluateStatement(_elseStatement, graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_elseStatement, graph, dataTypePatterns, sourceNode, clazz, method);
         }
       }
     }
@@ -184,7 +192,7 @@ public class JavaASTEvaluation {
       if (statement instanceof LabeledStatement) {
         _matched=true;
         Statement _body = ((LabeledStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
@@ -192,14 +200,14 @@ public class JavaASTEvaluation {
         _matched=true;
         Expression _expression = ((ReturnStatement)statement).getExpression();
         if (_expression!=null) {
-          JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+          JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         }
       }
     }
     if (!_matched) {
       if (statement instanceof SuperConstructorInvocation) {
         _matched=true;
-        JavaASTEvaluation.handleSuperConstructorInvocation(((SuperConstructorInvocation)statement), graph, node, clazz, method);
+        JavaASTEvaluation.handleSuperConstructorInvocation(((SuperConstructorInvocation)statement), graph, sourceNode);
       }
     }
     if (!_matched) {
@@ -207,7 +215,7 @@ public class JavaASTEvaluation {
         _matched=true;
         Expression _expression = ((SwitchCase)statement).getExpression();
         if (_expression!=null) {
-          JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+          JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         }
       }
     }
@@ -215,10 +223,10 @@ public class JavaASTEvaluation {
       if (statement instanceof SwitchStatement) {
         _matched=true;
         Expression _expression = ((SwitchStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         List _statements = ((SwitchStatement)statement).statements();
         final Consumer<Object> _function = (Object it) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode, clazz, method);
         };
         _statements.forEach(_function);
       }
@@ -227,32 +235,32 @@ public class JavaASTEvaluation {
       if (statement instanceof SynchronizedStatement) {
         _matched=true;
         Expression _expression = ((SynchronizedStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Block _body = ((SynchronizedStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
       if (statement instanceof ThrowStatement) {
         _matched=true;
         Expression _expression = ((ThrowStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
       }
     }
     if (!_matched) {
       if (statement instanceof TryStatement) {
         _matched=true;
         Block _body = ((TryStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
         List _catchClauses = ((TryStatement)statement).catchClauses();
         final Consumer<Object> _function = (Object it) -> {
           Block _body_1 = ((CatchClause) it).getBody();
-          JavaASTEvaluation.evaluateStatement(_body_1, graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_body_1, graph, dataTypePatterns, sourceNode, clazz, method);
         };
         _catchClauses.forEach(_function);
         Block _finally = ((TryStatement)statement).getFinally();
         if (_finally!=null) {
-          JavaASTEvaluation.evaluateStatement(_finally, graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_finally, graph, dataTypePatterns, sourceNode, clazz, method);
         }
       }
     }
@@ -263,7 +271,7 @@ public class JavaASTEvaluation {
         final Consumer<Object> _function = (Object it) -> {
           Expression _initializer = ((VariableDeclarationFragment) it).getInitializer();
           if (_initializer!=null) {
-            JavaASTExpressionEvaluation.evaluate(_initializer, node, graph, dataTypePatterns);
+            JavaASTExpressionEvaluation.evaluate(_initializer, sourceNode, graph, dataTypePatterns);
           }
         };
         _fragments.forEach(_function);
@@ -273,9 +281,9 @@ public class JavaASTEvaluation {
       if (statement instanceof WhileStatement) {
         _matched=true;
         Expression _expression = ((WhileStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, node, graph, dataTypePatterns);
+        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((WhileStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, node, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
       }
     }
     if (!_matched) {
@@ -307,30 +315,33 @@ public class JavaASTEvaluation {
   /**
    * Handle an constructor call to the super class. This could be a method which is part of the framework.
    */
-  public static boolean handleSuperConstructorInvocation(final SuperConstructorInvocation invocation, final ModularHypergraph graph, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static boolean handleSuperConstructorInvocation(final SuperConstructorInvocation invocation, final ModularHypergraph graph, final Node sourceNode) {
     boolean _xblockexpression = false;
     {
-      final IMethodBinding methodBinding = invocation.resolveConstructorBinding();
+      NodeReference _derivedFrom = sourceNode.getDerivedFrom();
+      Object _method = ((MethodTrace) _derivedFrom).getMethod();
+      final IMethodBinding sourceMethodBinding = ((IMethodBinding) _method);
+      final IMethodBinding targetMethodBinding = invocation.resolveConstructorBinding();
       EList<Module> _modules = graph.getModules();
       final Function1<Module, Boolean> _function = (Module it) -> {
         boolean _xblockexpression_1 = false;
         {
-          ModuleReference _derivedFrom = it.getDerivedFrom();
-          final Object type = ((TypeTrace) _derivedFrom).getType();
+          ModuleReference _derivedFrom_1 = it.getDerivedFrom();
+          final Object type = ((TypeTrace) _derivedFrom_1).getType();
           boolean _switchResult = false;
           boolean _matched = false;
           if (!_matched) {
             if (type instanceof TypeDeclaration) {
               _matched=true;
               ITypeBinding _resolveBinding = ((TypeDeclaration)type).resolveBinding();
-              ITypeBinding _declaringClass = methodBinding.getDeclaringClass();
+              ITypeBinding _declaringClass = targetMethodBinding.getDeclaringClass();
               _switchResult = _resolveBinding.isSubTypeCompatible(_declaringClass);
             }
           }
           if (!_matched) {
             if (type instanceof ITypeBinding) {
               _matched=true;
-              ITypeBinding _declaringClass = methodBinding.getDeclaringClass();
+              ITypeBinding _declaringClass = targetMethodBinding.getDeclaringClass();
               _switchResult = ((ITypeBinding)type).isSubTypeCompatible(_declaringClass);
             }
           }
@@ -357,21 +368,21 @@ public class JavaASTEvaluation {
       final Function1<Node, Boolean> _function_1 = (Node it) -> {
         boolean _xblockexpression_1 = false;
         {
-          NodeReference _derivedFrom = it.getDerivedFrom();
-          final Object localMethod = ((MethodTrace) _derivedFrom).getMethod();
+          NodeReference _derivedFrom_1 = it.getDerivedFrom();
+          final Object localMethod = ((MethodTrace) _derivedFrom_1).getMethod();
           boolean _switchResult = false;
           boolean _matched = false;
           if (!_matched) {
             if (localMethod instanceof MethodDeclaration) {
               _matched=true;
               IMethodBinding _resolveBinding = ((MethodDeclaration)localMethod).resolveBinding();
-              _switchResult = _resolveBinding.isSubsignature(methodBinding);
+              _switchResult = _resolveBinding.isSubsignature(targetMethodBinding);
             }
           }
           if (!_matched) {
             if (localMethod instanceof IMethodBinding) {
               _matched=true;
-              _switchResult = ((IMethodBinding)localMethod).isSubsignature(methodBinding);
+              _switchResult = ((IMethodBinding)localMethod).isSubsignature(targetMethodBinding);
             }
           }
           if (!_matched) {
@@ -384,17 +395,17 @@ public class JavaASTEvaluation {
       Node targetNode = IterableExtensions.<Node>findFirst(_nodes, _function_1);
       boolean _equals_1 = Objects.equal(targetNode, null);
       if (_equals_1) {
-        Node _createNodeForSuperConstructorInvocation = JavaHypergraphElementFactory.createNodeForSuperConstructorInvocation(methodBinding);
+        Node _createNodeForSuperConstructorInvocation = JavaHypergraphElementFactory.createNodeForSuperConstructorInvocation(targetMethodBinding);
         targetNode = _createNodeForSuperConstructorInvocation;
         EList<Node> _nodes_1 = module.getNodes();
         _nodes_1.add(targetNode);
         EList<Node> _nodes_2 = graph.getNodes();
         _nodes_2.add(targetNode);
       }
-      final Edge edge = JavaHypergraphElementFactory.createCallEdge(clazz, method, methodBinding);
+      final Edge edge = JavaHypergraphElementFactory.createCallEdge(sourceMethodBinding, targetMethodBinding);
       EList<Edge> _edges = graph.getEdges();
       _edges.add(edge);
-      EList<Edge> _edges_1 = node.getEdges();
+      EList<Edge> _edges_1 = sourceNode.getEdges();
       _edges_1.add(edge);
       EList<Edge> _edges_2 = targetNode.getEdges();
       _xblockexpression = _edges_2.add(edge);
@@ -406,10 +417,12 @@ public class JavaASTEvaluation {
    * Handle an constructor 'this' invocation. This requires (a) an call edge from
    * this method to the called constructor and (b) an evaluation of all parameters.
    */
-  private static void handleConstructorInvocation(final ConstructorInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
-    final IMethodBinding sourceBinding = method.resolveBinding();
-    final IMethodBinding targetBinding = invocation.resolveConstructorBinding();
-    final Edge edge = JavaHypergraphElementFactory.createCallEdge(sourceBinding, targetBinding);
+  private static void handleConstructorInvocation(final ConstructorInvocation invocation, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode) {
+    NodeReference _derivedFrom = sourceNode.getDerivedFrom();
+    Object _method = ((MethodTrace) _derivedFrom).getMethod();
+    final IMethodBinding sourceMethodBinding = ((IMethodBinding) _method);
+    final IMethodBinding targetMethodBinding = invocation.resolveConstructorBinding();
+    final Edge edge = JavaHypergraphElementFactory.createCallEdge(sourceMethodBinding, targetMethodBinding);
     EList<Edge> _edges = graph.getEdges();
     final Function1<Edge, Boolean> _function = (Edge it) -> {
       String _name = it.getName();
@@ -420,10 +433,10 @@ public class JavaASTEvaluation {
     boolean _not = (!_exists);
     if (_not) {
       EList<Node> _nodes = graph.getNodes();
-      Node targetNode = JavaHypergraphQueryHelper.findNodeForConstructorBinding(_nodes, targetBinding);
+      Node targetNode = JavaHypergraphQueryHelper.findNodeForConstructorBinding(_nodes, targetMethodBinding);
       boolean _equals = Objects.equal(targetNode, null);
       if (_equals) {
-        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(targetBinding);
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(targetMethodBinding);
         String _plus = ("Missing source node: This is an error!! " + _determineFullyQualifiedName);
         throw new UnsupportedOperationException(_plus);
       } else {
@@ -431,13 +444,13 @@ public class JavaASTEvaluation {
         _edges_1.add(edge);
         EList<Edge> _edges_2 = targetNode.getEdges();
         _edges_2.add(edge);
-        EList<Edge> _edges_3 = node.getEdges();
+        EList<Edge> _edges_3 = sourceNode.getEdges();
         _edges_3.add(edge);
       }
     }
     List _arguments = invocation.arguments();
     final Consumer<Object> _function_1 = (Object it) -> {
-      JavaASTExpressionEvaluation.evaluate(((Expression) it), node, graph, dataTypePatterns);
+      JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
     };
     _arguments.forEach(_function_1);
   }
