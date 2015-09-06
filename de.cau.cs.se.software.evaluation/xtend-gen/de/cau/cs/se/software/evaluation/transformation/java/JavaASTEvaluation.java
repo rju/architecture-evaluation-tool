@@ -61,7 +61,7 @@ public class JavaASTEvaluation {
    * @param clazz declaring class of the given method
    * @param method the method to be evaluated for property access and method calls
    */
-  public static void evaluteMethod(final ModularHypergraph graph, final List<String> dataTypePatterns, final Node node, final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static void evaluteMethod(final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode, final TypeDeclaration clazz, final MethodDeclaration method) {
     boolean _and = false;
     boolean _isInterface = clazz.isInterface();
     boolean _not = (!_isInterface);
@@ -81,19 +81,11 @@ public class JavaASTEvaluation {
         Block _body_1 = method.getBody();
         List _statements_1 = _body_1.statements();
         final Consumer<Object> _function = (Object statement) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) statement), graph, dataTypePatterns, node, clazz, method);
+          JavaASTEvaluation.evaluateStatement(((Statement) statement), graph, dataTypePatterns, sourceNode);
         };
         _statements_1.forEach(_function);
       }
     }
-  }
-  
-  public static void evaluateBody(final Block body, final Node sourceNode, final ModularHypergraph hypergraph, final List<String> dataTypePatterns) {
-    List _statements = body.statements();
-    final Consumer<Object> _function = (Object it) -> {
-      JavaASTEvaluation.evaluateStatement(((Statement) it), hypergraph, dataTypePatterns, sourceNode, null, null);
-    };
-    _statements.forEach(_function);
   }
   
   /**
@@ -106,7 +98,7 @@ public class JavaASTEvaluation {
    * @param clazz the context class
    * @param method the context method
    */
-  private static void evaluateStatement(final Statement statement, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode, final TypeDeclaration clazz, final MethodDeclaration method) {
+  public static void evaluateStatement(final Statement statement, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode) {
     boolean _matched = false;
     if (!_matched) {
       if (statement instanceof AssertStatement) {
@@ -120,7 +112,7 @@ public class JavaASTEvaluation {
         _matched=true;
         List _statements = ((Block)statement).statements();
         final Consumer<Object> _function = (Object it) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode, clazz, method);
+          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode);
         };
         _statements.forEach(_function);
       }
@@ -137,7 +129,7 @@ public class JavaASTEvaluation {
         Expression _expression = ((DoStatement)statement).getExpression();
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((DoStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
@@ -146,7 +138,7 @@ public class JavaASTEvaluation {
         Expression _expression = ((EnhancedForStatement)statement).getExpression();
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((EnhancedForStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
@@ -172,7 +164,7 @@ public class JavaASTEvaluation {
         };
         _updaters.forEach(_function_1);
         Statement _body = ((ForStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
@@ -181,10 +173,10 @@ public class JavaASTEvaluation {
         Expression _expression = ((IfStatement)statement).getExpression();
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _thenStatement = ((IfStatement)statement).getThenStatement();
-        JavaASTEvaluation.evaluateStatement(_thenStatement, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_thenStatement, graph, dataTypePatterns, sourceNode);
         Statement _elseStatement = ((IfStatement)statement).getElseStatement();
         if (_elseStatement!=null) {
-          JavaASTEvaluation.evaluateStatement(_elseStatement, graph, dataTypePatterns, sourceNode, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_elseStatement, graph, dataTypePatterns, sourceNode);
         }
       }
     }
@@ -192,7 +184,7 @@ public class JavaASTEvaluation {
       if (statement instanceof LabeledStatement) {
         _matched=true;
         Statement _body = ((LabeledStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
@@ -226,7 +218,7 @@ public class JavaASTEvaluation {
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         List _statements = ((SwitchStatement)statement).statements();
         final Consumer<Object> _function = (Object it) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode, clazz, method);
+          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode);
         };
         _statements.forEach(_function);
       }
@@ -237,7 +229,7 @@ public class JavaASTEvaluation {
         Expression _expression = ((SynchronizedStatement)statement).getExpression();
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Block _body = ((SynchronizedStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {
@@ -251,16 +243,16 @@ public class JavaASTEvaluation {
       if (statement instanceof TryStatement) {
         _matched=true;
         Block _body = ((TryStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
         List _catchClauses = ((TryStatement)statement).catchClauses();
         final Consumer<Object> _function = (Object it) -> {
           Block _body_1 = ((CatchClause) it).getBody();
-          JavaASTEvaluation.evaluateStatement(_body_1, graph, dataTypePatterns, sourceNode, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_body_1, graph, dataTypePatterns, sourceNode);
         };
         _catchClauses.forEach(_function);
         Block _finally = ((TryStatement)statement).getFinally();
         if (_finally!=null) {
-          JavaASTEvaluation.evaluateStatement(_finally, graph, dataTypePatterns, sourceNode, clazz, method);
+          JavaASTEvaluation.evaluateStatement(_finally, graph, dataTypePatterns, sourceNode);
         }
       }
     }
@@ -283,7 +275,7 @@ public class JavaASTEvaluation {
         Expression _expression = ((WhileStatement)statement).getExpression();
         JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
         Statement _body = ((WhileStatement)statement).getBody();
-        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode, clazz, method);
+        JavaASTEvaluation.evaluateStatement(_body, graph, dataTypePatterns, sourceNode);
       }
     }
     if (!_matched) {

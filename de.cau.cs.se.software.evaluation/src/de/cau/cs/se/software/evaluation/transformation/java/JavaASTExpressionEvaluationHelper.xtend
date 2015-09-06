@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.ThisExpression
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
 
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
 import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.LambdaExpression
@@ -133,10 +134,19 @@ class JavaASTExpressionEvaluationHelper {
     	}
     }
     
-    def static processLambdaExpression(LambdaExpression lambda, Node sourceNode, ModularHypergraph graph, List<String> dataTypePatterns) {
+    /**
+     * Process the invocation of a method of the super class as an call edge. If the target node is part of a framework, create the node
+     * and place it in the graph.
+     * 
+     * @param lambda the lambda expression
+     * @param sourceNode the context node
+     * @param graph the modular graph
+     * @param dataTypePatterns a list of patterns to identify data types
+     */
+    def static void processLambdaExpression(LambdaExpression lambda, Node sourceNode, ModularHypergraph graph, List<String> dataTypePatterns) {
     	val body = lambda.body
     	switch (body) {
-    		Block: JavaASTEvaluation.evaluateBody(body, sourceNode, graph, dataTypePatterns)
+    		Block: body.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
     		Expression: body.evaluate(sourceNode, graph, dataTypePatterns)
     	}	
     }
@@ -150,7 +160,7 @@ class JavaASTExpressionEvaluationHelper {
      * @param graph the modular graph
      * @param dataTypePatterns a list of patterns to identify data types
      */
-    def static processSuperMethodInvocation(SuperMethodInvocation callee, Node sourceNode,
+    def static void processSuperMethodInvocation(SuperMethodInvocation callee, Node sourceNode,
     	ModularHypergraph graph, List<String> dataTypePatterns
     ) {
 		val targetSuperMethodBinding = callee.resolveMethodBinding
@@ -170,7 +180,7 @@ class JavaASTExpressionEvaluationHelper {
 	 * @param sourceNode the node causing the access
 	 * @param graph the graph containing the edge
 	 */	
-	def static processSimpleName(SimpleName name, Node sourceNode, ModularHypergraph graph)  {
+	def static void processSimpleName(SimpleName name, Node sourceNode, ModularHypergraph graph)  {
 		val nameBinding = name.resolveBinding
 		switch(nameBinding) {
 			IVariableBinding: {
@@ -192,7 +202,7 @@ class JavaASTExpressionEvaluationHelper {
 	 * @param sourceNode the node causing the access
 	 * @param graph the graph containing the edge
 	 */	
-	def static processQualifiedName(QualifiedName name, Node sourceNode, ModularHypergraph graph)  {
+	def static void processQualifiedName(QualifiedName name, Node sourceNode, ModularHypergraph graph)  {
 		// TODO most likely the qualifier should be handled here
 		val nameBinding = name.resolveBinding
 		switch(nameBinding) {

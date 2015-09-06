@@ -54,19 +54,15 @@ class JavaASTEvaluation {
 	 * @param clazz declaring class of the given method
 	 * @param method the method to be evaluated for property access and method calls
 	 */
-	public static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node node, TypeDeclaration clazz, MethodDeclaration method) {
-		// System.out.println("evaluateMethod <" + node.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
+	public static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, TypeDeclaration clazz, MethodDeclaration method) {
+		// System.out.println("evaluateMethod <" + sourceNode.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		if (!clazz.interface && !Modifier.isAbstract(method.getModifiers())) {
 			if (method.body.statements != null) {
-				method.body.statements.forEach[statement | (statement as Statement).evaluateStatement(graph, dataTypePatterns, node, clazz, method)]
+				method.body.statements.forEach[statement | (statement as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
 			}
 		}
 	}
-	
-	def static evaluateBody(Block body, Node sourceNode, ModularHypergraph hypergraph, List<String> dataTypePatterns) {
-		body.statements.forEach[(it as Statement).evaluateStatement(hypergraph, dataTypePatterns, sourceNode, null, null)]
-	}
-	
+
 	/**
 	 * Evaluate a single statement.
 	 * 
@@ -77,54 +73,52 @@ class JavaASTEvaluation {
 	 * @param clazz the context class
 	 * @param method the context method
 	 */
-	private static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, 
-		Node sourceNode, TypeDeclaration clazz, MethodDeclaration method
-	) {
+	public static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode) {
 		// System.out.println("statement evaluate <" + node.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		switch (statement) {
 			AssertStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    		Block: statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)]
+    		Block: statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
     		ConstructorInvocation: handleConstructorInvocation(statement, graph, dataTypePatterns, sourceNode)
     		DoStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
     		EnhancedForStatement: {
     			/* we ignore local value declarations here (see paper) */
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
     		ExpressionStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
     		ForStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
     			statement.initializers.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
     			statement.updaters.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
     		IfStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.thenStatement.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
-    			statement.elseStatement?.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.thenStatement.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.elseStatement?.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
-    		LabeledStatement: statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    		LabeledStatement: statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		ReturnStatement: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns)
     		SuperConstructorInvocation: handleSuperConstructorInvocation(statement, graph, sourceNode)
     		SwitchCase: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns)
     		SwitchStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)]
+    			statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
     		}
     		SynchronizedStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
     		ThrowStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
     		TryStatement: {
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     			statement.catchClauses.forEach[
-    				(it as CatchClause).body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    				(it as CatchClause).body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     			]
-    			statement.^finally?.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.^finally?.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
     		// TODO TypeDeclarationStatement: for now this must be ignored. However, I am not totally sure if the could 
     		// not happen inside a method anyway, as the whole AST is a little weird
@@ -133,7 +127,7 @@ class JavaASTEvaluation {
     		]
     		WhileStatement: {
     			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, clazz, method)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
     		}
 			BreakStatement, ContinueStatement, EmptyStatement: return
     		default:

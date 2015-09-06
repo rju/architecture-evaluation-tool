@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -151,13 +152,26 @@ public class JavaASTExpressionEvaluationHelper {
     }
   }
   
+  /**
+   * Process the invocation of a method of the super class as an call edge. If the target node is part of a framework, create the node
+   * and place it in the graph.
+   * 
+   * @param lambda the lambda expression
+   * @param sourceNode the context node
+   * @param graph the modular graph
+   * @param dataTypePatterns a list of patterns to identify data types
+   */
   public static void processLambdaExpression(final LambdaExpression lambda, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
     final ASTNode body = lambda.getBody();
     boolean _matched = false;
     if (!_matched) {
       if (body instanceof Block) {
         _matched=true;
-        JavaASTEvaluation.evaluateBody(((Block)body), sourceNode, graph, dataTypePatterns);
+        List _statements = ((Block)body).statements();
+        final Consumer<Object> _function = (Object it) -> {
+          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode);
+        };
+        _statements.forEach(_function);
       }
     }
     if (!_matched) {
@@ -197,39 +211,27 @@ public class JavaASTExpressionEvaluationHelper {
    * @param sourceNode the node causing the access
    * @param graph the graph containing the edge
    */
-  public static boolean processSimpleName(final SimpleName name, final Node sourceNode, final ModularHypergraph graph) {
-    boolean _xblockexpression = false;
-    {
-      final IBinding nameBinding = name.resolveBinding();
-      boolean _switchResult = false;
-      boolean _matched = false;
-      if (!_matched) {
-        if (nameBinding instanceof IVariableBinding) {
-          _matched=true;
-          boolean _xblockexpression_1 = false;
-          {
-            EList<Edge> _edges = graph.getEdges();
-            final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
-            boolean _xifexpression = false;
-            boolean _notEquals = (!Objects.equal(edge, null));
-            if (_notEquals) {
-              EList<Edge> _edges_1 = sourceNode.getEdges();
-              _xifexpression = _edges_1.add(edge);
-            }
-            _xblockexpression_1 = _xifexpression;
-          }
-          _switchResult = _xblockexpression_1;
+  public static void processSimpleName(final SimpleName name, final Node sourceNode, final ModularHypergraph graph) {
+    final IBinding nameBinding = name.resolveBinding();
+    boolean _matched = false;
+    if (!_matched) {
+      if (nameBinding instanceof IVariableBinding) {
+        _matched=true;
+        EList<Edge> _edges = graph.getEdges();
+        final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
+        boolean _notEquals = (!Objects.equal(edge, null));
+        if (_notEquals) {
+          EList<Edge> _edges_1 = sourceNode.getEdges();
+          _edges_1.add(edge);
         }
       }
-      if (!_matched) {
-        Class<? extends IBinding> _class = nameBinding.getClass();
-        String _plus = ("Binding type " + _class);
-        String _plus_1 = (_plus + " is not supported by processSimpleName");
-        throw new UnsupportedOperationException(_plus_1);
-      }
-      _xblockexpression = _switchResult;
     }
-    return _xblockexpression;
+    if (!_matched) {
+      Class<? extends IBinding> _class = nameBinding.getClass();
+      String _plus = ("Binding type " + _class);
+      String _plus_1 = (_plus + " is not supported by processSimpleName");
+      throw new UnsupportedOperationException(_plus_1);
+    }
   }
   
   /**
@@ -240,39 +242,27 @@ public class JavaASTExpressionEvaluationHelper {
    * @param sourceNode the node causing the access
    * @param graph the graph containing the edge
    */
-  public static boolean processQualifiedName(final QualifiedName name, final Node sourceNode, final ModularHypergraph graph) {
-    boolean _xblockexpression = false;
-    {
-      final IBinding nameBinding = name.resolveBinding();
-      boolean _switchResult = false;
-      boolean _matched = false;
-      if (!_matched) {
-        if (nameBinding instanceof IVariableBinding) {
-          _matched=true;
-          boolean _xblockexpression_1 = false;
-          {
-            EList<Edge> _edges = graph.getEdges();
-            final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
-            boolean _xifexpression = false;
-            boolean _notEquals = (!Objects.equal(edge, null));
-            if (_notEquals) {
-              EList<Edge> _edges_1 = sourceNode.getEdges();
-              _xifexpression = _edges_1.add(edge);
-            }
-            _xblockexpression_1 = _xifexpression;
-          }
-          _switchResult = _xblockexpression_1;
+  public static void processQualifiedName(final QualifiedName name, final Node sourceNode, final ModularHypergraph graph) {
+    final IBinding nameBinding = name.resolveBinding();
+    boolean _matched = false;
+    if (!_matched) {
+      if (nameBinding instanceof IVariableBinding) {
+        _matched=true;
+        EList<Edge> _edges = graph.getEdges();
+        final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
+        boolean _notEquals = (!Objects.equal(edge, null));
+        if (_notEquals) {
+          EList<Edge> _edges_1 = sourceNode.getEdges();
+          _edges_1.add(edge);
         }
       }
-      if (!_matched) {
-        Class<? extends IBinding> _class = nameBinding.getClass();
-        String _plus = ("Binding type " + _class);
-        String _plus_1 = (_plus + " is not supported by processSimpleName");
-        throw new UnsupportedOperationException(_plus_1);
-      }
-      _xblockexpression = _switchResult;
     }
-    return _xblockexpression;
+    if (!_matched) {
+      Class<? extends IBinding> _class = nameBinding.getClass();
+      String _plus = ("Binding type " + _class);
+      String _plus_1 = (_plus + " is not supported by processSimpleName");
+      throw new UnsupportedOperationException(_plus_1);
+    }
   }
   
   /**
