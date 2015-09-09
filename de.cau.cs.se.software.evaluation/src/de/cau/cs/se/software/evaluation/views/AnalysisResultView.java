@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
 
 import de.cau.cs.se.software.evaluation.Activator;
-import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 
 /**
  * The Main analysis result view class.
@@ -50,7 +50,7 @@ public class AnalysisResultView extends ViewPart {
 	private Action exportDataAction;
 	private Action exportHypergraphAction;
 	private Action visualizeAction;
-	private ModularHypergraph graph = null;
+	private Hypergraph graph = null;
 	private IProject project = null;
 
 	/**
@@ -195,7 +195,7 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
-	public void setGraph(final ModularHypergraph graph) {
+	public void setHypergraph(final Hypergraph graph) {
 		this.graph = graph;
 	}
 

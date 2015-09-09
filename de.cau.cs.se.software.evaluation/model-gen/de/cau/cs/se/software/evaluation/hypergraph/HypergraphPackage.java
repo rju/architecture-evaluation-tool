@@ -750,6 +750,43 @@ public interface HypergraphPackage extends EPackage {
 	int CALLER_CALLEE_TRACE_OPERATION_COUNT = EDGE_REFERENCE_OPERATION_COUNT + 0;
 
 	/**
+	 * The meta object id for the '{@link de.cau.cs.se.software.evaluation.hypergraph.impl.ModelElementTraceImpl <em>Model Element Trace</em>}' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see de.cau.cs.se.software.evaluation.hypergraph.impl.ModelElementTraceImpl
+	 * @see de.cau.cs.se.software.evaluation.hypergraph.impl.HypergraphPackageImpl#getModelElementTrace()
+	 * @generated
+	 */
+	int MODEL_ELEMENT_TRACE = 17;
+
+	/**
+	 * The feature id for the '<em><b>Element</b></em>' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_ELEMENT_TRACE__ELEMENT = EDGE_REFERENCE_FEATURE_COUNT + 0;
+
+	/**
+	 * The number of structural features of the '<em>Model Element Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_ELEMENT_TRACE_FEATURE_COUNT = EDGE_REFERENCE_FEATURE_COUNT + 1;
+
+	/**
+	 * The number of operations of the '<em>Model Element Trace</em>' class.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int MODEL_ELEMENT_TRACE_OPERATION_COUNT = EDGE_REFERENCE_OPERATION_COUNT + 0;
+
+	/**
 	 * The meta object id for the '{@link de.cau.cs.se.software.evaluation.hypergraph.EModuleKind <em>EModule Kind</em>}' enum.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -757,7 +794,7 @@ public interface HypergraphPackage extends EPackage {
 	 * @see de.cau.cs.se.software.evaluation.hypergraph.impl.HypergraphPackageImpl#getEModuleKind()
 	 * @generated
 	 */
-	int EMODULE_KIND = 17;
+	int EMODULE_KIND = 18;
 
 
 	/**
@@ -1140,6 +1177,27 @@ public interface HypergraphPackage extends EPackage {
 	EAttribute getCallerCalleeTrace_Callee();
 
 	/**
+	 * Returns the meta object for class '{@link de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace <em>Model Element Trace</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for class '<em>Model Element Trace</em>'.
+	 * @see de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace
+	 * @generated
+	 */
+	EClass getModelElementTrace();
+
+	/**
+	 * Returns the meta object for the reference '{@link de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace#getElement <em>Element</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the reference '<em>Element</em>'.
+	 * @see de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace#getElement()
+	 * @see #getModelElementTrace()
+	 * @generated
+	 */
+	EReference getModelElementTrace_Element();
+
+	/**
 	 * Returns the meta object for enum '{@link de.cau.cs.se.software.evaluation.hypergraph.EModuleKind <em>EModule Kind</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1493,6 +1551,24 @@ public interface HypergraphPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute CALLER_CALLEE_TRACE__CALLEE = eINSTANCE.getCallerCalleeTrace_Callee();
+
+		/**
+		 * The meta object literal for the '{@link de.cau.cs.se.software.evaluation.hypergraph.impl.ModelElementTraceImpl <em>Model Element Trace</em>}' class.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see de.cau.cs.se.software.evaluation.hypergraph.impl.ModelElementTraceImpl
+		 * @see de.cau.cs.se.software.evaluation.hypergraph.impl.HypergraphPackageImpl#getModelElementTrace()
+		 * @generated
+		 */
+		EClass MODEL_ELEMENT_TRACE = eINSTANCE.getModelElementTrace();
+
+		/**
+		 * The meta object literal for the '<em><b>Element</b></em>' reference feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference MODEL_ELEMENT_TRACE__ELEMENT = eINSTANCE.getModelElementTrace_Element();
 
 		/**
 		 * The meta object literal for the '{@link de.cau.cs.se.software.evaluation.hypergraph.EModuleKind <em>EModule Kind</em>}' enum.

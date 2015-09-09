@@ -28,12 +28,12 @@ import org.eclipse.emf.ecore.util.EObjectResolvingEList;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.impl.ModuleImpl#getNodes <em>Nodes</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.impl.ModuleImpl#getDerivedFrom <em>Derived From</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.impl.ModuleImpl#getKind <em>Kind</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */

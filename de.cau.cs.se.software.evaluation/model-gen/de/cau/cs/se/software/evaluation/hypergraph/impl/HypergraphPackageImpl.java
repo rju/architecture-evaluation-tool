@@ -13,6 +13,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory;
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage;
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace;
+import de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.ModuleReference;
@@ -156,6 +157,13 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * @generated
 	 */
 	private EClass callerCalleeTraceEClass = null;
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EClass modelElementTraceEClass = null;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -554,6 +562,24 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EClass getModelElementTrace() {
+		return modelElementTraceEClass;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EReference getModelElementTrace_Element() {
+		return (EReference)modelElementTraceEClass.getEStructuralFeatures().get(0);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public EEnum getEModuleKind() {
 		return eModuleKindEEnum;
 	}
@@ -639,6 +665,9 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLER);
 		createEAttribute(callerCalleeTraceEClass, CALLER_CALLEE_TRACE__CALLEE);
 
+		modelElementTraceEClass = createEClass(MODEL_ELEMENT_TRACE);
+		createEReference(modelElementTraceEClass, MODEL_ELEMENT_TRACE__ELEMENT);
+
 		// Create enums
 		eModuleKindEEnum = createEEnum(EMODULE_KIND);
 	}
@@ -686,6 +715,9 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		fieldTraceEClass.getESuperTypes().add(this.getEdgeReference());
 		methodTraceEClass.getESuperTypes().add(this.getNodeReference());
 		callerCalleeTraceEClass.getESuperTypes().add(this.getEdgeReference());
+		modelElementTraceEClass.getESuperTypes().add(this.getEdgeReference());
+		modelElementTraceEClass.getESuperTypes().add(this.getModuleReference());
+		modelElementTraceEClass.getESuperTypes().add(this.getNodeReference());
 
 		// Initialize classes, features, and operations; add parameters
 		initEClass(hypergraphEClass, Hypergraph.class, "Hypergraph", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
@@ -740,6 +772,9 @@ public class HypergraphPackageImpl extends EPackageImpl implements HypergraphPac
 		initEClass(callerCalleeTraceEClass, CallerCalleeTrace.class, "CallerCalleeTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getCallerCalleeTrace_Caller(), ecorePackage.getEJavaObject(), "caller", null, 1, 1, CallerCalleeTrace.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getCallerCalleeTrace_Callee(), ecorePackage.getEJavaObject(), "callee", null, 1, 1, CallerCalleeTrace.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+		initEClass(modelElementTraceEClass, ModelElementTrace.class, "ModelElementTrace", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+		initEReference(getModelElementTrace_Element(), ecorePackage.getEObject(), null, "element", null, 0, 1, ModelElementTrace.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		// Initialize enums and add enum literals
 		initEEnum(eModuleKindEEnum, EModuleKind.class, "EModuleKind");

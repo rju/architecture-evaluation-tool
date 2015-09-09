@@ -11,10 +11,10 @@ import org.eclipse.emf.ecore.EObject;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.NamedElement#getName <em>Name</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getNamedElement()
  * @model

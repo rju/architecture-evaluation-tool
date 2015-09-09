@@ -10,11 +10,11 @@ package de.cau.cs.se.software.evaluation.hypergraph;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.CallerCalleeTrace#getCaller <em>Caller</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.CallerCalleeTrace#getCallee <em>Callee</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getCallerCalleeTrace()
  * @model

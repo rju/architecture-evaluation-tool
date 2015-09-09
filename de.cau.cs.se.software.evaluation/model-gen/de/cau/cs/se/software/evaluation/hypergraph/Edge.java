@@ -10,10 +10,10 @@ package de.cau.cs.se.software.evaluation.hypergraph;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Edge#getDerivedFrom <em>Derived From</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getEdge()
  * @model

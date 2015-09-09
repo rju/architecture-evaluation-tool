@@ -175,6 +175,15 @@ public interface HypergraphFactory extends EFactory {
 	CallerCalleeTrace createCallerCalleeTrace();
 
 	/**
+	 * Returns a new object of class '<em>Model Element Trace</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Model Element Trace</em>'.
+	 * @generated
+	 */
+	ModelElementTrace createModelElementTrace();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

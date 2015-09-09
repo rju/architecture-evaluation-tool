@@ -10,10 +10,10 @@ package de.cau.cs.se.software.evaluation.hypergraph;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.MethodTrace#getMethod <em>Method</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getMethodTrace()
  * @model

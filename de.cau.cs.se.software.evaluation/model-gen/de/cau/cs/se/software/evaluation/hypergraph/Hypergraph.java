@@ -13,11 +13,11 @@ import org.eclipse.emf.ecore.EObject;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Hypergraph#getNodes <em>Nodes</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Hypergraph#getEdges <em>Edges</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getHypergraph()
  * @model

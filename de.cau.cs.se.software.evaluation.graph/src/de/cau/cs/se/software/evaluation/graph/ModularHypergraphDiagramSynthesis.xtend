@@ -465,7 +465,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		//System.out.println("draw edge " + left + " " + right)
 		
 		//draw edges direct iff same parentNodes
-		if(right.parent.equals(left.parent)){		
+		if(right.parent.equals(left.parent)) {		
 		createEdge() => [
 			it.source = left
             it.target = right

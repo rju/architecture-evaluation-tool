@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
-import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 
 /**
  * Handles Actions for Buttons in AnalysisResultView.
@@ -90,7 +90,7 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Graph'-Button in AnalysisResultView.
 	 */
-	protected void exportGraph(final ModularHypergraph model, final Shell shell, final IProject project) throws IOException {
+	protected void exportGraph(final Hypergraph model, final Shell shell, final IProject project) throws IOException {
 
 		if (model == null) {
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");

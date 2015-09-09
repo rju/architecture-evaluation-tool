@@ -11,11 +11,11 @@ import org.eclipse.emf.common.util.EList;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Node#getEdges <em>Edges</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Node#getDerivedFrom <em>Derived From</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getNode()
  * @model

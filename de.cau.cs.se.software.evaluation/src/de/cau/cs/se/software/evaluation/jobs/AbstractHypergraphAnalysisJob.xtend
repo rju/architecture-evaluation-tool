@@ -27,7 +27,14 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 
+/**
+ * Abstract class implementing the basic metrics of the Edward B. Allen entropy
+ * based metrics based on a modular hypergraph formalism
+ * 
+ * @author Reiner Jung
+ */
 abstract class AbstractHypergraphAnalysisJob extends Job {
 
 	protected val IProject project
@@ -37,10 +44,85 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		this.project = project
 	}
 	
-	/**
-	 * Calculate cohesion of a graph.
+	/** 
+	 * Calculating system size based on input hypergraph.
+	 * 
+	 * @param inputHypergraph a hypergraph which will be interpreted as a hypergraph without modules.
+	 * @param monitor Eclipse progress monitor
+	 * @param result handler for the result model
+	 * 
+	 * @return the calculated information size of the hypergraph
 	 */
-	def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result, double coupling) {
+	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+		val hypergraphSize = new TransformationHypergraphSize(monitor)
+		hypergraphSize.name = "Calculate system size"
+		hypergraphSize.input = inputHypergraph
+		hypergraphSize.transform
+
+		result.values.add(new NamedValue(project.project.name, "hypergraph size", hypergraphSize.result))
+		updateView(inputHypergraph)
+		
+		return hypergraphSize.result
+	}
+	
+	/**
+	 * Calculate graph complexity.
+	 * 
+	 * @param inputHypergraph a hypergraph which will be interpreted as a hypergraph without modules.
+	 * @param monitor Eclipse progress monitor
+	 * @param result handler for the result model
+	 * 
+	 * @return the calculated complexity of the hypergraph
+	 */
+	protected def calculateComplexity(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+		val calculateComplexity = new CalculateComplexity(monitor)
+
+		/** Calculation for S -> S^#, S^#_i */
+		val complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system's hypergraph complexity")
+		
+		result.values.add(new NamedValue(project.project.name, "hypergraph complexity", complexity))
+		updateView(inputHypergraph)
+
+		return complexity
+	}
+	
+	/**
+	 * Calculate coupling of a modular hypergraph with only inter module hyperedges.
+	 * Calculation for MS^* -> MS^*#, MS^*#_i
+	 * 
+	 * @param inputHypergraph a modular hypergraph
+	 * @param monitor Eclipse progress monitor
+	 * @param result handler for the result model
+	 * 
+	 * @return the coupling of the modular inter-module hyperedges only hypergraph 
+	 */
+	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+		/** Determine intermodule hyperedges only modular graph for MS^* */
+		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
+		intermoduleHyperedgesOnlyGraph.input = inputHypergraph
+		intermoduleHyperedgesOnlyGraph.transform
+
+		val calculateComplexity = new CalculateComplexity(monitor)
+		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
+		result.values.add(new NamedValue(project.project.name, "inter module coupling", complexityIntermodule))	
+		updateView(inputHypergraph)
+		
+		return complexityIntermodule
+	}
+	
+	
+	/**
+	 * Calculate cohesion of a modular graph only containing inter module edges. 
+	 * For this calculation the hypergraph must also be a graph.
+	 * 
+	 * @param inputHypergraph a modular hypergraph
+	 * @param monitor Eclipse progress monitor
+	 * @param result handler for the result model
+	 * @param coupling the coupling values for the inter module only edges modular hypergraph 
+	 * 
+	 * @return the cohesion of the modular inter-module hyperedges only hypergraph
+	 */
+	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result, double coupling) {
 		/** Determine maximal interconnected modular graph MS^(n) */
 		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
 		maximalInterconnectedGraph.input = inputHypergraph
@@ -60,67 +142,16 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	
 		return cohesion
 	}
-	
-	/**
-	 * Calculation for MS^* -> MS^*#, MS^*#_i
-	 * Calculate coupling
-	 */
-	def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
-		/** Determine intermodule hyperedges only modular graph for MS^* */
-		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
-		intermoduleHyperedgesOnlyGraph.input = inputHypergraph
-		intermoduleHyperedgesOnlyGraph.transform
-
-		val calculateComplexity = new CalculateComplexity(monitor)
-		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
-		result.values.add(new NamedValue(project.project.name, "inter module coupling", complexityIntermodule))	
-		updateView(inputHypergraph)
 		
-		return complexityIntermodule
-	}
-	
-	/**
-	 * Calculate graph complexity.
-	 */
-	def calculateComplexity(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
-		val calculateComplexity = new CalculateComplexity(monitor)
-
-		/** Calculation for S -> S^#, S^#_i */
-		val complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system's hypergraph complexity")
-		
-		result.values.add(new NamedValue(project.project.name, "hypergraph complexity", complexity))
-		updateView(inputHypergraph)
-
-		return complexity
-	}
-	
-	/** 
-	 * Calculating system size based on input modular hyper graph
-	 */
-	def calculateSize(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
-		val hypergraphSize = new TransformationHypergraphSize(monitor)
-		hypergraphSize.name = "Calculate system size"
-		hypergraphSize.input = inputHypergraph
-		hypergraphSize.transform
-
-		result.values.add(new NamedValue(project.project.name, "hypergraph size", hypergraphSize.result))
-		updateView(inputHypergraph)
-		
-		return hypergraphSize.result
-	}
-	
-	
-
-	
 	/**
 	 * Update the analysis view after updating its content.
 	 */
-	protected def updateView(ModularHypergraph hypergraph) {
+	protected def updateView(Hypergraph hypergraph) {
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
        		public override void run() {
 	           try { 
 					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					if (hypergraph != null) (part as AnalysisResultView).setGraph(hypergraph)
+					if (hypergraph != null) (part as AnalysisResultView).setHypergraph(hypergraph)
 					(part as AnalysisResultView).setProject(project)
 					(part as AnalysisResultView).update()
 	           } catch (PartInitException e) {

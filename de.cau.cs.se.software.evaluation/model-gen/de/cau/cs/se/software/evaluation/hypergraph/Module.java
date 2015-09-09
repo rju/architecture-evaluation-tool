@@ -11,12 +11,12 @@ import org.eclipse.emf.common.util.EList;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Module#getNodes <em>Nodes</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Module#getDerivedFrom <em>Derived From</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.Module#getKind <em>Kind</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getModule()
  * @model

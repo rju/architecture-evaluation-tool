@@ -10,10 +10,10 @@ package de.cau.cs.se.software.evaluation.hypergraph;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.GenericTrace#getResourceId <em>Resource Id</em>}</li>
  * </ul>
- * </p>
  *
  * @see de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage#getGenericTrace()
  * @model

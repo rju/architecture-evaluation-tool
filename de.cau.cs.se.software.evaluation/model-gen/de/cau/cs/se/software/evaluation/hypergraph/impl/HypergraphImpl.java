@@ -27,11 +27,11 @@ import org.eclipse.emf.ecore.util.InternalEList;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.impl.HypergraphImpl#getNodes <em>Nodes</em>}</li>
  *   <li>{@link de.cau.cs.se.software.evaluation.hypergraph.impl.HypergraphImpl#getEdges <em>Edges</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
