@@ -68,13 +68,11 @@ public class CalculateComplexity {
     Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
     size.setInput(_result_1);
     size.transform();
-    final Consumer<Job> _function = new Consumer<Job>() {
-      public void accept(final Job it) {
-        try {
-          it.join();
-        } catch (Throwable _e) {
-          throw Exceptions.sneakyThrow(_e);
-        }
+    final Consumer<Job> _function = (Job it) -> {
+      try {
+        it.join();
+      } catch (Throwable _e) {
+        throw Exceptions.sneakyThrow(_e);
       }
     };
     jobs.forEach(_function);

@@ -148,11 +148,9 @@ public class NameResolutionHelper {
     String _plus_1 = (_plus + _fullyQualifiedName);
     String _plus_2 = (_plus_1 + "(");
     List _parameters = method.parameters();
-    final Function1<Object, String> _function = new Function1<Object, String>() {
-      public String apply(final Object it) {
-        Type _type = ((SingleVariableDeclaration) it).getType();
-        return NameResolutionHelper.determineFullyQualifiedName(_type);
-      }
+    final Function1<Object, String> _function = (Object it) -> {
+      Type _type = ((SingleVariableDeclaration) it).getType();
+      return NameResolutionHelper.determineFullyQualifiedName(_type);
     };
     List<String> _map = ListExtensions.<Object, String>map(_parameters, _function);
     String _join = IterableExtensions.join(_map, ", ");
@@ -166,10 +164,8 @@ public class NameResolutionHelper {
     boolean _greaterThan = (_size > 0);
     if (_greaterThan) {
       List _thrownExceptionTypes_1 = method.thrownExceptionTypes();
-      final Function1<Object, String> _function_1 = new Function1<Object, String>() {
-        public String apply(final Object it) {
-          return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
-        }
+      final Function1<Object, String> _function_1 = (Object it) -> {
+        return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
       };
       List<String> _map_1 = ListExtensions.<Object, String>map(_thrownExceptionTypes_1, _function_1);
       String _join_1 = IterableExtensions.join(_map_1, ", ");
@@ -191,10 +187,8 @@ public class NameResolutionHelper {
     String _plus_2 = (_plus_1 + "(");
     IMethodBinding _resolveMethodBinding = callee.resolveMethodBinding();
     ITypeBinding[] _parameterTypes = _resolveMethodBinding.getParameterTypes();
-    final Function1<ITypeBinding, String> _function = new Function1<ITypeBinding, String>() {
-      public String apply(final ITypeBinding it) {
-        return it.getQualifiedName();
-      }
+    final Function1<ITypeBinding, String> _function = (ITypeBinding it) -> {
+      return it.getQualifiedName();
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
     String _join = IterableExtensions.join(_map, ", ");
@@ -211,10 +205,8 @@ public class NameResolutionHelper {
     if (_greaterThan) {
       IMethodBinding _resolveMethodBinding_3 = callee.resolveMethodBinding();
       ITypeBinding[] _exceptionTypes_1 = _resolveMethodBinding_3.getExceptionTypes();
-      final Function1<ITypeBinding, String> _function_1 = new Function1<ITypeBinding, String>() {
-        public String apply(final ITypeBinding it) {
-          return it.getQualifiedName();
-        }
+      final Function1<ITypeBinding, String> _function_1 = (ITypeBinding it) -> {
+        return it.getQualifiedName();
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
       String _join_1 = IterableExtensions.join(_map_1, ", ");
@@ -236,10 +228,8 @@ public class NameResolutionHelper {
     String _plus_2 = (_plus_1 + "(");
     IMethodBinding _resolveConstructorBinding = callee.resolveConstructorBinding();
     ITypeBinding[] _parameterTypes = _resolveConstructorBinding.getParameterTypes();
-    final Function1<ITypeBinding, String> _function = new Function1<ITypeBinding, String>() {
-      public String apply(final ITypeBinding it) {
-        return it.getQualifiedName();
-      }
+    final Function1<ITypeBinding, String> _function = (ITypeBinding it) -> {
+      return it.getQualifiedName();
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
     String _join = IterableExtensions.join(_map, ", ");
@@ -252,10 +242,8 @@ public class NameResolutionHelper {
     if (_greaterThan) {
       IMethodBinding _resolveConstructorBinding_2 = callee.resolveConstructorBinding();
       ITypeBinding[] _exceptionTypes_1 = _resolveConstructorBinding_2.getExceptionTypes();
-      final Function1<ITypeBinding, String> _function_1 = new Function1<ITypeBinding, String>() {
-        public String apply(final ITypeBinding it) {
-          return it.getQualifiedName();
-        }
+      final Function1<ITypeBinding, String> _function_1 = (ITypeBinding it) -> {
+        return it.getQualifiedName();
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
       String _join_1 = IterableExtensions.join(_map_1, ", ");
@@ -277,10 +265,8 @@ public class NameResolutionHelper {
     String _plus_2 = (_plus_1 + "(");
     IMethodBinding _resolveConstructorBinding = callee.resolveConstructorBinding();
     ITypeBinding[] _parameterTypes = _resolveConstructorBinding.getParameterTypes();
-    final Function1<ITypeBinding, String> _function = new Function1<ITypeBinding, String>() {
-      public String apply(final ITypeBinding it) {
-        return it.getQualifiedName();
-      }
+    final Function1<ITypeBinding, String> _function = (ITypeBinding it) -> {
+      return it.getQualifiedName();
     };
     List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
     String _join = IterableExtensions.join(_map, ", ");
@@ -293,10 +279,8 @@ public class NameResolutionHelper {
     if (_greaterThan) {
       IMethodBinding _resolveConstructorBinding_2 = callee.resolveConstructorBinding();
       ITypeBinding[] _exceptionTypes_1 = _resolveConstructorBinding_2.getExceptionTypes();
-      final Function1<ITypeBinding, String> _function_1 = new Function1<ITypeBinding, String>() {
-        public String apply(final ITypeBinding it) {
-          return it.getQualifiedName();
-        }
+      final Function1<ITypeBinding, String> _function_1 = (ITypeBinding it) -> {
+        return it.getQualifiedName();
       };
       List<String> _map_1 = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_exceptionTypes_1)), _function_1);
       String _join_1 = IterableExtensions.join(_map_1, ", ");
@@ -350,10 +334,8 @@ public class NameResolutionHelper {
         String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_type);
         String _plus = (_determineFullyQualifiedName + "?G");
         List _typeArguments = ((ParameterizedType)type).typeArguments();
-        final Function1<Object, String> _function = new Function1<Object, String>() {
-          public String apply(final Object it) {
-            return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
-          }
+        final Function1<Object, String> _function = (Object it) -> {
+          return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
         };
         List<String> _map = ListExtensions.<Object, String>map(_typeArguments, _function);
         String _join = IterableExtensions.join(_map, ", ");
@@ -474,10 +456,8 @@ public class NameResolutionHelper {
       if (type instanceof UnionType) {
         _matched=true;
         List _types = ((UnionType)type).types();
-        final Function1<Object, String> _function = new Function1<Object, String>() {
-          public String apply(final Object it) {
-            return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
-          }
+        final Function1<Object, String> _function = (Object it) -> {
+          return NameResolutionHelper.determineFullyQualifiedName(((Type) it));
         };
         List<String> _map = ListExtensions.<Object, String>map(_types, _function);
         return IterableExtensions.join(_map, "+");

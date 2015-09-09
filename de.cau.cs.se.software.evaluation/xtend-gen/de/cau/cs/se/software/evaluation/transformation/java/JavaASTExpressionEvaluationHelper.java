@@ -102,24 +102,20 @@ public class JavaASTExpressionEvaluationHelper {
         AnonymousClassDeclaration _anonymousClassDeclaration = callee.getAnonymousClassDeclaration();
         ITypeBinding _resolveBinding = _anonymousClassDeclaration.resolveBinding();
         IMethodBinding[] _declaredMethods = _resolveBinding.getDeclaredMethods();
-        final Consumer<IMethodBinding> _function = new Consumer<IMethodBinding>() {
-          public void accept(final IMethodBinding anonMethod) {
-            final Node anonNode = JavaHypergraphElementFactory.createNodeForMethod(anonMethod);
-            EList<Node> _nodes = module.getNodes();
-            _nodes.add(anonNode);
-            EList<Node> _nodes_1 = graph.getNodes();
-            _nodes_1.add(anonNode);
-          }
+        final Consumer<IMethodBinding> _function = (IMethodBinding anonMethod) -> {
+          final Node anonNode = JavaHypergraphElementFactory.createNodeForMethod(anonMethod);
+          EList<Node> _nodes = module.getNodes();
+          _nodes.add(anonNode);
+          EList<Node> _nodes_1 = graph.getNodes();
+          _nodes_1.add(anonNode);
         };
         ((List<IMethodBinding>)Conversions.doWrapArray(_declaredMethods)).forEach(_function);
       }
       final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeConstructorBinding);
       JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
       List _arguments = callee.arguments();
-      final Consumer<Object> _function_1 = new Consumer<Object>() {
-        public void accept(final Object argument) {
-          JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
-        }
+      final Consumer<Object> _function_1 = (Object argument) -> {
+        JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
       };
       _arguments.forEach(_function_1);
     }
@@ -144,10 +140,8 @@ public class JavaASTExpressionEvaluationHelper {
       final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeMethodBinding);
       JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
       List _arguments = callee.arguments();
-      final Consumer<Object> _function = new Consumer<Object>() {
-        public void accept(final Object argument) {
-          JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
-        }
+      final Consumer<Object> _function = (Object argument) -> {
+        JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
       };
       _arguments.forEach(_function);
     }
@@ -168,10 +162,8 @@ public class JavaASTExpressionEvaluationHelper {
     final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, _declaringClass, targetSuperMethodBinding);
     JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
     List _arguments = callee.arguments();
-    final Consumer<Object> _function = new Consumer<Object>() {
-      public void accept(final Object it) {
-        JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
-      }
+    final Consumer<Object> _function = (Object it) -> {
+      JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
     };
     _arguments.forEach(_function);
   }
@@ -322,10 +314,52 @@ public class JavaASTExpressionEvaluationHelper {
         }
       }
       if (!_matched) {
-        String _name = JavaASTExpressionEvaluationHelper.class.getName();
-        String _plus = ("Prefix type not supported " + _name);
-        String _plus_1 = (_plus + ".processFieldAccess");
-        throw new UnsupportedOperationException(_plus_1);
+        if (prefix instanceof FieldAccess) {
+          _matched=true;
+          boolean _xifexpression = false;
+          ITypeBinding _resolveTypeBinding = fieldAccess.resolveTypeBinding();
+          boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_resolveTypeBinding, dataTypePatterns);
+          if (_isDataType) {
+            boolean _xblockexpression_1 = false;
+            {
+              EList<Edge> _edges = graph.getEdges();
+              IVariableBinding _resolveFieldBinding = fieldAccess.resolveFieldBinding();
+              final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _resolveFieldBinding);
+              boolean _xifexpression_1 = false;
+              boolean _equals = Objects.equal(edge, null);
+              if (_equals) {
+                Class<? extends FieldAccess> _class = ((FieldAccess)prefix).getClass();
+                String _plus = (("Missing edge for a data type property. " + 
+                  " Prefix ") + _class);
+                String _plus_1 = (_plus + " field ");
+                IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
+                String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
+                String _plus_3 = (_plus_2 + 
+                  " in ");
+                String _name = JavaASTExpressionEvaluationHelper.class.getName();
+                String _plus_4 = (_plus_3 + _name);
+                String _plus_5 = (_plus_4 + ".processFieldAccess");
+                System.out.println(_plus_5);
+              } else {
+                EList<Edge> _edges_1 = sourceNode.getEdges();
+                _xifexpression_1 = _edges_1.add(edge);
+              }
+              _xblockexpression_1 = _xifexpression_1;
+            }
+            _xifexpression = _xblockexpression_1;
+          }
+          _switchResult = Boolean.valueOf(_xifexpression);
+        }
+      }
+      if (!_matched) {
+        Class<? extends Expression> _class = prefix.getClass();
+        String _name = _class.getName();
+        String _plus = ("Prefix type " + _name);
+        String _plus_1 = (_plus + " not supported ");
+        String _name_1 = JavaASTExpressionEvaluationHelper.class.getName();
+        String _plus_2 = (_plus_1 + _name_1);
+        String _plus_3 = (_plus_2 + ".processFieldAccess");
+        throw new UnsupportedOperationException(_plus_3);
       }
       _xblockexpression = _switchResult;
     }

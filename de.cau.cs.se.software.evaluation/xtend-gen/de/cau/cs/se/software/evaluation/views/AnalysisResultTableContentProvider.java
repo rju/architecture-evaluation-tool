@@ -20,12 +20,15 @@ import org.eclipse.jface.viewers.Viewer;
 
 @SuppressWarnings("all")
 public class AnalysisResultTableContentProvider implements IStructuredContentProvider {
+  @Override
   public void inputChanged(final Viewer v, final Object oldInput, final Object newInput) {
   }
   
+  @Override
   public void dispose() {
   }
   
+  @Override
   public Object[] getElements(final Object parent) {
     return new Object[] { "One", "Two", "Three" };
   }

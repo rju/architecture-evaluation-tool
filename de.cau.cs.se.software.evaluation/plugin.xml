@@ -38,7 +38,7 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="de.cau.cs.se.software.evaluation.commands.AnalysisComplexityHandler"
+            defaultHandler="de.cau.cs.se.software.evaluation.commands.JavaComplexityAnalysisHandler"
             id="de.cau.cs.se.software.evaluation.commands.analysis"
             name="Analysis Complexity">
       </command>

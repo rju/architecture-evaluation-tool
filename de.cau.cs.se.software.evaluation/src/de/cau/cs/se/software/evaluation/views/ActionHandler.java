@@ -21,12 +21,12 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -54,7 +54,7 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Data'-Button in AnalysisResultView.
 	 */
-	protected void exportData(final TableViewer table, final Shell shell, final IJavaProject project) throws IOException {
+	protected void exportData(final TableViewer table, final Shell shell, final IProject project) throws IOException {
 		String loc = null;
 		if (table.getTable().getItems().length == 0) {
 			MessageDialog.openWarning(null, "Missing values", "There is nothing to export.");
@@ -62,7 +62,7 @@ class ActionHandler {
 			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setText("Save");
 			if (project != null) {
-				dialog.setFilterPath(project.getProject().getLocation().toString());
+				dialog.setFilterPath(project.getLocation().toString());
 			}
 			final String[] filterExt = { "*.csv", "*.*" };
 			dialog.setFilterExtensions(filterExt);
@@ -90,7 +90,7 @@ class ActionHandler {
 	/**
 	 * Action-Logic for 'export_Graph'-Button in AnalysisResultView.
 	 */
-	protected void exportGraph(final ModularHypergraph model, final Shell shell, final IJavaProject project) throws IOException {
+	protected void exportGraph(final ModularHypergraph model, final Shell shell, final IProject project) throws IOException {
 
 		if (model == null) {
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
@@ -99,7 +99,7 @@ class ActionHandler {
 			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setText("Save");
 			if (project != null) {
-				dialog.setFilterPath(project.getProject().getLocation().toString());
+				dialog.setFilterPath(project.getLocation().toString());
 			}
 			final String[] filterExt = { "*.xmi", "*.*" };
 			dialog.setFilterExtensions(filterExt);

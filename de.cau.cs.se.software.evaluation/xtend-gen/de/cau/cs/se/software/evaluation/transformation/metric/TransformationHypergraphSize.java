@@ -49,6 +49,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     return this.name = name;
   }
   
+  @Override
   public Double transform() {
     EList<Edge> _edges = this.input.getEdges();
     int _size = _edges.size();
@@ -106,11 +107,9 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
    * is found then the node is totally disconnected and the probability is 0.
    */
   private double lookupProbability(final EList<RowPattern> patternList, final Node node, final Hypergraph system) {
-    final Function1<RowPattern, Boolean> _function = new Function1<RowPattern, Boolean>() {
-      public Boolean apply(final RowPattern p) {
-        EList<Node> _nodes = p.getNodes();
-        return Boolean.valueOf(_nodes.contains(node));
-      }
+    final Function1<RowPattern, Boolean> _function = (RowPattern p) -> {
+      EList<Node> _nodes = p.getNodes();
+      return Boolean.valueOf(_nodes.contains(node));
     };
     final Iterable<RowPattern> pattern = IterableExtensions.<RowPattern>filter(patternList, _function);
     double _xifexpression = (double) 0;
@@ -140,24 +139,20 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
   private RowPatternTable createRowPatternTable(final Hypergraph systemGraph) {
     final RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable();
     EList<Edge> _edges = systemGraph.getEdges();
-    final Consumer<Edge> _function = new Consumer<Edge>() {
-      public void accept(final Edge edge) {
-        EList<Edge> _edges = patternTable.getEdges();
-        _edges.add(edge);
-      }
+    final Consumer<Edge> _function = (Edge edge) -> {
+      EList<Edge> _edges_1 = patternTable.getEdges();
+      _edges_1.add(edge);
     };
     _edges.forEach(_function);
     EList<Edge> _edges_1 = this.input.getEdges();
     int _size = _edges_1.size();
     this.monitor.worked(_size);
     EList<Node> _nodes = systemGraph.getNodes();
-    final Consumer<Node> _function_1 = new Consumer<Node>() {
-      public void accept(final Node node) {
-        EList<RowPattern> _patterns = patternTable.getPatterns();
-        EList<Edge> _edges = patternTable.getEdges();
-        RowPattern _calculateRowPattern = TransformationHypergraphSize.this.calculateRowPattern(node, _edges);
-        _patterns.add(_calculateRowPattern);
-      }
+    final Consumer<Node> _function_1 = (Node node) -> {
+      EList<RowPattern> _patterns = patternTable.getPatterns();
+      EList<Edge> _edges_2 = patternTable.getEdges();
+      RowPattern _calculateRowPattern = this.calculateRowPattern(node, _edges_2);
+      _patterns.add(_calculateRowPattern);
     };
     _nodes.forEach(_function_1);
     this.compactPatternTable(patternTable);
@@ -179,18 +174,14 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     final RowPattern pattern = StateFactory.eINSTANCE.createRowPattern();
     EList<Node> _nodes = pattern.getNodes();
     _nodes.add(node);
-    final Consumer<Edge> _function = new Consumer<Edge>() {
-      public void accept(final Edge edge) {
-        EList<Boolean> _pattern = pattern.getPattern();
-        EList<Edge> _edges = node.getEdges();
-        final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-          public Boolean apply(final Edge it) {
-            return Boolean.valueOf(Objects.equal(it, edge));
-          }
-        };
-        boolean _exists = IterableExtensions.<Edge>exists(_edges, _function);
-        _pattern.add(Boolean.valueOf(_exists));
-      }
+    final Consumer<Edge> _function = (Edge edge) -> {
+      EList<Boolean> _pattern = pattern.getPattern();
+      EList<Edge> _edges = node.getEdges();
+      final Function1<Edge, Boolean> _function_1 = (Edge it) -> {
+        return Boolean.valueOf(Objects.equal(it, edge));
+      };
+      boolean _exists = IterableExtensions.<Edge>exists(_edges, _function_1);
+      _pattern.add(Boolean.valueOf(_exists));
     };
     edgeList.forEach(_function);
     return pattern;
@@ -215,11 +206,9 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
           EList<RowPattern> _patterns_3 = table.getPatterns();
           RowPattern _get_2 = _patterns_3.get(j);
           EList<Node> _nodes = _get_2.getNodes();
-          final Consumer<Node> _function = new Consumer<Node>() {
-            public void accept(final Node node) {
-              EList<Node> _nodes = basePattern.getNodes();
-              _nodes.add(node);
-            }
+          final Consumer<Node> _function = (Node node) -> {
+            EList<Node> _nodes_1 = basePattern.getNodes();
+            _nodes_1.add(node);
           };
           _nodes.forEach(_function);
           EList<RowPattern> _patterns_4 = table.getPatterns();
@@ -267,41 +256,33 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     EList<Node> _nodes = systemGraph.getNodes();
     _nodes.add(environmentNode);
     EList<Edge> _edges = system.getEdges();
-    final Consumer<Edge> _function = new Consumer<Edge>() {
-      public void accept(final Edge edge) {
-        EList<Edge> _edges = systemGraph.getEdges();
-        Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
-        _edges.add(_deriveEdge);
-      }
+    final Consumer<Edge> _function = (Edge edge) -> {
+      EList<Edge> _edges_1 = systemGraph.getEdges();
+      Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+      _edges_1.add(_deriveEdge);
     };
     _edges.forEach(_function);
     EList<Edge> _edges_1 = system.getEdges();
     int _size = _edges_1.size();
     this.monitor.worked(_size);
     EList<Node> _nodes_1 = system.getNodes();
-    final Consumer<Node> _function_1 = new Consumer<Node>() {
-      public void accept(final Node node) {
-        final Node derivedNode = TransformationHelper.deriveNode(node);
-        EList<Edge> _edges = node.getEdges();
-        final Consumer<Edge> _function = new Consumer<Edge>() {
-          public void accept(final Edge edge) {
-            EList<Edge> _edges = systemGraph.getEdges();
-            final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-              public Boolean apply(final Edge it) {
-                EdgeReference _derivedFrom = it.getDerivedFrom();
-                Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
-                return Boolean.valueOf(Objects.equal(_edge, edge));
-              }
-            };
-            final Edge derivedEdge = IterableExtensions.<Edge>findFirst(_edges, _function);
-            EList<Edge> _edges_1 = derivedNode.getEdges();
-            _edges_1.add(derivedEdge);
-          }
+    final Consumer<Node> _function_1 = (Node node) -> {
+      final Node derivedNode = TransformationHelper.deriveNode(node);
+      EList<Edge> _edges_2 = node.getEdges();
+      final Consumer<Edge> _function_2 = (Edge edge) -> {
+        EList<Edge> _edges_3 = systemGraph.getEdges();
+        final Function1<Edge, Boolean> _function_3 = (Edge it) -> {
+          EdgeReference _derivedFrom = it.getDerivedFrom();
+          Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
+          return Boolean.valueOf(Objects.equal(_edge, edge));
         };
-        _edges.forEach(_function);
-        EList<Node> _nodes = systemGraph.getNodes();
-        _nodes.add(derivedNode);
-      }
+        final Edge derivedEdge = IterableExtensions.<Edge>findFirst(_edges_3, _function_3);
+        EList<Edge> _edges_4 = derivedNode.getEdges();
+        _edges_4.add(derivedEdge);
+      };
+      _edges_2.forEach(_function_2);
+      EList<Node> _nodes_2 = systemGraph.getNodes();
+      _nodes_2.add(derivedNode);
     };
     _nodes_1.forEach(_function_1);
     EList<Node> _nodes_2 = system.getNodes();

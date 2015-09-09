@@ -66,6 +66,7 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
   /**
    * Main transformation routine.
    */
+  @Override
   public ModularHypergraph transform() {
     String _elementName = this.project.getElementName();
     String _plus = ("Process java project " + _elementName);
@@ -81,68 +82,54 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
     this.monitor.beginTask(_plus, _plus_4);
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
-    final Consumer<AbstractTypeDeclaration> _function = new Consumer<AbstractTypeDeclaration>() {
-      public void accept(final AbstractTypeDeclaration clazz) {
-        EList<Module> _modules = TransformationJavaMethodsToModularHypergraph.this.result.getModules();
-        ITypeBinding _resolveBinding = clazz.resolveBinding();
-        Module _createModuleForTypeBinding = JavaHypergraphElementFactory.createModuleForTypeBinding(_resolveBinding, EModuleKind.SYSTEM);
-        _modules.add(_createModuleForTypeBinding);
-      }
+    final Consumer<AbstractTypeDeclaration> _function = (AbstractTypeDeclaration clazz) -> {
+      EList<Module> _modules = this.result.getModules();
+      ITypeBinding _resolveBinding = clazz.resolveBinding();
+      Module _createModuleForTypeBinding = JavaHypergraphElementFactory.createModuleForTypeBinding(_resolveBinding, EModuleKind.SYSTEM);
+      _modules.add(_createModuleForTypeBinding);
     };
     this.input.forEach(_function);
     int _size_5 = this.input.size();
     this.monitor.worked(_size_5);
-    final Consumer<AbstractTypeDeclaration> _function_1 = new Consumer<AbstractTypeDeclaration>() {
-      public void accept(final AbstractTypeDeclaration clazz) {
-        EList<Edge> _edges = TransformationJavaMethodsToModularHypergraph.this.result.getEdges();
-        TransformationJavaMethodsToModularHypergraph.this.createEdgesForClassProperties(_edges, clazz, TransformationJavaMethodsToModularHypergraph.this.dataTypePatterns);
-      }
+    final Consumer<AbstractTypeDeclaration> _function_1 = (AbstractTypeDeclaration clazz) -> {
+      EList<Edge> _edges = this.result.getEdges();
+      this.createEdgesForClassProperties(_edges, clazz, this.dataTypePatterns);
     };
     this.input.forEach(_function_1);
     int _size_6 = this.input.size();
     this.monitor.worked(_size_6);
-    final Consumer<AbstractTypeDeclaration> _function_2 = new Consumer<AbstractTypeDeclaration>() {
-      public void accept(final AbstractTypeDeclaration clazz) {
-        EList<Node> _nodes = TransformationJavaMethodsToModularHypergraph.this.result.getNodes();
-        TransformationJavaMethodsToModularHypergraph.this.createNodesForMethods(_nodes, clazz);
-      }
+    final Consumer<AbstractTypeDeclaration> _function_2 = (AbstractTypeDeclaration clazz) -> {
+      EList<Node> _nodes = this.result.getNodes();
+      this.createNodesForMethods(_nodes, clazz);
     };
     this.input.forEach(_function_2);
     int _size_7 = this.input.size();
     this.monitor.worked(_size_7);
-    final Function1<AbstractTypeDeclaration, Boolean> _function_3 = new Function1<AbstractTypeDeclaration, Boolean>() {
-      public Boolean apply(final AbstractTypeDeclaration clazz) {
-        return Boolean.valueOf(TransformationJavaMethodsToModularHypergraph.this.hasImplicitConstructor(clazz));
-      }
+    final Function1<AbstractTypeDeclaration, Boolean> _function_3 = (AbstractTypeDeclaration clazz) -> {
+      return Boolean.valueOf(this.hasImplicitConstructor(clazz));
     };
     Iterable<AbstractTypeDeclaration> _filter = IterableExtensions.<AbstractTypeDeclaration>filter(this.input, _function_3);
-    final Consumer<AbstractTypeDeclaration> _function_4 = new Consumer<AbstractTypeDeclaration>() {
-      public void accept(final AbstractTypeDeclaration clazz) {
-        ITypeBinding _resolveBinding = clazz.resolveBinding();
-        final Node node = JavaHypergraphElementFactory.createNodeForImplicitConstructor(_resolveBinding);
-        EList<Module> _modules = TransformationJavaMethodsToModularHypergraph.this.result.getModules();
-        final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
-          public Boolean apply(final Module it) {
-            ModuleReference _derivedFrom = it.getDerivedFrom();
-            Object _type = ((TypeTrace) _derivedFrom).getType();
-            ITypeBinding _resolveBinding = clazz.resolveBinding();
-            return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(_resolveBinding));
-          }
-        };
-        final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
-        EList<Node> _nodes = module.getNodes();
-        _nodes.add(node);
-        EList<Node> _nodes_1 = TransformationJavaMethodsToModularHypergraph.this.result.getNodes();
-        _nodes_1.add(node);
-      }
+    final Consumer<AbstractTypeDeclaration> _function_4 = (AbstractTypeDeclaration clazz) -> {
+      ITypeBinding _resolveBinding = clazz.resolveBinding();
+      final Node node = JavaHypergraphElementFactory.createNodeForImplicitConstructor(_resolveBinding);
+      EList<Module> _modules = this.result.getModules();
+      final Function1<Module, Boolean> _function_5 = (Module it) -> {
+        ModuleReference _derivedFrom = it.getDerivedFrom();
+        Object _type = ((TypeTrace) _derivedFrom).getType();
+        ITypeBinding _resolveBinding_1 = clazz.resolveBinding();
+        return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(_resolveBinding_1));
+      };
+      final Module module = IterableExtensions.<Module>findFirst(_modules, _function_5);
+      EList<Node> _nodes = module.getNodes();
+      _nodes.add(node);
+      EList<Node> _nodes_1 = this.result.getNodes();
+      _nodes_1.add(node);
     };
     _filter.forEach(_function_4);
     int _size_8 = this.input.size();
     this.monitor.worked(_size_8);
-    final Consumer<AbstractTypeDeclaration> _function_5 = new Consumer<AbstractTypeDeclaration>() {
-      public void accept(final AbstractTypeDeclaration clazz) {
-        TransformationJavaMethodsToModularHypergraph.this.resolveEdges(TransformationJavaMethodsToModularHypergraph.this.result, TransformationJavaMethodsToModularHypergraph.this.dataTypePatterns, clazz);
-      }
+    final Consumer<AbstractTypeDeclaration> _function_5 = (AbstractTypeDeclaration clazz) -> {
+      this.resolveEdges(this.result, this.dataTypePatterns, clazz);
     };
     this.input.forEach(_function_5);
     int _size_9 = this.input.size();
@@ -160,20 +147,16 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
     if ((type instanceof TypeDeclaration)) {
       final TypeDeclaration clazz = ((TypeDeclaration) type);
       MethodDeclaration[] _methods = clazz.getMethods();
-      final Consumer<MethodDeclaration> _function = new Consumer<MethodDeclaration>() {
-        public void accept(final MethodDeclaration method) {
-          EList<Node> _nodes = graph.getNodes();
-          final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-            public Boolean apply(final Node it) {
-              NodeReference _derivedFrom = it.getDerivedFrom();
-              Object _method = ((MethodTrace) _derivedFrom).getMethod();
-              IMethodBinding _resolveBinding = method.resolveBinding();
-              return Boolean.valueOf(((IMethodBinding) _method).isEqualTo(_resolveBinding));
-            }
-          };
-          final Node node = IterableExtensions.<Node>findFirst(_nodes, _function);
-          JavaASTEvaluation.evaluteMethod(graph, dataTypePatterns, node, clazz, method);
-        }
+      final Consumer<MethodDeclaration> _function = (MethodDeclaration method) -> {
+        EList<Node> _nodes = graph.getNodes();
+        final Function1<Node, Boolean> _function_1 = (Node it) -> {
+          NodeReference _derivedFrom = it.getDerivedFrom();
+          Object _method = ((MethodTrace) _derivedFrom).getMethod();
+          IMethodBinding _resolveBinding = method.resolveBinding();
+          return Boolean.valueOf(((IMethodBinding) _method).isEqualTo(_resolveBinding));
+        };
+        final Node node = IterableExtensions.<Node>findFirst(_nodes, _function_1);
+        JavaASTEvaluation.evaluteMethod(graph, dataTypePatterns, node, clazz, method);
       };
       ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function);
     }
@@ -203,10 +186,8 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
       }
       if (_and) {
         MethodDeclaration[] _methods = clazz.getMethods();
-        final Function1<MethodDeclaration, Boolean> _function = new Function1<MethodDeclaration, Boolean>() {
-          public Boolean apply(final MethodDeclaration method) {
-            return Boolean.valueOf(method.isConstructor());
-          }
+        final Function1<MethodDeclaration, Boolean> _function = (MethodDeclaration method) -> {
+          return Boolean.valueOf(method.isConstructor());
         };
         boolean _exists = IterableExtensions.<MethodDeclaration>exists(((Iterable<MethodDeclaration>)Conversions.doWrapArray(_methods)), _function);
         final boolean isImplicit = (!_exists);
@@ -225,24 +206,20 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
   private void createNodesForMethods(final EList<Node> nodes, final AbstractTypeDeclaration type) {
     if ((type instanceof TypeDeclaration)) {
       EList<Module> _modules = this.result.getModules();
-      final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
-        public Boolean apply(final Module it) {
-          ModuleReference _derivedFrom = it.getDerivedFrom();
-          Object _type = ((TypeTrace) _derivedFrom).getType();
-          ITypeBinding _resolveBinding = ((TypeDeclaration)type).resolveBinding();
-          return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(_resolveBinding));
-        }
+      final Function1<Module, Boolean> _function = (Module it) -> {
+        ModuleReference _derivedFrom = it.getDerivedFrom();
+        Object _type = ((TypeTrace) _derivedFrom).getType();
+        ITypeBinding _resolveBinding = ((TypeDeclaration)type).resolveBinding();
+        return Boolean.valueOf(((ITypeBinding) _type).isSubTypeCompatible(_resolveBinding));
       };
       final Module module = IterableExtensions.<Module>findFirst(_modules, _function);
       MethodDeclaration[] _methods = ((TypeDeclaration)type).getMethods();
-      final Consumer<MethodDeclaration> _function_1 = new Consumer<MethodDeclaration>() {
-        public void accept(final MethodDeclaration method) {
-          IMethodBinding _resolveBinding = method.resolveBinding();
-          final Node node = JavaHypergraphElementFactory.createNodeForMethod(_resolveBinding);
-          nodes.add(node);
-          EList<Node> _nodes = module.getNodes();
-          _nodes.add(node);
-        }
+      final Consumer<MethodDeclaration> _function_1 = (MethodDeclaration method) -> {
+        IMethodBinding _resolveBinding = method.resolveBinding();
+        final Node node = JavaHypergraphElementFactory.createNodeForMethod(_resolveBinding);
+        nodes.add(node);
+        EList<Node> _nodes = module.getNodes();
+        _nodes.add(node);
       };
       ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function_1);
     }
@@ -254,21 +231,17 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
   private void createEdgesForClassProperties(final EList<Edge> edges, final AbstractTypeDeclaration type, final List<String> dataTypePatterns) {
     if ((type instanceof TypeDeclaration)) {
       FieldDeclaration[] _fields = ((TypeDeclaration)type).getFields();
-      final Consumer<FieldDeclaration> _function = new Consumer<FieldDeclaration>() {
-        public void accept(final FieldDeclaration field) {
-          Type _type = field.getType();
-          boolean _isDataType = TransformationJavaMethodsToModularHypergraph.this.isDataType(_type, dataTypePatterns);
-          if (_isDataType) {
-            List _fragments = field.fragments();
-            final Consumer<Object> _function = new Consumer<Object>() {
-              public void accept(final Object fragment) {
-                IVariableBinding _resolveBinding = ((VariableDeclarationFragment) fragment).resolveBinding();
-                Edge _createDataEdge = JavaHypergraphElementFactory.createDataEdge(_resolveBinding);
-                edges.add(_createDataEdge);
-              }
-            };
-            _fragments.forEach(_function);
-          }
+      final Consumer<FieldDeclaration> _function = (FieldDeclaration field) -> {
+        Type _type = field.getType();
+        boolean _isDataType = this.isDataType(_type, dataTypePatterns);
+        if (_isDataType) {
+          List _fragments = field.fragments();
+          final Consumer<Object> _function_1 = (Object fragment) -> {
+            IVariableBinding _resolveBinding = ((VariableDeclarationFragment) fragment).resolveBinding();
+            Edge _createDataEdge = JavaHypergraphElementFactory.createDataEdge(_resolveBinding);
+            edges.add(_createDataEdge);
+          };
+          _fragments.forEach(_function_1);
         }
       };
       ((List<FieldDeclaration>)Conversions.doWrapArray(_fields)).forEach(_function);
@@ -315,12 +288,10 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
     if (!_matched) {
       if (type instanceof SimpleType) {
         _matched=true;
-        final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
-          public Boolean apply(final String dataTypePattern) {
-            ITypeBinding _resolveBinding = ((SimpleType)type).resolveBinding();
-            String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_resolveBinding);
-            return Boolean.valueOf(_determineFullyQualifiedName.matches(dataTypePattern));
-          }
+        final Function1<String, Boolean> _function = (String dataTypePattern) -> {
+          ITypeBinding _resolveBinding = ((SimpleType)type).resolveBinding();
+          String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_resolveBinding);
+          return Boolean.valueOf(_determineFullyQualifiedName.matches(dataTypePattern));
         };
         return IterableExtensions.<String>exists(dataTypePatterns, _function);
       }
@@ -329,10 +300,8 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
       if (type instanceof UnionType) {
         _matched=true;
         List _types = ((UnionType)type).types();
-        final Function1<Type, Boolean> _function = new Function1<Type, Boolean>() {
-          public Boolean apply(final Type it) {
-            return Boolean.valueOf(TransformationJavaMethodsToModularHypergraph.this.isDataType(it, dataTypePatterns));
-          }
+        final Function1<Type, Boolean> _function = (Type it) -> {
+          return Boolean.valueOf(this.isDataType(it, dataTypePatterns));
         };
         return IterableExtensions.<Type>forall(_types, _function);
       }

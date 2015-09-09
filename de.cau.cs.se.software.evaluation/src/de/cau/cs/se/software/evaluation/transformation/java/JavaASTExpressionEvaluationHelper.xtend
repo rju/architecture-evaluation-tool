@@ -233,9 +233,28 @@ class JavaASTExpressionEvaluationHelper {
 	    	 * It is a method invocation, and is handled elsewhere
 	    	 */
 	    	}
+	    	FieldAccess: {
+	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
+		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
+		    		if (edge == null) {
+		    			// TODO how can this happen?
+		    			System.out.println("Missing edge for a data type property. " + 
+		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
+		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
+		    			//" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
+		    			//" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
+		    			//)
+		    		} else {
+			    		sourceNode.edges.add(edge)
+			    	}
+		    	}
+	    	}
 			// TODO other prefixes might contain method calls add evaluate here accordingly
 	    	default:
-	    		throw new UnsupportedOperationException("Prefix type not supported " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+	    		throw new UnsupportedOperationException("Prefix type " + prefix.class.name
+	    			+ " not supported " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
+	    		)
 	    }    	
     }
        	

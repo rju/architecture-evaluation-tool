@@ -42,6 +42,7 @@ public class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransf
     super(monitor);
   }
   
+  @Override
   public ModularHypergraph transform() {
     EList<Edge> _edges = this.input.getEdges();
     int _size = _edges.size();
@@ -68,76 +69,62 @@ public class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransf
     this.result = _createModularHypergraph;
     final HashMap<Node, Module> moduleNodeMap = new HashMap<Node, Module>();
     EList<Module> _modules_2 = this.input.getModules();
-    final Consumer<Module> _function = new Consumer<Module>() {
-      public void accept(final Module module) {
-        EList<Node> _nodes = module.getNodes();
-        final Consumer<Node> _function = new Consumer<Node>() {
-          public void accept(final Node it) {
-            moduleNodeMap.put(it, module);
-          }
-        };
-        _nodes.forEach(_function);
-      }
+    final Consumer<Module> _function = (Module module) -> {
+      EList<Node> _nodes_3 = module.getNodes();
+      final Consumer<Node> _function_1 = (Node it) -> {
+        moduleNodeMap.put(it, module);
+      };
+      _nodes_3.forEach(_function_1);
     };
     _modules_2.forEach(_function);
     EList<Edge> _edges_2 = this.input.getEdges();
-    final Function1<Edge, Boolean> _function_1 = new Function1<Edge, Boolean>() {
-      public Boolean apply(final Edge edge) {
-        Boolean _xblockexpression = null;
-        {
-          EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getNodes();
-          int _size = _nodes.size();
-          EList<Module> _modules = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getModules();
-          int _size_1 = _modules.size();
-          int _plus = (_size + _size_1);
-          TransformationIntermoduleHyperedgesOnlyGraph.this.monitor.worked(_plus);
-          EList<Node> _nodes_1 = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getNodes();
-          _xblockexpression = TransformationIntermoduleHyperedgesOnlyGraph.this.isIntermoduleEdge(edge, moduleNodeMap, _nodes_1);
-        }
-        return _xblockexpression;
+    final Function1<Edge, Boolean> _function_1 = (Edge edge) -> {
+      Boolean _xblockexpression = null;
+      {
+        EList<Node> _nodes_3 = this.input.getNodes();
+        int _size_7 = _nodes_3.size();
+        EList<Module> _modules_3 = this.input.getModules();
+        int _size_8 = _modules_3.size();
+        int _plus_3 = (_size_7 + _size_8);
+        this.monitor.worked(_plus_3);
+        EList<Node> _nodes_4 = this.input.getNodes();
+        _xblockexpression = this.isIntermoduleEdge(edge, moduleNodeMap, _nodes_4);
       }
+      return _xblockexpression;
     };
     final Iterable<Edge> interModuleEdges = IterableExtensions.<Edge>filter(_edges_2, _function_1);
-    final Consumer<Edge> _function_2 = new Consumer<Edge>() {
-      public void accept(final Edge edge) {
-        final Edge derivedEdge = TransformationHelper.deriveEdge(edge);
-        EList<Edge> _edges = TransformationIntermoduleHyperedgesOnlyGraph.this.result.getEdges();
-        _edges.add(derivedEdge);
-        EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getNodes();
-        final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-          public Boolean apply(final Node node) {
-            EList<Edge> _edges = node.getEdges();
-            return Boolean.valueOf(_edges.contains(edge));
-          }
+    final Consumer<Edge> _function_2 = (Edge edge) -> {
+      final Edge derivedEdge = TransformationHelper.deriveEdge(edge);
+      EList<Edge> _edges_3 = this.result.getEdges();
+      _edges_3.add(derivedEdge);
+      EList<Node> _nodes_3 = this.input.getNodes();
+      final Function1<Node, Boolean> _function_3 = (Node node) -> {
+        EList<Edge> _edges_4 = node.getEdges();
+        return Boolean.valueOf(_edges_4.contains(edge));
+      };
+      Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes_3, _function_3);
+      final Consumer<Node> _function_4 = (Node node) -> {
+        EList<Node> _nodes_4 = this.result.getNodes();
+        final Function1<Node, Boolean> _function_5 = (Node derivedNode) -> {
+          NodeReference _derivedFrom = derivedNode.getDerivedFrom();
+          Node _node = ((NodeTrace) _derivedFrom).getNode();
+          return Boolean.valueOf(Objects.equal(_node, node));
         };
-        Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes, _function);
-        final Consumer<Node> _function_1 = new Consumer<Node>() {
-          public void accept(final Node node) {
-            EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.result.getNodes();
-            final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-              public Boolean apply(final Node derivedNode) {
-                NodeReference _derivedFrom = derivedNode.getDerivedFrom();
-                Node _node = ((NodeTrace) _derivedFrom).getNode();
-                return Boolean.valueOf(Objects.equal(_node, node));
-              }
-            };
-            Node derivedNode = IterableExtensions.<Node>findFirst(_nodes, _function);
-            boolean _equals = Objects.equal(derivedNode, null);
-            if (_equals) {
-              Node _deriveNode = TransformationHelper.deriveNode(node);
-              derivedNode = _deriveNode;
-              EList<Node> _nodes_1 = TransformationIntermoduleHyperedgesOnlyGraph.this.result.getNodes();
-              _nodes_1.add(derivedNode);
-            }
-            EList<Edge> _edges = derivedNode.getEdges();
-            _edges.add(derivedEdge);
-          }
-        };
-        _filter.forEach(_function_1);
-        EList<Node> _nodes_1 = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getNodes();
-        int _size = _nodes_1.size();
-        TransformationIntermoduleHyperedgesOnlyGraph.this.monitor.worked(_size);
-      }
+        Node derivedNode = IterableExtensions.<Node>findFirst(_nodes_4, _function_5);
+        boolean _equals = Objects.equal(derivedNode, null);
+        if (_equals) {
+          Node _deriveNode = TransformationHelper.deriveNode(node);
+          derivedNode = _deriveNode;
+          EList<Node> _nodes_5 = this.result.getNodes();
+          _nodes_5.add(derivedNode);
+        }
+        EList<Edge> _edges_4 = derivedNode.getEdges();
+        _edges_4.add(derivedEdge);
+      };
+      _filter.forEach(_function_4);
+      EList<Node> _nodes_4 = this.input.getNodes();
+      int _size_7 = _nodes_4.size();
+      this.monitor.worked(_size_7);
     };
     interModuleEdges.forEach(_function_2);
     EList<Node> _nodes_3 = this.input.getNodes();
@@ -149,33 +136,27 @@ public class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransf
     int _multiply_3 = (_size_7 * _minus);
     this.monitor.worked(_multiply_3);
     EList<Module> _modules_3 = this.input.getModules();
-    final Consumer<Module> _function_3 = new Consumer<Module>() {
-      public void accept(final Module module) {
-        final Module derivedModule = TransformationHelper.deriveModule(module);
-        EList<Node> _nodes = module.getNodes();
-        final Consumer<Node> _function = new Consumer<Node>() {
-          public void accept(final Node node) {
-            EList<Node> _nodes = TransformationIntermoduleHyperedgesOnlyGraph.this.result.getNodes();
-            final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-              public Boolean apply(final Node derivedNode) {
-                NodeReference _derivedFrom = derivedNode.getDerivedFrom();
-                Node _node = ((NodeTrace) _derivedFrom).getNode();
-                return Boolean.valueOf(Objects.equal(_node, node));
-              }
-            };
-            final Node derivedNode = IterableExtensions.<Node>findFirst(_nodes, _function);
-            boolean _notEquals = (!Objects.equal(derivedNode, null));
-            if (_notEquals) {
-              EList<Node> _nodes_1 = derivedModule.getNodes();
-              _nodes_1.add(derivedNode);
-            }
-          }
+    final Consumer<Module> _function_3 = (Module module) -> {
+      final Module derivedModule = TransformationHelper.deriveModule(module);
+      EList<Node> _nodes_4 = module.getNodes();
+      final Consumer<Node> _function_4 = (Node node) -> {
+        EList<Node> _nodes_5 = this.result.getNodes();
+        final Function1<Node, Boolean> _function_5 = (Node derivedNode) -> {
+          NodeReference _derivedFrom = derivedNode.getDerivedFrom();
+          Node _node = ((NodeTrace) _derivedFrom).getNode();
+          return Boolean.valueOf(Objects.equal(_node, node));
         };
-        _nodes.forEach(_function);
-        EList<Node> _nodes_1 = TransformationIntermoduleHyperedgesOnlyGraph.this.input.getNodes();
-        int _size = _nodes_1.size();
-        TransformationIntermoduleHyperedgesOnlyGraph.this.monitor.worked(_size);
-      }
+        final Node derivedNode = IterableExtensions.<Node>findFirst(_nodes_5, _function_5);
+        boolean _notEquals = (!Objects.equal(derivedNode, null));
+        if (_notEquals) {
+          EList<Node> _nodes_6 = derivedModule.getNodes();
+          _nodes_6.add(derivedNode);
+        }
+      };
+      _nodes_4.forEach(_function_4);
+      EList<Node> _nodes_5 = this.input.getNodes();
+      int _size_10 = _nodes_5.size();
+      this.monitor.worked(_size_10);
     };
     _modules_3.forEach(_function_3);
     return this.result;
@@ -185,11 +166,9 @@ public class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransf
    * Check if the edge is an intermodule edge.
    */
   private Boolean isIntermoduleEdge(final Edge edge, final Map<Node, Module> moduleNodeMap, final EList<Node> nodes) {
-    final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-      public Boolean apply(final Node node) {
-        EList<Edge> _edges = node.getEdges();
-        return Boolean.valueOf(_edges.contains(edge));
-      }
+    final Function1<Node, Boolean> _function = (Node node) -> {
+      EList<Edge> _edges = node.getEdges();
+      return Boolean.valueOf(_edges.contains(edge));
     };
     final Iterable<Node> connectedNodes = IterableExtensions.<Node>filter(nodes, _function);
     Module lastMatch = null;

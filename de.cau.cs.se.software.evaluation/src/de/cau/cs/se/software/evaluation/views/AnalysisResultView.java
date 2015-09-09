@@ -17,7 +17,7 @@ package de.cau.cs.se.software.evaluation.views;
 
 import java.io.IOException;
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -51,7 +51,7 @@ public class AnalysisResultView extends ViewPart {
 	private Action exportHypergraphAction;
 	private Action visualizeAction;
 	private ModularHypergraph graph = null;
-	private IJavaProject project = null;
+	private IProject project = null;
 
 	/**
 	 * The constructor.
@@ -207,7 +207,7 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.refresh();
 	}
 
-	public void setProject(final IJavaProject project) {
+	public void setProject(final IProject project) {
 		this.project = project;
 	}
 }

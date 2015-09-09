@@ -34,35 +34,33 @@ public class JavaHypergraphQueryHelper {
    * @param binding
    */
   public static Node findNodeForMethodBinding(final EList<Node> nodes, final IMethodBinding binding) {
-    final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-      public Boolean apply(final Node it) {
-        boolean _xblockexpression = false;
-        {
-          final NodeReference derivedFrom = it.getDerivedFrom();
-          boolean _switchResult = false;
-          boolean _matched = false;
-          if (!_matched) {
-            if (derivedFrom instanceof MethodTrace) {
-              _matched=true;
-              Object _method = ((MethodTrace)derivedFrom).getMethod();
-              _switchResult = ((IMethodBinding) _method).isEqualTo(binding);
-            }
+    final Function1<Node, Boolean> _function = (Node it) -> {
+      boolean _xblockexpression = false;
+      {
+        final NodeReference derivedFrom = it.getDerivedFrom();
+        boolean _switchResult = false;
+        boolean _matched = false;
+        if (!_matched) {
+          if (derivedFrom instanceof MethodTrace) {
+            _matched=true;
+            Object _method = ((MethodTrace)derivedFrom).getMethod();
+            _switchResult = ((IMethodBinding) _method).isEqualTo(binding);
           }
-          if (!_matched) {
-            if (derivedFrom instanceof TypeTrace) {
-              _matched=true;
-              _switchResult = false;
-            }
-          }
-          if (!_matched) {
-            Class<? extends NodeReference> _class = derivedFrom.getClass();
-            String _plus = ("Nodes cannot be derived from " + _class);
-            throw new UnsupportedOperationException(_plus);
-          }
-          _xblockexpression = _switchResult;
         }
-        return Boolean.valueOf(_xblockexpression);
+        if (!_matched) {
+          if (derivedFrom instanceof TypeTrace) {
+            _matched=true;
+            _switchResult = false;
+          }
+        }
+        if (!_matched) {
+          Class<? extends NodeReference> _class = derivedFrom.getClass();
+          String _plus = ("Nodes cannot be derived from " + _class);
+          throw new UnsupportedOperationException(_plus);
+        }
+        _xblockexpression = _switchResult;
       }
+      return Boolean.valueOf(_xblockexpression);
     };
     return IterableExtensions.<Node>findFirst(nodes, _function);
   }
@@ -80,36 +78,34 @@ public class JavaHypergraphQueryHelper {
       Node _xifexpression = null;
       boolean _equals = Objects.equal(result, null);
       if (_equals) {
-        final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-          public Boolean apply(final Node it) {
-            boolean _xblockexpression = false;
-            {
-              final NodeReference derivedFrom = it.getDerivedFrom();
-              boolean _switchResult = false;
-              boolean _matched = false;
-              if (!_matched) {
-                if (derivedFrom instanceof MethodTrace) {
-                  _matched=true;
-                  _switchResult = false;
-                }
+        final Function1<Node, Boolean> _function = (Node it) -> {
+          boolean _xblockexpression_1 = false;
+          {
+            final NodeReference derivedFrom = it.getDerivedFrom();
+            boolean _switchResult = false;
+            boolean _matched = false;
+            if (!_matched) {
+              if (derivedFrom instanceof MethodTrace) {
+                _matched=true;
+                _switchResult = false;
               }
-              if (!_matched) {
-                if (derivedFrom instanceof TypeTrace) {
-                  _matched=true;
-                  Object _type = ((TypeTrace)derivedFrom).getType();
-                  ITypeBinding _declaringClass = binding.getDeclaringClass();
-                  _switchResult = ((ITypeBinding) _type).isEqualTo(_declaringClass);
-                }
-              }
-              if (!_matched) {
-                Class<? extends NodeReference> _class = derivedFrom.getClass();
-                String _plus = ("Nodes cannot be derived from " + _class);
-                throw new UnsupportedOperationException(_plus);
-              }
-              _xblockexpression = _switchResult;
             }
-            return Boolean.valueOf(_xblockexpression);
+            if (!_matched) {
+              if (derivedFrom instanceof TypeTrace) {
+                _matched=true;
+                Object _type = ((TypeTrace)derivedFrom).getType();
+                ITypeBinding _declaringClass = binding.getDeclaringClass();
+                _switchResult = ((ITypeBinding) _type).isEqualTo(_declaringClass);
+              }
+            }
+            if (!_matched) {
+              Class<? extends NodeReference> _class = derivedFrom.getClass();
+              String _plus = ("Nodes cannot be derived from " + _class);
+              throw new UnsupportedOperationException(_plus);
+            }
+            _xblockexpression_1 = _switchResult;
           }
+          return Boolean.valueOf(_xblockexpression_1);
         };
         _xifexpression = IterableExtensions.<Node>findFirst(nodes, _function);
       } else {
@@ -124,12 +120,10 @@ public class JavaHypergraphQueryHelper {
    * Find a module which corresponds to the type binding.
    */
   public static Module findModule(final EList<Module> modules, final ITypeBinding binding) {
-    final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
-      public Boolean apply(final Module it) {
-        ModuleReference _derivedFrom = it.getDerivedFrom();
-        Object _type = ((TypeTrace) _derivedFrom).getType();
-        return Boolean.valueOf(((ITypeBinding) _type).isEqualTo(binding));
-      }
+    final Function1<Module, Boolean> _function = (Module it) -> {
+      ModuleReference _derivedFrom = it.getDerivedFrom();
+      Object _type = ((TypeTrace) _derivedFrom).getType();
+      return Boolean.valueOf(((ITypeBinding) _type).isEqualTo(binding));
     };
     return IterableExtensions.<Module>findFirst(modules, _function);
   }
@@ -138,11 +132,9 @@ public class JavaHypergraphQueryHelper {
    * Find a module which corresponds to the type binding.
    */
   public static Module findModule(final EList<Module> modules, final String fullyQualifiedName) {
-    final Function1<Module, Boolean> _function = new Function1<Module, Boolean>() {
-      public Boolean apply(final Module it) {
-        String _name = it.getName();
-        return Boolean.valueOf(_name.equals(fullyQualifiedName));
-      }
+    final Function1<Module, Boolean> _function = (Module it) -> {
+      String _name = it.getName();
+      return Boolean.valueOf(_name.equals(fullyQualifiedName));
     };
     return IterableExtensions.<Module>findFirst(modules, _function);
   }
@@ -151,55 +143,53 @@ public class JavaHypergraphQueryHelper {
    * Find an edge which has the two corresponding method bindings.
    */
   public static Edge findCallEdge(final EList<Edge> edges, final IMethodBinding endOne, final IMethodBinding endTwo) {
-    final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-      public Boolean apply(final Edge edge) {
-        boolean _xifexpression = false;
-        EdgeReference _derivedFrom = edge.getDerivedFrom();
-        if ((_derivedFrom instanceof CallerCalleeTrace)) {
-          boolean _xblockexpression = false;
-          {
-            EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
-            final CallerCalleeTrace trace = ((CallerCalleeTrace) _derivedFrom_1);
-            Object _callee = trace.getCallee();
-            final IMethodBinding callee = ((IMethodBinding) _callee);
-            Object _caller = trace.getCaller();
-            final IMethodBinding caller = ((IMethodBinding) _caller);
-            boolean _xifexpression_1 = false;
-            boolean _or = false;
-            boolean _and = false;
-            boolean _isEqualTo = caller.isEqualTo(endOne);
-            if (!_isEqualTo) {
-              _and = false;
-            } else {
-              boolean _isEqualTo_1 = callee.isEqualTo(endTwo);
-              _and = _isEqualTo_1;
-            }
-            if (_and) {
-              _or = true;
-            } else {
-              boolean _and_1 = false;
-              boolean _isEqualTo_2 = caller.isEqualTo(endTwo);
-              if (!_isEqualTo_2) {
-                _and_1 = false;
-              } else {
-                boolean _isEqualTo_3 = callee.isEqualTo(endOne);
-                _and_1 = _isEqualTo_3;
-              }
-              _or = _and_1;
-            }
-            if (_or) {
-              _xifexpression_1 = true;
-            } else {
-              _xifexpression_1 = false;
-            }
-            _xblockexpression = _xifexpression_1;
+    final Function1<Edge, Boolean> _function = (Edge edge) -> {
+      boolean _xifexpression = false;
+      EdgeReference _derivedFrom = edge.getDerivedFrom();
+      if ((_derivedFrom instanceof CallerCalleeTrace)) {
+        boolean _xblockexpression = false;
+        {
+          EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
+          final CallerCalleeTrace trace = ((CallerCalleeTrace) _derivedFrom_1);
+          Object _callee = trace.getCallee();
+          final IMethodBinding callee = ((IMethodBinding) _callee);
+          Object _caller = trace.getCaller();
+          final IMethodBinding caller = ((IMethodBinding) _caller);
+          boolean _xifexpression_1 = false;
+          boolean _or = false;
+          boolean _and = false;
+          boolean _isEqualTo = caller.isEqualTo(endOne);
+          if (!_isEqualTo) {
+            _and = false;
+          } else {
+            boolean _isEqualTo_1 = callee.isEqualTo(endTwo);
+            _and = _isEqualTo_1;
           }
-          _xifexpression = _xblockexpression;
-        } else {
-          _xifexpression = false;
+          if (_and) {
+            _or = true;
+          } else {
+            boolean _and_1 = false;
+            boolean _isEqualTo_2 = caller.isEqualTo(endTwo);
+            if (!_isEqualTo_2) {
+              _and_1 = false;
+            } else {
+              boolean _isEqualTo_3 = callee.isEqualTo(endOne);
+              _and_1 = _isEqualTo_3;
+            }
+            _or = _and_1;
+          }
+          if (_or) {
+            _xifexpression_1 = true;
+          } else {
+            _xifexpression_1 = false;
+          }
+          _xblockexpression = _xifexpression_1;
         }
-        return Boolean.valueOf(_xifexpression);
+        _xifexpression = _xblockexpression;
+      } else {
+        _xifexpression = false;
       }
+      return Boolean.valueOf(_xifexpression);
     };
     return IterableExtensions.<Edge>findFirst(edges, _function);
   }
@@ -208,24 +198,22 @@ public class JavaHypergraphQueryHelper {
    * Find an data edge which has the given variable binding.
    */
   public static Edge findDataEdge(final EList<Edge> edges, final IVariableBinding binding) {
-    final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-      public Boolean apply(final Edge edge) {
-        boolean _xifexpression = false;
-        EdgeReference _derivedFrom = edge.getDerivedFrom();
-        if ((_derivedFrom instanceof FieldTrace)) {
-          boolean _xblockexpression = false;
-          {
-            EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
-            Object _field = ((FieldTrace) _derivedFrom_1).getField();
-            final IVariableBinding trace = ((IVariableBinding) _field);
-            _xblockexpression = trace.isEqualTo(binding);
-          }
-          _xifexpression = _xblockexpression;
-        } else {
-          _xifexpression = false;
+    final Function1<Edge, Boolean> _function = (Edge edge) -> {
+      boolean _xifexpression = false;
+      EdgeReference _derivedFrom = edge.getDerivedFrom();
+      if ((_derivedFrom instanceof FieldTrace)) {
+        boolean _xblockexpression = false;
+        {
+          EdgeReference _derivedFrom_1 = edge.getDerivedFrom();
+          Object _field = ((FieldTrace) _derivedFrom_1).getField();
+          final IVariableBinding trace = ((IVariableBinding) _field);
+          _xblockexpression = trace.isEqualTo(binding);
         }
-        return Boolean.valueOf(_xifexpression);
+        _xifexpression = _xblockexpression;
+      } else {
+        _xifexpression = false;
       }
+      return Boolean.valueOf(_xifexpression);
     };
     return IterableExtensions.<Edge>findFirst(edges, _function);
   }
@@ -277,21 +265,19 @@ public class JavaHypergraphQueryHelper {
    */
   public static IVariableBinding findDataPropertyInClass(final SimpleName property, final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
     IVariableBinding[] _declaredFields = typeBinding.getDeclaredFields();
-    final Function1<IVariableBinding, Boolean> _function = new Function1<IVariableBinding, Boolean>() {
-      public Boolean apply(final IVariableBinding it) {
-        boolean _and = false;
-        String _name = it.getName();
-        String _fullyQualifiedName = property.getFullyQualifiedName();
-        boolean _equals = _name.equals(_fullyQualifiedName);
-        if (!_equals) {
-          _and = false;
-        } else {
-          ITypeBinding _type = it.getType();
-          boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_type, dataTypePatterns);
-          _and = _isDataType;
-        }
-        return Boolean.valueOf(_and);
+    final Function1<IVariableBinding, Boolean> _function = (IVariableBinding it) -> {
+      boolean _and = false;
+      String _name = it.getName();
+      String _fullyQualifiedName = property.getFullyQualifiedName();
+      boolean _equals = _name.equals(_fullyQualifiedName);
+      if (!_equals) {
+        _and = false;
+      } else {
+        ITypeBinding _type = it.getType();
+        boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_type, dataTypePatterns);
+        _and = _isDataType;
       }
+      return Boolean.valueOf(_and);
     };
     return IterableExtensions.<IVariableBinding>findFirst(((Iterable<IVariableBinding>)Conversions.doWrapArray(_declaredFields)), _function);
   }
@@ -304,11 +290,9 @@ public class JavaHypergraphQueryHelper {
     if (_isPrimitive) {
       return true;
     } else {
-      final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
-        public Boolean apply(final String it) {
-          String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(type);
-          return Boolean.valueOf(_determineFullyQualifiedName.matches(it));
-        }
+      final Function1<String, Boolean> _function = (String it) -> {
+        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(type);
+        return Boolean.valueOf(_determineFullyQualifiedName.matches(it));
       };
       return IterableExtensions.<String>exists(dataTypePatterns, _function);
     }

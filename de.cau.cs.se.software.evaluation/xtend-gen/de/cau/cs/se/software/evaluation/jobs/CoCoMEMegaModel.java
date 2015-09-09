@@ -237,18 +237,14 @@ public class CoCoMEMegaModel {
   private boolean connectNode(final EList<Node> nodes, final EList<Edge> edges, final String nodeName, final String edgeName) {
     boolean _xblockexpression = false;
     {
-      final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-        public Boolean apply(final Node node) {
-          String _name = node.getName();
-          return Boolean.valueOf(_name.equals(nodeName));
-        }
+      final Function1<Node, Boolean> _function = (Node node) -> {
+        String _name = node.getName();
+        return Boolean.valueOf(_name.equals(nodeName));
       };
       final Node node = IterableExtensions.<Node>findFirst(nodes, _function);
-      final Function1<Edge, Boolean> _function_1 = new Function1<Edge, Boolean>() {
-        public Boolean apply(final Edge edge) {
-          String _name = edge.getName();
-          return Boolean.valueOf(_name.equals(edgeName));
-        }
+      final Function1<Edge, Boolean> _function_1 = (Edge edge) -> {
+        String _name = edge.getName();
+        return Boolean.valueOf(_name.equals(edgeName));
       };
       final Edge edge = IterableExtensions.<Edge>findFirst(edges, _function_1);
       EList<Edge> _edges = node.getEdges();

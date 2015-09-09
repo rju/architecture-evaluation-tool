@@ -38,6 +38,7 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
     super(monitor);
   }
   
+  @Override
   public ModularHypergraph transform() {
     EList<Node> _nodes = this.input.getNodes();
     int _size = _nodes.size();
@@ -57,71 +58,61 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
     EList<Node> _nodes_4 = this.input.getNodes();
-    final Consumer<Node> _function = new Consumer<Node>() {
-      public void accept(final Node it) {
-        EList<Node> _nodes = TransformationMaximalInterconnectedGraph.this.result.getNodes();
-        Node _deriveNode = TransformationHelper.deriveNode(it);
-        _nodes.add(_deriveNode);
-      }
+    final Consumer<Node> _function = (Node it) -> {
+      EList<Node> _nodes_5 = this.result.getNodes();
+      Node _deriveNode = TransformationHelper.deriveNode(it);
+      _nodes_5.add(_deriveNode);
     };
     _nodes_4.forEach(_function);
     EList<Node> _nodes_5 = this.input.getNodes();
     int _size_5 = _nodes_5.size();
     this.monitor.worked(_size_5);
     EList<Module> _modules_1 = this.input.getModules();
-    final Consumer<Module> _function_1 = new Consumer<Module>() {
-      public void accept(final Module module) {
-        final Module derivedModule = TransformationHelper.deriveModule(module);
-        EList<Node> _nodes = module.getNodes();
-        final Consumer<Node> _function = new Consumer<Node>() {
-          public void accept(final Node node) {
-            EList<Node> _nodes = derivedModule.getNodes();
-            EList<Node> _nodes_1 = TransformationMaximalInterconnectedGraph.this.result.getNodes();
-            final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-              public Boolean apply(final Node derivedNode) {
-                NodeReference _derivedFrom = derivedNode.getDerivedFrom();
-                Node _node = ((NodeTrace) _derivedFrom).getNode();
-                return Boolean.valueOf(Objects.equal(_node, node));
-              }
-            };
-            Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_1, _function);
-            _nodes.add(_findFirst);
-          }
+    final Consumer<Module> _function_1 = (Module module) -> {
+      final Module derivedModule = TransformationHelper.deriveModule(module);
+      EList<Node> _nodes_6 = module.getNodes();
+      final Consumer<Node> _function_2 = (Node node) -> {
+        EList<Node> _nodes_7 = derivedModule.getNodes();
+        EList<Node> _nodes_8 = this.result.getNodes();
+        final Function1<Node, Boolean> _function_3 = (Node derivedNode) -> {
+          NodeReference _derivedFrom = derivedNode.getDerivedFrom();
+          Node _node = ((NodeTrace) _derivedFrom).getNode();
+          return Boolean.valueOf(Objects.equal(_node, node));
         };
-        _nodes.forEach(_function);
-        EList<Module> _modules = TransformationMaximalInterconnectedGraph.this.result.getModules();
-        _modules.add(derivedModule);
-        EList<Node> _nodes_1 = TransformationMaximalInterconnectedGraph.this.input.getNodes();
-        int _size = _nodes_1.size();
-        TransformationMaximalInterconnectedGraph.this.monitor.worked(_size);
-      }
+        Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_8, _function_3);
+        _nodes_7.add(_findFirst);
+      };
+      _nodes_6.forEach(_function_2);
+      EList<Module> _modules_2 = this.result.getModules();
+      _modules_2.add(derivedModule);
+      EList<Node> _nodes_7 = this.input.getNodes();
+      int _size_6 = _nodes_7.size();
+      this.monitor.worked(_size_6);
     };
     _modules_1.forEach(_function_1);
     EList<Node> _nodes_6 = this.result.getNodes();
-    final Procedure2<Node, Integer> _function_2 = new Procedure2<Node, Integer>() {
-      public void apply(final Node startNode, final Integer startIndex) {
-        for (int index = ((startIndex).intValue() + 1); (index < TransformationMaximalInterconnectedGraph.this.result.getNodes().size()); index++) {
-          {
-            EList<Node> _nodes = TransformationMaximalInterconnectedGraph.this.result.getNodes();
-            final Node endNode = _nodes.get(index);
-            final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-            String _name = startNode.getName();
-            String _plus = (_name + "-");
-            String _name_1 = endNode.getName();
-            String _plus_1 = (_plus + _name_1);
-            edge.setName(_plus_1);
-            EList<Edge> _edges = startNode.getEdges();
-            _edges.add(edge);
-            EList<Edge> _edges_1 = endNode.getEdges();
-            _edges_1.add(edge);
-            EList<Edge> _edges_2 = TransformationMaximalInterconnectedGraph.this.result.getEdges();
-            _edges_2.add(edge);
-          }
+    final Procedure2<Node, Integer> _function_2 = (Node startNode, Integer startIndex) -> {
+      for (int index = ((startIndex).intValue() + 1); (index < this.result.getNodes().size()); index++) {
+        {
+          EList<Node> _nodes_7 = this.result.getNodes();
+          final Node endNode = _nodes_7.get(index);
+          final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+          String _name = startNode.getName();
+          String _plus_2 = (_name + "-");
+          String _name_1 = endNode.getName();
+          String _plus_3 = (_plus_2 + _name_1);
+          edge.setName(_plus_3);
+          EList<Edge> _edges = startNode.getEdges();
+          _edges.add(edge);
+          EList<Edge> _edges_1 = endNode.getEdges();
+          _edges_1.add(edge);
+          EList<Edge> _edges_2 = this.result.getEdges();
+          _edges_2.add(edge);
         }
-        EList<Node> _nodes = TransformationMaximalInterconnectedGraph.this.input.getNodes();
-        int _size = _nodes.size();
-        TransformationMaximalInterconnectedGraph.this.monitor.worked(_size);
       }
+      EList<Node> _nodes_7 = this.input.getNodes();
+      int _size_6 = _nodes_7.size();
+      this.monitor.worked(_size_6);
     };
     IterableExtensions.<Node>forEach(_nodes_6, _function_2);
     return this.result;

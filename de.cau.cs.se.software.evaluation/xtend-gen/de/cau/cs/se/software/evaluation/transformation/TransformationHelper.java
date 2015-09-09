@@ -88,27 +88,21 @@ public class TransformationHelper {
     boolean _xblockexpression = false;
     {
       EList<Edge> _edges = caller.getEdges();
-      final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-        public Boolean apply(final Edge callerEdge) {
-          EList<Edge> _edges = callee.getEdges();
-          final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-            public Boolean apply(final Edge calleeEdge) {
-              return Boolean.valueOf(Objects.equal(calleeEdge, callerEdge));
-            }
-          };
-          return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges, _function));
-        }
+      final Function1<Edge, Boolean> _function = (Edge callerEdge) -> {
+        EList<Edge> _edges_1 = callee.getEdges();
+        final Function1<Edge, Boolean> _function_1 = (Edge calleeEdge) -> {
+          return Boolean.valueOf(Objects.equal(calleeEdge, callerEdge));
+        };
+        return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges_1, _function_1));
       };
       final Iterable<Edge> edgeSubset = IterableExtensions.<Edge>filter(_edges, _function);
       String _name = caller.getName();
       String _plus = (_name + "::");
       String _name_1 = callee.getName();
       final String edgeName = (_plus + _name_1);
-      final Function1<Edge, Boolean> _function_1 = new Function1<Edge, Boolean>() {
-        public Boolean apply(final Edge edge) {
-          String _name = edge.getName();
-          return Boolean.valueOf(_name.equals(edgeName));
-        }
+      final Function1<Edge, Boolean> _function_1 = (Edge edge) -> {
+        String _name_2 = edge.getName();
+        return Boolean.valueOf(_name_2.equals(edgeName));
       };
       final Edge existingEdge = IterableExtensions.<Edge>findFirst(edgeSubset, _function_1);
       boolean _xifexpression = false;

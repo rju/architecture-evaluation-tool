@@ -42,6 +42,7 @@ public class ConnectedNodeHyperedgeOnlySizeJob extends Job {
     this.input = input;
   }
   
+  @Override
   protected IStatus run(final IProgressMonitor monitor) {
     Node node = null;
     int i = 0;

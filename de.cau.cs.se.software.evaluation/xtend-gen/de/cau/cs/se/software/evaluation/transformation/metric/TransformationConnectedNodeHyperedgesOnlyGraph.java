@@ -51,6 +51,7 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
   /**
    * Find all nodes connected to the start node and create a graph for it.
    */
+  @Override
   public Hypergraph transform() {
     Object _xblockexpression = null;
     {
@@ -72,21 +73,17 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
         Node _deriveNode = TransformationHelper.deriveNode(selectedNode);
         _nodes_1.add(_deriveNode);
         EList<Edge> _edges = selectedNode.getEdges();
-        final Consumer<Edge> _function = new Consumer<Edge>() {
-          public void accept(final Edge edge) {
-            EList<Edge> _edges = TransformationConnectedNodeHyperedgesOnlyGraph.this.result.getEdges();
-            Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
-            _edges.add(_deriveEdge);
-          }
+        final Consumer<Edge> _function = (Edge edge) -> {
+          EList<Edge> _edges_1 = this.result.getEdges();
+          Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+          _edges_1.add(_deriveEdge);
         };
         _edges.forEach(_function);
         EList<Edge> _edges_1 = this.result.getEdges();
-        final Consumer<Edge> _function_1 = new Consumer<Edge>() {
-          public void accept(final Edge edge) {
-            EList<Node> _nodes = TransformationConnectedNodeHyperedgesOnlyGraph.this.input.getNodes();
-            EList<Node> _nodes_1 = TransformationConnectedNodeHyperedgesOnlyGraph.this.result.getNodes();
-            TransformationConnectedNodeHyperedgesOnlyGraph.this.createAndLinkNodesConnectedToEdge(edge, _nodes, _nodes_1);
-          }
+        final Consumer<Edge> _function_1 = (Edge edge) -> {
+          EList<Node> _nodes_2 = this.input.getNodes();
+          EList<Node> _nodes_3 = this.result.getNodes();
+          this.createAndLinkNodesConnectedToEdge(edge, _nodes_2, _nodes_3);
         };
         _edges_1.forEach(_function_1);
         return this.result;
@@ -105,12 +102,10 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
       EList<Edge> _edges = originalNode.getEdges();
       boolean _contains = _edges.contains(originalEdge);
       if (_contains) {
-        final Function1<Node, Boolean> _function = new Function1<Node, Boolean>() {
-          public Boolean apply(final Node node) {
-            NodeReference _derivedFrom = node.getDerivedFrom();
-            Node _node = ((NodeTrace) _derivedFrom).getNode();
-            return Boolean.valueOf(Objects.equal(_node, originalNode));
-          }
+        final Function1<Node, Boolean> _function = (Node node) -> {
+          NodeReference _derivedFrom_1 = node.getDerivedFrom();
+          Node _node = ((NodeTrace) _derivedFrom_1).getNode();
+          return Boolean.valueOf(Objects.equal(_node, originalNode));
         };
         Node newNode = IterableExtensions.<Node>findFirst(nodes, _function);
         boolean _equals = Objects.equal(newNode, null);

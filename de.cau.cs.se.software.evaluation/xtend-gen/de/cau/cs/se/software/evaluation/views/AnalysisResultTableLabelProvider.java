@@ -24,14 +24,17 @@ import org.eclipse.ui.PlatformUI;
 
 @SuppressWarnings("all")
 public class AnalysisResultTableLabelProvider extends LabelProvider implements ITableLabelProvider {
+  @Override
   public String getColumnText(final Object obj, final int index) {
     return this.getText(obj);
   }
   
+  @Override
   public Image getColumnImage(final Object obj, final int index) {
     return this.getImage(obj);
   }
   
+  @Override
   public Image getImage(final Object obj) {
     IWorkbench _workbench = PlatformUI.getWorkbench();
     ISharedImages _sharedImages = _workbench.getSharedImages();

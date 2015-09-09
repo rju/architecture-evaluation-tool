@@ -86,21 +86,20 @@ public class CollectInputModelJob extends Job {
   /**
    * Execute the preparation
    */
+  @Override
   protected IStatus run(final IProgressMonitor monitor) {
     monitor.beginTask("Collect project information", 0);
     final List<IType> types = this.determineClassFiles(monitor);
     boolean _notEquals = (!Objects.equal(types, null));
     if (_notEquals) {
       final ArrayList<IJavaProject> projects = new ArrayList<IJavaProject>();
-      final Consumer<IType> _function = new Consumer<IType>() {
-        public void accept(final IType type) {
-          IJavaProject _javaProject = type.getJavaProject();
-          boolean _contains = projects.contains(_javaProject);
-          boolean _not = (!_contains);
-          if (_not) {
-            IJavaProject _javaProject_1 = type.getJavaProject();
-            projects.add(_javaProject_1);
-          }
+      final Consumer<IType> _function = (IType type) -> {
+        IJavaProject _javaProject = type.getJavaProject();
+        boolean _contains = projects.contains(_javaProject);
+        boolean _not = (!_contains);
+        if (_not) {
+          IJavaProject _javaProject_1 = type.getJavaProject();
+          projects.add(_javaProject_1);
         }
       };
       types.forEach(_function);
@@ -137,16 +136,14 @@ public class CollectInputModelJob extends Job {
       if ((this.selection instanceof ITreeSelection)) {
         final TreeSelection treeSelection = ((TreeSelection) this.selection);
         Iterator _iterator = treeSelection.iterator();
-        final Function1<Object, Boolean> _function = new Function1<Object, Boolean>() {
-          public Boolean apply(final Object element) {
-            boolean _or = false;
-            if ((element instanceof IProject)) {
-              _or = true;
-            } else {
-              _or = (element instanceof IJavaProject);
-            }
-            return Boolean.valueOf(_or);
+        final Function1<Object, Boolean> _function = (Object element) -> {
+          boolean _or = false;
+          if ((element instanceof IProject)) {
+            _or = true;
+          } else {
+            _or = (element instanceof IJavaProject);
           }
+          return Boolean.valueOf(_or);
         };
         final Object selectedElement = IteratorExtensions.<Object>findFirst(_iterator, _function);
         boolean _notEquals = (!Objects.equal(selectedElement, null));
@@ -217,10 +214,8 @@ public class CollectInputModelJob extends Job {
               List<String> _readPattern_1 = this.readPattern(observedSystemPatternsFile);
               this.observedSystemPatterns = _readPattern_1;
               IPackageFragmentRoot[] _allPackageFragmentRoots = project.getAllPackageFragmentRoots();
-              final Consumer<IPackageFragmentRoot> _function = new Consumer<IPackageFragmentRoot>() {
-                public void accept(final IPackageFragmentRoot root) {
-                  CollectInputModelJob.this.checkForTypes(types, root, monitor);
-                }
+              final Consumer<IPackageFragmentRoot> _function = (IPackageFragmentRoot root) -> {
+                this.checkForTypes(types, root, monitor);
               };
               ((List<IPackageFragmentRoot>)Conversions.doWrapArray(_allPackageFragmentRoots)).forEach(_function);
               return types;
@@ -251,36 +246,30 @@ public class CollectInputModelJob extends Job {
    * @param observedSystemPatterns pattern list for classes to be included
    */
   private void collectAllSourceClasses(final List<IType> types, final List<String> dataTypePatterns, final List<String> observedSystemPatterns, final IProgressMonitor monitor) {
-    final Consumer<IType> _function = new Consumer<IType>() {
-      public void accept(final IType jdtType) {
-        final CompilationUnit unit = CollectInputModelJob.this.getUnitForType(jdtType, monitor);
-        boolean _notEquals = (!Objects.equal(unit, null));
-        if (_notEquals) {
-          List _types = unit.types();
-          final Consumer<Object> _function = new Consumer<Object>() {
-            public void accept(final Object unitType) {
-              if ((unitType instanceof TypeDeclaration)) {
-                final TypeDeclaration type = ((TypeDeclaration) unitType);
-                final ITypeBinding typeBinding = type.resolveBinding();
-                final String name = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
-                final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
-                  public Boolean apply(final String it) {
-                    return Boolean.valueOf(name.matches(it));
-                  }
-                };
-                boolean _exists = IterableExtensions.<String>exists(observedSystemPatterns, _function);
-                if (_exists) {
-                  boolean _isClassDataType = CollectInputModelJob.this.isClassDataType(typeBinding, dataTypePatterns);
-                  boolean _not = (!_isClassDataType);
-                  if (_not) {
-                    CollectInputModelJob.this.classes.add(type);
-                  }
-                }
+    final Consumer<IType> _function = (IType jdtType) -> {
+      final CompilationUnit unit = this.getUnitForType(jdtType, monitor);
+      boolean _notEquals = (!Objects.equal(unit, null));
+      if (_notEquals) {
+        List _types = unit.types();
+        final Consumer<Object> _function_1 = (Object unitType) -> {
+          if ((unitType instanceof TypeDeclaration)) {
+            final TypeDeclaration type = ((TypeDeclaration) unitType);
+            final ITypeBinding typeBinding = type.resolveBinding();
+            final String name = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
+            final Function1<String, Boolean> _function_2 = (String it) -> {
+              return Boolean.valueOf(name.matches(it));
+            };
+            boolean _exists = IterableExtensions.<String>exists(observedSystemPatterns, _function_2);
+            if (_exists) {
+              boolean _isClassDataType = this.isClassDataType(typeBinding, dataTypePatterns);
+              boolean _not = (!_isClassDataType);
+              if (_not) {
+                this.classes.add(type);
               }
             }
-          };
-          _types.forEach(_function);
-        }
+          }
+        };
+        _types.forEach(_function_1);
       }
     };
     types.forEach(_function);
@@ -296,10 +285,8 @@ public class CollectInputModelJob extends Job {
    */
   private boolean isClassDataType(final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
     final String name = NameResolutionHelper.determineFullyQualifiedName(typeBinding);
-    final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
-      public Boolean apply(final String pattern) {
-        return Boolean.valueOf(name.matches(pattern));
-      }
+    final Function1<String, Boolean> _function = (String pattern) -> {
+      return Boolean.valueOf(name.matches(pattern));
     };
     return IterableExtensions.<String>exists(dataTypePatterns, _function);
   }
@@ -314,10 +301,8 @@ public class CollectInputModelJob extends Job {
       String _plus = (_elementName + ".");
       String _elementName_1 = type.getElementName();
       final String outerTypeName = (_plus + _elementName_1);
-      final Function1<String, Boolean> _function = new Function1<String, Boolean>() {
-        public Boolean apply(final String it) {
-          return Boolean.valueOf(outerTypeName.matches(it));
-        }
+      final Function1<String, Boolean> _function = (String it) -> {
+        return Boolean.valueOf(outerTypeName.matches(it));
       };
       boolean _exists = IterableExtensions.<String>exists(this.observedSystemPatterns, _function);
       if (_exists) {
@@ -379,11 +364,9 @@ public class CollectInputModelJob extends Job {
       String _elementName = root.getElementName();
       monitor.subTask(_elementName);
       IJavaElement[] _children = root.getChildren();
-      final Consumer<IJavaElement> _function = new Consumer<IJavaElement>() {
-        public void accept(final IJavaElement element) {
-          if ((element instanceof IPackageFragment)) {
-            CollectInputModelJob.this.checkForTypes(types, ((IPackageFragment) element));
-          }
+      final Consumer<IJavaElement> _function = (IJavaElement element) -> {
+        if ((element instanceof IPackageFragment)) {
+          this.checkForTypes(types, ((IPackageFragment) element));
         }
       };
       ((List<IJavaElement>)Conversions.doWrapArray(_children)).forEach(_function);
@@ -398,14 +381,12 @@ public class CollectInputModelJob extends Job {
   private void checkForTypes(final List<IType> types, final IPackageFragment fragment) {
     try {
       IJavaElement[] _children = fragment.getChildren();
-      final Consumer<IJavaElement> _function = new Consumer<IJavaElement>() {
-        public void accept(final IJavaElement element) {
-          if ((element instanceof IPackageFragment)) {
-            CollectInputModelJob.this.checkForTypes(types, ((IPackageFragment) element));
-          } else {
-            if ((element instanceof ICompilationUnit)) {
-              CollectInputModelJob.this.checkForTypes(types, ((ICompilationUnit) element));
-            }
+      final Consumer<IJavaElement> _function = (IJavaElement element) -> {
+        if ((element instanceof IPackageFragment)) {
+          this.checkForTypes(types, ((IPackageFragment) element));
+        } else {
+          if ((element instanceof ICompilationUnit)) {
+            this.checkForTypes(types, ((ICompilationUnit) element));
           }
         }
       };
@@ -421,14 +402,12 @@ public class CollectInputModelJob extends Job {
   private void checkForTypes(final List<IType> types, final ICompilationUnit unit) {
     try {
       IType[] _allTypes = unit.getAllTypes();
-      final Consumer<IType> _function = new Consumer<IType>() {
-        public void accept(final IType type) {
-          if ((type instanceof IType)) {
-            boolean _isBinary = ((IType) type).isBinary();
-            boolean _not = (!_isBinary);
-            if (_not) {
-              types.add(type);
-            }
+      final Consumer<IType> _function = (IType type) -> {
+        if ((type instanceof IType)) {
+          boolean _isBinary = ((IType) type).isBinary();
+          boolean _not = (!_isBinary);
+          if (_not) {
+            types.add(type);
           }
         }
       };
@@ -442,6 +421,7 @@ public class CollectInputModelJob extends Job {
     IWorkbench _workbench = PlatformUI.getWorkbench();
     Display _display = _workbench.getDisplay();
     _display.syncExec(new Runnable() {
+      @Override
       public void run() {
         try {
           MessageDialog.openError(CollectInputModelJob.this.shell, title, message);

@@ -39,6 +39,7 @@ public class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hy
     super(monitor);
   }
   
+  @Override
   public Hypergraph transform() {
     Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
     this.result = _createHypergraph;
@@ -56,20 +57,16 @@ public class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hy
       if (_greaterThan) {
         final Node resultNode = TransformationHelper.deriveNode(node);
         EList<Edge> _edges_3 = node.getEdges();
-        final Consumer<Edge> _function = new Consumer<Edge>() {
-          public void accept(final Edge edge) {
-            EList<Edge> _edges = resultNode.getEdges();
-            EList<Edge> _edges_1 = TransformationHyperedgesOnlyGraph.this.result.getEdges();
-            final Function1<Edge, Boolean> _function = new Function1<Edge, Boolean>() {
-              public Boolean apply(final Edge it) {
-                EdgeReference _derivedFrom = it.getDerivedFrom();
-                Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
-                return Boolean.valueOf(Objects.equal(_edge, edge));
-              }
-            };
-            Edge _findFirst = IterableExtensions.<Edge>findFirst(_edges_1, _function);
-            _edges.add(_findFirst);
-          }
+        final Consumer<Edge> _function = (Edge edge_1) -> {
+          EList<Edge> _edges_4 = resultNode.getEdges();
+          EList<Edge> _edges_5 = this.result.getEdges();
+          final Function1<Edge, Boolean> _function_1 = (Edge it) -> {
+            EdgeReference _derivedFrom = it.getDerivedFrom();
+            Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
+            return Boolean.valueOf(Objects.equal(_edge, edge_1));
+          };
+          Edge _findFirst = IterableExtensions.<Edge>findFirst(_edges_5, _function_1);
+          _edges_4.add(_findFirst);
         };
         _edges_3.forEach(_function);
         EList<Node> _nodes_1 = this.result.getNodes();

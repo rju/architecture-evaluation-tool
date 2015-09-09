@@ -105,10 +105,8 @@ public class JavaASTExpressionEvaluation {
       if (expression instanceof ArrayCreation) {
         _matched=true;
         List _dimensions = ((ArrayCreation)expression).dimensions();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object it) {
-            JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
-          }
+        final Consumer<Object> _function = (Object it) -> {
+          JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
         };
         _dimensions.forEach(_function);
         ArrayInitializer _initializer = ((ArrayCreation)expression).getInitializer();
@@ -121,10 +119,8 @@ public class JavaASTExpressionEvaluation {
       if (expression instanceof ArrayInitializer) {
         _matched=true;
         List _expressions = ((ArrayInitializer)expression).expressions();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object it) {
-            JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
-          }
+        final Consumer<Object> _function = (Object it) -> {
+          JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
         };
         _expressions.forEach(_function);
       }
@@ -243,11 +239,9 @@ public class JavaASTExpressionEvaluation {
       if (expression instanceof VariableDeclarationExpression) {
         _matched=true;
         List _fragments = ((VariableDeclarationExpression)expression).fragments();
-        final Consumer<Object> _function = new Consumer<Object>() {
-          public void accept(final Object it) {
-            Expression _initializer = ((VariableDeclarationFragment) it).getInitializer();
-            JavaASTExpressionEvaluation.evaluate(_initializer, sourceNode, graph, dataTypePatterns);
-          }
+        final Consumer<Object> _function = (Object it) -> {
+          Expression _initializer = ((VariableDeclarationFragment) it).getInitializer();
+          JavaASTExpressionEvaluation.evaluate(_initializer, sourceNode, graph, dataTypePatterns);
         };
         _fragments.forEach(_function);
       }
