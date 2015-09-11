@@ -712,7 +712,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             it_2.setCursorSelectable(true);
             this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it_2, 1, 1, 1, 1);
           };
-          ObjectExtensions.<KRectangle>operator_doubleArrow(_addRectangle, _function_2);
+          ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
+          this._kContainerRenderingExtensions.addChildArea(it_1);
           EList<Node> _nodes = module.getNodes();
           final Consumer<Node> _function_3 = (Node node) -> {
             this.createGraphNode(node, it_1, module, moduleNode);
@@ -740,7 +741,6 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
       EList<KNode> _children = moduleNode.getChildren();
       _children.add(kNode);
       final Procedure1<KNode> _function = (KNode it) -> {
-        EList<KRendering> _children_1 = parent.getChildren();
         KEllipse _addEllipse = this._kRenderingExtensions.addEllipse(it);
         final Procedure1<KEllipse> _function_1 = (KEllipse it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
@@ -759,26 +759,31 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           };
           ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
         };
-        KEllipse _doubleArrow = ObjectExtensions.<KEllipse>operator_doubleArrow(_addEllipse, _function_1);
-        _children_1.add(_doubleArrow);
+        ObjectExtensions.<KEllipse>operator_doubleArrow(_addEllipse, _function_1);
       };
       _xblockexpression = ObjectExtensions.<KNode>operator_doubleArrow(kNode, _function);
     }
     return _xblockexpression;
   }
   
-  private boolean createEdgePort(final Edge edge, final KNode kNode, final String label) {
-    EList<KPort> _ports = kNode.getPorts();
-    KPort _createPort = this._kPortExtensions.createPort();
-    final Procedure1<KPort> _function = (KPort it) -> {
-      this._kPortExtensions.setPortSize(it, 2, 2);
-      KRectangle _addRectangle = this._kRenderingExtensions.addRectangle(it);
-      KColor _color = this._kColorExtensions.getColor("black");
-      KRectangle _setBackground = this._kRenderingExtensions.<KRectangle>setBackground(_addRectangle, _color);
-      this._kRenderingExtensions.setLineJoin(_setBackground, LineJoin.JOIN_ROUND);
-    };
-    KPort _doubleArrow = ObjectExtensions.<KPort>operator_doubleArrow(_createPort, _function);
-    return _ports.add(_doubleArrow);
+  private KPort getOrCreateEdgePort(final KNode kNode, final String label) {
+    KPort _get = this.portMap.get(label);
+    boolean _equals = Objects.equal(_get, null);
+    if (_equals) {
+      EList<KPort> _ports = kNode.getPorts();
+      KPort _createPort = this._kPortExtensions.createPort();
+      final Procedure1<KPort> _function = (KPort it) -> {
+        this._kPortExtensions.setPortSize(it, 2, 2);
+        KRectangle _addRectangle = this._kRenderingExtensions.addRectangle(it);
+        KColor _color = this._kColorExtensions.getColor("black");
+        KRectangle _setBackground = this._kRenderingExtensions.<KRectangle>setBackground(_addRectangle, _color);
+        this._kRenderingExtensions.setLineJoin(_setBackground, LineJoin.JOIN_ROUND);
+        this.portMap.put(label, it);
+      };
+      KPort _doubleArrow = ObjectExtensions.<KPort>operator_doubleArrow(_createPort, _function);
+      _ports.add(_doubleArrow);
+    }
+    return this.portMap.get(label);
   }
   
   private Object createGraphEdge(final Edge edge, final EList<Node> nodes, final EList<KNode> siblings) {
