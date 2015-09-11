@@ -7,6 +7,10 @@
          class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis"
          id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
    </diagramSynthesis>
+   <diagramSynthesis
+         class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.HypergraphDiagramSynthesis"
+         id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
+   </diagramSynthesis>
    </extension>
 <extension
       point="org.eclipse.ui.commands">

@@ -31,6 +31,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.cau.cs.kieler.klighd.ui.DiagramViewManager;
 import de.cau.cs.kieler.klighd.util.KlighdSynthesisProperties;
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
+import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 
 /**
  * A simple handler for opening diagrams.
@@ -83,8 +85,17 @@ public class OpenDiagramHandler extends AbstractHandler {
 				model = sSelection.getFirstElement();
 			}
 
-			DiagramViewManager.createView(ModularHypergraphDiagramSynthesis.class.getCanonicalName(),
-					"ModularHypergraph Diagram", model, KlighdSynthesisProperties.create());
+			if (model instanceof ModularHypergraph) {
+				DiagramViewManager.createView(ModularHypergraphDiagramSynthesis.class.getCanonicalName(),
+						"ModularHypergraph Diagram", model, KlighdSynthesisProperties.create());
+			} else if (model instanceof Hypergraph) {
+				DiagramViewManager.createView(HypergraphDiagramSynthesis.class.getCanonicalName(),
+						"Hypergraph Diagram", model, KlighdSynthesisProperties.create());
+			} else {
+				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Unsupported model type",
+						"KLighD diagram synthesis is unsupported for the current selection "
+								+ selection.toString() + ".");
+			}
 		} else {
 			MessageDialog.openInformation(HandlerUtil.getActiveShell(event), "Unsupported element",
 					"KLighD diagram synthesis is unsupported for the current selection "
