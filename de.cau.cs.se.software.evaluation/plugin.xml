@@ -43,7 +43,7 @@
             name="Analysis Java">
       </command>
       <command
-            defaultHandler="de.cau.cs.se.software.evaluation.commands.ModelComplexityAnalysisHandler"
+            defaultHandler="de.cau.cs.se.software.evaluation.commands.ModelAnalysisHandler"
             id="de.cau.cs.se.software.evaluation.commands.analysis.model"
             name="Analysis Model">
       </command>
