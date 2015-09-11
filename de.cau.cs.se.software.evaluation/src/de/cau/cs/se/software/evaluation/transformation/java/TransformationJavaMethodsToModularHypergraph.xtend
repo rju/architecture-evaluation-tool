@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.WildcardType
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
@@ -55,7 +55,7 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	/**
 	 * Main transformation routine.
 	 */
-	override transform() {
+	override transform(List<AbstractTypeDeclaration> input) {
 		monitor.beginTask("Process java project " + this.project.elementName,
 			input.size + // modules
 			input.size + // properties for each class
@@ -66,15 +66,15 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		/** create modules for all classes */
 		input.forEach[clazz | result.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
-		monitor.worked(this.input.size)
+		monitor.worked(input.size)
 
 		/** define edges for all internal variables of a class */
 		input.forEach[clazz | result.edges.createEdgesForClassProperties(clazz, dataTypePatterns)]
-		monitor.worked(this.input.size)
+		monitor.worked(input.size)
 		
 		/** find all method declarations and create nodes for it, grouped by class as modules */
 		input.forEach[clazz | result.nodes.createNodesForMethods(clazz)]
-		monitor.worked(this.input.size)
+		monitor.worked(input.size)
 		input.filter[clazz | clazz.hasImplicitConstructor].
 			forEach[clazz |
 				val node = createNodeForImplicitConstructor(clazz.resolveBinding)
@@ -82,11 +82,11 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 				module.nodes.add(node) 
 				result.nodes.add(node)
 			]
-		monitor.worked(this.input.size)
+		monitor.worked(input.size)
 		
 		/** resolve edges */
 		input.forEach[clazz | resolveEdges(result, dataTypePatterns, clazz)]
-		monitor.worked(this.input.size)
+		monitor.worked(input.size)
 		
 		return result
 	}

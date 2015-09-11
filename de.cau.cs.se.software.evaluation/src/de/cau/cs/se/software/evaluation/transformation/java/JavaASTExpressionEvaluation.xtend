@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluationHelper.*
 import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.LambdaExpression
-import org.eclipse.jdt.core.dom.Block
 
 class JavaASTExpressionEvaluation {
 

@@ -16,7 +16,7 @@
 package de.cau.cs.se.software.evaluation.jobs;
 
 import com.google.common.base.Objects;
-import de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper;
+import de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;

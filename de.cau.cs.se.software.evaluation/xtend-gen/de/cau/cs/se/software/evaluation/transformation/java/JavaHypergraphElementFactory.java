@@ -9,7 +9,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.TypeTrace;
-import de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper;
+import de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;

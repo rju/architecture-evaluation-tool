@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.SimpleName
 
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 
 class JavaHypergraphQueryHelper {

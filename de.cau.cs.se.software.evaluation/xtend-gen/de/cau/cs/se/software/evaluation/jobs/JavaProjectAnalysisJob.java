@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 
 @SuppressWarnings("all")
-public class JavaComplexityAnalysisJob extends AbstractHypergraphAnalysisJob {
+public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   private final List<AbstractTypeDeclaration> classes;
   
   private final List<String> dataTypePatterns;
@@ -27,7 +27,7 @@ public class JavaComplexityAnalysisJob extends AbstractHypergraphAnalysisJob {
   
   private final IJavaProject javaProject;
   
-  public JavaComplexityAnalysisJob(final IJavaProject project, final List<AbstractTypeDeclaration> classes, final List<String> dataTypePatterns, final List<String> observedSystemPatterns) {
+  public JavaProjectAnalysisJob(final IJavaProject project, final List<AbstractTypeDeclaration> classes, final List<String> dataTypePatterns, final List<String> observedSystemPatterns) {
     super(project.getProject());
     this.javaProject = project;
     this.classes = classes;
@@ -62,8 +62,7 @@ public class JavaComplexityAnalysisJob extends AbstractHypergraphAnalysisJob {
    */
   public ModularHypergraph createHypergraphForJavaProject(final IProgressMonitor monitor, final ResultModelProvider result) {
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(this.javaProject, this.dataTypePatterns, this.observedSystemPatterns, monitor);
-    javaToModularHypergraph.setInput(this.classes);
-    javaToModularHypergraph.transform();
+    javaToModularHypergraph.transform(this.classes);
     List<NamedValue> _values = result.getValues();
     String _name = this.project.getName();
     ModularHypergraph _result = javaToModularHypergraph.getResult();

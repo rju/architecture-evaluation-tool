@@ -18,13 +18,13 @@ package de.cau.cs.se.software.evaluation.transformation.metric
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper
 import de.cau.cs.se.software.evaluation.hypergraph.EdgeTrace
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
 
 /**
  * Create a hypergraph for a given hypergraph which contains only
@@ -45,16 +45,16 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 	/**
 	 * Find all nodes connected to the start node and create a graph for it.
 	 */
-	override transform() {
+	override transform(Hypergraph input) {
 		// find start node
-		val selectedNode = if (this.input.nodes.contains(startNode)) startNode else null
+		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
 		if (selectedNode != null) {	
 			this.result = HypergraphFactory.eINSTANCE.createHypergraph
-			this.result.nodes.add(TransformationHelper.deriveNode(selectedNode))
+			this.result.nodes.add(HypergraphCreationHelper.deriveNode(selectedNode))
 			// find all connected edges and copy them
-			selectedNode.edges.forEach[edge | this.result.edges.add(TransformationHelper.deriveEdge(edge))]
+			selectedNode.edges.forEach[edge | this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))]
 			// find all connected nodes
-			this.result.edges.forEach[edge | createAndLinkNodesConnectedToEdge(edge, this.input.nodes, this.result.nodes)]
+			this.result.edges.forEach[edge | createAndLinkNodesConnectedToEdge(edge, input.nodes, this.result.nodes)]
 			
 			return this.result
 		} else
@@ -67,7 +67,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 			if (originalNode.edges.contains(originalEdge)) {
 				var newNode = nodes.findFirst[node | (node.derivedFrom as NodeTrace).node == originalNode]
 				if (newNode == null) {
-					newNode = TransformationHelper.deriveNode(originalNode)
+					newNode = HypergraphCreationHelper.deriveNode(originalNode)
 					nodes.add(newNode)
 				}
 				newNode.edges.add(edge)

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.core.runtime.IStatus
 import org.eclipse.core.runtime.Status
 
-class JavaComplexityAnalysisJob extends AbstractHypergraphAnalysisJob {
+class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
 	val List<AbstractTypeDeclaration> classes 
 					
@@ -61,8 +61,7 @@ class JavaComplexityAnalysisJob extends AbstractHypergraphAnalysisJob {
 		/** construct analysis. */				
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(javaProject, dataTypePatterns, observedSystemPatterns, monitor)
 		
-		javaToModularHypergraph.input = this.classes
-		javaToModularHypergraph.transform
+		javaToModularHypergraph.transform(this.classes)
 		
 		result.values.add(new NamedValue(project.name, "number of modules", javaToModularHypergraph.result.modules.size))
 		result.values.add(new NamedValue(project.name, "number of nodes", javaToModularHypergraph.result.nodes.size))

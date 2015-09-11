@@ -13,7 +13,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView;
 
-public abstract class AbstractComplexityAnalysisHandler extends AbstractHandler implements IHandler {
+public abstract class AbstractAnalysisHandler extends AbstractHandler implements IHandler {
 
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {

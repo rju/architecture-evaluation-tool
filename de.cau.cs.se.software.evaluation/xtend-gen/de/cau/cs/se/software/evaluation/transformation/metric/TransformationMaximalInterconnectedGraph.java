@@ -24,7 +24,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeReference;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper;
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -39,37 +39,37 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
   }
   
   @Override
-  public ModularHypergraph transform() {
-    EList<Node> _nodes = this.input.getNodes();
+  public ModularHypergraph transform(final ModularHypergraph input) {
+    EList<Node> _nodes = input.getNodes();
     int _size = _nodes.size();
-    EList<Module> _modules = this.input.getModules();
+    EList<Module> _modules = input.getModules();
     int _size_1 = _modules.size();
-    EList<Node> _nodes_1 = this.input.getNodes();
+    EList<Node> _nodes_1 = input.getNodes();
     int _size_2 = _nodes_1.size();
     int _multiply = (_size_1 * _size_2);
     int _plus = (_size + _multiply);
-    EList<Node> _nodes_2 = this.input.getNodes();
+    EList<Node> _nodes_2 = input.getNodes();
     int _size_3 = _nodes_2.size();
-    EList<Node> _nodes_3 = this.input.getNodes();
+    EList<Node> _nodes_3 = input.getNodes();
     int _size_4 = _nodes_3.size();
     int _multiply_1 = (_size_3 * _size_4);
     int _plus_1 = (_plus + _multiply_1);
     this.monitor.beginTask("Create maximal interconnected graph", _plus_1);
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
-    EList<Node> _nodes_4 = this.input.getNodes();
+    EList<Node> _nodes_4 = input.getNodes();
     final Consumer<Node> _function = (Node it) -> {
       EList<Node> _nodes_5 = this.result.getNodes();
-      Node _deriveNode = TransformationHelper.deriveNode(it);
+      Node _deriveNode = HypergraphCreationHelper.deriveNode(it);
       _nodes_5.add(_deriveNode);
     };
     _nodes_4.forEach(_function);
-    EList<Node> _nodes_5 = this.input.getNodes();
+    EList<Node> _nodes_5 = input.getNodes();
     int _size_5 = _nodes_5.size();
     this.monitor.worked(_size_5);
-    EList<Module> _modules_1 = this.input.getModules();
+    EList<Module> _modules_1 = input.getModules();
     final Consumer<Module> _function_1 = (Module module) -> {
-      final Module derivedModule = TransformationHelper.deriveModule(module);
+      final Module derivedModule = HypergraphCreationHelper.deriveModule(module);
       EList<Node> _nodes_6 = module.getNodes();
       final Consumer<Node> _function_2 = (Node node) -> {
         EList<Node> _nodes_7 = derivedModule.getNodes();
@@ -85,7 +85,7 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
       _nodes_6.forEach(_function_2);
       EList<Module> _modules_2 = this.result.getModules();
       _modules_2.add(derivedModule);
-      EList<Node> _nodes_7 = this.input.getNodes();
+      EList<Node> _nodes_7 = input.getNodes();
       int _size_6 = _nodes_7.size();
       this.monitor.worked(_size_6);
     };
@@ -110,7 +110,7 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
           _edges_2.add(edge);
         }
       }
-      EList<Node> _nodes_7 = this.input.getNodes();
+      EList<Node> _nodes_7 = input.getNodes();
       int _size_6 = _nodes_7.size();
       this.monitor.worked(_size_6);
     };

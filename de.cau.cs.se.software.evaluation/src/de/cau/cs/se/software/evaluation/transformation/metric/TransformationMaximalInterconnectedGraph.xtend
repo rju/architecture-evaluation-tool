@@ -17,10 +17,10 @@ package de.cau.cs.se.software.evaluation.transformation.metric
 
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
 
 class TransformationMaximalInterconnectedGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
 	
@@ -29,26 +29,26 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 		super(monitor)
 	}
 	
-	override transform() {
+	override transform(ModularHypergraph input) {
 		monitor.beginTask("Create maximal interconnected graph",
-			this.input.nodes.size + // copy nodes
-			this.input.modules.size * this.input.nodes.size + // copy modules and assign nodes
-			this.input.nodes.size * this.input.nodes.size // create edges
+			input.nodes.size + // copy nodes
+			input.modules.size * input.nodes.size + // copy modules and assign nodes
+			input.nodes.size * input.nodes.size // create edges
 		)
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		/** copy all nodes */
-		this.input.nodes.forEach[this.result.nodes.add(TransformationHelper.deriveNode(it))]
-		monitor.worked(this.input.nodes.size)
+		input.nodes.forEach[this.result.nodes.add(HypergraphCreationHelper.deriveNode(it))]
+		monitor.worked(input.nodes.size)
 		
 		/** copy module boundaries */
-		this.input.modules.forEach[module |
-			val derivedModule = TransformationHelper.deriveModule(module)
+		input.modules.forEach[module |
+			val derivedModule = HypergraphCreationHelper.deriveModule(module)
 			module.nodes.forEach[node | 
 				derivedModule.nodes.add(this.result.nodes.
 					findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node])
 			]
 			this.result.modules.add(derivedModule)
-			monitor.worked(this.input.nodes.size)
+			monitor.worked(input.nodes.size)
 		]
 		/** create one simple edge between every node */
 		this.result.nodes.forEach[startNode,startIndex |
@@ -60,7 +60,7 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 				endNode.edges.add(edge)
 				this.result.edges.add(edge)
 			}
-			monitor.worked(this.input.nodes.size)
+			monitor.worked(input.nodes.size)
 		]
 		
 		return this.result

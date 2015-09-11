@@ -38,14 +38,14 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="de.cau.cs.se.software.evaluation.commands.JavaComplexityAnalysisHandler"
+            defaultHandler="de.cau.cs.se.software.evaluation.commands.JavaProjectAnalysisHandler"
             id="de.cau.cs.se.software.evaluation.commands.analysis.java"
             name="Analysis Java">
       </command>
       <command
-            defaultHandler="de.cau.cs.se.software.evaluation.commands.GecoComplexityAnalysisHandler"
-            id="de.cau.cs.se.software.evaluation.commands.analysis.geco"
-            name="Analysis Geco">
+            defaultHandler="de.cau.cs.se.software.evaluation.commands.ModelComplexityAnalysisHandler"
+            id="de.cau.cs.se.software.evaluation.commands.analysis.model"
+            name="Analysis Model">
       </command>
    </extension>
    <extension
@@ -60,13 +60,13 @@
             commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
             label="Analysis Java"
             style="push"
-            tooltip="Run the complexity analysis">
+            tooltip="Run Java analysis">
       </command>
       <command
-            commandId="de.cau.cs.se.software.evaluation.commands.analysis.geco"
-            label="Analysis Geco"
+            commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
+            label="Analysis Model"
             style="push"
-            tooltip="Run the complexity analysis">
+            tooltip="Run model analysis">
       </command>
 	  </menuContribution>
 	  <menuContribution
@@ -79,13 +79,13 @@
 	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
 	                  label="Analysis Java"
 	                  style="push"
-	                  tooltip="Run the complexity analysis">
+	                  tooltip="Run Java analysis">
 	     </command>
       <command
-            commandId="de.cau.cs.se.software.evaluation.commands.analysis.geco"
-            label="Analysis Geco"
+            commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
+            label="Analysis Model"
             style="push"
-            tooltip="Run the complexity analysis">
+            tooltip="Run model analysis">
       </command>
 	  </menuContribution>
 	  <menuContribution
@@ -94,13 +94,13 @@
 	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
 	                  label="Analysis Java"
 	                  style="push"
-	                  tooltip="Run the complexity analysis">
+	                  tooltip="Run Java analysis">
 	     </command>
       <command
-            commandId="de.cau.cs.se.software.evaluation.commands.analysis.geco"
-            label="Analysis Geco"
+            commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
+            label="Analysis Model"
             style="push"
-            tooltip="Run the geco complexity analysis">
+            tooltip="Run model analysis">
       </command>
       </menuContribution>
    </extension>

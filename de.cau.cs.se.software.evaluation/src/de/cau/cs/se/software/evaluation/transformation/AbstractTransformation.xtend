@@ -25,20 +25,22 @@ abstract class AbstractTransformation<S,T> {
 	
 	val protected IProgressMonitor monitor
 	var protected T result
-	var protected S input
 		
 	new(IProgressMonitor monitor) {
 		this.monitor = monitor
 	}
 	
-	def T transform()
+	/**
+	 * The transformation must return the transformation result and store it also internally
+	 * in the result property, for later retrieval.
+	 */
+	def T transform(S input)
 	
+	/**
+	 * Get the previously computed result.
+	 */
 	def T getResult() {
 		this.result
 	}
-	
-	def void setInput(S input) {
-		this.input = input
-	}
-	
+		
 }

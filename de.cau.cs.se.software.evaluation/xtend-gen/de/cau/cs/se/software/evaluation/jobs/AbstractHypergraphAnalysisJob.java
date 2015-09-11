@@ -65,8 +65,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
   protected Double calculateSize(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
     final TransformationHypergraphSize hypergraphSize = new TransformationHypergraphSize(monitor);
     hypergraphSize.setName("Calculate system size");
-    hypergraphSize.setInput(inputHypergraph);
-    hypergraphSize.transform();
+    hypergraphSize.transform(inputHypergraph);
     List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
@@ -110,8 +109,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    */
   protected double calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
     final TransformationIntermoduleHyperedgesOnlyGraph intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor);
-    intermoduleHyperedgesOnlyGraph.setInput(inputHypergraph);
-    intermoduleHyperedgesOnlyGraph.transform();
+    intermoduleHyperedgesOnlyGraph.transform(inputHypergraph);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     ModularHypergraph _result = intermoduleHyperedgesOnlyGraph.getResult();
     final double complexityIntermodule = calculateComplexity.calculate(_result, "Calculate intermodule complexity");
@@ -137,8 +135,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    */
   protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result, final double coupling) {
     final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
-    maximalInterconnectedGraph.setInput(inputHypergraph);
-    maximalInterconnectedGraph.transform();
+    maximalInterconnectedGraph.transform(inputHypergraph);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     ModularHypergraph _result = maximalInterconnectedGraph.getResult();
     final double complexityMaximalInterconnected = calculateComplexity.calculate(_result, 

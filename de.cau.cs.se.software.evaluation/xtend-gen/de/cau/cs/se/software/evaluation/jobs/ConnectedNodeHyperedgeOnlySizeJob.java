@@ -47,16 +47,14 @@ public class ConnectedNodeHyperedgeOnlySizeJob extends Job {
     Node node = null;
     int i = 0;
     final TransformationConnectedNodeHyperedgesOnlyGraph connectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(monitor);
-    connectedNodeHyperedgesOnlyGraph.setInput(this.input);
     final TransformationHypergraphSize hypergraphSize = new TransformationHypergraphSize(monitor);
     while ((!Objects.equal((node = this.parent.getNextConnectedNodeTask()), null))) {
       {
         monitor.beginTask(("Determine S^#_" + Integer.valueOf(i)), 0);
         connectedNodeHyperedgesOnlyGraph.setNode(node);
         hypergraphSize.setName((("Determine Size(S^#_" + Integer.valueOf(i)) + ")"));
-        Hypergraph _transform = connectedNodeHyperedgesOnlyGraph.transform();
-        hypergraphSize.setInput(_transform);
-        Double _transform_1 = hypergraphSize.transform();
+        Hypergraph _transform = connectedNodeHyperedgesOnlyGraph.transform(this.input);
+        Double _transform_1 = hypergraphSize.transform(_transform);
         this.parent.deliverConnectedNodeHyperedgesOnlySizeResult((_transform_1).doubleValue());
         i++;
       }

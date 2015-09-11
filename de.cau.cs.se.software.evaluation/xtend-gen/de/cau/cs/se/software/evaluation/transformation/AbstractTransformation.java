@@ -27,19 +27,20 @@ public abstract class AbstractTransformation<S extends Object, T extends Object>
   
   protected T result;
   
-  protected S input;
-  
   public AbstractTransformation(final IProgressMonitor monitor) {
     this.monitor = monitor;
   }
   
-  public abstract T transform();
+  /**
+   * The transformation must return the transformation result and store it also internally
+   * in the result property, for later retrieval.
+   */
+  public abstract T transform(final S input);
   
+  /**
+   * Get the previously computed result.
+   */
   public T getResult() {
     return this.result;
-  }
-  
-  public void setInput(final S input) {
-    this.input = input;
   }
 }

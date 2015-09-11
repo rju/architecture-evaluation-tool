@@ -46,8 +46,7 @@ public class CalculateComplexity {
     int _plus = (_size + 1);
     this.monitor.beginTask(message, _plus);
     final TransformationHyperedgesOnlyGraph hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(this.monitor);
-    hyperedgesOnlyGraph.setInput(input);
-    hyperedgesOnlyGraph.transform();
+    hyperedgesOnlyGraph.transform(input);
     this.monitor.worked(1);
     Hypergraph _result = hyperedgesOnlyGraph.getResult();
     EList<Node> _nodes_1 = _result.getNodes();
@@ -66,8 +65,7 @@ public class CalculateComplexity {
     final TransformationHypergraphSize size = new TransformationHypergraphSize(this.monitor);
     size.setName("Determine Size(S^#)");
     Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
-    size.setInput(_result_1);
-    size.transform();
+    size.transform(_result_1);
     final Consumer<Job> _function = (Job it) -> {
       try {
         it.join();

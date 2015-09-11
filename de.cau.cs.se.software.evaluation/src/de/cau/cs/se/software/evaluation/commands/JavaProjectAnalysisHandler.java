@@ -24,18 +24,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 
 import de.cau.cs.se.software.evaluation.jobs.CollectInputModelJob;
-import de.cau.cs.se.software.evaluation.jobs.JavaComplexityAnalysisJob;
+import de.cau.cs.se.software.evaluation.jobs.JavaProjectAnalysisJob;
 
 /**
  * @author Reiner Jung
  *
  */
-public class JavaComplexityAnalysisHandler extends AbstractComplexityAnalysisHandler implements IHandler {
+public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implements IHandler {
 
 	/**
 	 * Empty default constructor, as proposed by checkstyle.
 	 */
-	public JavaComplexityAnalysisHandler() {
+	public JavaProjectAnalysisHandler() {
 		super();
 	}
 
@@ -46,7 +46,7 @@ public class JavaComplexityAnalysisHandler extends AbstractComplexityAnalysisHan
 		try {
 			collectInputModelJob.join();
 			if (collectInputModelJob.getResult() == Status.OK_STATUS) {
-				final Job job = new JavaComplexityAnalysisJob(collectInputModelJob.getProject(),
+				final Job job = new JavaProjectAnalysisJob(collectInputModelJob.getProject(),
 						collectInputModelJob.getClasses(),
 						collectInputModelJob.getDataTypePatterns(),
 						collectInputModelJob.getObservedSystemPatterns());

@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.WhileStatement
 
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind

@@ -26,7 +26,7 @@ import de.cau.cs.se.software.evaluation.state.RowPattern;
 import de.cau.cs.se.software.evaluation.state.RowPatternTable;
 import de.cau.cs.se.software.evaluation.state.StateFactory;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper;
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -50,19 +50,19 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
   }
   
   @Override
-  public Double transform() {
-    EList<Edge> _edges = this.input.getEdges();
+  public Double transform(final Hypergraph input) {
+    EList<Edge> _edges = input.getEdges();
     int _size = _edges.size();
-    EList<Node> _nodes = this.input.getNodes();
+    EList<Node> _nodes = input.getNodes();
     int _size_1 = _nodes.size();
     int _plus = (_size + _size_1);
     int _multiply = (_plus * 2);
-    EList<Node> _nodes_1 = this.input.getNodes();
+    EList<Node> _nodes_1 = input.getNodes();
     int _size_2 = _nodes_1.size();
     int _plus_1 = (_multiply + _size_2);
     this.monitor.beginTask(this.name, _plus_1);
-    final Hypergraph systemGraph = this.createSystemGraph(this.input);
-    final RowPatternTable table = this.createRowPatternTable(systemGraph);
+    final Hypergraph systemGraph = this.createSystemGraph(input);
+    final RowPatternTable table = this.createRowPatternTable(systemGraph, input);
     double _calculateSize = this.calculateSize(systemGraph, table);
     this.result = Double.valueOf(_calculateSize);
     return this.result;
@@ -136,7 +136,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
    * Second, calculate the pattern row for each node of the system graph.
    * Compact, rows with the same pattern
    */
-  private RowPatternTable createRowPatternTable(final Hypergraph systemGraph) {
+  private RowPatternTable createRowPatternTable(final Hypergraph systemGraph, final Hypergraph input) {
     final RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable();
     EList<Edge> _edges = systemGraph.getEdges();
     final Consumer<Edge> _function = (Edge edge) -> {
@@ -144,7 +144,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
       _edges_1.add(edge);
     };
     _edges.forEach(_function);
-    EList<Edge> _edges_1 = this.input.getEdges();
+    EList<Edge> _edges_1 = input.getEdges();
     int _size = _edges_1.size();
     this.monitor.worked(_size);
     EList<Node> _nodes = systemGraph.getNodes();
@@ -156,7 +156,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     };
     _nodes.forEach(_function_1);
     this.compactPatternTable(patternTable);
-    EList<Node> _nodes_1 = this.input.getNodes();
+    EList<Node> _nodes_1 = input.getNodes();
     int _size_1 = _nodes_1.size();
     this.monitor.worked(_size_1);
     return patternTable;
@@ -258,7 +258,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     EList<Edge> _edges = system.getEdges();
     final Consumer<Edge> _function = (Edge edge) -> {
       EList<Edge> _edges_1 = systemGraph.getEdges();
-      Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+      Edge _deriveEdge = HypergraphCreationHelper.deriveEdge(edge);
       _edges_1.add(_deriveEdge);
     };
     _edges.forEach(_function);
@@ -267,7 +267,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     this.monitor.worked(_size);
     EList<Node> _nodes_1 = system.getNodes();
     final Consumer<Node> _function_1 = (Node node) -> {
-      final Node derivedNode = TransformationHelper.deriveNode(node);
+      final Node derivedNode = HypergraphCreationHelper.deriveNode(node);
       EList<Edge> _edges_2 = node.getEdges();
       final Consumer<Edge> _function_2 = (Edge edge) -> {
         EList<Edge> _edges_3 = systemGraph.getEdges();

@@ -56,8 +56,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		val hypergraphSize = new TransformationHypergraphSize(monitor)
 		hypergraphSize.name = "Calculate system size"
-		hypergraphSize.input = inputHypergraph
-		hypergraphSize.transform
+		hypergraphSize.transform(inputHypergraph)
 
 		result.values.add(new NamedValue(project.project.name, "hypergraph size", hypergraphSize.result))
 		updateView(inputHypergraph)
@@ -99,8 +98,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		/** Determine intermodule hyperedges only modular graph for MS^* */
 		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
-		intermoduleHyperedgesOnlyGraph.input = inputHypergraph
-		intermoduleHyperedgesOnlyGraph.transform
+		intermoduleHyperedgesOnlyGraph.transform(inputHypergraph)
 
 		val calculateComplexity = new CalculateComplexity(monitor)
 		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
@@ -125,8 +123,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result, double coupling) {
 		/** Determine maximal interconnected modular graph MS^(n) */
 		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
-		maximalInterconnectedGraph.input = inputHypergraph
-		maximalInterconnectedGraph.transform
+		maximalInterconnectedGraph.transform(inputHypergraph)
 		
 		val calculateComplexity = new CalculateComplexity(monitor)
 		

@@ -23,7 +23,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper;
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -40,22 +40,22 @@ public class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hy
   }
   
   @Override
-  public Hypergraph transform() {
+  public Hypergraph transform(final Hypergraph input) {
     Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
     this.result = _createHypergraph;
-    EList<Edge> _edges = this.input.getEdges();
+    EList<Edge> _edges = input.getEdges();
     for (final Edge edge : _edges) {
       EList<Edge> _edges_1 = this.result.getEdges();
-      Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+      Edge _deriveEdge = HypergraphCreationHelper.deriveEdge(edge);
       _edges_1.add(_deriveEdge);
     }
-    EList<Node> _nodes = this.input.getNodes();
+    EList<Node> _nodes = input.getNodes();
     for (final Node node : _nodes) {
       EList<Edge> _edges_2 = node.getEdges();
       int _size = _edges_2.size();
       boolean _greaterThan = (_size > 0);
       if (_greaterThan) {
-        final Node resultNode = TransformationHelper.deriveNode(node);
+        final Node resultNode = HypergraphCreationHelper.deriveNode(node);
         EList<Edge> _edges_3 = node.getEdges();
         final Consumer<Edge> _function = (Edge edge_1) -> {
           EList<Edge> _edges_4 = resultNode.getEdges();

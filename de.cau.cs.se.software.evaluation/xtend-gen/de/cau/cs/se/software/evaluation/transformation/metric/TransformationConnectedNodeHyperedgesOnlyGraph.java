@@ -25,7 +25,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeReference;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
-import de.cau.cs.se.software.evaluation.transformation.TransformationHelper;
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -52,11 +52,11 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
    * Find all nodes connected to the start node and create a graph for it.
    */
   @Override
-  public Hypergraph transform() {
+  public Hypergraph transform(final Hypergraph input) {
     Object _xblockexpression = null;
     {
       Node _xifexpression = null;
-      EList<Node> _nodes = this.input.getNodes();
+      EList<Node> _nodes = input.getNodes();
       boolean _contains = _nodes.contains(this.startNode);
       if (_contains) {
         _xifexpression = this.startNode;
@@ -70,18 +70,18 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
         Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
         this.result = _createHypergraph;
         EList<Node> _nodes_1 = this.result.getNodes();
-        Node _deriveNode = TransformationHelper.deriveNode(selectedNode);
+        Node _deriveNode = HypergraphCreationHelper.deriveNode(selectedNode);
         _nodes_1.add(_deriveNode);
         EList<Edge> _edges = selectedNode.getEdges();
         final Consumer<Edge> _function = (Edge edge) -> {
           EList<Edge> _edges_1 = this.result.getEdges();
-          Edge _deriveEdge = TransformationHelper.deriveEdge(edge);
+          Edge _deriveEdge = HypergraphCreationHelper.deriveEdge(edge);
           _edges_1.add(_deriveEdge);
         };
         _edges.forEach(_function);
         EList<Edge> _edges_1 = this.result.getEdges();
         final Consumer<Edge> _function_1 = (Edge edge) -> {
-          EList<Node> _nodes_2 = this.input.getNodes();
+          EList<Node> _nodes_2 = input.getNodes();
           EList<Node> _nodes_3 = this.result.getNodes();
           this.createAndLinkNodesConnectedToEdge(edge, _nodes_2, _nodes_3);
         };
@@ -110,7 +110,7 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
         Node newNode = IterableExtensions.<Node>findFirst(nodes, _function);
         boolean _equals = Objects.equal(newNode, null);
         if (_equals) {
-          Node _deriveNode = TransformationHelper.deriveNode(originalNode);
+          Node _deriveNode = HypergraphCreationHelper.deriveNode(originalNode);
           newNode = _deriveNode;
           nodes.add(newNode);
         }

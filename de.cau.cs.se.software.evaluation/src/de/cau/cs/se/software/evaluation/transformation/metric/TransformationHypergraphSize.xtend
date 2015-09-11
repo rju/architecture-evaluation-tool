@@ -25,9 +25,9 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import org.eclipse.core.runtime.IProgressMonitor
 
-import static extension de.cau.cs.se.software.evaluation.transformation.TransformationHelper.*
 import de.cau.cs.se.software.evaluation.hypergraph.EdgeTrace
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 
 /**
  * Calculate the information size of a hypergraph.
@@ -44,10 +44,10 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		this.name = name
 	}
 
-	override transform() {
-		monitor.beginTask(this.name, (this.input.edges.size + this.input.nodes.size)*2 + this.input.nodes.size)
-		val systemGraph = createSystemGraph(this.input)
-		val table = systemGraph.createRowPatternTable
+	override transform(Hypergraph input) {
+		monitor.beginTask(this.name, (input.edges.size + input.nodes.size)*2 + input.nodes.size)
+		val systemGraph = createSystemGraph(input)
+		val table = systemGraph.createRowPatternTable(input)
 					
 		this.result = calculateSize(systemGraph, table)
 
@@ -98,13 +98,13 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 * Second, calculate the pattern row for each node of the system graph.
 	 * Compact, rows with the same pattern
 	 */
-	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph) {
+	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph, Hypergraph input) {
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
 		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
-		monitor.worked(this.input.edges.size)
+		monitor.worked(input.edges.size)
 		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
 		patternTable.compactPatternTable
-		monitor.worked(this.input.nodes.size)
+		monitor.worked(input.nodes.size)
 				
 		return patternTable	
 	}

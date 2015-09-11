@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Shell
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
-import static extension de.cau.cs.se.software.evaluation.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
 
 class CollectInputModelJob extends Job {
 	
