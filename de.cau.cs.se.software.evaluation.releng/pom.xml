@@ -6,28 +6,26 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>de.cau.cs.se.geco</groupId>
-    <artifactId>de.cau.cs.se.geco.architecture.releng</artifactId>
+    <groupId>de.cau.cs.se.software.evaluation</groupId>
+    <artifactId>de.cau.cs.se.software.evaluation.releng</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>GECO Generator Composition Framework and Language Release Management</name>
+    <name>Static software analysis based an hypergraphs</name>
 
     <properties>
         <tycho.version>0.23.0</tycho.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
         <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
         <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly</kieler-repo.url>
+        <geco-repo.url>https://build.se.informatik.uni-kiel.de/eus/geco/snapshot/</geco-repo.url>
         <checkstyle.config.location>../cs-conf.xml</checkstyle.config.location>
     </properties>
 
 	<modules>
-        <module>../de.cau.cs.se.geco.architecture</module>
-        <module>../de.cau.cs.se.geco.architecture.framework</module>
-        <module>../de.cau.cs.se.geco.architecture.graph</module>
-        <module>../de.cau.cs.se.geco.architecture.sdk</module>
-        <!--  <module>../de.cau.cs.se.geco.architecture.tests</module> -->
-        <module>../de.cau.cs.se.geco.architecture.ui</module>
-        <module>../de.cau.cs.se.geco.architecture.updatesite</module>
+        <module>../de.cau.cs.se.software.evaluation</module>
+        <module>../de.cau.cs.se.software.evaluation.graph</module>
+        <module>../de.cau.cs.se.software.evaluation.feature</module>
+        <module>../de.cau.cs.se.software.evaluation.updatesite</module>
     </modules>
 
     <repositories>
@@ -39,6 +37,11 @@
 		<repository>
             <id>kieler</id>
             <url>${kieler-repo.url}</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>geco</id>
+            <url>${geco-repo.url}</url>
             <layout>p2</layout>
         </repository>
     </repositories>
@@ -88,11 +91,29 @@
             </plugin>
             
             <!-- checkstyle plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.9.1</version>
-			</plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-checkstyle-plugin</artifactId>
+			<version>2.15</version>
+			<configuration>
+				<linkXRef>false</linkXRef>
+			</configuration>
+		</plugin>
         </plugins>
     </build>
+
+    <reporting>
+    	<plugins>
+<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.3</version>
+    </plugin>
+      		<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-checkstyle-plugin</artifactId>
+        		<version>2.15</version>
+      		</plugin>
+    </plugins>
+  </reporting>
 </project> 
