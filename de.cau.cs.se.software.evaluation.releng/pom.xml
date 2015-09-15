@@ -6,11 +6,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>de.cau.cs.se.software.evaluation</groupId>
-    <artifactId>de.cau.cs.se.software.evaluation.releng</artifactId>
+    <groupId>de.cau.cs.se.geco</groupId>
+    <artifactId>de.cau.cs.se.geco.architecture.releng</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Static software analysis based an hypergraphs</name>
+    <name>GECO Generator Composition Framework and Language Release Management</name>
 
     <properties>
         <tycho.version>0.23.0</tycho.version>
@@ -21,10 +21,13 @@
     </properties>
 
 	<modules>
-        <module>../de.cau.cs.se.software.evaluation</module>
-        <module>../de.cau.cs.se.software.evaluation.graph</module>
-        <module>../de.cau.cs.se.software.evaluation.feature</module>
-        <module>../de.cau.cs.se.software.evaluation.updatesite</module>
+        <module>../de.cau.cs.se.geco.architecture</module>
+        <module>../de.cau.cs.se.geco.architecture.framework</module>
+        <module>../de.cau.cs.se.geco.architecture.graph</module>
+        <module>../de.cau.cs.se.geco.architecture.sdk</module>
+        <!--  <module>../de.cau.cs.se.geco.architecture.tests</module> -->
+        <module>../de.cau.cs.se.geco.architecture.ui</module>
+        <module>../de.cau.cs.se.geco.architecture.updatesite</module>
     </modules>
 
     <repositories>
@@ -85,29 +88,11 @@
             </plugin>
             
             <!-- checkstyle plugin -->
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-checkstyle-plugin</artifactId>
-			<version>2.15</version>
-			<configuration>
-				<linkXRef>false</linkXRef>
-			</configuration>
-		</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.9.1</version>
+			</plugin>
         </plugins>
     </build>
-
-    <reporting>
-    	<plugins>
-<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.3</version>
-    </plugin>
-      		<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-checkstyle-plugin</artifactId>
-        		<version>2.15</version>
-      		</plugin>
-    </plugins>
-  </reporting>
 </project> 
