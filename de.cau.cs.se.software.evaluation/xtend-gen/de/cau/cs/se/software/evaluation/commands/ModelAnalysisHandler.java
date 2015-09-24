@@ -2,6 +2,7 @@ package de.cau.cs.se.software.evaluation.commands;
 
 import com.google.common.collect.Iterators;
 import de.cau.cs.se.software.evaluation.commands.AbstractAnalysisHandler;
+import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob;
 import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob;
 import java.util.Iterator;
 import org.eclipse.core.commands.ExecutionException;
@@ -46,6 +47,11 @@ public class ModelAnalysisHandler extends AbstractAnalysisHandler {
                 this.createAnalysisView(activePage);
                 break;
               case "ecore":
+                IProject _project_1 = file.getProject();
+                final EMFMetamodelAnalysisJob job_1 = new EMFMetamodelAnalysisJob(_project_1, file, shell);
+                job_1.schedule();
+                job_1.join();
+                this.createAnalysisView(activePage);
                 break;
               default:
                 String _fileExtension_1 = file.getFileExtension();

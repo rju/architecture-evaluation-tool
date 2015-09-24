@@ -10,6 +10,7 @@ import org.eclipse.jface.viewers.TreeSelection
 import org.eclipse.core.resources.IFile
 import org.eclipse.jface.dialogs.MessageDialog
 import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob
 
 class ModelAnalysisHandler extends AbstractAnalysisHandler {
 
@@ -36,7 +37,10 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 							this.createAnalysisView(activePage)
 						}
 						case "ecore" : {
-							// TODO add EMF job here
+							val job = new EMFMetamodelAnalysisJob(file.project, file, shell)
+							job.schedule()
+							job.join
+							this.createAnalysisView(activePage)
 						}
 						default:
 							MessageDialog.openInformation(shell, "Unknown Model Type", 

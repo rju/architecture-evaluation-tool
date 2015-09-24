@@ -630,9 +630,14 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     }
     final String moduleQualifier = _xifexpression;
     final int separator = moduleQualifier.lastIndexOf(".");
-    String _substring = moduleQualifier.substring(0, separator);
-    String _substring_1 = moduleQualifier.substring((separator + 1));
-    return this.drawEmptyModule(module, _substring, _substring_1, otherColor);
+    if ((separator == (-1))) {
+      return this.drawEmptyModule(module, 
+        "", moduleQualifier, otherColor);
+    } else {
+      String _substring = moduleQualifier.substring(0, separator);
+      String _substring_1 = moduleQualifier.substring((separator + 1));
+      return this.drawEmptyModule(module, _substring, _substring_1, otherColor);
+    }
   }
   
   /**

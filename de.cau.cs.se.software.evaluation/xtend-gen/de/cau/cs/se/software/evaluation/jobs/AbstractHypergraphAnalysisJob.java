@@ -146,6 +146,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
     String _name = _project.getName();
     NamedValue _namedValue = new NamedValue(_name, "inter module cohesion", cohesion);
     _values.add(_namedValue);
+    this.updateView(inputHypergraph);
     return cohesion;
   }
   

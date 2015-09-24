@@ -330,11 +330,18 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		} else
 			module.name
 		val separator = moduleQualifier.lastIndexOf('.')
-		return drawEmptyModule(module, 
-			moduleQualifier.substring(0,separator), 
-			moduleQualifier.substring(separator+1),
-			otherColor
-		)
+		if (separator == -1) 
+			return drawEmptyModule(module, 
+				"", 
+				moduleQualifier,
+				otherColor
+			)
+		else
+			return drawEmptyModule(module, 
+				moduleQualifier.substring(0,separator), 
+				moduleQualifier.substring(separator+1),
+				otherColor
+			)
 	}
 	
 	/**

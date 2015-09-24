@@ -136,7 +136,8 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		
 		/** display results */
 		result.values.add(new NamedValue(project.project.name, "inter module cohesion", cohesion))
-	
+		updateView(inputHypergraph)
+		
 		return cohesion
 	}
 		
