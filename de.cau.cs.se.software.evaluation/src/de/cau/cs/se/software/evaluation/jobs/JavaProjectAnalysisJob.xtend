@@ -45,9 +45,9 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		
 		calculateComplexity(inputHypergraph, monitor, result)
 		
-		val coupling = calculateCoupling(inputHypergraph, monitor, result)
+		calculateCoupling(inputHypergraph, monitor, result)
 		
-		calculateCohesion(inputHypergraph, monitor, result, coupling)
+		calculateCohesion(inputHypergraph, monitor, result)
 				
 		monitor.done()
 							

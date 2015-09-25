@@ -42,9 +42,9 @@ class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		
 			calculateComplexity(emfMetaModel.result, monitor, result)
 			
-			val coupling = calculateCoupling(emfMetaModel.result, monitor, result)
+			calculateCoupling(emfMetaModel.result, monitor, result)
 			
-			calculateCohesion(emfMetaModel.result, monitor, result, coupling)	
+			calculateCohesion(emfMetaModel.result, monitor, result)	
 		} else {
 			MessageDialog.openError(this.shell, "Model empty", "The selected resource is empty.")
 		}

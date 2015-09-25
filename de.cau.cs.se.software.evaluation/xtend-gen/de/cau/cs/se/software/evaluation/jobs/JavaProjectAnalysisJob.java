@@ -51,8 +51,8 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
     final ModularHypergraph inputHypergraph = this.createHypergraphForJavaProject(monitor, result);
     this.calculateSize(inputHypergraph, monitor, result);
     this.calculateComplexity(inputHypergraph, monitor, result);
-    final double coupling = this.calculateCoupling(inputHypergraph, monitor, result);
-    this.calculateCohesion(inputHypergraph, monitor, result, coupling);
+    this.calculateCoupling(inputHypergraph, monitor, result);
+    this.calculateCohesion(inputHypergraph, monitor, result);
     monitor.done();
     return Status.OK_STATUS;
   }

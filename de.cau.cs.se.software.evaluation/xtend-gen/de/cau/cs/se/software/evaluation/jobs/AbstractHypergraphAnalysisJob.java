@@ -19,8 +19,10 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.jobs.CalculateComplexity;
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphMappingGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph;
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationMaximalInterconnectedGraph;
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView;
 import de.cau.cs.se.software.evaluation.views.NamedValue;
@@ -107,7 +109,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the coupling of the modular inter-module hyperedges only hypergraph
    */
-  protected double calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+  protected void calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
     final TransformationIntermoduleHyperedgesOnlyGraph intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor);
     intermoduleHyperedgesOnlyGraph.transform(inputHypergraph);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
@@ -119,7 +121,6 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
     NamedValue _namedValue = new NamedValue(_name, "inter module coupling", complexityIntermodule);
     _values.add(_namedValue);
     this.updateView(inputHypergraph);
-    return complexityIntermodule;
   }
   
   /**
@@ -133,18 +134,27 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the cohesion of the modular inter-module hyperedges only hypergraph
    */
-  protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result, final double coupling) {
+  protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+    final TransformationHypergraphMappingGraph modularGraph = new TransformationHypergraphMappingGraph(monitor);
+    modularGraph.transform(inputHypergraph);
     final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
-    maximalInterconnectedGraph.transform(inputHypergraph);
+    ModularHypergraph _result = modularGraph.getResult();
+    maximalInterconnectedGraph.transform(_result);
+    final TransformationIntraModuleGraph intraModuleGraph = new TransformationIntraModuleGraph(monitor);
+    ModularHypergraph _result_1 = modularGraph.getResult();
+    intraModuleGraph.transform(_result_1);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
-    ModularHypergraph _result = maximalInterconnectedGraph.getResult();
-    final double complexityMaximalInterconnected = calculateComplexity.calculate(_result, 
+    ModularHypergraph _result_2 = maximalInterconnectedGraph.getResult();
+    final double complexityMaximalInterconnected = calculateComplexity.calculate(_result_2, 
+      "Calculate maximal interconnected graph complexity");
+    ModularHypergraph _result_3 = intraModuleGraph.getResult();
+    final double coupling = calculateComplexity.calculate(_result_3, 
       "Calculate maximal interconnected graph complexity");
     final double cohesion = (coupling / complexityMaximalInterconnected);
     List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
-    NamedValue _namedValue = new NamedValue(_name, "inter module cohesion", cohesion);
+    NamedValue _namedValue = new NamedValue(_name, "graph cohesion", cohesion);
     _values.add(_namedValue);
     this.updateView(inputHypergraph);
     return cohesion;

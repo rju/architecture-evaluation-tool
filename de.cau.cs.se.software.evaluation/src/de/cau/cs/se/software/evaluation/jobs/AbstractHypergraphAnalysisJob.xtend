@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphMappingGraph
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph
 
 /**
  * Abstract class implementing the basic metrics of the Edward B. Allen entropy
@@ -104,8 +106,6 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
 		result.values.add(new NamedValue(project.project.name, "inter module coupling", complexityIntermodule))	
 		updateView(inputHypergraph)
-		
-		return complexityIntermodule
 	}
 	
 	
@@ -120,22 +120,34 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * 
 	 * @return the cohesion of the modular inter-module hyperedges only hypergraph
 	 */
-	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result, double coupling) {
+	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+		/** Determine graph mapping of the hypergraph */
+		val modularGraph = new TransformationHypergraphMappingGraph(monitor)
+		modularGraph.transform(inputHypergraph)
+				
 		/** Determine maximal interconnected modular graph MS^(n) */
 		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
-		maximalInterconnectedGraph.transform(inputHypergraph)
+		maximalInterconnectedGraph.transform(modularGraph.result)
+		
+		/** Determine maximal intra module graph MS^° */
+		val intraModuleGraph = new TransformationIntraModuleGraph(monitor)
+		intraModuleGraph.transform(modularGraph.result)
 		
 		val calculateComplexity = new CalculateComplexity(monitor)
 		
 		/** Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i */
-		val complexityMaximalInterconnected = calculateComplexity.calculate(maximalInterconnectedGraph.result, 
-			"Calculate maximal interconnected graph complexity"
-		)
+		val complexityMaximalInterconnected = 
+			calculateComplexity.calculate(maximalInterconnectedGraph.result, 
+				"Calculate maximal interconnected graph complexity")
+				
+		val coupling = 
+			calculateComplexity.calculate(intraModuleGraph.result, 
+				"Calculate maximal interconnected graph complexity")
 		
 		val cohesion = coupling/complexityMaximalInterconnected
 		
 		/** display results */
-		result.values.add(new NamedValue(project.project.name, "inter module cohesion", cohesion))
+		result.values.add(new NamedValue(project.project.name, "graph cohesion", cohesion))
 		updateView(inputHypergraph)
 		
 		return cohesion

@@ -53,9 +53,9 @@ public class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
       ModularHypergraph _result_1 = emfMetaModel.getResult();
       this.calculateComplexity(_result_1, monitor, result);
       ModularHypergraph _result_2 = emfMetaModel.getResult();
-      final double coupling = this.calculateCoupling(_result_2, monitor, result);
+      this.calculateCoupling(_result_2, monitor, result);
       ModularHypergraph _result_3 = emfMetaModel.getResult();
-      this.calculateCohesion(_result_3, monitor, result, coupling);
+      this.calculateCohesion(_result_3, monitor, result);
     } else {
       MessageDialog.openError(this.shell, "Model empty", "The selected resource is empty.");
     }
