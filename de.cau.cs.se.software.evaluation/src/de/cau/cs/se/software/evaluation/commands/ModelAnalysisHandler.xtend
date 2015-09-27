@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IFile
 import org.eclipse.jface.dialogs.MessageDialog
 import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob
 import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.CoCoMEAnalysisJob
 
 class ModelAnalysisHandler extends AbstractAnalysisHandler {
 
@@ -38,6 +39,12 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 						}
 						case "ecore" : {
 							val job = new EMFMetamodelAnalysisJob(file.project, file, shell)
+							job.schedule()
+							job.join
+							this.createAnalysisView(activePage)
+						}
+						case "cocome" : {
+							val job = new CoCoMEAnalysisJob(file.project, file.name.equals("megamodel.cocome"), shell)
 							job.schedule()
 							job.join
 							this.createAnalysisView(activePage)

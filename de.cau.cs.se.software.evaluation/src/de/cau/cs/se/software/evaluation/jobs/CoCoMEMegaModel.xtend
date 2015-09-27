@@ -15,11 +15,9 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.jobs
 
-import org.eclipse.emf.common.util.EList
-import de.cau.cs.se.software.evaluation.hypergraph.Node
-import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
+import java.util.List
 
 /**
  * This class is only a temporary place for this model. In real
@@ -28,119 +26,117 @@ import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
  */
 class CoCoMEMegaModel {
 	
-			// val megaModelGraph = createMegaModelAnalysis
-		// metrics.system = megaModelGraph
-		// val mmSize = metrics.calculate
-		// val mmComplexity = calculateComplexity(megaModelGraph, monitor)
-				
-		// result.getValues.add(new NamedValue("Size", mmSize))
-		// result.getValues.add(new NamedValue("Complexity", mmComplexity))
+	val trmInitialNodes = #[
+		"TRM_PCM", "TRM_DTL"
+	]
+	val modelInitialNodes = #["PCM", "Behavior", "DTL", 
+		"EJB/Servlet Stubs", "EJB/Servlets", "Snippets", "Entities", 
+		"Bean Classes", "Entity Classes"
+	]
+	val transInitialNodes = #["T_ProtoCom", "T_behavior", "T_DTL",
+		"T_JW",
+		"T_javac,ajc", "T_javac3"	
+	]
 	
+	val trmCompleteNodes = #[
+		"TRM_IRL", "TRM_PCM", "TRM_DTL"
+	]
+	val modelCompleteNodes = #["IRL", "IAL", "PCM", "Behavior", "DTL", 
+		"Kieker Records", "Sensors", "aspect.xml", "EJB/Servlet Stubs", "EJB/Servlets", "Snippets", "Entities", 
+		"Record Classes", "Sensor Classes", "web.xml", "Bean Classes", "Entity Classes"
+	]
+	val transCompleteNodes = #["T_IRL", "T_sensor", "T_web", "T_aspect", "T_ProtoCom", "T_behavior", "T_DTL",
+		"T_JW",
+		"T_javac1", "T_javac2", "T_javac,ajc", "T_javac3"	
+	]
 	
 	/**
 	 * Create Megamodel graph
 	 */
-	def createMegaModelAnalysis() {
+	def createMegaModelAnalysis(boolean complete) {
 		val Hypergraph graph = HypergraphFactory.eINSTANCE.createHypergraph
-		for(var int i=1;i<22;i++) {
-			val node = HypergraphFactory.eINSTANCE.createNode
-			node.name = "Node " + i
-			graph.nodes.add(node)
+		if (complete) {
+			graph.makeNodes(modelCompleteNodes)
+			graph.makeNodes(transCompleteNodes)
+			graph.makeNodes(trmCompleteNodes)	
+		} else {
+			graph.makeNodes(modelInitialNodes)
+			graph.makeNodes(transInitialNodes)
+			graph.makeNodes(trmInitialNodes)
 		}
 	
-		for(var int i=1;i<26;i++) {
-			val edge = HypergraphFactory.eINSTANCE.createEdge
-			edge.name = "Edge " + i
-			graph.edges.add(edge)
-		}
+		graph.connectNode("IRL",               "T_IRL")
+		graph.connectNode("T_IRL",             "Kieker Records")
+		graph.connectNode("T_IRL",             "TRM_IRL")
+		graph.connectNode("Kieker Records",    "T_javac1")
+		graph.connectNode("TRM_IRL",           "T_sensor")
+		graph.connectNode("IAL",               "IRL")
+		graph.connectNode("IAL",               "T_sensor")
+		graph.connectNode("IAL",               "T_web")
+		graph.connectNode("IAL",               "T_aspect")
+		graph.connectNode("IAL",               "PCM")
+		graph.connectNode("T_sensor",          "Sensors")
+		graph.connectNode("T_web",             "web.xml")
+		graph.connectNode("web.xml",           "Bean Classes")
+		graph.connectNode("Sensor Classes",    "Record Classes")
+		graph.connectNode("T_aspect",          "aspect.xml")
+		graph.connectNode("Sensors",           "T_javac2")
+		graph.connectNode("T_javac2",          "Sensor Classes")
+		graph.connectNode("Sensors",           "T_javac,ajc")
+		graph.connectNode("aspect.xml",        "T_javac,ajc")
+		graph.connectNode("PCM",               "T_ProtoCom")
+		graph.connectNode("PCM",               "DTL")
+		graph.connectNode("T_ProtoCom",        "TRM_PCM")
+		graph.connectNode("T_ProtoCom",        "EJB/Servlet Stubs")
+		graph.connectNode("TRM_PCM",           "T_sensor")
+		graph.connectNode("TRM_PCM",           "T_web")
+		graph.connectNode("TRM_PCM",           "T_aspect")
+		graph.connectNode("TRM_PCM",           "T_behavior")
+		graph.connectNode("EJB/Servlet Stubs", "T_JW")
+		graph.connectNode("T_JW",               "EJB/Servlets")
+		graph.connectNode("EJB/Servlets",       "T_javac,ajc")
+		graph.connectNode("T_javac,ajc",        "Bean Classes")
+		graph.connectNode("Bean Classes",       "Entity Classes")
+		graph.connectNode("Behavior",           "T_behavior")
+		graph.connectNode("Behavior",           "PCM")
+		graph.connectNode("Behavior",           "DTL")
+		graph.connectNode("T_behavior",         "Snippets")
+		graph.connectNode("Snippets",           "T_JW")
+		graph.connectNode("Snippets",           "Entities")
+		graph.connectNode("Snippets",           "EJB/Servlet Stubs")
+		graph.connectNode("DTL",                "T_DTL")
+		graph.connectNode("T_DTL",              "TRM_DTL")
+		graph.connectNode("T_DTL",              "Entities")
+		graph.connectNode("TRM_DTL",            "T_behavior")
+		graph.connectNode("TRM_DTL",            "T_ProtoCom")
+		graph.connectNode("Entities",           "T_javac3")
+		graph.connectNode("T_javac3",           "Entity Classes")
 		
-		connectNode(graph.nodes, graph.edges, "Node 1", "Edge 3")
-		connectNode(graph.nodes, graph.edges, "Node 1", "Edge 9")
-		
-		connectNode(graph.nodes, graph.edges, "Node 2", "Edge 3")
-		connectNode(graph.nodes, graph.edges, "Node 2", "Edge 4")
-		connectNode(graph.nodes, graph.edges, "Node 2", "Edge 5")
-		connectNode(graph.nodes, graph.edges, "Node 2", "Edge 6")
-		connectNode(graph.nodes, graph.edges, "Node 2", "Edge 2")
-		
-		connectNode(graph.nodes, graph.edges, "Node 3", "Edge 2")
-		connectNode(graph.nodes, graph.edges, "Node 3", "Edge 1")
-		
-		connectNode(graph.nodes, graph.edges, "Node 4", "Edge 9")
-		connectNode(graph.nodes, graph.edges, "Node 4", "Edge 4")
-		connectNode(graph.nodes, graph.edges, "Node 4", "Edge 25")
-		connectNode(graph.nodes, graph.edges, "Node 4", "Edge 7")
-		
-		connectNode(graph.nodes, graph.edges, "Node 5", "Edge 7")
-		connectNode(graph.nodes, graph.edges, "Node 5", "Edge 1")
-		
-		connectNode(graph.nodes, graph.edges, "Node 6", "Edge 5")
-		connectNode(graph.nodes, graph.edges, "Node 6", "Edge 22")
-		connectNode(graph.nodes, graph.edges, "Node 6", "Edge 24")
-		
-		connectNode(graph.nodes, graph.edges, "Node 7", "Edge 6")
-		connectNode(graph.nodes, graph.edges, "Node 7", "Edge 24")
-		connectNode(graph.nodes, graph.edges, "Node 7", "Edge 13")
-		connectNode(graph.nodes, graph.edges, "Node 7", "Edge 23")
-		
-		connectNode(graph.nodes, graph.edges, "Node 8", "Edge 22")
-		connectNode(graph.nodes, graph.edges, "Node 8", "Edge 1")
-		
-		connectNode(graph.nodes, graph.edges, "Node 9", "Edge 13")
-		connectNode(graph.nodes, graph.edges, "Node 9", "Edge 12")
-		
-		connectNode(graph.nodes, graph.edges, "Node 10", "Edge 9")
-		connectNode(graph.nodes, graph.edges, "Node 10", "Edge 10")
-		
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 10")
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 25")
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 24")
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 23")
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 11")
-		connectNode(graph.nodes, graph.edges, "Node 11", "Edge 16")
-		
-		connectNode(graph.nodes, graph.edges, "Node 12", "Edge 10")
-		connectNode(graph.nodes, graph.edges, "Node 12", "Edge 8")
-		
-		connectNode(graph.nodes, graph.edges, "Node 13", "Edge 10")
-		connectNode(graph.nodes, graph.edges, "Node 13", "Edge 21")
-		
-		connectNode(graph.nodes, graph.edges, "Node 14", "Edge 8")
-		connectNode(graph.nodes, graph.edges, "Node 14", "Edge 21")
-		
-		connectNode(graph.nodes, graph.edges, "Node 15", "Edge 21")
-		connectNode(graph.nodes, graph.edges, "Node 15", "Edge 20")
-		connectNode(graph.nodes, graph.edges, "Node 15", "Edge 17")
-		
-		connectNode(graph.nodes, graph.edges, "Node 16", "Edge 20")
-		connectNode(graph.nodes, graph.edges, "Node 16", "Edge 1")
-		connectNode(graph.nodes, graph.edges, "Node 16", "Edge 19")
-		
-		connectNode(graph.nodes, graph.edges, "Node 17", "Edge 19")
-		connectNode(graph.nodes, graph.edges, "Node 17", "Edge 18")
-		
-		connectNode(graph.nodes, graph.edges, "Node 18", "Edge 8")
-		connectNode(graph.nodes, graph.edges, "Node 18", "Edge 16")
-		connectNode(graph.nodes, graph.edges, "Node 18", "Edge 17")
-		connectNode(graph.nodes, graph.edges, "Node 18", "Edge 18")
-		
-		connectNode(graph.nodes, graph.edges, "Node 19", "Edge 18")
-		connectNode(graph.nodes, graph.edges, "Node 19", "Edge 11")
-			
-		connectNode(graph.nodes, graph.edges, "Node 20", "Edge 11")	
-		connectNode(graph.nodes, graph.edges, "Node 20", "Edge 12")	
-		connectNode(graph.nodes, graph.edges, "Node 20", "Edge 18")	
-		
-		connectNode(graph.nodes, graph.edges, "Node 21", "Edge 12")	
-		connectNode(graph.nodes, graph.edges, "Node 21", "Edge 14")	
-		connectNode(graph.nodes, graph.edges, "Node 21", "Edge 1")	
-		
-		return graph
+		return graph		
 	}
 	
-	private def connectNode(EList<Node> nodes, EList<Edge> edges, String nodeName, String edgeName) {
-		val node = nodes.findFirst[node | node.name.equals(nodeName)]
-		val edge = edges.findFirst[edge | edge.name.equals(edgeName)]
-		node.edges.add(edge)
+	private def void makeNodes(Hypergraph hypergraph, List<String> strings) {
+		strings.forEach[name | 
+			val node = HypergraphFactory.eINSTANCE.createNode
+			node.name = name
+			hypergraph.nodes.add(node)
+		]
+	}
+	
+	private def connectNode(Hypergraph graph, String sourceNodeName, String targetNodeName) {
+		val sourceNode = graph.nodes.findFirst[node | node.name.equals(sourceNodeName)]
+		val targetNode = graph.nodes.findFirst[node | node.name.equals(targetNodeName)]
+		
+		if (sourceNode != null && targetNode != null) {
+			val edge = HypergraphFactory.eINSTANCE.createEdge
+			edge.name = sourceNodeName + "::" + targetNodeName
+			graph.edges.add(edge)
+					
+			sourceNode.edges.add(edge)
+			targetNode.edges.add(edge)
+		} else {
+			if (sourceNode == null) System.out.println("missing source node " + sourceNodeName)
+			if (targetNode == null) System.out.println("missing target node " + targetNodeName)
+		}
 	}
 }
