@@ -91,6 +91,11 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     private static val VISIBLE_ANONYMOUS_NO = "hidden"
     private static val VISIBLE_ANONYMOUS_YES = "visible"
     
+    /** changes in visualization anonymous classes on off */
+//    private static val VISIBLE_FRAMEWORK_NAME = "Framework Classes"
+//    private static val VISIBLE_FRAMEWORK_NO = "hidden"
+//    private static val VISIBLE_FRAMEWORK_YES = "visible"
+    
     /** changes in layout direction */
     private static val DIRECTION_NAME = "Layout Direction"
     private static val DIRECTION_UP = "up"
@@ -115,6 +120,9 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     private static val SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption::createChoiceOption(VISIBLE_ANONYMOUS_NAME,
        ImmutableList::of(VISIBLE_ANONYMOUS_YES, VISIBLE_ANONYMOUS_NO), VISIBLE_ANONYMOUS_NO)
        
+ //   private static val SynthesisOption VISIBLE_FRAMEWORK = SynthesisOption::createChoiceOption(VISIBLE_FRAMEWORK_NAME,
+ //      ImmutableList::of(VISIBLE_FRAMEWORK_YES, VISIBLE_FRAMEWORK_NO), VISIBLE_FRAMEWORK_YES)
+       
     private static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
        ImmutableList::of(DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT), DIRECTION_LEFT)
        
@@ -135,7 +143,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
      * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
      */
     override public getDisplayedSynthesisOptions() {
-        return ImmutableList::of(VISIBLE_NODES, VISIBLE_ANONYMOUS, DIRECTION, ROUTING, SPACING)
+        return ImmutableList::of(VISIBLE_NODES, VISIBLE_ANONYMOUS, /*VISIBLE_FRAMEWORK,*/ DIRECTION, ROUTING, SPACING)
     }
 
     
@@ -185,27 +193,41 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		sourceModule.nodes.forEach[node | node.edges.forEach[edges.addUnique(it)]]
 		processedModules.add(sourceModule)
 		
-		val targetModules = new HashMap<Module,Integer>()
+		val targetModuleMap = new HashMap<Module,Integer>()
 		edges.forEach[edge |
 			hypergraph.nodes.filter[node | node.edges.exists[it.equals(edge)]].forEach[node |
 				if (!sourceModule.nodes.exists[it.equals(node)]) {
 					/** external node, determine module */
 					val targetModule = hypergraph.modules.findFirst[module | module.nodes.exists[it.equals(node)]]
-					if (targetModule.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO) {
+					if (targetModule.determineVisibility) {
+						targetModuleMap.registerConnection(targetModule)
+					} else {
 						/** module is not shown, compute transitive set. */
 						targetModule.computeTransitiveModules(hypergraph).forEach[transitive |
 							if (!transitive.equals(sourceModule))
-								targetModules.registerConnection(targetModule)
+								targetModuleMap.registerConnection(targetModule)
 						]
-					} else {
-						targetModules.registerConnection(targetModule)
 					}
 				}
 			]
 		]
 		
-		targetModules.forEach[module, count | createAggregatedEdge(sourceModule, module, count) ]
+		targetModuleMap.forEach[module, count | createAggregatedEdge(sourceModule, module, count) ]
 	}
+	
+	/**
+	 * Determine if the given module should be visible depending on type and option values.
+	 */
+	private def boolean determineVisibility(Module module) {
+		switch(module.kind) {
+			case FRAMEWORK: return true // VISIBLE_FRAMEWORK.objectValue == VISIBLE_FRAMEWORK_YES
+			case ANONYMOUS: return VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_YES
+			case INTERFACE: return true
+			case SYSTEM: true
+			default: true
+		}
+	}
+	
 	
 	/**
 	 * Calculate transitive set of modules.
@@ -220,11 +242,11 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 			hypergraph.nodes.filter[node | node.edges.exists[it.equals(edge)]].forEach[node |
 				if (!sourceModule.nodes.exists[it.equals(node)]) {
 					val targetModule = hypergraph.modules.findFirst[module | module.nodes.exists[it.equals(node)]]
-					if (targetModule.kind == EModuleKind.ANONYMOUS && VISIBLE_ANONYMOUS.objectValue == VISIBLE_ANONYMOUS_NO) {
-						/** module is not shown, compute transitive set. */
-						transitiveModules.addAllUnique(targetModule.computeTransitiveModules(hypergraph))
-					} else {
+					if (targetModule.determineVisibility) {
 						transitiveModules.addUnique(targetModule)
+					} else {
+						/** module is not shown, compute transitive set. */
+						transitiveModules.addAllUnique(targetModule.computeTransitiveModules(hypergraph))	
 					}
 				}
 			]

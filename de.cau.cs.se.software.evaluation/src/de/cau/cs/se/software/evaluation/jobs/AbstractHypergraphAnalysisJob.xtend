@@ -28,8 +28,8 @@ import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
-import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphMappingGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphToGraphMapping
 
 /**
  * Abstract class implementing the basic metrics of the Edward B. Allen entropy
@@ -122,7 +122,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 */
 	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		/** Determine graph mapping of the hypergraph */
-		val modularGraph = new TransformationHypergraphMappingGraph(monitor)
+		val modularGraph = new TransformationHypergraphToGraphMapping(monitor)
 		modularGraph.transform(inputHypergraph)
 				
 		/** Determine maximal interconnected modular graph MS^(n) */

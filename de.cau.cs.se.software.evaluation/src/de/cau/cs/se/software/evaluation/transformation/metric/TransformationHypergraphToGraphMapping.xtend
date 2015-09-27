@@ -10,7 +10,13 @@ import java.util.HashMap
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 
-class TransformationHypergraphMappingGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
+/**
+ * Transform a hypergraph into a graph.
+ * 
+ * All hyperedges with more than two participant nodes are replaced by a node
+ * and edges for each of the hyperedge participant nodes.
+ */
+class TransformationHypergraphToGraphMapping extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
 	
 	new(IProgressMonitor monitor) {
 		super(monitor)
@@ -36,7 +42,6 @@ class TransformationHypergraphMappingGraph extends AbstractTransformation<Modula
 		]
 		input.edges.forEach[edge |
 			val connectedNodes = input.nodes.filter[it.edges.contains(edge)]
-			System.out.println("edge " + connectedNodes.size + " " + edge.name)
 			if (connectedNodes.size > 2) {
 				val module = nodeModuleMap.get(connectedNodes.get(0))
 				val derivedNode = result.createNode(moduleMap.get(module), edge.name, edge)

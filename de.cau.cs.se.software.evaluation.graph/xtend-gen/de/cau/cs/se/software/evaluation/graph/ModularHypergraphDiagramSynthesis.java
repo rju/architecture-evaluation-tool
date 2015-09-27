@@ -319,7 +319,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     };
     _nodes.forEach(_function);
     this.processedModules.add(sourceModule);
-    final HashMap<Module, Integer> targetModules = new HashMap<Module, Integer>();
+    final HashMap<Module, Integer> targetModuleMap = new HashMap<Module, Integer>();
     final Consumer<Edge> _function_1 = (Edge edge) -> {
       EList<Node> _nodes_1 = hypergraph.getNodes();
       final Function1<Node, Boolean> _function_2 = (Node node) -> {
@@ -347,28 +347,19 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             return Boolean.valueOf(IterableExtensions.<Node>exists(_nodes_3, _function_6));
           };
           final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_5);
-          boolean _and = false;
-          EModuleKind _kind = targetModule.getKind();
-          boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
-          if (!_equals) {
-            _and = false;
+          boolean _determineVisibility = this.determineVisibility(targetModule);
+          if (_determineVisibility) {
+            this.registerConnection(targetModuleMap, targetModule);
           } else {
-            Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
-            boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
-            _and = _equals_1;
-          }
-          if (_and) {
             List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
             final Consumer<Module> _function_6 = (Module transitive) -> {
-              boolean _equals_2 = transitive.equals(sourceModule);
-              boolean _not_1 = (!_equals_2);
+              boolean _equals = transitive.equals(sourceModule);
+              boolean _not_1 = (!_equals);
               if (_not_1) {
-                this.registerConnection(targetModules, targetModule);
+                this.registerConnection(targetModuleMap, targetModule);
               }
             };
             _computeTransitiveModules.forEach(_function_6);
-          } else {
-            this.registerConnection(targetModules, targetModule);
           }
         }
       };
@@ -378,7 +369,35 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     final BiConsumer<Module, Integer> _function_2 = (Module module, Integer count) -> {
       this.createAggregatedEdge(sourceModule, module, count);
     };
-    targetModules.forEach(_function_2);
+    targetModuleMap.forEach(_function_2);
+  }
+  
+  /**
+   * Determine if the given module should be visible depending on type and option values.
+   */
+  private boolean determineVisibility(final Module module) {
+    boolean _switchResult = false;
+    EModuleKind _kind = module.getKind();
+    if (_kind != null) {
+      switch (_kind) {
+        case FRAMEWORK:
+          return true;
+        case ANONYMOUS:
+          Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+          return Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES);
+        case INTERFACE:
+          return true;
+        case SYSTEM:
+          _switchResult = true;
+          break;
+        default:
+          _switchResult = true;
+          break;
+      }
+    } else {
+      _switchResult = true;
+    }
+    return _switchResult;
   }
   
   /**
@@ -423,21 +442,12 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             return Boolean.valueOf(IterableExtensions.<Node>exists(_nodes_3, _function_6));
           };
           final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_5);
-          boolean _and = false;
-          EModuleKind _kind = targetModule.getKind();
-          boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
-          if (!_equals) {
-            _and = false;
+          boolean _determineVisibility = this.determineVisibility(targetModule);
+          if (_determineVisibility) {
+            this.addUnique(transitiveModules, targetModule);
           } else {
-            Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
-            boolean _equals_1 = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
-            _and = _equals_1;
-          }
-          if (_and) {
             List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
             this.addAllUnique(transitiveModules, _computeTransitiveModules);
-          } else {
-            this.addUnique(transitiveModules, targetModule);
           }
         }
       };

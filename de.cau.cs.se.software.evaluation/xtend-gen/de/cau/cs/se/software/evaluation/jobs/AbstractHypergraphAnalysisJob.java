@@ -19,8 +19,8 @@ import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.jobs.CalculateComplexity;
-import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphMappingGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize;
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphToGraphMapping;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationMaximalInterconnectedGraph;
@@ -135,7 +135,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * @return the cohesion of the modular inter-module hyperedges only hypergraph
    */
   protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
-    final TransformationHypergraphMappingGraph modularGraph = new TransformationHypergraphMappingGraph(monitor);
+    final TransformationHypergraphToGraphMapping modularGraph = new TransformationHypergraphToGraphMapping(monitor);
     modularGraph.transform(inputHypergraph);
     final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
     ModularHypergraph _result = modularGraph.getResult();

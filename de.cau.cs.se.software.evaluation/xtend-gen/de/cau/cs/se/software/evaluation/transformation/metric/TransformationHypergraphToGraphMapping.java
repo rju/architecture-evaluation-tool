@@ -15,9 +15,15 @@ import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
+/**
+ * Transform a hypergraph into a graph.
+ * 
+ * All hyperedges with more than two participant nodes are replaced by a node
+ * and edges for each of the hyperedge participant nodes.
+ */
 @SuppressWarnings("all")
-public class TransformationHypergraphMappingGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
-  public TransformationHypergraphMappingGraph(final IProgressMonitor monitor) {
+public class TransformationHypergraphToGraphMapping extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
+  public TransformationHypergraphToGraphMapping(final IProgressMonitor monitor) {
     super(monitor);
   }
   
@@ -58,31 +64,25 @@ public class TransformationHypergraphMappingGraph extends AbstractTransformation
       };
       final Iterable<Node> connectedNodes = IterableExtensions.<Node>filter(_nodes_1, _function_3);
       int _size = IterableExtensions.size(connectedNodes);
-      String _plus = ("edge " + Integer.valueOf(_size));
-      String _plus_1 = (_plus + " ");
-      String _name = edge.getName();
-      String _plus_2 = (_plus_1 + _name);
-      System.out.println(_plus_2);
-      int _size_1 = IterableExtensions.size(connectedNodes);
-      boolean _greaterThan = (_size_1 > 2);
+      boolean _greaterThan = (_size > 2);
       if (_greaterThan) {
         Object _get = ((Object[])Conversions.unwrapArray(connectedNodes, Object.class))[0];
         final Module module = nodeModuleMap.get(_get);
         Module _get_1 = moduleMap.get(module);
-        String _name_1 = edge.getName();
-        final Node derivedNode = HypergraphCreationHelper.createNode(this.result, _get_1, _name_1, edge);
+        String _name = edge.getName();
+        final Node derivedNode = HypergraphCreationHelper.createNode(this.result, _get_1, _name, edge);
         final Consumer<Node> _function_4 = (Node connectedNode) -> {
           Node _get_2 = nodeMap.get(connectedNode);
-          String _name_2 = connectedNode.getName();
-          String _plus_3 = (_name_2 + "::");
-          String _name_3 = derivedNode.getName();
-          String _plus_4 = (_plus_3 + _name_3);
-          HypergraphCreationHelper.createEdge(this.result, _get_2, derivedNode, _plus_4, edge);
+          String _name_1 = connectedNode.getName();
+          String _plus = (_name_1 + "::");
+          String _name_2 = derivedNode.getName();
+          String _plus_1 = (_plus + _name_2);
+          HypergraphCreationHelper.createEdge(this.result, _get_2, derivedNode, _plus_1, edge);
         };
         connectedNodes.forEach(_function_4);
       } else {
-        int _size_2 = IterableExtensions.size(connectedNodes);
-        boolean _equals = (_size_2 == 2);
+        int _size_1 = IterableExtensions.size(connectedNodes);
+        boolean _equals = (_size_1 == 2);
         if (_equals) {
           final Edge derivedEdge = HypergraphCreationHelper.deriveEdge(edge);
           Object _get_2 = ((Object[])Conversions.unwrapArray(connectedNodes, Object.class))[0];
@@ -96,8 +96,8 @@ public class TransformationHypergraphMappingGraph extends AbstractTransformation
           EList<Edge> _edges_3 = this.result.getEdges();
           _edges_3.add(derivedEdge);
         } else {
-          int _size_3 = IterableExtensions.size(connectedNodes);
-          boolean _equals_1 = (_size_3 == 1);
+          int _size_2 = IterableExtensions.size(connectedNodes);
+          boolean _equals_1 = (_size_2 == 1);
           if (_equals_1) {
             final Edge derivedEdge_1 = HypergraphCreationHelper.deriveEdge(edge);
             Object _get_6 = ((Object[])Conversions.unwrapArray(connectedNodes, Object.class))[0];
@@ -111,12 +111,12 @@ public class TransformationHypergraphMappingGraph extends AbstractTransformation
             EList<Edge> _edges_6 = this.result.getEdges();
             _edges_6.add(derivedEdge_1);
           } else {
-            int _size_4 = IterableExtensions.size(connectedNodes);
-            String _plus_3 = ("unused edge " + Integer.valueOf(_size_4));
-            String _plus_4 = (_plus_3 + " ");
-            String _name_2 = edge.getName();
-            String _plus_5 = (_plus_4 + _name_2);
-            System.out.println(_plus_5);
+            int _size_3 = IterableExtensions.size(connectedNodes);
+            String _plus = ("unused edge " + Integer.valueOf(_size_3));
+            String _plus_1 = (_plus + " ");
+            String _name_1 = edge.getName();
+            String _plus_2 = (_plus_1 + _name_1);
+            System.out.println(_plus_2);
           }
         }
       }
