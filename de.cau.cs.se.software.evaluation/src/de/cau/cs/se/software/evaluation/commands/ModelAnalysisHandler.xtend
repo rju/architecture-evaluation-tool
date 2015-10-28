@@ -11,11 +11,8 @@ import org.eclipse.core.resources.IFile
 import org.eclipse.jface.dialogs.MessageDialog
 import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob
 import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob
-<<<<<<< 8bc7dea11497cf8013b1224ccb063b66eeed056e
 import de.cau.cs.se.software.evaluation.jobs.CoCoMEAnalysisJob
-=======
 import de.cau.cs.se.software.evaluation.jobs.PCMDeploymentAnalysisJob
->>>>>>> updated evaluation tooling
 
 class ModelAnalysisHandler extends AbstractAnalysisHandler {
 
@@ -34,35 +31,22 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 				val iterator = treeSelection.iterator.filter(IFile)
 				if (iterator.hasNext) {
 					val file = iterator.next
-					switch(file.fileExtension) {
-						case "geco" : {
-							val job = new GecoMegamodelAnalysisJob(file.project, file, shell)
-							job.schedule()
-							job.join
-							this.createAnalysisView(activePage)
-						}
-						case "ecore" : {
-							val job = new EMFMetamodelAnalysisJob(file.project, file, shell)
-							job.schedule()
-							job.join
-							this.createAnalysisView(activePage)
-						}
-						case "cocome" : {
-							val job = new CoCoMEAnalysisJob(file.project, file.name.equals("megamodel.cocome"), shell)
-							job.schedule()
-							job.join
-							this.createAnalysisView(activePage)
-						}
-						case "system" : {
-							val job = new PCMDeploymentAnalysisJob(file.project, file, shell)
-							job.schedule()
-							job.join
-							this.createAnalysisView(activePage)
-						}
-						default:
+					val job = switch(file.fileExtension) {
+						case "geco" : new GecoMegamodelAnalysisJob(file.project, file, shell)
+						case "ecore" : new EMFMetamodelAnalysisJob(file.project, file, shell)
+						case "cocome" : new CoCoMEAnalysisJob(file.project, file.name.equals("megamodel.cocome"), shell)
+						case "system" : new PCMDeploymentAnalysisJob(file.project, file, shell)
+						default: {
 							MessageDialog.openInformation(shell, "Unknown Model Type", 
 								"The model type implied by the extension " + file.fileExtension + 
 								" is not supported.")
+							null
+						}
+					}
+					if (job != null) {
+						job.schedule()
+						job.join
+						this.createAnalysisView(activePage)
 					}
 				} else {
 					MessageDialog.openInformation(shell, "Empty selection", "No model selected for execution.")

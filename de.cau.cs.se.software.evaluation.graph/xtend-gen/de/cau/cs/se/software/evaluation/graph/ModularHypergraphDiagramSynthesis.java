@@ -476,12 +476,10 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_5);
           boolean _determineVisibility = this.determineVisibility(targetModule);
           if (_determineVisibility) {
-            this.addUnique(transitiveModules, targetModule);
+            DiagramModelHelper.addUnique(transitiveModules, targetModule);
           } else {
             List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
             DiagramModelHelper.addAllUnique(transitiveModules, _computeTransitiveModules);
-          } else {
-            DiagramModelHelper.addUnique(transitiveModules, targetModule);
           }
         }
       };
