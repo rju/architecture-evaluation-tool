@@ -5,6 +5,8 @@ import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob;
+import de.cau.cs.se.software.evaluation.transformation.TransformationCyclomaticComplexity;
+import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode;
 import de.cau.cs.se.software.evaluation.transformation.java.TransformationJavaMethodsToModularHypergraph;
 import de.cau.cs.se.software.evaluation.views.NamedValue;
 import de.cau.cs.se.software.evaluation.views.ResultModelProvider;
@@ -41,12 +43,32 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   @Override
   protected IStatus run(final IProgressMonitor monitor) {
     final ResultModelProvider result = ResultModelProvider.INSTANCE;
+    final TransformationLinesOfCode linesOfCodeMetric = new TransformationLinesOfCode(monitor);
+    linesOfCodeMetric.transform(this.classes);
+    final TransformationCyclomaticComplexity javaMethodComplexity = new TransformationCyclomaticComplexity(monitor);
+    javaMethodComplexity.transform(this.classes);
     List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     int _size = this.classes.size();
     NamedValue _namedValue = new NamedValue(_name, "size of observed system", _size);
     _values.add(_namedValue);
+    List<NamedValue> _values_1 = result.getValues();
+    IProject _project_1 = this.project.getProject();
+    String _name_1 = _project_1.getName();
+    Long _result = linesOfCodeMetric.getResult();
+    NamedValue _namedValue_1 = new NamedValue(_name_1, "lines of code (LOC)", (_result).longValue());
+    _values_1.add(_namedValue_1);
+    for (int i = 1; (i < javaMethodComplexity.getResult().size()); i++) {
+      List<NamedValue> _values_2 = result.getValues();
+      IProject _project_2 = this.project.getProject();
+      String _name_2 = _project_2.getName();
+      List<Integer> _result_1 = javaMethodComplexity.getResult();
+      Integer _get = _result_1.get(i);
+      NamedValue _namedValue_2 = new NamedValue(_name_2, 
+        ("cyclomatic complexity bucket " + Integer.valueOf(i)), (_get).intValue());
+      _values_2.add(_namedValue_2);
+    }
     this.updateView(null);
     final ModularHypergraph inputHypergraph = this.createHypergraphForJavaProject(monitor, result);
     this.calculateSize(inputHypergraph, monitor, result);

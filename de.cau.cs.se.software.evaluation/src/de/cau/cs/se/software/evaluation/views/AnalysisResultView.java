@@ -49,7 +49,7 @@ public class AnalysisResultView extends ViewPart {
 	private TableViewer viewer;
 	private Action exportDataAction;
 	private Action exportHypergraphAction;
-	private Action visualizeAction;
+	private Action clearViewAction;
 	private Hypergraph graph = null;
 	private IProject project = null;
 
@@ -108,7 +108,7 @@ public class AnalysisResultView extends ViewPart {
 		});
 
 		final TableViewerColumn columnProperty = new TableViewerColumn(this.viewer, SWT.NONE);
-		columnProperty.getColumn().setWidth(200);
+		columnProperty.getColumn().setWidth(400);
 		columnProperty.getColumn().setText("Property");
 		columnProperty.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -168,10 +168,10 @@ public class AnalysisResultView extends ViewPart {
 			}
 		};
 
-		this.visualizeAction = new Action("Graph Visualization", Activator.getImageDescriptor("/icons/graph.gif")) {
+		this.clearViewAction = new Action("Clear Data in View", Activator.getImageDescriptor("/icons/sample.gif")) {
 			@Override
 			public void run() {
-				actionHandler.visualize();
+				actionHandler.clearViewData(AnalysisResultView.this);
 			}
 		};
 
@@ -184,7 +184,7 @@ public class AnalysisResultView extends ViewPart {
 		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
 		manager.add(this.exportDataAction);
 		manager.add(this.exportHypergraphAction);
-		manager.add(this.visualizeAction);
+		manager.add(this.clearViewAction);
 	}
 
 	/**

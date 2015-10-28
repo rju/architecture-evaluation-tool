@@ -1,9 +1,14 @@
 package de.cau.cs.se.software.evaluation.jobs;
 
+import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
+import de.cau.cs.se.software.evaluation.hypergraph.Module;
+import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob;
 import de.cau.cs.se.software.evaluation.transformation.emf.TransformationEMFInstanceToHypergraph;
+import de.cau.cs.se.software.evaluation.views.NamedValue;
 import de.cau.cs.se.software.evaluation.views.ResultModelProvider;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -48,14 +53,35 @@ public class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
       final EPackage model = ((EPackage) _get);
       final TransformationEMFInstanceToHypergraph emfMetaModel = new TransformationEMFInstanceToHypergraph(monitor);
       emfMetaModel.transform(model);
+      List<NamedValue> _values = result.getValues();
+      String _name = this.project.getName();
       ModularHypergraph _result = emfMetaModel.getResult();
-      this.calculateSize(_result, monitor, result);
+      EList<Module> _modules = _result.getModules();
+      int _size_1 = _modules.size();
+      NamedValue _namedValue = new NamedValue(_name, "number of modules", _size_1);
+      _values.add(_namedValue);
+      List<NamedValue> _values_1 = result.getValues();
+      String _name_1 = this.project.getName();
       ModularHypergraph _result_1 = emfMetaModel.getResult();
-      this.calculateComplexity(_result_1, monitor, result);
+      EList<Node> _nodes = _result_1.getNodes();
+      int _size_2 = _nodes.size();
+      NamedValue _namedValue_1 = new NamedValue(_name_1, "number of nodes", _size_2);
+      _values_1.add(_namedValue_1);
+      List<NamedValue> _values_2 = result.getValues();
+      String _name_2 = this.project.getName();
       ModularHypergraph _result_2 = emfMetaModel.getResult();
-      this.calculateCoupling(_result_2, monitor, result);
+      EList<Edge> _edges = _result_2.getEdges();
+      int _size_3 = _edges.size();
+      NamedValue _namedValue_2 = new NamedValue(_name_2, "number of edges", _size_3);
+      _values_2.add(_namedValue_2);
       ModularHypergraph _result_3 = emfMetaModel.getResult();
-      this.calculateCohesion(_result_3, monitor, result);
+      this.calculateSize(_result_3, monitor, result);
+      ModularHypergraph _result_4 = emfMetaModel.getResult();
+      this.calculateComplexity(_result_4, monitor, result);
+      ModularHypergraph _result_5 = emfMetaModel.getResult();
+      this.calculateCoupling(_result_5, monitor, result);
+      ModularHypergraph _result_6 = emfMetaModel.getResult();
+      this.calculateCohesion(_result_6, monitor, result);
     } else {
       MessageDialog.openError(this.shell, "Model empty", "The selected resource is empty.");
     }

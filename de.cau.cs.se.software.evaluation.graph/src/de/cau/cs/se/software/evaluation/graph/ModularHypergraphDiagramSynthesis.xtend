@@ -15,58 +15,43 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.graph
 
-import javax.inject.Inject
-
+import com.google.common.collect.ImmutableList
 import de.cau.cs.kieler.core.kgraph.KNode
+import de.cau.cs.kieler.core.kgraph.KPort
+import de.cau.cs.kieler.core.krendering.KColor
+import de.cau.cs.kieler.core.krendering.KContainerRendering
 import de.cau.cs.kieler.core.krendering.KRenderingFactory
-import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KEdgeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KLabelExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KContainerRenderingExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions
+import de.cau.cs.kieler.core.krendering.LineJoin
+import de.cau.cs.kieler.core.krendering.LineStyle
 import de.cau.cs.kieler.core.krendering.extensions.KColorExtensions
-import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
-
-import static extension de.cau.cs.kieler.klighd.syntheses.DiagramSyntheses.*
-
-import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
-import de.cau.cs.kieler.kiml.options.LayoutOptions
+import de.cau.cs.kieler.core.krendering.extensions.KContainerRenderingExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KEdgeExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KLabelExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions
+import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions
+import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout
 import de.cau.cs.kieler.kiml.options.Direction
-import org.eclipse.emf.common.util.EList
+import de.cau.cs.kieler.kiml.options.EdgeRouting
+import de.cau.cs.kieler.kiml.options.LayoutOptions
+import de.cau.cs.kieler.kiml.options.SizeConstraint
+import de.cau.cs.kieler.klay.layered.properties.Properties
+import de.cau.cs.kieler.klighd.SynthesisOption
+import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+import de.cau.cs.se.software.evaluation.hypergraph.Edge
+import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.hypergraph.Node
-import de.cau.cs.se.software.evaluation.hypergraph.EdgeReference
 import java.util.ArrayList
-import de.cau.cs.se.software.evaluation.hypergraph.Edge
-import de.cau.cs.kieler.kiml.klayoutdata.KLayoutData
-import de.cau.cs.kieler.klighd.util.KlighdSemanticDiagramData
-import de.cau.cs.kieler.klighd.util.KlighdProperties
-import de.cau.cs.kieler.klighd.KlighdConstants
-import de.cau.cs.kieler.kiml.options.EdgeType
-import de.cau.cs.kieler.core.krendering.KRendering
-import de.cau.cs.kieler.core.krendering.KRectangle
-import org.eclipse.emf.ecore.EClass
 import java.util.HashMap
-import java.util.Map
-import de.cau.cs.kieler.core.kgraph.KEdge
-import de.cau.cs.kieler.core.krendering.LineStyle
-import de.cau.cs.kieler.kiml.options.EdgeRouting
-import de.cau.cs.kieler.core.krendering.LineJoin
-import de.cau.cs.kieler.core.krendering.KContainerRendering
-import de.cau.cs.kieler.kiml.options.PortConstraints
-import de.cau.cs.kieler.klay.layered.properties.Properties
-import com.google.common.collect.ImmutableList
-import de.cau.cs.kieler.klighd.SynthesisOption
-import de.cau.cs.kieler.kiml.options.SizeConstraint
-import java.util.EnumSet
-import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import java.util.List
-import de.cau.cs.kieler.core.krendering.KColor
-import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout
-import de.cau.cs.kieler.kiml.klayoutdata.KInsets
-import de.cau.cs.kieler.core.kgraph.KPort
+import java.util.Map
+import javax.inject.Inject
+import org.eclipse.emf.common.util.EList
+import static extension de.cau.cs.se.software.evaluation.graph.DiagramModelHelper.*
+import de.cau.cs.kieler.kiml.options.PortConstraints
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -187,6 +172,21 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
         
         return root
     }
+    
+    /**
+     * Return the correct color for a module.
+     */
+    private def getBackgroundColor(Module module) {
+		switch (module.kind) {
+			case SYSTEM: "LemonChiffon".color
+			case FRAMEWORK: "Blue".color
+			case ANONYMOUS: "Orange".color
+			case INTERFACE: "White".color
+		}
+		
+	} 
+	
+	/** -- aggregated view ------------------ */
 	
 	private def void createCombindEdges(Module sourceModule, ModularHypergraph hypergraph) {
 		val edges = new ArrayList<Edge>()
@@ -317,69 +317,47 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             ]
 		]
 	}
-	
-	private def addUnique(List<Edge> edges, Edge edge) {
-		if (!edges.contains(edge)) {
-			edges.add(edge)
-		}
-	}
-	
-	private def addUnique(List<Module> modules, Module module) {
-		if (!modules.contains(module)) {
-			modules.add(module)
-		}
-	}
-	
-	private def addAllUnique(List<Module> modules, List<Module> additionalModules) {
-		additionalModules.forEach[modules.addUnique(it)]
-	}
-    
+	   
     
     /**
      * Create module without nodes for simple display.
      */
     private def KNode createEmptyModule(Module module) {
-    	val otherColor = switch (module.kind) {
-			case SYSTEM: "LemonChiffon".color
-			case FRAMEWORK: "Blue".color
-			case ANONYMOUS: "Orange".color
-			case INTERFACE: "White".color
-		}
-		
 		val moduleQualifier = if (module.kind == EModuleKind.ANONYMOUS) {
 			val separator = module.name.lastIndexOf('$')
 			module.name.substring(0,separator)
 		} else
 			module.name
 		val separator = moduleQualifier.lastIndexOf('.')
-		if (separator == -1) 
-			return drawEmptyModule(module, 
+		val moduleNode = if (separator == -1) 
+			drawEmptyModule(module, 
 				"", 
 				moduleQualifier,
-				otherColor
+				module.backgroundColor
 			)
 		else
-			return drawEmptyModule(module, 
+			drawEmptyModule(module, 
 				moduleQualifier.substring(0,separator), 
 				moduleQualifier.substring(separator+1),
-				otherColor
+				module.backgroundColor
 			)
+		moduleMap.put(module, moduleNode)
+		
+		return moduleNode
 	}
 	
 	/**
 	 * Draw the empty module.
 	 */
-	private def KNode drawEmptyModule(Module module, String packageName, String moduleName, KColor otherColor) {
+	private def KNode drawEmptyModule(Module module, String packageName, String moduleName, KColor backgroundColor) {
 		val moduleNode = module.createNode().associateWith(module)
-		moduleMap.put(module, moduleNode)
-		
-		
+				
 		moduleNode => [
 			it.setLayoutOption(LayoutOptions::PORT_SPACING, 20f)
 			it.setLayoutOption(LayoutOptions::SIZE_CONSTRAINT, SizeConstraint.minimumSizeWithPorts)
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
-                it.setBackgroundGradient("white".color, otherColor, 0)
+                it.setBackgroundGradient("white".color, backgroundColor, 0)
                 it.shadow = "black".color
                 it.setGridPlacement(1).from(LEFT, 10, 0, TOP, 20, 0).to(RIGHT, 10, 0, BOTTOM, 20, 0)
 	            it.addText(packageName) => [
@@ -395,6 +373,8 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
             ]
 		]
 	}
+	
+	/** -- complete view ------------------ */
     
     /**
 	 * Draw module as a rectangle with its nodes inside.
@@ -409,9 +389,11 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		moduleNode.getData(KShapeLayout).insets.top = 15 //bringt nicht wirklich Effekt
 
 		moduleNode => [	
+			it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			it.setLayoutOption(LayoutOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
-                it.setBackgroundGradient("white".color, "LemonChiffon".color, 0)
+                it.setBackgroundGradient("white".color, module.backgroundColor, 0)
                 it.shadow = "black".color
                 it.setGridPlacement(1).from(LEFT, 10, 0, TOP, 10, 0).to(RIGHT, 10, 0, BOTTOM, 10, 0)
                 it.addText(module.name) => [
@@ -440,12 +422,13 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		nodeMap.put(node, kNode)
 		moduleNode.children += kNode
 		kNode => [
-			//it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			
 			//node.edges.forEach[graphEdge | graphEdge.createEdgePort(it, graphEdge.name)]
-			it.addEllipse => [ 
+			it.addRoundedRectangle(2,2) => [ 
 				it.lineWidth = 2
                 it.background = "white".color
-                it.setSurroundingSpace(10,0,10,0)
+                it.setSurroundingSpace(1,0,1,0)
                 it.addText(node.name.substring(module.name.length+1)) => [
                 	it.setSurroundingSpace(10,0,10,0)
                 	it.cursorSelectable = true
@@ -457,12 +440,13 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	
 	//create iff not exists & add to portMap & return port
 	private def KPort getOrCreateEdgePort(KNode kNode, String label) {
-		if (portMap.get(label) == null){
-		kNode.ports.add(createPort() => [
-    		it.setPortSize(2,2)
-    		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
-    		portMap.put(label,it)
-    	])}
+		if (portMap.get(label) == null) {
+			kNode.ports.add(createPort() => [
+	    		it.setPortSize(2,2)
+	    		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
+	    		portMap.put(label,it)
+	    	])
+	    }
     	return portMap.get(label)
 	}
 
@@ -471,7 +455,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		//System.out.println("graph edge " + edge.name + " size " + referencedNodes.size )
 		if (referencedNodes.size > 1) {
 			if (referencedNodes.size == 2) { /** direct link */
-				drawEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)), edge)
+				constructEdge(nodeMap.get(referencedNodes.get(0)), nodeMap.get(referencedNodes.get(1)), edge)
 			} else { /** hyper edge */
 				siblings += drawHyperEdge(edge, referencedNodes)
 			}
@@ -485,93 +469,74 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 				//it.addText(graphEdge.name)
 			]
 		]		
-		nodes.forEach[node | drawEdge(edgeNode, nodeMap.get(node), graphEdge)]
+		nodes.forEach[node | constructEdge(edgeNode, nodeMap.get(node), graphEdge)]
 		//System.out.println("edge " + edgeNode)
 		return edgeNode
 	}
 	
-	private def drawEdge(KNode left, KNode right, Edge graphEdge) {
+	private def constructEdge(KNode left, KNode right, Edge graphEdge) {
 		//System.out.println("draw edge " + left + " " + right)
 		
 		//draw edges direct iff same parentNodes
-		if(right.parent.equals(left.parent)) {		
+		if(right.parent.equals(left.parent)) {	
+			drawEdge(left, right, 
+				getOrCreateEdgePort(left, left.toString + '_to_' + right.toString), 
+				getOrCreateEdgePort(right, right.toString + '_to_' + left.toString)
+			)	
+			// else use ports	
+		} else {
+			//if no HyperEdgePart
+			if(left.parent != null) {		
+				//Edge from inner-Node to parentPort (left) (iff not exists yet)
+				if (portMap.get(left.toString + '_to_' + right.parent.toString) == null) {
+					drawEdge(left, left.parent,
+						getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString),
+						getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
+					)
+				}
+				//Edge between parentPorts (iff not exists yet)
+				if (portMap.get(right.parent.toString + '_to_' + left.parent.toString) == null) {
+					drawEdge(left.parent, right.parent,
+						getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString),
+						getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
+					)
+				}
+				//Edge from inner-Node to parentPort (right) (iff not exists yet)
+				if (portMap.get(right.toString + '_to_' + left.parent.toString) == null) {
+					drawEdge(right, right.parent, 
+						getOrCreateEdgePort(right, right.toString + '_to_' + left.parent.toString),
+						getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
+					)
+				}		
+			} else { //if HyperEdgePart
+				//Edge between parentPort and HyperEdgeNode
+				drawEdge(left, right.parent,
+					getOrCreateEdgePort(left, left.toString),
+					getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
+	            )
+				//Edge from inner-Node to parentPort (right)
+				drawEdge(right, right.parent,
+					getOrCreateEdgePort(right, right.toString + '_to_' + left.toString),
+					getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
+	            )
+			}			
+		}
+	}
+	
+	/**
+	 * Draw a single edge.
+	 */
+	private def void drawEdge(KNode left, KNode right, KPort leftPort, KPort rightPort) {
 		createEdge() => [
 			it.source = left
             it.target = right
-            it.addPolyline => [
-            	it.lineWidth = 2
-            	it.lineStyle = LineStyle.SOLID
-            ]
-		]}
-			
-		//else use ports		
-		else{
-			//if no HyperEdgePart
-			if(left.parent != null){		
-			//Edge from inner-Node to parentPort (left) (iff not exists yet)
-			if(portMap.get(left.toString + '_to_' + right.parent.toString) == null){
-			createEdge() => [
-			it.source = left
-			it.sourcePort = getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString)
-			it.targetPort = getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
-            it.target = left.parent
-            it.addPolyline => [
-            	it.lineWidth = 2
-            	it.lineStyle = LineStyle.SOLID
-            ]
-		]}
-			//Edge between parentPorts (iff not exists yet)
-			if (portMap.get(right.parent.toString + '_to_' + left.parent.toString) == null){
-			createEdge() => [
-			it.source = left.parent
-			it.sourcePort = getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
-			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
-            it.target = right.parent
-            it.addPolyline => [
-            	it.lineWidth = 2
-            	it.lineStyle = LineStyle.SOLID
-            ]
-		]}
-			//Edge from inner-Node to parentPort (right) (iff not exists yet)
-			if (portMap.get(right.toString + '_to_' + left.parent.toString) == null){
-			createEdge() => [
-			it.source = right
-			it.sourcePort = getOrCreateEdgePort(right, right.toString + '_to_' + left.parent.toString)
-			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
-            it.target = right.parent
-            it.addPolyline => [
-            	it.lineWidth = 2
-            	it.lineStyle = LineStyle.SOLID
-            ]
-		]}		
-		}
-		//if HyperEdgePart
-		else{
-			//Edge between parentPort and HyperEdgeNode
-			createEdge() => [
-			it.source = left
-			it.sourcePort = getOrCreateEdgePort(left, left.toString)
-			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
-            it.target = right.parent
+            it.sourcePort = leftPort
+            it.targetPort = rightPort
             it.addPolyline => [
             	it.lineWidth = 2
             	it.lineStyle = LineStyle.SOLID
             ]
 		]
-			//Edge from inner-Node to parentPort (right)
-			createEdge() => [
-			it.source = right
-			it.sourcePort = getOrCreateEdgePort(right, right.toString + '_to_' + left.toString)
-			it.targetPort = getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.toString)
-            it.target = right.parent
-            it.addPolyline => [
-            	it.lineWidth = 2
-            	it.lineStyle = LineStyle.SOLID
-            ]
-		]		
-					
-			}			
-		}
 	}
 
 }

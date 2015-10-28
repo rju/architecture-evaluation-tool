@@ -22,6 +22,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -55,7 +57,6 @@ class ActionHandler {
 	 * Action-Logic for 'export_Data'-Button in AnalysisResultView.
 	 */
 	protected void exportData(final TableViewer table, final Shell shell, final IProject project) throws IOException {
-		String loc = null;
 		if (table.getTable().getItems().length == 0) {
 			MessageDialog.openWarning(null, "Missing values", "There is nothing to export.");
 		} else {
@@ -66,15 +67,13 @@ class ActionHandler {
 			}
 			final String[] filterExt = { "*.csv", "*.*" };
 			dialog.setFilterExtensions(filterExt);
-			final String returnVal = dialog.open();
-			if (returnVal != null) {
-				if (!returnVal.endsWith(".csv")) {
-					loc = returnVal.concat(".csv");
-				} else {
-					loc = returnVal;
+			final String outputFilePath = dialog.open();
+			if (outputFilePath != null) {
+				if (!outputFilePath.endsWith(".csv")) {
+					outputFilePath.concat(".csv");
 				}
 
-				final File result = new File(loc);
+				final File result = new File(outputFilePath);
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
@@ -83,6 +82,11 @@ class ActionHandler {
 				}
 				br.write(sb.toString());
 				br.close();
+				try {
+					project.refreshLocal(IResource.DEPTH_INFINITE, null);
+				} catch (final CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -95,7 +99,7 @@ class ActionHandler {
 		if (model == null) {
 			MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
 		} else {
-			String loc = null;
+
 			final FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 			dialog.setText("Save");
 			if (project != null) {
@@ -103,12 +107,11 @@ class ActionHandler {
 			}
 			final String[] filterExt = { "*.xmi", "*.*" };
 			dialog.setFilterExtensions(filterExt);
-			final String returnVal = dialog.open();
-			if (returnVal != null) {
-				if (!returnVal.endsWith(".xmi")) {
-					loc = returnVal.concat(".xmi");
-				} else {
-					loc = returnVal;
+			final String outputFilePath = dialog.open();
+			if (outputFilePath != null) {
+
+				if (!outputFilePath.endsWith(".xmi")) {
+					outputFilePath.concat(".xmi");
 				}
 
 				final ResourceSet resourceSet = new ResourceSetImpl();
@@ -117,16 +120,21 @@ class ActionHandler {
 				resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
 
 				// Create empty resource with the given URI
-				final Resource resource = resourceSet.createResource(URI.createURI(loc));
+				final Resource resource = resourceSet.createResource(URI.createURI(outputFilePath));
 
 				// Add model to contents list of the resource
 				resource.getContents().add(model);
 
 				// Save the resource
-				final File destination = new File(loc);
+				final File destination = new File(outputFilePath);
 				final FileOutputStream stream = new FileOutputStream(destination);
 				resource.save(stream, null);
 				stream.close();
+				try {
+					project.refreshLocal(IResource.DEPTH_INFINITE, null);
+				} catch (final CoreException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -136,6 +144,14 @@ class ActionHandler {
 	 */
 	protected void visualize() {
 		MessageDialog.openWarning(null, "Not implemented", "Not implemented yet.");
+	}
+
+	/**
+	 * Delete the data in the view.
+	 */
+	protected void clearViewData(final AnalysisResultView view) {
+		ResultModelProvider.INSTANCE.clearValues();
+		view.update();
 	}
 
 }

@@ -15,6 +15,7 @@ import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Shell
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
+import de.cau.cs.se.software.evaluation.views.NamedValue
 
 /**
  * run job for the GECO megamodel evaluation.
@@ -49,6 +50,9 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 			
 			val gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor)
 			gecoMegamodel.transform(model)
+			
+			result.values.add(new NamedValue(project.name, "number of nodes", gecoMegamodel.result.nodes.size))
+			result.values.add(new NamedValue(project.name, "number of edges", gecoMegamodel.result.edges.size))
 			
 			calculateSize(gecoMegamodel.result, monitor, result)
 		

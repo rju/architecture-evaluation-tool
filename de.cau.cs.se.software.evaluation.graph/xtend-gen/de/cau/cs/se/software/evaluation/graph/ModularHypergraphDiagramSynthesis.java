@@ -44,10 +44,12 @@ import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout;
 import de.cau.cs.kieler.kiml.options.Direction;
 import de.cau.cs.kieler.kiml.options.EdgeRouting;
 import de.cau.cs.kieler.kiml.options.LayoutOptions;
+import de.cau.cs.kieler.kiml.options.PortConstraints;
 import de.cau.cs.kieler.kiml.options.SizeConstraint;
 import de.cau.cs.kieler.klay.layered.properties.Properties;
 import de.cau.cs.kieler.klighd.SynthesisOption;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
+import de.cau.cs.se.software.evaluation.graph.DiagramModelHelper;
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind;
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
@@ -307,13 +309,43 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return root;
   }
   
+  /**
+   * Return the correct color for a module.
+   */
+  private KColor getBackgroundColor(final Module module) {
+    KColor _switchResult = null;
+    EModuleKind _kind = module.getKind();
+    if (_kind != null) {
+      switch (_kind) {
+        case SYSTEM:
+          _switchResult = this._kColorExtensions.getColor("LemonChiffon");
+          break;
+        case FRAMEWORK:
+          _switchResult = this._kColorExtensions.getColor("Blue");
+          break;
+        case ANONYMOUS:
+          _switchResult = this._kColorExtensions.getColor("Orange");
+          break;
+        case INTERFACE:
+          _switchResult = this._kColorExtensions.getColor("White");
+          break;
+        default:
+          break;
+      }
+    }
+    return _switchResult;
+  }
+  
+  /**
+   * -- aggregated view ------------------
+   */
   private void createCombindEdges(final Module sourceModule, final ModularHypergraph hypergraph) {
     final ArrayList<Edge> edges = new ArrayList<Edge>();
     EList<Node> _nodes = sourceModule.getNodes();
     final Consumer<Node> _function = (Node node) -> {
       EList<Edge> _edges = node.getEdges();
       final Consumer<Edge> _function_1 = (Edge it) -> {
-        this.addUnique(edges, it);
+        DiagramModelHelper.addUnique(edges, it);
       };
       _edges.forEach(_function_1);
     };
@@ -410,7 +442,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     final Consumer<Node> _function = (Node node) -> {
       EList<Edge> _edges = node.getEdges();
       final Consumer<Edge> _function_1 = (Edge it) -> {
-        this.addUnique(edges, it);
+        DiagramModelHelper.addUnique(edges, it);
       };
       _edges.forEach(_function_1);
     };
@@ -447,7 +479,9 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
             this.addUnique(transitiveModules, targetModule);
           } else {
             List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
-            this.addAllUnique(transitiveModules, _computeTransitiveModules);
+            DiagramModelHelper.addAllUnique(transitiveModules, _computeTransitiveModules);
+          } else {
+            DiagramModelHelper.addUnique(transitiveModules, targetModule);
           }
         }
       };
@@ -571,61 +605,13 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return _xblockexpression;
   }
   
-  private boolean addUnique(final List<Edge> edges, final Edge edge) {
-    boolean _xifexpression = false;
-    boolean _contains = edges.contains(edge);
-    boolean _not = (!_contains);
-    if (_not) {
-      _xifexpression = edges.add(edge);
-    }
-    return _xifexpression;
-  }
-  
-  private boolean addUnique(final List<Module> modules, final Module module) {
-    boolean _xifexpression = false;
-    boolean _contains = modules.contains(module);
-    boolean _not = (!_contains);
-    if (_not) {
-      _xifexpression = modules.add(module);
-    }
-    return _xifexpression;
-  }
-  
-  private void addAllUnique(final List<Module> modules, final List<Module> additionalModules) {
-    final Consumer<Module> _function = (Module it) -> {
-      this.addUnique(modules, it);
-    };
-    additionalModules.forEach(_function);
-  }
-  
   /**
    * Create module without nodes for simple display.
    */
   private KNode createEmptyModule(final Module module) {
-    KColor _switchResult = null;
-    EModuleKind _kind = module.getKind();
-    if (_kind != null) {
-      switch (_kind) {
-        case SYSTEM:
-          _switchResult = this._kColorExtensions.getColor("LemonChiffon");
-          break;
-        case FRAMEWORK:
-          _switchResult = this._kColorExtensions.getColor("Blue");
-          break;
-        case ANONYMOUS:
-          _switchResult = this._kColorExtensions.getColor("Orange");
-          break;
-        case INTERFACE:
-          _switchResult = this._kColorExtensions.getColor("White");
-          break;
-        default:
-          break;
-      }
-    }
-    final KColor otherColor = _switchResult;
     String _xifexpression = null;
-    EModuleKind _kind_1 = module.getKind();
-    boolean _equals = Objects.equal(_kind_1, EModuleKind.ANONYMOUS);
+    EModuleKind _kind = module.getKind();
+    boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
     if (_equals) {
       String _xblockexpression = null;
       {
@@ -640,25 +626,30 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     }
     final String moduleQualifier = _xifexpression;
     final int separator = moduleQualifier.lastIndexOf(".");
+    KNode _xifexpression_1 = null;
     if ((separator == (-1))) {
-      return this.drawEmptyModule(module, 
-        "", moduleQualifier, otherColor);
+      KColor _backgroundColor = this.getBackgroundColor(module);
+      _xifexpression_1 = this.drawEmptyModule(module, 
+        "", moduleQualifier, _backgroundColor);
     } else {
       String _substring = moduleQualifier.substring(0, separator);
       String _substring_1 = moduleQualifier.substring((separator + 1));
-      return this.drawEmptyModule(module, _substring, _substring_1, otherColor);
+      KColor _backgroundColor_1 = this.getBackgroundColor(module);
+      _xifexpression_1 = this.drawEmptyModule(module, _substring, _substring_1, _backgroundColor_1);
     }
+    final KNode moduleNode = _xifexpression_1;
+    this.moduleMap.put(module, moduleNode);
+    return moduleNode;
   }
   
   /**
    * Draw the empty module.
    */
-  private KNode drawEmptyModule(final Module module, final String packageName, final String moduleName, final KColor otherColor) {
+  private KNode drawEmptyModule(final Module module, final String packageName, final String moduleName, final KColor backgroundColor) {
     KNode _xblockexpression = null;
     {
       KNode _createNode = this._kNodeExtensions.createNode(module);
       final KNode moduleNode = this.<KNode>associateWith(_createNode, module);
-      this.moduleMap.put(module, moduleNode);
       final Procedure1<KNode> _function = (KNode it) -> {
         this.<KNode, Float>setLayoutOption(it, LayoutOptions.PORT_SPACING, Float.valueOf(20f));
         EnumSet<SizeConstraint> _minimumSizeWithPorts = SizeConstraint.minimumSizeWithPorts();
@@ -667,7 +658,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
         final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
           KColor _color = this._kColorExtensions.getColor("white");
-          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, otherColor, 0);
+          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, backgroundColor, 0);
           KColor _color_1 = this._kColorExtensions.getColor("black");
           this._kRenderingExtensions.setShadow(it_1, _color_1);
           KGridPlacement _setGridPlacement = this._kContainerRenderingExtensions.setGridPlacement(it_1, 1);
@@ -709,14 +700,16 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
       KInsets _insets = _data.getInsets();
       _insets.setTop(15);
       final Procedure1<KNode> _function = (KNode it) -> {
+        this.<KNode, PortConstraints>setLayoutOption(it, LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE);
+        this.<KNode, EdgeRouting>setLayoutOption(it, LayoutOptions.EDGE_ROUTING, EdgeRouting.POLYLINE);
         KRoundedRectangle _addRoundedRectangle = this._kRenderingExtensions.addRoundedRectangle(it, 10, 10);
         final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
           KColor _color = this._kColorExtensions.getColor("white");
-          KColor _color_1 = this._kColorExtensions.getColor("LemonChiffon");
-          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _color_1, 0);
-          KColor _color_2 = this._kColorExtensions.getColor("black");
-          this._kRenderingExtensions.setShadow(it_1, _color_2);
+          KColor _backgroundColor = this.getBackgroundColor(module);
+          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _backgroundColor, 0);
+          KColor _color_1 = this._kColorExtensions.getColor("black");
+          this._kRenderingExtensions.setShadow(it_1, _color_1);
           KGridPlacement _setGridPlacement = this._kContainerRenderingExtensions.setGridPlacement(it_1, 1);
           KGridPlacement _from = this._kRenderingExtensions.from(_setGridPlacement, this._kRenderingExtensions.LEFT, 10, 0, this._kRenderingExtensions.TOP, 10, 0);
           this._kRenderingExtensions.to(_from, this._kRenderingExtensions.RIGHT, 10, 0, this._kRenderingExtensions.BOTTOM, 10, 0);
@@ -756,12 +749,13 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
       EList<KNode> _children = moduleNode.getChildren();
       _children.add(kNode);
       final Procedure1<KNode> _function = (KNode it) -> {
-        KEllipse _addEllipse = this._kRenderingExtensions.addEllipse(it);
-        final Procedure1<KEllipse> _function_1 = (KEllipse it_1) -> {
+        this.<KNode, PortConstraints>setLayoutOption(it, LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE);
+        KRoundedRectangle _addRoundedRectangle = this._kRenderingExtensions.addRoundedRectangle(it, 2, 2);
+        final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
           KColor _color = this._kColorExtensions.getColor("white");
           this._kRenderingExtensions.setBackground(it_1, _color);
-          this._kRenderingExtensions.<KEllipse>setSurroundingSpace(it_1, 10, 0, 10, 0);
+          this._kRenderingExtensions.<KRoundedRectangle>setSurroundingSpace(it_1, 1, 0, 1, 0);
           String _name = node.getName();
           String _name_1 = module.getName();
           int _length = _name_1.length();
@@ -774,7 +768,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           };
           ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
         };
-        ObjectExtensions.<KEllipse>operator_doubleArrow(_addEllipse, _function_1);
+        ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function_1);
       };
       _xblockexpression = ObjectExtensions.<KNode>operator_doubleArrow(kNode, _function);
     }
@@ -801,8 +795,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     return this.portMap.get(label);
   }
   
-  private Object createGraphEdge(final Edge edge, final EList<Node> nodes, final EList<KNode> siblings) {
-    Object _xblockexpression = null;
+  private Boolean createGraphEdge(final Edge edge, final EList<Node> nodes, final EList<KNode> siblings) {
+    boolean _xblockexpression = false;
     {
       final Function1<Node, Boolean> _function = (Node node) -> {
         EList<Edge> _edges = node.getEdges();
@@ -812,11 +806,11 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
         return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges, _function_1));
       };
       final Iterable<Node> referencedNodes = IterableExtensions.<Node>filter(nodes, _function);
-      Object _xifexpression = null;
+      boolean _xifexpression = false;
       int _size = IterableExtensions.size(referencedNodes);
       boolean _greaterThan = (_size > 1);
       if (_greaterThan) {
-        Object _xifexpression_1 = null;
+        boolean _xifexpression_1 = false;
         int _size_1 = IterableExtensions.size(referencedNodes);
         boolean _equals = (_size_1 == 2);
         if (_equals) {
@@ -824,16 +818,16 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
           KNode _get_1 = this.nodeMap.get(_get);
           Object _get_2 = ((Object[])Conversions.unwrapArray(referencedNodes, Object.class))[1];
           KNode _get_3 = this.nodeMap.get(_get_2);
-          _xifexpression_1 = this.drawEdge(_get_1, _get_3, edge);
+          this.constructEdge(_get_1, _get_3, edge);
         } else {
           KNode _drawHyperEdge = this.drawHyperEdge(edge, referencedNodes);
-          _xifexpression_1 = Boolean.valueOf(siblings.add(_drawHyperEdge));
+          _xifexpression_1 = siblings.add(_drawHyperEdge);
         }
         _xifexpression = _xifexpression_1;
       }
       _xblockexpression = _xifexpression;
     }
-    return _xblockexpression;
+    return Boolean.valueOf(_xblockexpression);
   }
   
   private KNode drawHyperEdge(final Edge graphEdge, final Iterable<Node> nodes) {
@@ -848,218 +842,158 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     final KNode edgeNode = ObjectExtensions.<KNode>operator_doubleArrow(_createNode, _function);
     final Consumer<Node> _function_1 = (Node node) -> {
       KNode _get = this.nodeMap.get(node);
-      this.drawEdge(edgeNode, _get, graphEdge);
+      this.constructEdge(edgeNode, _get, graphEdge);
     };
     nodes.forEach(_function_1);
     return edgeNode;
   }
   
-  private KEdge drawEdge(final KNode left, final KNode right, final Edge graphEdge) {
-    KEdge _xifexpression = null;
+  private void constructEdge(final KNode left, final KNode right, final Edge graphEdge) {
     KNode _parent = right.getParent();
     KNode _parent_1 = left.getParent();
     boolean _equals = _parent.equals(_parent_1);
     if (_equals) {
-      KEdge _createEdge = this._kEdgeExtensions.createEdge();
-      final Procedure1<KEdge> _function = (KEdge it) -> {
-        it.setSource(left);
-        it.setTarget(right);
-        KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-        final Procedure1<KPolyline> _function_1 = (KPolyline it_1) -> {
-          this._kRenderingExtensions.setLineWidth(it_1, 2);
-          this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-        };
-        ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_1);
-      };
-      _xifexpression = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
+      String _string = left.toString();
+      String _plus = (_string + "_to_");
+      String _string_1 = right.toString();
+      String _plus_1 = (_plus + _string_1);
+      KPort _orCreateEdgePort = this.getOrCreateEdgePort(left, _plus_1);
+      String _string_2 = right.toString();
+      String _plus_2 = (_string_2 + "_to_");
+      String _string_3 = left.toString();
+      String _plus_3 = (_plus_2 + _string_3);
+      KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(right, _plus_3);
+      this.drawEdge(left, right, _orCreateEdgePort, _orCreateEdgePort_1);
     } else {
-      KEdge _xifexpression_1 = null;
       KNode _parent_2 = left.getParent();
       boolean _notEquals = (!Objects.equal(_parent_2, null));
       if (_notEquals) {
-        KEdge _xblockexpression = null;
-        {
-          String _string = left.toString();
-          String _plus = (_string + "_to_");
-          KNode _parent_3 = right.getParent();
-          String _string_1 = _parent_3.toString();
-          String _plus_1 = (_plus + _string_1);
-          KPort _get = this.portMap.get(_plus_1);
-          boolean _equals_1 = Objects.equal(_get, null);
-          if (_equals_1) {
-            KEdge _createEdge_1 = this._kEdgeExtensions.createEdge();
-            final Procedure1<KEdge> _function_1 = (KEdge it) -> {
-              it.setSource(left);
-              String _string_2 = left.toString();
-              String _plus_2 = (_string_2 + "_to_");
-              KNode _parent_4 = right.getParent();
-              String _string_3 = _parent_4.toString();
-              String _plus_3 = (_plus_2 + _string_3);
-              KPort _orCreateEdgePort = this.getOrCreateEdgePort(left, _plus_3);
-              it.setSourcePort(_orCreateEdgePort);
-              KNode _parent_5 = left.getParent();
-              KNode _parent_6 = left.getParent();
-              String _string_4 = _parent_6.toString();
-              String _plus_4 = (_string_4 + "_to_");
-              KNode _parent_7 = right.getParent();
-              String _string_5 = _parent_7.toString();
-              String _plus_5 = (_plus_4 + _string_5);
-              KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(_parent_5, _plus_5);
-              it.setTargetPort(_orCreateEdgePort_1);
-              KNode _parent_8 = left.getParent();
-              it.setTarget(_parent_8);
-              KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-              final Procedure1<KPolyline> _function_2 = (KPolyline it_1) -> {
-                this._kRenderingExtensions.setLineWidth(it_1, 2);
-                this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-              };
-              ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_2);
-            };
-            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_1, _function_1);
-          }
-          KNode _parent_4 = right.getParent();
-          String _string_2 = _parent_4.toString();
-          String _plus_2 = (_string_2 + "_to_");
-          KNode _parent_5 = left.getParent();
-          String _string_3 = _parent_5.toString();
-          String _plus_3 = (_plus_2 + _string_3);
-          KPort _get_1 = this.portMap.get(_plus_3);
-          boolean _equals_2 = Objects.equal(_get_1, null);
-          if (_equals_2) {
-            KEdge _createEdge_2 = this._kEdgeExtensions.createEdge();
-            final Procedure1<KEdge> _function_2 = (KEdge it) -> {
-              KNode _parent_6 = left.getParent();
-              it.setSource(_parent_6);
-              KNode _parent_7 = left.getParent();
-              KNode _parent_8 = left.getParent();
-              String _string_4 = _parent_8.toString();
-              String _plus_4 = (_string_4 + "_to_");
-              KNode _parent_9 = right.getParent();
-              String _string_5 = _parent_9.toString();
-              String _plus_5 = (_plus_4 + _string_5);
-              KPort _orCreateEdgePort = this.getOrCreateEdgePort(_parent_7, _plus_5);
-              it.setSourcePort(_orCreateEdgePort);
-              KNode _parent_10 = right.getParent();
-              KNode _parent_11 = right.getParent();
-              String _string_6 = _parent_11.toString();
-              String _plus_6 = (_string_6 + "_to_");
-              KNode _parent_12 = left.getParent();
-              String _string_7 = _parent_12.toString();
-              String _plus_7 = (_plus_6 + _string_7);
-              KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(_parent_10, _plus_7);
-              it.setTargetPort(_orCreateEdgePort_1);
-              KNode _parent_13 = right.getParent();
-              it.setTarget(_parent_13);
-              KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-              final Procedure1<KPolyline> _function_3 = (KPolyline it_1) -> {
-                this._kRenderingExtensions.setLineWidth(it_1, 2);
-                this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-              };
-              ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_3);
-            };
-            ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_2, _function_2);
-          }
-          KEdge _xifexpression_2 = null;
-          String _string_4 = right.toString();
-          String _plus_4 = (_string_4 + "_to_");
+        String _string_4 = left.toString();
+        String _plus_4 = (_string_4 + "_to_");
+        KNode _parent_3 = right.getParent();
+        String _string_5 = _parent_3.toString();
+        String _plus_5 = (_plus_4 + _string_5);
+        KPort _get = this.portMap.get(_plus_5);
+        boolean _equals_1 = Objects.equal(_get, null);
+        if (_equals_1) {
+          KNode _parent_4 = left.getParent();
+          String _string_6 = left.toString();
+          String _plus_6 = (_string_6 + "_to_");
+          KNode _parent_5 = right.getParent();
+          String _string_7 = _parent_5.toString();
+          String _plus_7 = (_plus_6 + _string_7);
+          KPort _orCreateEdgePort_2 = this.getOrCreateEdgePort(left, _plus_7);
           KNode _parent_6 = left.getParent();
-          String _string_5 = _parent_6.toString();
-          String _plus_5 = (_plus_4 + _string_5);
-          KPort _get_2 = this.portMap.get(_plus_5);
-          boolean _equals_3 = Objects.equal(_get_2, null);
-          if (_equals_3) {
-            KEdge _createEdge_3 = this._kEdgeExtensions.createEdge();
-            final Procedure1<KEdge> _function_3 = (KEdge it) -> {
-              it.setSource(right);
-              String _string_6 = right.toString();
-              String _plus_6 = (_string_6 + "_to_");
-              KNode _parent_7 = left.getParent();
-              String _string_7 = _parent_7.toString();
-              String _plus_7 = (_plus_6 + _string_7);
-              KPort _orCreateEdgePort = this.getOrCreateEdgePort(right, _plus_7);
-              it.setSourcePort(_orCreateEdgePort);
-              KNode _parent_8 = right.getParent();
-              KNode _parent_9 = right.getParent();
-              String _string_8 = _parent_9.toString();
-              String _plus_8 = (_string_8 + "_to_");
-              KNode _parent_10 = left.getParent();
-              String _string_9 = _parent_10.toString();
-              String _plus_9 = (_plus_8 + _string_9);
-              KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(_parent_8, _plus_9);
-              it.setTargetPort(_orCreateEdgePort_1);
-              KNode _parent_11 = right.getParent();
-              it.setTarget(_parent_11);
-              KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-              final Procedure1<KPolyline> _function_4 = (KPolyline it_1) -> {
-                this._kRenderingExtensions.setLineWidth(it_1, 2);
-                this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-              };
-              ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_4);
-            };
-            _xifexpression_2 = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_3, _function_3);
-          }
-          _xblockexpression = _xifexpression_2;
+          KNode _parent_7 = left.getParent();
+          String _string_8 = _parent_7.toString();
+          String _plus_8 = (_string_8 + "_to_");
+          KNode _parent_8 = right.getParent();
+          String _string_9 = _parent_8.toString();
+          String _plus_9 = (_plus_8 + _string_9);
+          KPort _orCreateEdgePort_3 = this.getOrCreateEdgePort(_parent_6, _plus_9);
+          this.drawEdge(left, _parent_4, _orCreateEdgePort_2, _orCreateEdgePort_3);
         }
-        _xifexpression_1 = _xblockexpression;
+        KNode _parent_9 = right.getParent();
+        String _string_10 = _parent_9.toString();
+        String _plus_10 = (_string_10 + "_to_");
+        KNode _parent_10 = left.getParent();
+        String _string_11 = _parent_10.toString();
+        String _plus_11 = (_plus_10 + _string_11);
+        KPort _get_1 = this.portMap.get(_plus_11);
+        boolean _equals_2 = Objects.equal(_get_1, null);
+        if (_equals_2) {
+          KNode _parent_11 = left.getParent();
+          KNode _parent_12 = right.getParent();
+          KNode _parent_13 = left.getParent();
+          KNode _parent_14 = left.getParent();
+          String _string_12 = _parent_14.toString();
+          String _plus_12 = (_string_12 + "_to_");
+          KNode _parent_15 = right.getParent();
+          String _string_13 = _parent_15.toString();
+          String _plus_13 = (_plus_12 + _string_13);
+          KPort _orCreateEdgePort_4 = this.getOrCreateEdgePort(_parent_13, _plus_13);
+          KNode _parent_16 = right.getParent();
+          KNode _parent_17 = right.getParent();
+          String _string_14 = _parent_17.toString();
+          String _plus_14 = (_string_14 + "_to_");
+          KNode _parent_18 = left.getParent();
+          String _string_15 = _parent_18.toString();
+          String _plus_15 = (_plus_14 + _string_15);
+          KPort _orCreateEdgePort_5 = this.getOrCreateEdgePort(_parent_16, _plus_15);
+          this.drawEdge(_parent_11, _parent_12, _orCreateEdgePort_4, _orCreateEdgePort_5);
+        }
+        String _string_16 = right.toString();
+        String _plus_16 = (_string_16 + "_to_");
+        KNode _parent_19 = left.getParent();
+        String _string_17 = _parent_19.toString();
+        String _plus_17 = (_plus_16 + _string_17);
+        KPort _get_2 = this.portMap.get(_plus_17);
+        boolean _equals_3 = Objects.equal(_get_2, null);
+        if (_equals_3) {
+          KNode _parent_20 = right.getParent();
+          String _string_18 = right.toString();
+          String _plus_18 = (_string_18 + "_to_");
+          KNode _parent_21 = left.getParent();
+          String _string_19 = _parent_21.toString();
+          String _plus_19 = (_plus_18 + _string_19);
+          KPort _orCreateEdgePort_6 = this.getOrCreateEdgePort(right, _plus_19);
+          KNode _parent_22 = right.getParent();
+          KNode _parent_23 = right.getParent();
+          String _string_20 = _parent_23.toString();
+          String _plus_20 = (_string_20 + "_to_");
+          KNode _parent_24 = left.getParent();
+          String _string_21 = _parent_24.toString();
+          String _plus_21 = (_plus_20 + _string_21);
+          KPort _orCreateEdgePort_7 = this.getOrCreateEdgePort(_parent_22, _plus_21);
+          this.drawEdge(right, _parent_20, _orCreateEdgePort_6, _orCreateEdgePort_7);
+        }
       } else {
-        KEdge _xblockexpression_1 = null;
-        {
-          KEdge _createEdge_1 = this._kEdgeExtensions.createEdge();
-          final Procedure1<KEdge> _function_1 = (KEdge it) -> {
-            it.setSource(left);
-            String _string = left.toString();
-            KPort _orCreateEdgePort = this.getOrCreateEdgePort(left, _string);
-            it.setSourcePort(_orCreateEdgePort);
-            KNode _parent_3 = right.getParent();
-            KNode _parent_4 = right.getParent();
-            String _string_1 = _parent_4.toString();
-            String _plus = (_string_1 + "_to_");
-            String _string_2 = left.toString();
-            String _plus_1 = (_plus + _string_2);
-            KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(_parent_3, _plus_1);
-            it.setTargetPort(_orCreateEdgePort_1);
-            KNode _parent_5 = right.getParent();
-            it.setTarget(_parent_5);
-            KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-            final Procedure1<KPolyline> _function_2 = (KPolyline it_1) -> {
-              this._kRenderingExtensions.setLineWidth(it_1, 2);
-              this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-            };
-            ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_2);
-          };
-          ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_1, _function_1);
-          KEdge _createEdge_2 = this._kEdgeExtensions.createEdge();
-          final Procedure1<KEdge> _function_2 = (KEdge it) -> {
-            it.setSource(right);
-            String _string = right.toString();
-            String _plus = (_string + "_to_");
-            String _string_1 = left.toString();
-            String _plus_1 = (_plus + _string_1);
-            KPort _orCreateEdgePort = this.getOrCreateEdgePort(right, _plus_1);
-            it.setSourcePort(_orCreateEdgePort);
-            KNode _parent_3 = right.getParent();
-            KNode _parent_4 = right.getParent();
-            String _string_2 = _parent_4.toString();
-            String _plus_2 = (_string_2 + "_to_");
-            String _string_3 = left.toString();
-            String _plus_3 = (_plus_2 + _string_3);
-            KPort _orCreateEdgePort_1 = this.getOrCreateEdgePort(_parent_3, _plus_3);
-            it.setTargetPort(_orCreateEdgePort_1);
-            KNode _parent_5 = right.getParent();
-            it.setTarget(_parent_5);
-            KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
-            final Procedure1<KPolyline> _function_3 = (KPolyline it_1) -> {
-              this._kRenderingExtensions.setLineWidth(it_1, 2);
-              this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
-            };
-            ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_3);
-          };
-          _xblockexpression_1 = ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge_2, _function_2);
-        }
-        _xifexpression_1 = _xblockexpression_1;
+        KNode _parent_25 = right.getParent();
+        String _string_22 = left.toString();
+        KPort _orCreateEdgePort_8 = this.getOrCreateEdgePort(left, _string_22);
+        KNode _parent_26 = right.getParent();
+        KNode _parent_27 = right.getParent();
+        String _string_23 = _parent_27.toString();
+        String _plus_22 = (_string_23 + "_to_");
+        String _string_24 = left.toString();
+        String _plus_23 = (_plus_22 + _string_24);
+        KPort _orCreateEdgePort_9 = this.getOrCreateEdgePort(_parent_26, _plus_23);
+        this.drawEdge(left, _parent_25, _orCreateEdgePort_8, _orCreateEdgePort_9);
+        KNode _parent_28 = right.getParent();
+        String _string_25 = right.toString();
+        String _plus_24 = (_string_25 + "_to_");
+        String _string_26 = left.toString();
+        String _plus_25 = (_plus_24 + _string_26);
+        KPort _orCreateEdgePort_10 = this.getOrCreateEdgePort(right, _plus_25);
+        KNode _parent_29 = right.getParent();
+        KNode _parent_30 = right.getParent();
+        String _string_27 = _parent_30.toString();
+        String _plus_26 = (_string_27 + "_to_");
+        String _string_28 = left.toString();
+        String _plus_27 = (_plus_26 + _string_28);
+        KPort _orCreateEdgePort_11 = this.getOrCreateEdgePort(_parent_29, _plus_27);
+        this.drawEdge(right, _parent_28, _orCreateEdgePort_10, _orCreateEdgePort_11);
       }
-      _xifexpression = _xifexpression_1;
     }
-    return _xifexpression;
+  }
+  
+  /**
+   * Draw a single edge.
+   */
+  private void drawEdge(final KNode left, final KNode right, final KPort leftPort, final KPort rightPort) {
+    KEdge _createEdge = this._kEdgeExtensions.createEdge();
+    final Procedure1<KEdge> _function = (KEdge it) -> {
+      it.setSource(left);
+      it.setTarget(right);
+      it.setSourcePort(leftPort);
+      it.setTargetPort(rightPort);
+      KPolyline _addPolyline = this._kEdgeExtensions.addPolyline(it);
+      final Procedure1<KPolyline> _function_1 = (KPolyline it_1) -> {
+        this._kRenderingExtensions.setLineWidth(it_1, 2);
+        this._kRenderingExtensions.setLineStyle(it_1, LineStyle.SOLID);
+      };
+      ObjectExtensions.<KPolyline>operator_doubleArrow(_addPolyline, _function_1);
+    };
+    ObjectExtensions.<KEdge>operator_doubleArrow(_createEdge, _function);
   }
 }

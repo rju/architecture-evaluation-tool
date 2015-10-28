@@ -5,6 +5,7 @@ import de.cau.cs.se.software.evaluation.commands.AbstractAnalysisHandler;
 import de.cau.cs.se.software.evaluation.jobs.CoCoMEAnalysisJob;
 import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob;
 import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob;
+import de.cau.cs.se.software.evaluation.jobs.PCMDeploymentAnalysisJob;
 import java.util.Iterator;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
@@ -61,6 +62,13 @@ public class ModelAnalysisHandler extends AbstractAnalysisHandler {
                 final CoCoMEAnalysisJob job_2 = new CoCoMEAnalysisJob(_project_2, _equals, shell);
                 job_2.schedule();
                 job_2.join();
+                this.createAnalysisView(activePage);
+                break;
+              case "system":
+                IProject _project_3 = file.getProject();
+                final PCMDeploymentAnalysisJob job_3 = new PCMDeploymentAnalysisJob(_project_3, file, shell);
+                job_3.schedule();
+                job_3.join();
                 this.createAnalysisView(activePage);
                 break;
               default:

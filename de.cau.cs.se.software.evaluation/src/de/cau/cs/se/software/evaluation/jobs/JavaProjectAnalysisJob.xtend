@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.jdt.core.IJavaProject
 import org.eclipse.core.runtime.IStatus
 import org.eclipse.core.runtime.Status
+import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode
+import de.cau.cs.se.software.evaluation.transformation.TransformationCyclomaticComplexity
 
 class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
@@ -36,7 +38,18 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	protected override IStatus run(IProgressMonitor monitor) {
 		val result = ResultModelProvider.INSTANCE
 		
+		val linesOfCodeMetric = new TransformationLinesOfCode(monitor)
+		linesOfCodeMetric.transform(this.classes)
+		val javaMethodComplexity = new TransformationCyclomaticComplexity(monitor)
+		javaMethodComplexity.transform(this.classes)
+		
 		result.values.add(new NamedValue(project.project.name, "size of observed system", this.classes.size))
+		result.values.add(new NamedValue(project.project.name, "lines of code (LOC)", linesOfCodeMetric.result))
+		for (var i=1;i<javaMethodComplexity.result.size;i++) {
+			result.values.add(new NamedValue(project.project.name, 
+				"cyclomatic complexity bucket " + i,
+				javaMethodComplexity.result.get(i)))
+		}
 		updateView(null)
 				
 		val inputHypergraph = createHypergraphForJavaProject(monitor, result)

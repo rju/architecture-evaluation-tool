@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Shell
+import de.cau.cs.se.software.evaluation.views.NamedValue
 
 class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
@@ -37,6 +38,10 @@ class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 			
 			val emfMetaModel = new TransformationEMFInstanceToHypergraph(monitor)
 			emfMetaModel.transform(model)
+			
+			result.values.add(new NamedValue(project.name, "number of modules", emfMetaModel.result.modules.size))
+			result.values.add(new NamedValue(project.name, "number of nodes", emfMetaModel.result.nodes.size))
+			result.values.add(new NamedValue(project.name, "number of edges", emfMetaModel.result.edges.size))
 			
 			calculateSize(emfMetaModel.result, monitor, result)
 		
