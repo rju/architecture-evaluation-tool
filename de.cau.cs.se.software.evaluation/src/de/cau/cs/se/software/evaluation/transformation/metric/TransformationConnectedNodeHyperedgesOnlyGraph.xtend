@@ -45,7 +45,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 	/**
 	 * Find all nodes connected to the start node and create a graph for it.
 	 */
-	override transform(Hypergraph input) {
+	override generate(Hypergraph input) {
 		// find start node
 		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
 		if (selectedNode != null) {	

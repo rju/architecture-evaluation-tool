@@ -35,7 +35,7 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
   }
   
   @Override
-  public Hypergraph transform(final Model input) {
+  public Hypergraph generate(final Model input) {
     Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
     this.result = _createHypergraph;
     final Map<Metamodel, Node> mmNodeMap = new HashMap<Metamodel, Node>();

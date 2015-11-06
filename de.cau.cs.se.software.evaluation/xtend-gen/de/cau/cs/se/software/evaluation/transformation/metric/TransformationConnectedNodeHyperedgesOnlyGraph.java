@@ -52,7 +52,7 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
    * Find all nodes connected to the start node and create a graph for it.
    */
   @Override
-  public Hypergraph transform(final Hypergraph input) {
+  public Hypergraph generate(final Hypergraph input) {
     Object _xblockexpression = null;
     {
       Node _xifexpression = null;

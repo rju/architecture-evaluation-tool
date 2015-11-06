@@ -44,9 +44,9 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   protected IStatus run(final IProgressMonitor monitor) {
     final ResultModelProvider result = ResultModelProvider.INSTANCE;
     final TransformationLinesOfCode linesOfCodeMetric = new TransformationLinesOfCode(monitor);
-    linesOfCodeMetric.transform(this.classes);
+    linesOfCodeMetric.generate(this.classes);
     final TransformationCyclomaticComplexity javaMethodComplexity = new TransformationCyclomaticComplexity(monitor);
-    javaMethodComplexity.transform(this.classes);
+    javaMethodComplexity.generate(this.classes);
     List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
@@ -84,7 +84,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
    */
   public ModularHypergraph createHypergraphForJavaProject(final IProgressMonitor monitor, final ResultModelProvider result) {
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(this.javaProject, this.dataTypePatterns, this.observedSystemPatterns, monitor);
-    javaToModularHypergraph.transform(this.classes);
+    javaToModularHypergraph.generate(this.classes);
     List<NamedValue> _values = result.getValues();
     String _name = this.project.getName();
     ModularHypergraph _result = javaToModularHypergraph.getResult();

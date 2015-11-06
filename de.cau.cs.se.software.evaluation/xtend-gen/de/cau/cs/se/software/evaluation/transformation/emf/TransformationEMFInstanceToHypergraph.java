@@ -31,7 +31,7 @@ public class TransformationEMFInstanceToHypergraph extends AbstractTransformatio
   }
   
   @Override
-  public ModularHypergraph transform(final EPackage input) {
+  public ModularHypergraph generate(final EPackage input) {
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
     final ArrayList<Module> packages = new ArrayList<Module>();

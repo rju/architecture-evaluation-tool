@@ -37,7 +37,7 @@ class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 			val model = source.contents.get(0) as EPackage
 			
 			val emfMetaModel = new TransformationEMFInstanceToHypergraph(monitor)
-			emfMetaModel.transform(model)
+			emfMetaModel.generate(model)
 			
 			result.values.add(new NamedValue(project.name, "number of modules", emfMetaModel.result.modules.size))
 			result.values.add(new NamedValue(project.name, "number of nodes", emfMetaModel.result.nodes.size))

@@ -28,7 +28,7 @@ public class TransformationPCMDeploymentToHypergraph extends AbstractTransformat
   }
   
   @Override
-  public ModularHypergraph transform(final org.palladiosimulator.pcm.system.System input) {
+  public ModularHypergraph generate(final org.palladiosimulator.pcm.system.System input) {
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
     EList<AssemblyContext> _assemblyContexts__ComposedStructure = input.getAssemblyContexts__ComposedStructure();

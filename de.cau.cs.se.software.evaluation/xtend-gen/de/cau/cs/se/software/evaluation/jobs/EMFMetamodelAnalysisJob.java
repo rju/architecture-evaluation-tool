@@ -52,7 +52,7 @@ public class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
       EObject _get = _contents_1.get(0);
       final EPackage model = ((EPackage) _get);
       final TransformationEMFInstanceToHypergraph emfMetaModel = new TransformationEMFInstanceToHypergraph(monitor);
-      emfMetaModel.transform(model);
+      emfMetaModel.generate(model);
       List<NamedValue> _values = result.getValues();
       String _name = this.project.getName();
       ModularHypergraph _result = emfMetaModel.getResult();

@@ -39,7 +39,7 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
   }
   
   @Override
-  public ModularHypergraph transform(final ModularHypergraph input) {
+  public ModularHypergraph generate(final ModularHypergraph input) {
     EList<Node> _nodes = input.getNodes();
     int _size = _nodes.size();
     EList<Module> _modules = input.getModules();

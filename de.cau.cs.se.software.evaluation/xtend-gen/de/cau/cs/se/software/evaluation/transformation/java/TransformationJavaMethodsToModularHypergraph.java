@@ -67,7 +67,7 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
    * Main transformation routine.
    */
   @Override
-  public ModularHypergraph transform(final List<AbstractTypeDeclaration> input) {
+  public ModularHypergraph generate(final List<AbstractTypeDeclaration> input) {
     String _elementName = this.project.getElementName();
     String _plus = ("Process java project " + _elementName);
     int _size = input.size();

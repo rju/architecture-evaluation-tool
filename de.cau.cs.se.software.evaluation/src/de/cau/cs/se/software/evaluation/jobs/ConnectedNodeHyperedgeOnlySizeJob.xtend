@@ -52,7 +52,7 @@ class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 			hypergraphSize.name = "Determine Size(S^#_" + i + ")"
 			
 			parent.deliverConnectedNodeHyperedgesOnlySizeResult(
-				hypergraphSize.transform(connectedNodeHyperedgesOnlyGraph.transform(input))
+				hypergraphSize.generate(connectedNodeHyperedgesOnlyGraph.generate(input))
 			)
 			i++
 		}

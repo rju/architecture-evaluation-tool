@@ -44,7 +44,7 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		this.name = name
 	}
 
-	override transform(Hypergraph input) {
+	override generate(Hypergraph input) {
 		monitor.beginTask(this.name, (input.edges.size + input.nodes.size)*2 + input.nodes.size)
 		val systemGraph = createSystemGraph(input)
 		val table = systemGraph.createRowPatternTable(input)

@@ -39,9 +39,9 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		val result = ResultModelProvider.INSTANCE
 		
 		val linesOfCodeMetric = new TransformationLinesOfCode(monitor)
-		linesOfCodeMetric.transform(this.classes)
+		linesOfCodeMetric.generate(this.classes)
 		val javaMethodComplexity = new TransformationCyclomaticComplexity(monitor)
-		javaMethodComplexity.transform(this.classes)
+		javaMethodComplexity.generate(this.classes)
 		
 		result.values.add(new NamedValue(project.project.name, "size of observed system", this.classes.size))
 		result.values.add(new NamedValue(project.project.name, "lines of code (LOC)", linesOfCodeMetric.result))
@@ -74,7 +74,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		/** construct analysis. */				
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(javaProject, dataTypePatterns, observedSystemPatterns, monitor)
 		
-		javaToModularHypergraph.transform(this.classes)
+		javaToModularHypergraph.generate(this.classes)
 		
 		result.values.add(new NamedValue(project.name, "number of modules", javaToModularHypergraph.result.modules.size))
 		result.values.add(new NamedValue(project.name, "number of nodes", javaToModularHypergraph.result.nodes.size))

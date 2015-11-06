@@ -49,7 +49,7 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 			val model = source.contents.get(0) as Model
 			
 			val gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor)
-			gecoMegamodel.transform(model)
+			gecoMegamodel.generate(model)
 			
 			result.values.add(new NamedValue(project.name, "number of nodes", gecoMegamodel.result.nodes.size))
 			result.values.add(new NamedValue(project.name, "number of edges", gecoMegamodel.result.edges.size))

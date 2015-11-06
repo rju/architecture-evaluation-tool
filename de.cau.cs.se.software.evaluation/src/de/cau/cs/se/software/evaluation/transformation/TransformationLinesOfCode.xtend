@@ -12,7 +12,7 @@ class TransformationLinesOfCode extends AbstractTransformation<List<AbstractType
 		super(monitor)
 	}
 	
-	override transform(List<AbstractTypeDeclaration> input) {
+	override generate(List<AbstractTypeDeclaration> input) {
 		result = 0L
 		
 		input.forEach[type |

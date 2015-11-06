@@ -25,7 +25,7 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Mod
 		super(monitor)
 	}
 	
-	override transform(Model input) {
+	override generate(Model input) {
 		result = HypergraphFactory.eINSTANCE.createHypergraph
 		val Map<Metamodel, Node> mmNodeMap = new HashMap<Metamodel, Node>()
 		

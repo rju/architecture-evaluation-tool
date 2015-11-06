@@ -58,7 +58,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		val hypergraphSize = new TransformationHypergraphSize(monitor)
 		hypergraphSize.name = "Calculate system size"
-		hypergraphSize.transform(inputHypergraph)
+		hypergraphSize.generate(inputHypergraph)
 
 		result.values.add(new NamedValue(project.project.name, "hypergraph size", hypergraphSize.result))
 		updateView(inputHypergraph)
@@ -100,7 +100,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		/** Determine intermodule hyperedges only modular graph for MS^* */
 		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
-		intermoduleHyperedgesOnlyGraph.transform(inputHypergraph)
+		intermoduleHyperedgesOnlyGraph.generate(inputHypergraph)
 
 		val calculateComplexity = new CalculateComplexity(monitor)
 		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
@@ -123,15 +123,15 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
 		/** Determine graph mapping of the hypergraph */
 		val modularGraph = new TransformationHypergraphToGraphMapping(monitor)
-		modularGraph.transform(inputHypergraph)
+		modularGraph.generate(inputHypergraph)
 				
 		/** Determine maximal interconnected modular graph MS^(n) */
 		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
-		maximalInterconnectedGraph.transform(modularGraph.result)
+		maximalInterconnectedGraph.generate(modularGraph.result)
 		
 		/** Determine maximal intra module graph MS^° */
 		val intraModuleGraph = new TransformationIntraModuleGraph(monitor)
-		intraModuleGraph.transform(modularGraph.result)
+		intraModuleGraph.generate(modularGraph.result)
 		
 		val calculateComplexity = new CalculateComplexity(monitor)
 		

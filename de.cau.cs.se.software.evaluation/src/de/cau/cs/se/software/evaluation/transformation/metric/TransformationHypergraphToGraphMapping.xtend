@@ -22,7 +22,7 @@ class TransformationHypergraphToGraphMapping extends AbstractTransformation<Modu
 		super(monitor)
 	}
 	
-	override transform(ModularHypergraph input) {
+	override generate(ModularHypergraph input) {
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		val nodeMap = new HashMap<Node,Node>()

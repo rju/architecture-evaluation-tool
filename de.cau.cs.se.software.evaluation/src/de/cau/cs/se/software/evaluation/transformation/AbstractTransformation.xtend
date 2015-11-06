@@ -16,12 +16,13 @@
 package de.cau.cs.se.software.evaluation.transformation
 
 import org.eclipse.core.runtime.IProgressMonitor
+import de.cau.cs.se.geco.architecture.framework.IGenerator
 
 /**
  * Abstract transformation class also defining the general interface
  * of transformations.
  */
-abstract class AbstractTransformation<S,T> {
+abstract class AbstractTransformation<S,T> implements IGenerator<S,T> {
 	
 	val protected IProgressMonitor monitor
 	var protected T result
@@ -29,12 +30,6 @@ abstract class AbstractTransformation<S,T> {
 	new(IProgressMonitor monitor) {
 		this.monitor = monitor
 	}
-	
-	/**
-	 * The transformation must return the transformation result and store it also internally
-	 * in the result property, for later retrieval.
-	 */
-	def T transform(S input)
 	
 	/**
 	 * Get the previously computed result.

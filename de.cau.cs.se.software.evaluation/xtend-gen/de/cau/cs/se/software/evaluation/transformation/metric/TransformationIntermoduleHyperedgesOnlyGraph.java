@@ -43,7 +43,7 @@ public class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransf
   }
   
   @Override
-  public ModularHypergraph transform(final ModularHypergraph input) {
+  public ModularHypergraph generate(final ModularHypergraph input) {
     EList<Edge> _edges = input.getEdges();
     int _size = _edges.size();
     EList<Node> _nodes = input.getNodes();

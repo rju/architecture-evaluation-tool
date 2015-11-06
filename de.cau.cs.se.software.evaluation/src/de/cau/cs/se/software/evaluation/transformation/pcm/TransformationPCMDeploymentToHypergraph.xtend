@@ -21,7 +21,7 @@ class TransformationPCMDeploymentToHypergraph extends AbstractTransformation<Sys
 		super(monitor)
 	}
 	
-	override transform(System input) {
+	override generate(System input) {
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		input.assemblyContexts__ComposedStructure.forEach[assemblyContext |

@@ -16,7 +16,7 @@ class TransformationIntraModuleGraph extends AbstractTransformation<ModularHyper
 		super(monitor)
 	}
 	
-	override transform(ModularHypergraph input) {
+	override generate(ModularHypergraph input) {
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		val nodeMap = new HashMap<Node,Node>()

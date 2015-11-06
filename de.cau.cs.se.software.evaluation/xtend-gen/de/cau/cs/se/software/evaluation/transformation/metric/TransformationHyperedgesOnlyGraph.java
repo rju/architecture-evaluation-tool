@@ -40,7 +40,7 @@ public class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hy
   }
   
   @Override
-  public Hypergraph transform(final Hypergraph input) {
+  public Hypergraph generate(final Hypergraph input) {
     Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
     this.result = _createHypergraph;
     EList<Edge> _edges = input.getEdges();

@@ -15,6 +15,7 @@
  */
 package de.cau.cs.se.software.evaluation.transformation;
 
+import de.cau.cs.se.geco.architecture.framework.IGenerator;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
@@ -22,7 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * of transformations.
  */
 @SuppressWarnings("all")
-public abstract class AbstractTransformation<S extends Object, T extends Object> {
+public abstract class AbstractTransformation<S extends Object, T extends Object> implements IGenerator<S, T> {
   protected final IProgressMonitor monitor;
   
   protected T result;
@@ -30,12 +31,6 @@ public abstract class AbstractTransformation<S extends Object, T extends Object>
   public AbstractTransformation(final IProgressMonitor monitor) {
     this.monitor = monitor;
   }
-  
-  /**
-   * The transformation must return the transformation result and store it also internally
-   * in the result property, for later retrieval.
-   */
-  public abstract T transform(final S input);
   
   /**
    * Get the previously computed result.

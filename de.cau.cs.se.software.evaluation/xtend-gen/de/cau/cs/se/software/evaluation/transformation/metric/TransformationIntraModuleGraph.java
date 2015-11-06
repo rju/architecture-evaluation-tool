@@ -23,7 +23,7 @@ public class TransformationIntraModuleGraph extends AbstractTransformation<Modul
   }
   
   @Override
-  public ModularHypergraph transform(final ModularHypergraph input) {
+  public ModularHypergraph generate(final ModularHypergraph input) {
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
     final HashMap<Node, Node> nodeMap = new HashMap<Node, Node>();

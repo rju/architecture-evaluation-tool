@@ -21,7 +21,7 @@ class TransformationEMFInstanceToHypergraph extends AbstractTransformation<EPack
 		super(monitor)
 	}
 	
-	override transform(EPackage input) {
+	override generate(EPackage input) {
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		val packages = new ArrayList<Module>() 

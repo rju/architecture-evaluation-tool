@@ -29,7 +29,7 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 		super(monitor)
 	}
 	
-	override transform(ModularHypergraph input) {
+	override generate(ModularHypergraph input) {
 		monitor.beginTask("Create maximal interconnected graph",
 			input.nodes.size + // copy nodes
 			input.modules.size * input.nodes.size + // copy modules and assign nodes

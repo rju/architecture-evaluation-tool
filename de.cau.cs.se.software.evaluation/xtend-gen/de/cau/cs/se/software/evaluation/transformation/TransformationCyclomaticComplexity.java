@@ -27,7 +27,7 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
   }
   
   @Override
-  public List<Integer> transform(final List<AbstractTypeDeclaration> input) {
+  public List<Integer> generate(final List<AbstractTypeDeclaration> input) {
     ArrayList<Integer> _arrayList = new ArrayList<Integer>();
     this.result = _arrayList;
     Iterable<TypeDeclaration> _filter = Iterables.<TypeDeclaration>filter(input, TypeDeclaration.class);

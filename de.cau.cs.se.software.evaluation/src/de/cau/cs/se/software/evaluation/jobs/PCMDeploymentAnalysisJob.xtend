@@ -38,7 +38,7 @@ class PCMDeploymentAnalysisJob extends AbstractHypergraphAnalysisJob {
 			val model = source.contents.get(0) as System
 			
 			val deploymentModel = new TransformationPCMDeploymentToHypergraph(monitor)
-			deploymentModel.transform(model)
+			deploymentModel.generate(model)
 			
 			result.values.add(new NamedValue(project.name, "number of modules", deploymentModel.result.modules.size))
 			result.values.add(new NamedValue(project.name, "number of nodes", deploymentModel.result.nodes.size))

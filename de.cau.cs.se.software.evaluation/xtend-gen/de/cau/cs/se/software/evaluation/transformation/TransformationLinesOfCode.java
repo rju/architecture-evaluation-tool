@@ -17,7 +17,7 @@ public class TransformationLinesOfCode extends AbstractTransformation<List<Abstr
   }
   
   @Override
-  public Long transform(final List<AbstractTypeDeclaration> input) {
+  public Long generate(final List<AbstractTypeDeclaration> input) {
     this.result = Long.valueOf(0L);
     final Consumer<AbstractTypeDeclaration> _function = (AbstractTypeDeclaration type) -> {
       ASTNode _parent = type.getParent();

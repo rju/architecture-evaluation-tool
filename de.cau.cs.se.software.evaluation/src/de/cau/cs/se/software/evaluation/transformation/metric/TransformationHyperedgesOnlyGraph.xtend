@@ -33,7 +33,7 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 		super(monitor)
 	}
 	
-	override transform(Hypergraph input) {		
+	override generate(Hypergraph input) {		
 		this.result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
 			this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))

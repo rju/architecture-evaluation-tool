@@ -37,7 +37,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		super(monitor)
 	}
 	
-	override transform(ModularHypergraph input) {
+	override generate(ModularHypergraph input) {
 		monitor.beginTask("Create intermodule hyperedges only graph",
 			input.edges.size * (input.nodes.size + input.modules.size) + // find all intermodule edges
 			input.edges.size * input.nodes.size + // upper bound of node and edge iteration

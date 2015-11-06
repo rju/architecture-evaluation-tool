@@ -55,7 +55,7 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	/**
 	 * Main transformation routine.
 	 */
-	override transform(List<AbstractTypeDeclaration> input) {
+	override generate(List<AbstractTypeDeclaration> input) {
 		monitor.beginTask("Process java project " + this.project.elementName,
 			input.size + // modules
 			input.size + // properties for each class

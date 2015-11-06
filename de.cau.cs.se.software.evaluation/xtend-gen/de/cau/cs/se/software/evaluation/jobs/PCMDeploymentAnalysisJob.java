@@ -51,7 +51,7 @@ public class PCMDeploymentAnalysisJob extends AbstractHypergraphAnalysisJob {
       EObject _get = _contents_1.get(0);
       final org.palladiosimulator.pcm.system.System model = ((org.palladiosimulator.pcm.system.System) _get);
       final TransformationPCMDeploymentToHypergraph deploymentModel = new TransformationPCMDeploymentToHypergraph(monitor);
-      deploymentModel.transform(model);
+      deploymentModel.generate(model);
       List<NamedValue> _values = result.getValues();
       String _name = this.project.getName();
       ModularHypergraph _result = deploymentModel.getResult();

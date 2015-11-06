@@ -67,7 +67,7 @@ public class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
       EObject _get = _contents_1.get(0);
       final Model model = ((Model) _get);
       final TransformationGecoMegamodelToHypergraph gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor);
-      gecoMegamodel.transform(model);
+      gecoMegamodel.generate(model);
       List<NamedValue> _values = result.getValues();
       String _name = this.project.getName();
       Hypergraph _result = gecoMegamodel.getResult();

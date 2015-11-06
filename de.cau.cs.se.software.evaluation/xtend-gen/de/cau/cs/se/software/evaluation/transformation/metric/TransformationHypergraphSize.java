@@ -50,7 +50,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
   }
   
   @Override
-  public Double transform(final Hypergraph input) {
+  public Double generate(final Hypergraph input) {
     EList<Edge> _edges = input.getEdges();
     int _size = _edges.size();
     EList<Node> _nodes = input.getNodes();

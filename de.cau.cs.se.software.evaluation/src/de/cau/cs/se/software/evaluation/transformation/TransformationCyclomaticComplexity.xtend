@@ -18,7 +18,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 		super(monitor)
 	}
 	
-	override transform(List<AbstractTypeDeclaration> input) {
+	override generate(List<AbstractTypeDeclaration> input) {
 		result = new ArrayList<Integer>()
 		
 		input.filter(TypeDeclaration).forEach[type | type.checkMethods]
