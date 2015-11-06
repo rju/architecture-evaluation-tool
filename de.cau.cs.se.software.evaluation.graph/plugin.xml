@@ -28,44 +28,12 @@
    </command>
 </extension>
 
-<extension
-      point="org.eclipse.ui.menus">
-   <menuContribution
-        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-	     <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Open ModularHypergraph diagram"
-            style="push">
-         </command>
-	  </menuContribution>
-	  <menuContribution
-        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-	     <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Open ModularHypergraph diagram"
-            style="push">
-         </command>
-	  </menuContribution>
-   <!-- the following might be obsolete -->
-   <menuContribution
-         locationURI="popup:org.eclipse.ui.popup.any?before=additions">
-      <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Open ModularHypergraph diagram"
-            style="push">
-         <visibleWhen
-               checkEnabled="false">
-            <iterate ifEmpty="false" operator="or">
-               <or>
-                   <instanceof
-                         value="de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph">
-                   </instanceof>
-               </or>
-            </iterate>
-         </visibleWhen>
-      </command>
-   </menuContribution>
-   
-</extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated PlanarVisualization -->
+      <package
+            uri="de.cau.cs.se.software.evaluation.graph.transformation"
+            class="de.cau.cs.se.software.evaluation.graph.transformation.TransformationPackage"
+            genModel="src/de/cau/cs/se/software/evaluation/graph/transformation/PlanarVisualization.xcore"/>
+   </extension>
 
 </plugin>

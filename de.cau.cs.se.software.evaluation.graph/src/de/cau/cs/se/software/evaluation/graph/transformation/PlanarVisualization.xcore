@@ -1,0 +1,24 @@
+package de.cau.cs.se.software.evaluation.graph.transformation
+
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+
+abstract class NamedElement {
+	String name
+}
+
+class PlanarVisualizationGraph {
+	contains PlanarNode[] nodes	
+	contains PlanarEdge[] edges
+}
+
+class PlanarNode extends NamedElement {
+	 refers PlanarEdge[] edges
+	 EModuleKind kind
+	 String context
+}
+
+class PlanarEdge extends NamedElement {
+	int count
+	refers PlanarNode start
+	refers PlanarNode end
+}

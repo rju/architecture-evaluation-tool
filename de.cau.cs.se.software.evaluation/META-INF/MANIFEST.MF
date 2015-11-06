@@ -10,7 +10,6 @@ Bundle-Activator: de.cau.cs.se.software.evaluation.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
- de.cau.cs.se.software.evaluation;visibility:=reexport,
  org.eclipse.xtend.lib,
  org.eclipse.xtend.lib.macro,
  com.google.guava,

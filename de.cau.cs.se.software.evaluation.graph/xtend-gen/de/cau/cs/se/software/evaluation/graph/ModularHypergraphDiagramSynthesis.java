@@ -49,7 +49,11 @@ import de.cau.cs.kieler.kiml.options.SizeConstraint;
 import de.cau.cs.kieler.klay.layered.properties.Properties;
 import de.cau.cs.kieler.klighd.SynthesisOption;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
-import de.cau.cs.se.software.evaluation.graph.DiagramModelHelper;
+import de.cau.cs.se.software.evaluation.graph.transformation.ManipulatePlanarGraph;
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge;
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode;
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarVisualizationGraph;
+import de.cau.cs.se.software.evaluation.graph.transformation.VisualizationPlanarGraph;
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind;
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
@@ -60,7 +64,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import org.eclipse.emf.common.util.EList;
@@ -127,6 +130,15 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   private final static String VISIBLE_ANONYMOUS_YES = "visible";
   
   /**
+   * changes in visualization anonymous classes on off
+   */
+  private final static String VISIBLE_FRAMEWORK_NAME = "Framework Classes";
+  
+  private final static String VISIBLE_FRAMEWORK_NO = "hidden";
+  
+  private final static String VISIBLE_FRAMEWORK_YES = "visible";
+  
+  /**
    * changes in layout direction
    */
   private final static String DIRECTION_NAME = "Layout Direction";
@@ -161,6 +173,9 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   private final static SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NAME, 
     ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO), ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
   
+  private final static SynthesisOption VISIBLE_FRAMEWORK = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_NAME, 
+    ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_YES, ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_NO), ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_YES);
+  
   private final static SynthesisOption DIRECTION = SynthesisOption.createChoiceOption(ModularHypergraphDiagramSynthesis.DIRECTION_NAME, 
     ImmutableList.<String>of(ModularHypergraphDiagramSynthesis.DIRECTION_UP, ModularHypergraphDiagramSynthesis.DIRECTION_DOWN, ModularHypergraphDiagramSynthesis.DIRECTION_LEFT, ModularHypergraphDiagramSynthesis.DIRECTION_RIGHT), ModularHypergraphDiagramSynthesis.DIRECTION_LEFT);
   
@@ -177,6 +192,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   
   private ArrayList<Module> processedModules = new ArrayList<Module>();
   
+  private Map<PlanarNode, KNode> planarNodeMap = new HashMap<PlanarNode, KNode>();
+  
   /**
    * {@inheritDoc}<br>
    * <br>
@@ -184,7 +201,7 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    */
   @Override
   public List<SynthesisOption> getDisplayedSynthesisOptions() {
-    return ImmutableList.<SynthesisOption>of(ModularHypergraphDiagramSynthesis.VISIBLE_NODES, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS, ModularHypergraphDiagramSynthesis.DIRECTION, ModularHypergraphDiagramSynthesis.ROUTING, ModularHypergraphDiagramSynthesis.SPACING);
+    return ImmutableList.<SynthesisOption>of(ModularHypergraphDiagramSynthesis.VISIBLE_NODES, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS, ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK, ModularHypergraphDiagramSynthesis.DIRECTION, ModularHypergraphDiagramSynthesis.ROUTING, ModularHypergraphDiagramSynthesis.SPACING);
   }
   
   @Override
@@ -247,76 +264,62 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
         }
       }
       this.<KNode, EdgeRouting>setLayoutOption(it, LayoutOptions.EDGE_ROUTING, _switchResult_1);
-      Object _objectValue_3 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_NODES);
-      boolean _equals = Objects.equal(_objectValue_3, ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NO);
-      if (_equals) {
+    };
+    ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
+    Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_NODES);
+    boolean _equals = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NO);
+    if (_equals) {
+      final VisualizationPlanarGraph generatePlanarGraph = new VisualizationPlanarGraph();
+      Object _objectValue_1 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK);
+      boolean _equals_1 = Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_YES);
+      Object _objectValue_2 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+      boolean _equals_2 = Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES);
+      final ManipulatePlanarGraph manipulateGraph = new ManipulatePlanarGraph(_equals_1, _equals_2, 
+        true);
+      PlanarVisualizationGraph _generate = generatePlanarGraph.generate(hypergraph);
+      final PlanarVisualizationGraph planarGraph = manipulateGraph.generate(_generate);
+      EList<PlanarNode> _nodes = planarGraph.getNodes();
+      final Consumer<PlanarNode> _function_1 = (PlanarNode planarNode) -> {
+        EList<KNode> _children = root.getChildren();
+        KNode _createEmptyModule = this.createEmptyModule(planarNode);
+        _children.add(_createEmptyModule);
+      };
+      _nodes.forEach(_function_1);
+      EList<PlanarEdge> _edges = planarGraph.getEdges();
+      final Consumer<PlanarEdge> _function_2 = (PlanarEdge planarEdge) -> {
+        EList<PlanarNode> _nodes_1 = planarGraph.getNodes();
+        this.createAggregatedModuleEdge(planarEdge, _nodes_1);
+      };
+      _edges.forEach(_function_2);
+    } else {
+      final Procedure1<KNode> _function_3 = (KNode it) -> {
         EList<Module> _modules = hypergraph.getModules();
-        final Consumer<Module> _function_1 = (Module module) -> {
-          boolean _and = false;
-          EModuleKind _kind = module.getKind();
-          boolean _equals_1 = Objects.equal(_kind, EModuleKind.ANONYMOUS);
-          if (!_equals_1) {
-            _and = false;
-          } else {
-            Object _objectValue_4 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
-            boolean _equals_2 = Objects.equal(_objectValue_4, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
-            _and = _equals_2;
-          }
-          boolean _not = (!_and);
-          if (_not) {
-            EList<KNode> _children = root.getChildren();
-            KNode _createEmptyModule = this.createEmptyModule(module);
-            _children.add(_createEmptyModule);
-          }
-        };
-        _modules.forEach(_function_1);
-        EList<Module> _modules_1 = hypergraph.getModules();
-        final Consumer<Module> _function_2 = (Module module) -> {
-          boolean _and = false;
-          EModuleKind _kind = module.getKind();
-          boolean _equals_1 = Objects.equal(_kind, EModuleKind.ANONYMOUS);
-          if (!_equals_1) {
-            _and = false;
-          } else {
-            Object _objectValue_4 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
-            boolean _equals_2 = Objects.equal(_objectValue_4, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_NO);
-            _and = _equals_2;
-          }
-          boolean _not = (!_and);
-          if (_not) {
-            this.createCombindEdges(module, hypergraph);
-          }
-        };
-        _modules_1.forEach(_function_2);
-      } else {
-        EList<Module> _modules_2 = hypergraph.getModules();
-        final Consumer<Module> _function_3 = (Module module) -> {
+        final Consumer<Module> _function_4 = (Module module) -> {
           EList<KNode> _children = root.getChildren();
           KNode _createModuleWithNodes = this.createModuleWithNodes(module);
           _children.add(_createModuleWithNodes);
         };
-        _modules_2.forEach(_function_3);
-        EList<Edge> _edges = hypergraph.getEdges();
-        final Consumer<Edge> _function_4 = (Edge edge) -> {
-          EList<Node> _nodes = hypergraph.getNodes();
+        _modules.forEach(_function_4);
+        EList<Edge> _edges_1 = hypergraph.getEdges();
+        final Consumer<Edge> _function_5 = (Edge edge) -> {
+          EList<Node> _nodes_1 = hypergraph.getNodes();
           EList<KNode> _children = root.getChildren();
-          this.createGraphEdge(edge, _nodes, _children);
+          this.createGraphEdge(edge, _nodes_1, _children);
         };
-        _edges.forEach(_function_4);
-      }
-    };
-    ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
+        _edges_1.forEach(_function_5);
+      };
+      ObjectExtensions.<KNode>operator_doubleArrow(root, _function_3);
+    }
     return root;
   }
   
   /**
    * Return the correct color for a module.
    */
-  private KColor getBackgroundColor(final Module module) {
+  private KColor getBackgroundColor(final EModuleKind kind) {
     KColor _switchResult = null;
-    EModuleKind _kind = module.getKind();
-    if (_kind != null) {
-      switch (_kind) {
+    if (kind != null) {
+      switch (kind) {
         case SYSTEM:
           _switchResult = this._kColorExtensions.getColor("LemonChiffon");
           break;
@@ -337,216 +340,49 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   }
   
   /**
-   * -- aggregated view ------------------
-   */
-  private void createCombindEdges(final Module sourceModule, final ModularHypergraph hypergraph) {
-    final ArrayList<Edge> edges = new ArrayList<Edge>();
-    EList<Node> _nodes = sourceModule.getNodes();
-    final Consumer<Node> _function = (Node node) -> {
-      EList<Edge> _edges = node.getEdges();
-      final Consumer<Edge> _function_1 = (Edge it) -> {
-        DiagramModelHelper.addUnique(edges, it);
-      };
-      _edges.forEach(_function_1);
-    };
-    _nodes.forEach(_function);
-    this.processedModules.add(sourceModule);
-    final HashMap<Module, Integer> targetModuleMap = new HashMap<Module, Integer>();
-    final Consumer<Edge> _function_1 = (Edge edge) -> {
-      EList<Node> _nodes_1 = hypergraph.getNodes();
-      final Function1<Node, Boolean> _function_2 = (Node node) -> {
-        EList<Edge> _edges = node.getEdges();
-        final Function1<Edge, Boolean> _function_3 = (Edge it) -> {
-          return Boolean.valueOf(it.equals(edge));
-        };
-        return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges, _function_3));
-      };
-      Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes_1, _function_2);
-      final Consumer<Node> _function_3 = (Node node) -> {
-        EList<Node> _nodes_2 = sourceModule.getNodes();
-        final Function1<Node, Boolean> _function_4 = (Node it) -> {
-          return Boolean.valueOf(it.equals(node));
-        };
-        boolean _exists = IterableExtensions.<Node>exists(_nodes_2, _function_4);
-        boolean _not = (!_exists);
-        if (_not) {
-          EList<Module> _modules = hypergraph.getModules();
-          final Function1<Module, Boolean> _function_5 = (Module module) -> {
-            EList<Node> _nodes_3 = module.getNodes();
-            final Function1<Node, Boolean> _function_6 = (Node it) -> {
-              return Boolean.valueOf(it.equals(node));
-            };
-            return Boolean.valueOf(IterableExtensions.<Node>exists(_nodes_3, _function_6));
-          };
-          final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_5);
-          boolean _determineVisibility = this.determineVisibility(targetModule);
-          if (_determineVisibility) {
-            this.registerConnection(targetModuleMap, targetModule);
-          } else {
-            List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
-            final Consumer<Module> _function_6 = (Module transitive) -> {
-              boolean _equals = transitive.equals(sourceModule);
-              boolean _not_1 = (!_equals);
-              if (_not_1) {
-                this.registerConnection(targetModuleMap, targetModule);
-              }
-            };
-            _computeTransitiveModules.forEach(_function_6);
-          }
-        }
-      };
-      _filter.forEach(_function_3);
-    };
-    edges.forEach(_function_1);
-    final BiConsumer<Module, Integer> _function_2 = (Module module, Integer count) -> {
-      this.createAggregatedEdge(sourceModule, module, count);
-    };
-    targetModuleMap.forEach(_function_2);
-  }
-  
-  /**
-   * Determine if the given module should be visible depending on type and option values.
-   */
-  private boolean determineVisibility(final Module module) {
-    boolean _switchResult = false;
-    EModuleKind _kind = module.getKind();
-    if (_kind != null) {
-      switch (_kind) {
-        case FRAMEWORK:
-          return true;
-        case ANONYMOUS:
-          Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
-          return Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES);
-        case INTERFACE:
-          return true;
-        case SYSTEM:
-          _switchResult = true;
-          break;
-        default:
-          _switchResult = true;
-          break;
-      }
-    } else {
-      _switchResult = true;
-    }
-    return _switchResult;
-  }
-  
-  /**
-   * Calculate transitive set of modules.
-   */
-  private List<Module> computeTransitiveModules(final Module sourceModule, final ModularHypergraph hypergraph) {
-    final ArrayList<Module> transitiveModules = new ArrayList<Module>();
-    final ArrayList<Edge> edges = new ArrayList<Edge>();
-    EList<Node> _nodes = sourceModule.getNodes();
-    final Consumer<Node> _function = (Node node) -> {
-      EList<Edge> _edges = node.getEdges();
-      final Consumer<Edge> _function_1 = (Edge it) -> {
-        DiagramModelHelper.addUnique(edges, it);
-      };
-      _edges.forEach(_function_1);
-    };
-    _nodes.forEach(_function);
-    final Consumer<Edge> _function_1 = (Edge edge) -> {
-      EList<Node> _nodes_1 = hypergraph.getNodes();
-      final Function1<Node, Boolean> _function_2 = (Node node) -> {
-        EList<Edge> _edges = node.getEdges();
-        final Function1<Edge, Boolean> _function_3 = (Edge it) -> {
-          return Boolean.valueOf(it.equals(edge));
-        };
-        return Boolean.valueOf(IterableExtensions.<Edge>exists(_edges, _function_3));
-      };
-      Iterable<Node> _filter = IterableExtensions.<Node>filter(_nodes_1, _function_2);
-      final Consumer<Node> _function_3 = (Node node) -> {
-        EList<Node> _nodes_2 = sourceModule.getNodes();
-        final Function1<Node, Boolean> _function_4 = (Node it) -> {
-          return Boolean.valueOf(it.equals(node));
-        };
-        boolean _exists = IterableExtensions.<Node>exists(_nodes_2, _function_4);
-        boolean _not = (!_exists);
-        if (_not) {
-          EList<Module> _modules = hypergraph.getModules();
-          final Function1<Module, Boolean> _function_5 = (Module module) -> {
-            EList<Node> _nodes_3 = module.getNodes();
-            final Function1<Node, Boolean> _function_6 = (Node it) -> {
-              return Boolean.valueOf(it.equals(node));
-            };
-            return Boolean.valueOf(IterableExtensions.<Node>exists(_nodes_3, _function_6));
-          };
-          final Module targetModule = IterableExtensions.<Module>findFirst(_modules, _function_5);
-          boolean _determineVisibility = this.determineVisibility(targetModule);
-          if (_determineVisibility) {
-            DiagramModelHelper.addUnique(transitiveModules, targetModule);
-          } else {
-            List<Module> _computeTransitiveModules = this.computeTransitiveModules(targetModule, hypergraph);
-            DiagramModelHelper.addAllUnique(transitiveModules, _computeTransitiveModules);
-          }
-        }
-      };
-      _filter.forEach(_function_3);
-    };
-    edges.forEach(_function_1);
-    return transitiveModules;
-  }
-  
-  /**
-   * Register a target module or increase its hit count.
-   */
-  private Integer registerConnection(final HashMap<Module, Integer> targetModules, final Module targetModule) {
-    Integer _xifexpression = null;
-    final Function1<Module, Boolean> _function = (Module it) -> {
-      return Boolean.valueOf(it.equals(targetModule));
-    };
-    boolean _exists = IterableExtensions.<Module>exists(this.processedModules, _function);
-    boolean _not = (!_exists);
-    if (_not) {
-      Integer _xblockexpression = null;
-      {
-        Integer value = targetModules.get(targetModule);
-        Integer _xifexpression_1 = null;
-        boolean _equals = Objects.equal(value, null);
-        if (_equals) {
-          _xifexpression_1 = targetModules.put(targetModule, Integer.valueOf(1));
-        } else {
-          _xifexpression_1 = targetModules.put(targetModule, Integer.valueOf(((value).intValue() + 1)));
-        }
-        _xblockexpression = _xifexpression_1;
-      }
-      _xifexpression = _xblockexpression;
-    }
-    return _xifexpression;
-  }
-  
-  /**
    * Create an edge in the correct width for an aggregated edge.
    */
-  private KEdge createAggregatedEdge(final Module sourceModule, final Module targetModule, final Integer size) {
+  private KEdge createAggregatedModuleEdge(final PlanarEdge edge, final List<PlanarNode> nodes) {
     KEdge _xblockexpression = null;
     {
-      final KNode sourceNode = this.moduleMap.get(sourceModule);
-      final KNode targetNode = this.moduleMap.get(targetModule);
+      PlanarNode _start = edge.getStart();
+      final KNode sourceNode = this.planarNodeMap.get(_start);
+      PlanarNode _end = edge.getEnd();
+      final KNode targetNode = this.planarNodeMap.get(_end);
       int _xifexpression = (int) 0;
-      if (((size).intValue() <= 1)) {
+      int _count = edge.getCount();
+      boolean _lessEqualsThan = (_count <= 1);
+      if (_lessEqualsThan) {
         _xifexpression = 1;
       } else {
         int _xifexpression_1 = (int) 0;
-        if (((size).intValue() <= 3)) {
+        int _count_1 = edge.getCount();
+        boolean _lessEqualsThan_1 = (_count_1 <= 3);
+        if (_lessEqualsThan_1) {
           _xifexpression_1 = 2;
         } else {
           int _xifexpression_2 = (int) 0;
-          if (((size).intValue() <= 7)) {
+          int _count_2 = edge.getCount();
+          boolean _lessEqualsThan_2 = (_count_2 <= 7);
+          if (_lessEqualsThan_2) {
             _xifexpression_2 = 3;
           } else {
             int _xifexpression_3 = (int) 0;
-            if (((size).intValue() <= 10)) {
+            int _count_3 = edge.getCount();
+            boolean _lessEqualsThan_3 = (_count_3 <= 10);
+            if (_lessEqualsThan_3) {
               _xifexpression_3 = 4;
             } else {
               int _xifexpression_4 = (int) 0;
-              if (((size).intValue() <= 15)) {
+              int _count_4 = edge.getCount();
+              boolean _lessEqualsThan_4 = (_count_4 <= 15);
+              if (_lessEqualsThan_4) {
                 _xifexpression_4 = 5;
               } else {
                 int _xifexpression_5 = (int) 0;
-                if (((size).intValue() <= 20)) {
+                int _count_5 = edge.getCount();
+                boolean _lessEqualsThan_5 = (_count_5 <= 20);
+                if (_lessEqualsThan_5) {
                   _xifexpression_5 = 6;
                 } else {
                   _xifexpression_5 = 7;
@@ -606,48 +442,11 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   /**
    * Create module without nodes for simple display.
    */
-  private KNode createEmptyModule(final Module module) {
-    String _xifexpression = null;
-    EModuleKind _kind = module.getKind();
-    boolean _equals = Objects.equal(_kind, EModuleKind.ANONYMOUS);
-    if (_equals) {
-      String _xblockexpression = null;
-      {
-        String _name = module.getName();
-        final int separator = _name.lastIndexOf("$");
-        String _name_1 = module.getName();
-        _xblockexpression = _name_1.substring(0, separator);
-      }
-      _xifexpression = _xblockexpression;
-    } else {
-      _xifexpression = module.getName();
-    }
-    final String moduleQualifier = _xifexpression;
-    final int separator = moduleQualifier.lastIndexOf(".");
-    KNode _xifexpression_1 = null;
-    if ((separator == (-1))) {
-      KColor _backgroundColor = this.getBackgroundColor(module);
-      _xifexpression_1 = this.drawEmptyModule(module, 
-        "", moduleQualifier, _backgroundColor);
-    } else {
-      String _substring = moduleQualifier.substring(0, separator);
-      String _substring_1 = moduleQualifier.substring((separator + 1));
-      KColor _backgroundColor_1 = this.getBackgroundColor(module);
-      _xifexpression_1 = this.drawEmptyModule(module, _substring, _substring_1, _backgroundColor_1);
-    }
-    final KNode moduleNode = _xifexpression_1;
-    this.moduleMap.put(module, moduleNode);
-    return moduleNode;
-  }
-  
-  /**
-   * Draw the empty module.
-   */
-  private KNode drawEmptyModule(final Module module, final String packageName, final String moduleName, final KColor backgroundColor) {
+  private KNode createEmptyModule(final PlanarNode planarNode) {
     KNode _xblockexpression = null;
     {
-      KNode _createNode = this._kNodeExtensions.createNode(module);
-      final KNode moduleNode = this.<KNode>associateWith(_createNode, module);
+      final KNode moduleNode = this._kNodeExtensions.createNode(planarNode);
+      this.planarNodeMap.put(planarNode, moduleNode);
       final Procedure1<KNode> _function = (KNode it) -> {
         this.<KNode, Float>setLayoutOption(it, LayoutOptions.PORT_SPACING, Float.valueOf(20f));
         EnumSet<SizeConstraint> _minimumSizeWithPorts = SizeConstraint.minimumSizeWithPorts();
@@ -656,20 +455,24 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
         final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
           KColor _color = this._kColorExtensions.getColor("white");
-          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, backgroundColor, 0);
+          EModuleKind _kind = planarNode.getKind();
+          KColor _backgroundColor = this.getBackgroundColor(_kind);
+          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _backgroundColor, 0);
           KColor _color_1 = this._kColorExtensions.getColor("black");
           this._kRenderingExtensions.setShadow(it_1, _color_1);
           KGridPlacement _setGridPlacement = this._kContainerRenderingExtensions.setGridPlacement(it_1, 1);
           KGridPlacement _from = this._kRenderingExtensions.from(_setGridPlacement, this._kRenderingExtensions.LEFT, 10, 0, this._kRenderingExtensions.TOP, 20, 0);
           this._kRenderingExtensions.to(_from, this._kRenderingExtensions.RIGHT, 10, 0, this._kRenderingExtensions.BOTTOM, 20, 0);
-          KText _addText = this._kContainerRenderingExtensions.addText(it_1, packageName);
+          String _context = planarNode.getContext();
+          KText _addText = this._kContainerRenderingExtensions.addText(it_1, _context);
           final Procedure1<KText> _function_2 = (KText it_2) -> {
             this._kRenderingExtensions.setFontBold(it_2, false);
             it_2.setCursorSelectable(false);
             this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it_2, 1, 1, 1, 1);
           };
           ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
-          KText _addText_1 = this._kContainerRenderingExtensions.addText(it_1, moduleName);
+          String _name = planarNode.getName();
+          KText _addText_1 = this._kContainerRenderingExtensions.addText(it_1, _name);
           final Procedure1<KText> _function_3 = (KText it_2) -> {
             this._kRenderingExtensions.setFontBold(it_2, true);
             it_2.setCursorSelectable(true);
@@ -704,7 +507,8 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
         final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
           this._kRenderingExtensions.setLineWidth(it_1, 2);
           KColor _color = this._kColorExtensions.getColor("white");
-          KColor _backgroundColor = this.getBackgroundColor(module);
+          EModuleKind _kind = module.getKind();
+          KColor _backgroundColor = this.getBackgroundColor(_kind);
           this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _backgroundColor, 0);
           KColor _color_1 = this._kColorExtensions.getColor("black");
           this._kRenderingExtensions.setShadow(it_1, _color_1);
