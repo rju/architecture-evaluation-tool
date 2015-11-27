@@ -3,7 +3,7 @@ package de.cau.cs.se.software.evaluation.jobs;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.cau.cs.se.geco.architecture.ArchitectureStandaloneSetup;
-import de.cau.cs.se.geco.architecture.architecture.Model;
+import de.cau.cs.se.geco.architecture.architecture.GecoModel;
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
@@ -65,7 +65,7 @@ public class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
       final ResultModelProvider result = ResultModelProvider.INSTANCE;
       EList<EObject> _contents_1 = source.getContents();
       EObject _get = _contents_1.get(0);
-      final Model model = ((Model) _get);
+      final GecoModel model = ((GecoModel) _get);
       final TransformationGecoMegamodelToHypergraph gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor);
       gecoMegamodel.generate(model);
       List<NamedValue> _values = result.getValues();

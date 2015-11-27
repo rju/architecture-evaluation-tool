@@ -2,7 +2,7 @@ package de.cau.cs.se.software.evaluation.jobs
 
 import com.google.inject.Inject
 import de.cau.cs.se.geco.architecture.ArchitectureStandaloneSetup
-import de.cau.cs.se.geco.architecture.architecture.Model
+import de.cau.cs.se.geco.architecture.architecture.GecoModel
 import de.cau.cs.se.software.evaluation.transformation.geco.TransformationGecoMegamodelToHypergraph
 import de.cau.cs.se.software.evaluation.views.ResultModelProvider
 import org.eclipse.core.resources.IFile
@@ -46,7 +46,7 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		if (source.contents.size > 0) {
 			val result = ResultModelProvider.INSTANCE
 			
-			val model = source.contents.get(0) as Model
+			val model = source.contents.get(0) as GecoModel
 			
 			val gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor)
 			gecoMegamodel.generate(model)
