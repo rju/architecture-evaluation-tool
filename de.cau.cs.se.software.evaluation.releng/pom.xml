@@ -18,6 +18,7 @@
         <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
         <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly</kieler-repo.url>
         <geco-repo.url>https://build.se.informatik.uni-kiel.de/eus/geco/snapshot/</geco-repo.url>
+        <palladio-repo.url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo.url>
         <checkstyle.config.location>../cs-conf.xml</checkstyle.config.location>
     </properties>
 
@@ -42,6 +43,11 @@
         <repository>
             <id>geco</id>
             <url>${geco-repo.url}</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>palladio</id>
+            <url>${palladio-repo.url}</url>
             <layout>p2</layout>
         </repository>
     </repositories>
