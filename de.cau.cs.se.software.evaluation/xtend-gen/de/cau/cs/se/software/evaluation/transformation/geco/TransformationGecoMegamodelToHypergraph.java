@@ -6,8 +6,8 @@ import de.cau.cs.se.geco.architecture.architecture.AspectModel;
 import de.cau.cs.se.geco.architecture.architecture.Fragment;
 import de.cau.cs.se.geco.architecture.architecture.GecoModel;
 import de.cau.cs.se.geco.architecture.architecture.Generator;
-import de.cau.cs.se.geco.architecture.architecture.Metamodel;
-import de.cau.cs.se.geco.architecture.architecture.MetamodelSequence;
+import de.cau.cs.se.geco.architecture.architecture.Model;
+import de.cau.cs.se.geco.architecture.architecture.ModelSequence;
 import de.cau.cs.se.geco.architecture.architecture.SeparatePointcutAdviceModel;
 import de.cau.cs.se.geco.architecture.architecture.SourceModelNodeSelector;
 import de.cau.cs.se.geco.architecture.architecture.TargetModelNodeType;
@@ -41,18 +41,18 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
   public Hypergraph generate(final GecoModel input) {
     Hypergraph _createHypergraph = HypergraphFactory.eINSTANCE.createHypergraph();
     this.result = _createHypergraph;
-    final Map<Metamodel, Node> mmNodeMap = new HashMap<Metamodel, Node>();
-    EList<MetamodelSequence> _metamodels = input.getMetamodels();
-    final Consumer<MetamodelSequence> _function = (MetamodelSequence mm) -> {
-      EList<Metamodel> _metamodels_1 = mm.getMetamodels();
-      final Consumer<Metamodel> _function_1 = (Metamodel it) -> {
+    final Map<Model, Node> modelNodeMap = new HashMap<Model, Node>();
+    EList<ModelSequence> _models = input.getModels();
+    final Consumer<ModelSequence> _function = (ModelSequence sequence) -> {
+      EList<Model> _models_1 = sequence.getModels();
+      final Consumer<Model> _function_1 = (Model it) -> {
         String _name = it.getName();
         Node _createNode = HypergraphCreationHelper.createNode(this.result, _name, it);
-        mmNodeMap.put(it, _createNode);
+        modelNodeMap.put(it, _createNode);
       };
-      _metamodels_1.forEach(_function_1);
+      _models_1.forEach(_function_1);
     };
-    _metamodels.forEach(_function);
+    _models.forEach(_function);
     EList<Fragment> _fragments = input.getFragments();
     final Consumer<Fragment> _function_1 = (Fragment p) -> {
       boolean _matched = false;
@@ -63,8 +63,8 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
           String _simpleName = _reference.getSimpleName();
           final Node weaverNode = HypergraphCreationHelper.createNode(this.result, _simpleName, p);
           SourceModelNodeSelector _resolveWeaverSourceModel = ArchitectureTyping.resolveWeaverSourceModel(((Weaver)p));
-          Metamodel _reference_1 = _resolveWeaverSourceModel.getReference();
-          final Node baseModelNode = mmNodeMap.get(_reference_1);
+          Model _reference_1 = _resolveWeaverSourceModel.getReference();
+          final Node baseModelNode = modelNodeMap.get(_reference_1);
           String _name = weaverNode.getName();
           String _plus = (_name + "::");
           String _name_1 = baseModelNode.getName();
@@ -76,14 +76,14 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
             if (_aspectModel instanceof AdviceModel) {
               _matched_1=true;
               AspectModel _aspectModel_1 = ((Weaver)p).getAspectModel();
-              this.createWeaver(((AdviceModel) _aspectModel_1), mmNodeMap, weaverNode);
+              this.createWeaver(((AdviceModel) _aspectModel_1), modelNodeMap, weaverNode);
             }
           }
           if (!_matched_1) {
             if (_aspectModel instanceof SeparatePointcutAdviceModel) {
               _matched_1=true;
               AspectModel _aspectModel_1 = ((Weaver)p).getAspectModel();
-              this.createSeparatePointcutWeaver(((SeparatePointcutAdviceModel) _aspectModel_1), mmNodeMap, weaverNode);
+              this.createSeparatePointcutWeaver(((SeparatePointcutAdviceModel) _aspectModel_1), modelNodeMap, weaverNode);
             }
           }
         }
@@ -95,12 +95,12 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
           String _simpleName = _reference.getSimpleName();
           final Node generatorNode = HypergraphCreationHelper.createNode(this.result, _simpleName, p);
           SourceModelNodeSelector _sourceModel = ((Generator)p).getSourceModel();
-          Metamodel _reference_1 = _sourceModel.getReference();
+          Model _reference_1 = _sourceModel.getReference();
           boolean _notEquals = (!Objects.equal(_reference_1, null));
           if (_notEquals) {
             SourceModelNodeSelector _sourceModel_1 = ((Generator)p).getSourceModel();
-            Metamodel _reference_2 = _sourceModel_1.getReference();
-            final Node sourceModelNode = mmNodeMap.get(_reference_2);
+            Model _reference_2 = _sourceModel_1.getReference();
+            final Node sourceModelNode = modelNodeMap.get(_reference_2);
             String _name = generatorNode.getName();
             String _plus = (_name + "::");
             String _name_1 = sourceModelNode.getName();
@@ -108,8 +108,8 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
             HypergraphCreationHelper.createEdge(this.result, generatorNode, sourceModelNode, _plus_1, null);
           }
           TargetModelNodeType _targetModel = ((Generator)p).getTargetModel();
-          Metamodel _reference_3 = _targetModel.getReference();
-          final Node targetModelNode = mmNodeMap.get(_reference_3);
+          Model _reference_3 = _targetModel.getReference();
+          final Node targetModelNode = modelNodeMap.get(_reference_3);
           String _name_2 = generatorNode.getName();
           String _plus_2 = (_name_2 + "::");
           String _name_3 = targetModelNode.getName();
@@ -125,14 +125,14 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
   /**
    * create point cut reference for weaver.
    */
-  private Edge createSeparatePointcutWeaver(final SeparatePointcutAdviceModel model, final Map<Metamodel, Node> mmNodeMap, final Node weaverNode) {
+  private Edge createSeparatePointcutWeaver(final SeparatePointcutAdviceModel model, final Map<Model, Node> modelNodeMap, final Node weaverNode) {
     Edge _xblockexpression = null;
     {
       AdviceModel _advice = model.getAdvice();
-      this.createWeaver(_advice, mmNodeMap, weaverNode);
+      this.createWeaver(_advice, modelNodeMap, weaverNode);
       TargetModelNodeType _pointcut = model.getPointcut();
-      Metamodel _reference = _pointcut.getReference();
-      final Node pointcutModelNode = mmNodeMap.get(_reference);
+      Model _reference = _pointcut.getReference();
+      final Node pointcutModelNode = modelNodeMap.get(_reference);
       String _name = weaverNode.getName();
       String _plus = (_name + "::");
       String _name_1 = pointcutModelNode.getName();
@@ -145,7 +145,7 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
   /**
    * create advice/aspect edge.
    */
-  private Edge createWeaver(final AdviceModel adviceModel, final Map<Metamodel, Node> mmNodeMap, final Node weaverNode) {
+  private Edge createWeaver(final AdviceModel adviceModel, final Map<Model, Node> modelNodeMap, final Node weaverNode) {
     Edge _switchResult = null;
     boolean _matched = false;
     if (!_matched) {
@@ -174,8 +174,8 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
           String _simpleName = _reference_2.getSimpleName();
           final Node generatorNode = HypergraphCreationHelper.createNode(this.result, _simpleName, adviceModel);
           SourceModelNodeSelector _sourceModel = ((Generator)adviceModel).getSourceModel();
-          Metamodel _reference_3 = _sourceModel.getReference();
-          final Node sourceModelNode = mmNodeMap.get(_reference_3);
+          Model _reference_3 = _sourceModel.getReference();
+          final Node sourceModelNode = modelNodeMap.get(_reference_3);
           String _name = generatorNode.getName();
           String _plus = (_name + "::");
           String _name_1 = sourceModelNode.getName();
@@ -200,7 +200,7 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
         _matched=true;
         Edge _xblockexpression = null;
         {
-          final Node aspectModelNode = mmNodeMap.get(((Metamodel) adviceModel));
+          final Node aspectModelNode = modelNodeMap.get(((Model) adviceModel));
           String _name = weaverNode.getName();
           String _plus = (_name + "::");
           String _name_1 = aspectModelNode.getName();
