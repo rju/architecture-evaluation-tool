@@ -15,9 +15,9 @@ import org.eclipse.xtext.common.types.JvmGenericType
 
 import static extension de.cau.cs.se.geco.architecture.typing.ArchitectureTyping.*
 import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
-import de.cau.cs.se.geco.architecture.architecture.AdviceModel
-import de.cau.cs.se.geco.architecture.architecture.TargetModelNodeType
-import de.cau.cs.se.geco.architecture.architecture.SeparatePointcutAdviceModel
+import de.cau.cs.se.geco.architecture.architecture.CombinedModel
+import de.cau.cs.se.geco.architecture.architecture.TargetModel
+import de.cau.cs.se.geco.architecture.architecture.SeparateModels
 
 /**
  * Transform geco model to a hypergraph.
@@ -46,8 +46,8 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Gec
 					result.createEdge(weaverNode, baseModelNode, weaverNode.name + "::" + baseModelNode.name, null)
 					
 					switch(p.aspectModel) {
-						AdviceModel: createWeaver(p.aspectModel as AdviceModel, modelNodeMap, weaverNode)
-						SeparatePointcutAdviceModel: createSeparatePointcutWeaver(p.aspectModel as SeparatePointcutAdviceModel,
+						CombinedModel: createWeaver(p.aspectModel as CombinedModel, modelNodeMap, weaverNode)
+						SeparateModels: createSeparatePointcutWeaver(p.aspectModel as SeparateModels,
 							modelNodeMap, weaverNode
 						)	
 					}
@@ -71,7 +71,7 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Gec
 	/**
 	 * create point cut reference for weaver.
 	 */
-	private def createSeparatePointcutWeaver(SeparatePointcutAdviceModel model, Map<Model, Node> modelNodeMap, Node weaverNode) {
+	private def createSeparatePointcutWeaver(SeparateModels model, Map<Model, Node> modelNodeMap, Node weaverNode) {
 		model.advice.createWeaver(modelNodeMap, weaverNode)
 		val pointcutModelNode = modelNodeMap.get(model.pointcut.reference)
 		result.createEdge(weaverNode, pointcutModelNode, weaverNode.name + "::" + pointcutModelNode.name, null)
@@ -80,7 +80,7 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Gec
 	/**
 	 * create advice/aspect edge.
 	 */
-	private def createWeaver(AdviceModel adviceModel, Map<Model, Node> modelNodeMap, Node weaverNode) {
+	private def createWeaver(CombinedModel adviceModel, Map<Model, Node> modelNodeMap, Node weaverNode) {
 		switch (adviceModel) {
 			Generator: {
 				val aspectModelNode = if (adviceModel.reference instanceof JvmGenericType) {
@@ -96,7 +96,7 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Gec
 				result.createEdge(generatorNode, aspectModelNode, generatorNode.name + "::" + aspectModelNode.name, null)
 				result.createEdge(weaverNode, aspectModelNode, weaverNode.name + "::" + aspectModelNode.name, null)
 			}
-			TargetModelNodeType: {
+			TargetModel: {
 			 	val aspectModelNode = modelNodeMap.get(adviceModel as Model)
 			 	result.createEdge(weaverNode, aspectModelNode, weaverNode.name + "::" + aspectModelNode.name, null)
 			}
