@@ -94,13 +94,9 @@ public class CalculateComplexity {
     return _xifexpression;
   }
   
-  public synchronized double deliverConnectedNodeHyperedgesOnlySizeResult(final double size) {
-    double _xblockexpression = (double) 0;
-    {
-      this.monitor.worked(1);
-      double _complexity = this.complexity;
-      _xblockexpression = this.complexity = (_complexity + size);
-    }
-    return _xblockexpression;
+  public synchronized void deliverConnectedNodeHyperedgesOnlySizeResult(final double size) {
+    double _complexity = this.complexity;
+    this.complexity = (_complexity + size);
+    this.monitor.worked(1);
   }
 }

@@ -16,7 +16,7 @@
         <tycho.version>0.23.0</tycho.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
         <eclipse-repo.url>http://download.eclipse.org/releases/mars</eclipse-repo.url>
-        <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly</kieler-repo.url>
+        <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite</kieler-repo.url>
         <geco-repo.url>https://build.se.informatik.uni-kiel.de/eus/geco/snapshot/</geco-repo.url>
         <palladio-repo.url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo.url>
         <checkstyle.config.location>../cs-conf.xml</checkstyle.config.location>

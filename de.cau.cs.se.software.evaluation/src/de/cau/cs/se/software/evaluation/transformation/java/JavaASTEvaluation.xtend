@@ -159,11 +159,19 @@ class JavaASTEvaluation {
 		
 		/** create edge between this constructor and the invoked constructor. */
 		var targetNode = module.nodes.findFirst[
-			val localMethod = (it.derivedFrom as MethodTrace).method
-			switch(localMethod) {
-				MethodDeclaration: localMethod.resolveBinding.isSubsignature(targetMethodBinding)
-				IMethodBinding: localMethod.isSubsignature(targetMethodBinding)
-				default: false  	
+			if (it.derivedFrom instanceof MethodTrace) {
+				val localMethod = (it.derivedFrom as MethodTrace).method
+				switch(localMethod) {
+					MethodDeclaration: localMethod.resolveBinding.isSubsignature(targetMethodBinding)
+					IMethodBinding: localMethod.isSubsignature(targetMethodBinding)
+					default: false  	
+				}
+			} else if (it.derivedFrom instanceof TypeTrace) {
+				// TODO find out if TypeTrace references are correct and produce the correct response here
+				false
+			} else {
+				new UnsupportedOperationException("Internal error: Node " + it.name + " is not derived from a method " + it.derivedFrom)
+				false
 			}
 		]
 		if (targetNode == null) {
@@ -191,7 +199,7 @@ class JavaASTEvaluation {
 		if (!graph.edges.exists[it.name.equals(edge.name)]) {
 			var targetNode = graph.nodes.findNodeForConstructorBinding(targetMethodBinding)
 			if (targetNode == null) {
-				throw new UnsupportedOperationException("Missing source node: This is an error!! " + targetMethodBinding.determineFullyQualifiedName)
+				throw new UnsupportedOperationException("Internal error: Missing target node for method " + targetMethodBinding.determineFullyQualifiedName)
 			} else {
 				graph.edges.add(edge)
 				targetNode.edges.add(edge)

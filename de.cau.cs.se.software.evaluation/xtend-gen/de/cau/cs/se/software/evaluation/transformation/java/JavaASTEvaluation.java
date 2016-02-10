@@ -358,31 +358,55 @@ public class JavaASTEvaluation {
       }
       EList<Node> _nodes = module.getNodes();
       final Function1<Node, Boolean> _function_1 = (Node it) -> {
-        boolean _xblockexpression_1 = false;
-        {
-          NodeReference _derivedFrom_1 = it.getDerivedFrom();
-          final Object localMethod = ((MethodTrace) _derivedFrom_1).getMethod();
-          boolean _switchResult = false;
-          boolean _matched = false;
-          if (!_matched) {
-            if (localMethod instanceof MethodDeclaration) {
-              _matched=true;
-              IMethodBinding _resolveBinding = ((MethodDeclaration)localMethod).resolveBinding();
-              _switchResult = _resolveBinding.isSubsignature(targetMethodBinding);
+        boolean _xifexpression = false;
+        NodeReference _derivedFrom_1 = it.getDerivedFrom();
+        if ((_derivedFrom_1 instanceof MethodTrace)) {
+          boolean _xblockexpression_1 = false;
+          {
+            NodeReference _derivedFrom_2 = it.getDerivedFrom();
+            final Object localMethod = ((MethodTrace) _derivedFrom_2).getMethod();
+            boolean _switchResult = false;
+            boolean _matched = false;
+            if (!_matched) {
+              if (localMethod instanceof MethodDeclaration) {
+                _matched=true;
+                IMethodBinding _resolveBinding = ((MethodDeclaration)localMethod).resolveBinding();
+                _switchResult = _resolveBinding.isSubsignature(targetMethodBinding);
+              }
             }
-          }
-          if (!_matched) {
-            if (localMethod instanceof IMethodBinding) {
-              _matched=true;
-              _switchResult = ((IMethodBinding)localMethod).isSubsignature(targetMethodBinding);
+            if (!_matched) {
+              if (localMethod instanceof IMethodBinding) {
+                _matched=true;
+                _switchResult = ((IMethodBinding)localMethod).isSubsignature(targetMethodBinding);
+              }
             }
+            if (!_matched) {
+              _switchResult = false;
+            }
+            _xblockexpression_1 = _switchResult;
           }
-          if (!_matched) {
-            _switchResult = false;
+          _xifexpression = _xblockexpression_1;
+        } else {
+          boolean _xifexpression_1 = false;
+          NodeReference _derivedFrom_2 = it.getDerivedFrom();
+          if ((_derivedFrom_2 instanceof TypeTrace)) {
+            _xifexpression_1 = false;
+          } else {
+            boolean _xblockexpression_2 = false;
+            {
+              String _name = it.getName();
+              String _plus = ("Internal error: Node " + _name);
+              String _plus_1 = (_plus + " is not derived from a method ");
+              NodeReference _derivedFrom_3 = it.getDerivedFrom();
+              String _plus_2 = (_plus_1 + _derivedFrom_3);
+              new UnsupportedOperationException(_plus_2);
+              _xblockexpression_2 = false;
+            }
+            _xifexpression_1 = _xblockexpression_2;
           }
-          _xblockexpression_1 = _switchResult;
+          _xifexpression = _xifexpression_1;
         }
-        return Boolean.valueOf(_xblockexpression_1);
+        return Boolean.valueOf(_xifexpression);
       };
       Node targetNode = IterableExtensions.<Node>findFirst(_nodes, _function_1);
       boolean _equals_1 = Objects.equal(targetNode, null);
@@ -429,7 +453,7 @@ public class JavaASTEvaluation {
       boolean _equals = Objects.equal(targetNode, null);
       if (_equals) {
         String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(targetMethodBinding);
-        String _plus = ("Missing source node: This is an error!! " + _determineFullyQualifiedName);
+        String _plus = ("Internal error: Missing target node for method " + _determineFullyQualifiedName);
         throw new UnsupportedOperationException(_plus);
       } else {
         EList<Edge> _edges_1 = graph.getEdges();

@@ -26,6 +26,7 @@ import static extension de.cau.cs.se.software.evaluation.transformation.java.Jav
 import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.LambdaExpression
 import org.eclipse.jdt.core.dom.Block
+import org.eclipse.jdt.core.dom.IMethodBinding
 
 class JavaASTExpressionEvaluationHelper {
 	
@@ -73,27 +74,29 @@ class JavaASTExpressionEvaluationHelper {
     	 ModularHypergraph graph, List<String> dataTypePatterns 
     ) {
     	val calleeTypeBinding = callee.resolveTypeBinding
-    	if (!calleeTypeBinding.isDataType(dataTypePatterns)) {
-    		/** create only for behavior classes. */
+    	if (!calleeTypeBinding.isDataType(dataTypePatterns)) { /** create only for behavior classes. */
     		val calleeConstructorBinding = callee.resolveConstructorBinding
-    	
-    		/** check if the class is an anonymous class. */
-    		if (calleeTypeBinding.anonymous) {
-    			/** create a module for each new anonymous class and scan for methods. */
-    			val module = createModuleForTypeBinding(calleeTypeBinding, EModuleKind.ANONYMOUS)
-    			graph.modules.add(module)
-    			callee.anonymousClassDeclaration.resolveBinding.declaredMethods.forEach[anonMethod |
-    				val anonNode = createNodeForMethod(anonMethod)
-    				module.nodes.add(anonNode)
-    				graph.nodes.add(anonNode)
-    			]
+    		// TODO why can this binding be null?
+    		if (calleeConstructorBinding != null) {
+	    		/** check if the class is an anonymous class. */
+	    		if (calleeTypeBinding.anonymous) {
+	    			/** create a module for each new anonymous class and scan for methods. */
+	    			val module = createModuleForTypeBinding(calleeTypeBinding, EModuleKind.ANONYMOUS)
+	    			graph.modules.add(module)
+	    			callee.anonymousClassDeclaration.resolveBinding.declaredMethods.forEach[anonMethod |
+	    				val anonNode = createNodeForMethod(anonMethod)
+	    				module.nodes.add(anonNode)
+	    				graph.nodes.add(anonNode)
+	    			]
+	    		}
+		    	
+		    	val targetNode = graph.findOrCreateTargetNode(calleeTypeBinding, calleeConstructorBinding)
+		    	
+		    	/** create call edge as this is a local context. */
+		    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
+    		} else {
+    			System.out.println("processClassInstanceCreation " + callee)
     		}
-	    	
-	    	val targetNode = graph.findOrCreateTargetNode(calleeTypeBinding, calleeConstructorBinding)
-	    	
-	    	/** create call edge as this is a local context. */
-	    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
-    	
 	    	/**
 	    	 * node is the correct source node for evaluate, as all parameters are accessed inside of method and not the
 	    	 * instantiated constructor.
@@ -115,23 +118,27 @@ class JavaASTExpressionEvaluationHelper {
     def static void processMethodInvocation(MethodInvocation callee, Node sourceNode, 
     	ModularHypergraph graph, List<String> dataTypePatterns 
     ) {
-    	val calleeTypeBinding = callee.resolveMethodBinding.declaringClass
-    	/**
-    	 * If the class of this method is a data type class then ignore it, as methods of data type classes are operations
-    	 * like +, -, *, etc. and are not handled by the complexity measure.
-    	 */
-    	if (!calleeTypeBinding.isDataType(dataTypePatterns)) {
-    		val calleeMethodBinding = callee.resolveMethodBinding
-    		val targetNode = graph.findOrCreateTargetNode(calleeTypeBinding, calleeMethodBinding)
-    		
-	    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
-	    	
+    	val calleeMethodBinding = callee.resolveMethodBinding
+    	if (calleeMethodBinding != null) {
+	    	val calleeTypeBinding = calleeMethodBinding.declaringClass
 	    	/**
-	    	 * Parameter node is the correct source node to evaluate the parameters, as all parameters
-	    	 * are accessed inside of method and not the instantiated constructor.
+	    	 * If the class of this method is a data type class then ignore it, as methods of data type classes are operations
+	    	 * like +, -, *, etc. and are not handled by the complexity measure.
 	    	 */
-	    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
-    	}
+	    	if (!calleeTypeBinding.isDataType(dataTypePatterns)) {
+	    		val targetNode = graph.findOrCreateTargetNode(calleeTypeBinding, calleeMethodBinding)
+	    		
+		    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
+		    	
+		    	/**
+		    	 * Parameter node is the correct source node to evaluate the parameters, as all parameters
+		    	 * are accessed inside of method and not the instantiated constructor.
+		    	 */
+		    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
+	    	}
+	    } else {
+	    	throw new UnsupportedOperationException("Internal error: The method binding could not be resolved for " + callee.toString)
+	    }
     }
     
     /**
@@ -164,11 +171,15 @@ class JavaASTExpressionEvaluationHelper {
     	ModularHypergraph graph, List<String> dataTypePatterns
     ) {
 		val targetSuperMethodBinding = callee.resolveMethodBinding
-		val targetNode = findOrCreateTargetNode(graph, targetSuperMethodBinding.declaringClass, targetSuperMethodBinding)
-		handleCallEdgeInsertion(graph, sourceNode, targetNode)
-	   	callee.arguments.forEach[
-			(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)
-		]
+		if (targetSuperMethodBinding != null) {
+			val targetNode = findOrCreateTargetNode(graph, targetSuperMethodBinding.declaringClass, targetSuperMethodBinding)
+			handleCallEdgeInsertion(graph, sourceNode, targetNode)
+		   	callee.arguments.forEach[
+				(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)
+			]
+		} else {
+			throw new UnsupportedOperationException("Internal error: The method binding for a super call could not be resolved for " + callee.toString)
+		}
 	}
 	
 	

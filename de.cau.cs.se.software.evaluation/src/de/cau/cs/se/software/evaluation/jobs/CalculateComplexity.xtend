@@ -80,7 +80,7 @@ class CalculateComplexity {
 	}
 	
 	synchronized def deliverConnectedNodeHyperedgesOnlySizeResult(double size) {
-		this.monitor.worked(1)
 		complexity += size
+		monitor.worked(1)
 	}	
 }

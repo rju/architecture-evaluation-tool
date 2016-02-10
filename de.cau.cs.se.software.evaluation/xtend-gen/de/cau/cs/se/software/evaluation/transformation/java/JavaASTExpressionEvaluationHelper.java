@@ -99,25 +99,30 @@ public class JavaASTExpressionEvaluationHelper {
     boolean _not = (!_isDataType);
     if (_not) {
       final IMethodBinding calleeConstructorBinding = callee.resolveConstructorBinding();
-      boolean _isAnonymous = calleeTypeBinding.isAnonymous();
-      if (_isAnonymous) {
-        final Module module = JavaHypergraphElementFactory.createModuleForTypeBinding(calleeTypeBinding, EModuleKind.ANONYMOUS);
-        EList<Module> _modules = graph.getModules();
-        _modules.add(module);
-        AnonymousClassDeclaration _anonymousClassDeclaration = callee.getAnonymousClassDeclaration();
-        ITypeBinding _resolveBinding = _anonymousClassDeclaration.resolveBinding();
-        IMethodBinding[] _declaredMethods = _resolveBinding.getDeclaredMethods();
-        final Consumer<IMethodBinding> _function = (IMethodBinding anonMethod) -> {
-          final Node anonNode = JavaHypergraphElementFactory.createNodeForMethod(anonMethod);
-          EList<Node> _nodes = module.getNodes();
-          _nodes.add(anonNode);
-          EList<Node> _nodes_1 = graph.getNodes();
-          _nodes_1.add(anonNode);
-        };
-        ((List<IMethodBinding>)Conversions.doWrapArray(_declaredMethods)).forEach(_function);
+      boolean _notEquals = (!Objects.equal(calleeConstructorBinding, null));
+      if (_notEquals) {
+        boolean _isAnonymous = calleeTypeBinding.isAnonymous();
+        if (_isAnonymous) {
+          final Module module = JavaHypergraphElementFactory.createModuleForTypeBinding(calleeTypeBinding, EModuleKind.ANONYMOUS);
+          EList<Module> _modules = graph.getModules();
+          _modules.add(module);
+          AnonymousClassDeclaration _anonymousClassDeclaration = callee.getAnonymousClassDeclaration();
+          ITypeBinding _resolveBinding = _anonymousClassDeclaration.resolveBinding();
+          IMethodBinding[] _declaredMethods = _resolveBinding.getDeclaredMethods();
+          final Consumer<IMethodBinding> _function = (IMethodBinding anonMethod) -> {
+            final Node anonNode = JavaHypergraphElementFactory.createNodeForMethod(anonMethod);
+            EList<Node> _nodes = module.getNodes();
+            _nodes.add(anonNode);
+            EList<Node> _nodes_1 = graph.getNodes();
+            _nodes_1.add(anonNode);
+          };
+          ((List<IMethodBinding>)Conversions.doWrapArray(_declaredMethods)).forEach(_function);
+        }
+        final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeConstructorBinding);
+        JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
+      } else {
+        System.out.println(("processClassInstanceCreation " + callee));
       }
-      final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeConstructorBinding);
-      JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
       List _arguments = callee.arguments();
       final Consumer<Object> _function_1 = (Object argument) -> {
         JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
@@ -136,19 +141,25 @@ public class JavaASTExpressionEvaluationHelper {
    * @param dataTypePatterns a list of patterns to identify data types
    */
   public static void processMethodInvocation(final MethodInvocation callee, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
-    IMethodBinding _resolveMethodBinding = callee.resolveMethodBinding();
-    final ITypeBinding calleeTypeBinding = _resolveMethodBinding.getDeclaringClass();
-    boolean _isDataType = JavaHypergraphQueryHelper.isDataType(calleeTypeBinding, dataTypePatterns);
-    boolean _not = (!_isDataType);
-    if (_not) {
-      final IMethodBinding calleeMethodBinding = callee.resolveMethodBinding();
-      final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeMethodBinding);
-      JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
-      List _arguments = callee.arguments();
-      final Consumer<Object> _function = (Object argument) -> {
-        JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
-      };
-      _arguments.forEach(_function);
+    final IMethodBinding calleeMethodBinding = callee.resolveMethodBinding();
+    boolean _notEquals = (!Objects.equal(calleeMethodBinding, null));
+    if (_notEquals) {
+      final ITypeBinding calleeTypeBinding = calleeMethodBinding.getDeclaringClass();
+      boolean _isDataType = JavaHypergraphQueryHelper.isDataType(calleeTypeBinding, dataTypePatterns);
+      boolean _not = (!_isDataType);
+      if (_not) {
+        final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeMethodBinding);
+        JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
+        List _arguments = callee.arguments();
+        final Consumer<Object> _function = (Object argument) -> {
+          JavaASTExpressionEvaluation.evaluate(((Expression) argument), sourceNode, graph, dataTypePatterns);
+        };
+        _arguments.forEach(_function);
+      }
+    } else {
+      String _string = callee.toString();
+      String _plus = ("Internal error: The method binding could not be resolved for " + _string);
+      throw new UnsupportedOperationException(_plus);
     }
   }
   
@@ -193,14 +204,21 @@ public class JavaASTExpressionEvaluationHelper {
    */
   public static void processSuperMethodInvocation(final SuperMethodInvocation callee, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
     final IMethodBinding targetSuperMethodBinding = callee.resolveMethodBinding();
-    ITypeBinding _declaringClass = targetSuperMethodBinding.getDeclaringClass();
-    final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, _declaringClass, targetSuperMethodBinding);
-    JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
-    List _arguments = callee.arguments();
-    final Consumer<Object> _function = (Object it) -> {
-      JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
-    };
-    _arguments.forEach(_function);
+    boolean _notEquals = (!Objects.equal(targetSuperMethodBinding, null));
+    if (_notEquals) {
+      ITypeBinding _declaringClass = targetSuperMethodBinding.getDeclaringClass();
+      final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, _declaringClass, targetSuperMethodBinding);
+      JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
+      List _arguments = callee.arguments();
+      final Consumer<Object> _function = (Object it) -> {
+        JavaASTExpressionEvaluation.evaluate(((Expression) it), sourceNode, graph, dataTypePatterns);
+      };
+      _arguments.forEach(_function);
+    } else {
+      String _string = callee.toString();
+      String _plus = ("Internal error: The method binding for a super call could not be resolved for " + _string);
+      throw new UnsupportedOperationException(_plus);
+    }
   }
   
   /**
