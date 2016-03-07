@@ -23,6 +23,7 @@ class JavaHypergraphElementFactory {
 	 * @return one new module
 	 */
 	def static createModuleForTypeBinding(ITypeBinding type, EModuleKind kind) {
+		System.out.println("Module for type " + type.determineFullyQualifiedName)
 		val module = HypergraphFactory.eINSTANCE.createModule
 		module.name = type.determineFullyQualifiedName
 		module.kind = kind
