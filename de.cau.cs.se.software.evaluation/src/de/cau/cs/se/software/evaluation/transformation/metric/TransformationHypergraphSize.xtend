@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.hypergraph.EdgeTrace
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 /**
  * Calculate the information size of a hypergraph.
@@ -46,6 +47,9 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 
 	override generate(Hypergraph input) {
 		monitor.beginTask(this.name, (input.edges.size + input.nodes.size)*2 + input.nodes.size)
+		if (this.monitor.canceled)
+			return 0.0
+			
 		val systemGraph = createSystemGraph(input)
 		val table = systemGraph.createRowPatternTable(input)
 					
@@ -62,12 +66,14 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		var double size = 0
 		
 		for (var int i=0;i<system.nodes.size;i++) {
+			if (this.monitor.canceled)
+				return 0.0
 			monitor.worked(1)
 			val probability = table.patterns.lookupProbability(system.nodes.get(i), system)
 			if (probability > 0.0d) 
 				size+= (-log2(probability))
 			else
-				System.out.println("Disconnected component. Result is tainted.")
+				LogModelProvider.INSTANCE.addMessage("Hypergraph Model Error", "A component is disconnected, but should be connected. Result is tainted.")
 		}
 				
 		return size

@@ -44,12 +44,12 @@ import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
  * @author Yannic Kropp
  *
  */
-class ActionHandler {
+class AnalysisActionHandler {
 
 	/**
 	 * Default constructor.
 	 */
-	public ActionHandler() {
+	public AnalysisActionHandler() {
 		super();
 	}
 
@@ -77,7 +77,8 @@ class ActionHandler {
 				final BufferedWriter br = new BufferedWriter(new FileWriter(result));
 				final StringBuilder sb = new StringBuilder();
 				for (final TableItem element : table.getTable().getItems()) {
-					final NamedValue data = (NamedValue) (element.getData());
+					@SuppressWarnings("unchecked")
+					final NamedValue<Double> data = (NamedValue<Double>) (element.getData());
 					sb.append(data.getProjectName() + ";" + data.getPropertyName() + ";" + data.getValue() + "\n");
 				}
 				br.write(sb.toString());
@@ -150,7 +151,7 @@ class ActionHandler {
 	 * Delete the data in the view.
 	 */
 	protected void clearViewData(final AnalysisResultView view) {
-		ResultModelProvider.INSTANCE.clearValues();
+		AnalysisResultModelProvider.INSTANCE.clearValues();
 		view.update();
 	}
 

@@ -9,6 +9,7 @@ import static extension de.cau.cs.se.software.evaluation.transformation.Hypergra
 import java.util.HashMap
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Module
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 /**
  * Transform a hypergraph into a graph.
@@ -61,7 +62,7 @@ class TransformationHypergraphToGraphMapping extends AbstractTransformation<Modu
 				
 				result.edges += derivedEdge
 			} else {
-				System.out.println("unused edge " + connectedNodes.size + " " + edge.name)
+				LogModelProvider.INSTANCE.addMessage("Edge Warning", "The edge " + edge.name + " is not used. Connected nodes are " + connectedNodes.size)
 			}
 			
 		]

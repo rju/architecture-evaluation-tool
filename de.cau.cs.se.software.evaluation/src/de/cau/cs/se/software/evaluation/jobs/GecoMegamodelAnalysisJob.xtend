@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import de.cau.cs.se.geco.architecture.ArchitectureStandaloneSetup
 import de.cau.cs.se.geco.architecture.architecture.GecoModel
 import de.cau.cs.se.software.evaluation.transformation.geco.TransformationGecoMegamodelToHypergraph
-import de.cau.cs.se.software.evaluation.views.ResultModelProvider
+import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
@@ -15,7 +15,6 @@ import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Shell
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
-import de.cau.cs.se.software.evaluation.views.NamedValue
 
 /**
  * run job for the GECO megamodel evaluation.
@@ -44,15 +43,15 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		val Resource source = resourceSet.getResource(URI.createPlatformResourceURI(file.fullPath.toString, true), true)
 		
 		if (source.contents.size > 0) {
-			val result = ResultModelProvider.INSTANCE
+			val result = AnalysisResultModelProvider.INSTANCE
 			
 			val model = source.contents.get(0) as GecoModel
 			
 			val gecoMegamodel = new TransformationGecoMegamodelToHypergraph(monitor)
 			gecoMegamodel.generate(model)
 			
-			result.values.add(new NamedValue(project.name, "number of nodes", gecoMegamodel.result.nodes.size))
-			result.values.add(new NamedValue(project.name, "number of edges", gecoMegamodel.result.edges.size))
+			result.addResult(project.name, "number of nodes", gecoMegamodel.result.nodes.size)
+			result.addResult(project.name, "number of edges", gecoMegamodel.result.edges.size)
 			
 			calculateSize(gecoMegamodel.result, monitor, result)
 		

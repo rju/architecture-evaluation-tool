@@ -53,6 +53,10 @@ public class CalculateComplexity {
     Iterator<Node> _iterator = _nodes_1.iterator();
     this.globalHyperEdgesOnlyGraphNodes = _iterator;
     this.complexity = 0;
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return 0;
+    }
     final List<Job> jobs = new ArrayList<Job>();
     for (int j = 0; (j < CalculateComplexity.PARALLEL_TASKS); j++) {
       {
@@ -66,14 +70,22 @@ public class CalculateComplexity {
     size.setName("Determine Size(S^#)");
     Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
     size.generate(_result_1);
-    final Consumer<Job> _function = (Job it) -> {
+    boolean _isCanceled_1 = this.monitor.isCanceled();
+    if (_isCanceled_1) {
+      final Consumer<Job> _function = (Job it) -> {
+        it.cancel();
+      };
+      jobs.forEach(_function);
+      return 0.0;
+    }
+    final Consumer<Job> _function_1 = (Job it) -> {
       try {
         it.join();
       } catch (Throwable _e) {
         throw Exceptions.sneakyThrow(_e);
       }
     };
-    jobs.forEach(_function);
+    jobs.forEach(_function_1);
     double _complexity = this.complexity;
     Double _result_2 = size.getResult();
     this.complexity = (_complexity - (_result_2).doubleValue());

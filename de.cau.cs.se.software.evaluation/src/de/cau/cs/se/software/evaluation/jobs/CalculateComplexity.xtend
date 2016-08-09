@@ -47,6 +47,9 @@ class CalculateComplexity {
 		
 		complexity = 0
 		
+		if (this.monitor.canceled)
+			return 0
+		
 		val List<Job> jobs = new ArrayList<Job>()
 		
 		/** construct S^#_i and calculate the size of S^#_i */
@@ -61,6 +64,10 @@ class CalculateComplexity {
 		size.name = "Determine Size(S^#)"
 		size.generate(hyperedgesOnlyGraph.result)
 		
+		if (this.monitor.canceled) {
+			jobs.forEach[it.cancel]
+			return 0.0
+		}
 		/** wait for subtasks. */
 		jobs.forEach[it.join]
 

@@ -6,6 +6,7 @@ import java.util.List
 import org.eclipse.core.runtime.IProgressMonitor
 import java.util.ArrayList
 import org.eclipse.jdt.core.dom.TypeDeclaration
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 class TransformationCyclomaticComplexity extends AbstractTransformation<List<AbstractTypeDeclaration>, List<Integer>> {
 	
@@ -25,7 +26,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 		
 		input.filter(TypeDeclaration).forEach[type | type.checkMethods]
 		
-		for (var i=0;i<maxBucket;i++) 
+		for (var i=0;i<=topBucket;i++) 
 			result.add(buckets.get(i))
 		
 		return result
@@ -42,7 +43,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 					val int[] resizedBuckets = newIntArrayOfSize(maxBucket)
 					buckets.forEach[value, i| resizedBuckets.set(i, value)]
 					buckets = resizedBuckets
-					System.out.println("Resizing bucket number " + maxBucket + " for " + method.name + " to " + bucket)
+					LogModelProvider.INSTANCE.addMessage("Metric management", "Resizing bucket array to " + maxBucket + " for " + method.name + " with a complexity of " + bucket)
 				}
 				
 				if (bucket > topBucket) {

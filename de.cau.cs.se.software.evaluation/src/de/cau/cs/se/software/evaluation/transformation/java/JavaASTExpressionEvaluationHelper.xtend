@@ -26,9 +26,23 @@ import static extension de.cau.cs.se.software.evaluation.transformation.java.Jav
 import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.LambdaExpression
 import org.eclipse.jdt.core.dom.Block
-import org.eclipse.jdt.core.dom.IMethodBinding
+import org.eclipse.swt.widgets.Display
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.ui.PlatformUI
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 class JavaASTExpressionEvaluationHelper {
+
+
+	
+	private static def displayMessage(String title, String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			override run() {
+				val shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+				MessageDialog.openError(shell, title, message)
+		  	}
+		});
+	}
 	
 	/**
 	 * Process an field access to a field of the super class. Generate a connection to a data edge.
@@ -53,7 +67,11 @@ class JavaASTExpressionEvaluationHelper {
 				sourceNode.edges.add(edge)
 			}
 		} else {
-			// TODO this should not happen when the Java model is complete. Maybe issue a warning.
+			displayMessage("Java model incomplete","Field binding for " 
+				+ superFieldAccess.name 
+				+ " of node " + sourceNode.name 
+				+ " could not be resolved."
+			)
 			throw new UnsupportedOperationException("Field binding could not be resolved. Java model incomplete.")
 		}
 	}
@@ -95,7 +113,8 @@ class JavaASTExpressionEvaluationHelper {
 		    	/** create call edge as this is a local context. */
 		    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
     		} else {
-    			System.out.println("processClassInstanceCreation " + callee)
+    			displayMessage("Binding Error", "Callee constructor binding cannot be resolved in " 
+    				+ callee + " for node " + sourceNode.name)
     		}
 	    	/**
 	    	 * node is the correct source node for evaluate, as all parameters are accessed inside of method and not the
@@ -223,8 +242,14 @@ class JavaASTExpressionEvaluationHelper {
 					sourceNode.edges.add(edge)
 				}
 			}
-			default:
-				throw new UnsupportedOperationException("Binding type " + nameBinding.class + " is not supported by processSimpleName")
+			default: {
+				displayMessage("Missing Functionality", "Binding type " 
+					+ nameBinding.class 
+					+ " is not supported by processQualifiedName")
+				throw new UnsupportedOperationException("Binding type " 
+					+ nameBinding.class + " is not supported by processQualifiedName"
+				)
+			}
 		}
     }
 
@@ -247,7 +272,7 @@ class JavaASTExpressionEvaluationHelper {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge == null) {
 		    			// TODO how can this happen?
-		    			System.out.println("Missing edge for a data type property. " + 
+		    			LogModelProvider.INSTANCE.addMessage("Resolving Error", "Missing edge for a data type property. " + 
 		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
 		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
 		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
@@ -270,7 +295,7 @@ class JavaASTExpressionEvaluationHelper {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge == null) {
 		    			// TODO how can this happen?
-		    			System.out.println("Missing edge for a data type property. " + 
+		    			LogModelProvider.INSTANCE.addMessage("Resolving Error", "Missing edge for a data type property. " + 
 		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
 		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
 		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
@@ -283,10 +308,14 @@ class JavaASTExpressionEvaluationHelper {
 		    	}
 	    	}
 			// TODO other prefixes might contain method calls add evaluate here accordingly
-	    	default:
+	    	default: {
+	    		displayMessage("Missing Functionality", "Prefix type " 
+	    			+ prefix.class.name + " not supported "
+	    			+ JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
 	    		throw new UnsupportedOperationException("Prefix type " + prefix.class.name
 	    			+ " not supported " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
 	    		)
+	    	}
 	    }    	
     }
        	

@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Iterables;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
 import de.cau.cs.se.software.evaluation.transformation.CyclomaticComplexityVisitor;
+import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -42,7 +43,7 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
       this.checkMethods(type);
     };
     _filter.forEach(_function);
-    for (int i = 0; (i < this.maxBucket); i++) {
+    for (int i = 0; (i <= this.topBucket); i++) {
       int _get = this.buckets[i];
       this.result.add(Integer.valueOf(_get));
     }
@@ -69,10 +70,10 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
             IterableExtensions.<Integer>forEach(((Iterable<Integer>)Conversions.doWrapArray(this.buckets)), _function_1);
             this.buckets = resizedBuckets;
             SimpleName _name = method.getName();
-            String _plus = ((("Resizing bucket number " + Integer.valueOf(this.maxBucket)) + " for ") + _name);
-            String _plus_1 = (_plus + " to ");
+            String _plus = ((("Resizing bucket array to " + Integer.valueOf(this.maxBucket)) + " for ") + _name);
+            String _plus_1 = (_plus + " with a complexity of ");
             String _plus_2 = (_plus_1 + Integer.valueOf(bucket));
-            System.out.println(_plus_2);
+            LogModelProvider.INSTANCE.addMessage("Metric management", _plus_2);
           }
         }
         if ((bucket > this.topBucket)) {

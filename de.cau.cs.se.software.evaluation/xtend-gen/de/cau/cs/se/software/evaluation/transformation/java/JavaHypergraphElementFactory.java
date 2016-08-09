@@ -10,6 +10,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.TypeTrace;
 import de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper;
+import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -30,8 +31,7 @@ public class JavaHypergraphElementFactory {
    */
   public static Module createModuleForTypeBinding(final ITypeBinding type, final EModuleKind kind) {
     String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(type);
-    String _plus = ("Module for type " + _determineFullyQualifiedName);
-    System.out.println(_plus);
+    LogModelProvider.INSTANCE.addMessage("Module", _determineFullyQualifiedName);
     final Module module = HypergraphFactory.eINSTANCE.createModule();
     String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(type);
     module.setName(_determineFullyQualifiedName_1);

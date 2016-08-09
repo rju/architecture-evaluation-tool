@@ -24,13 +24,13 @@ import java.util.List;
  * @author Reiner Jung
  *
  */
-public enum ResultModelProvider {
+public enum AnalysisResultModelProvider {
 	INSTANCE;
 
-	private final List<NamedValue> values;
+	private final List<NamedValue<String>> values;
 
-	private ResultModelProvider() {
-		this.values = new ArrayList<NamedValue>();
+	private AnalysisResultModelProvider() {
+		this.values = new ArrayList<>();
 	}
 
 	/**
@@ -40,7 +40,19 @@ public enum ResultModelProvider {
 		this.values.clear();
 	}
 
-	public List<NamedValue> getValues() {
+	public void addResult(final String project, final String label, final Double value) {
+		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+	}
+
+	public void addResult(final String project, final String label, final int value) {
+		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+	}
+
+	public void addResult(final String project, final String label, final long value) {
+		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+	}
+
+	public List<NamedValue<String>> getValues() {
 		return this.values;
 	}
 }

@@ -1,7 +1,7 @@
 package de.cau.cs.se.software.evaluation.jobs
 
 import de.cau.cs.se.software.evaluation.transformation.emf.TransformationEMFInstanceToHypergraph
-import de.cau.cs.se.software.evaluation.views.ResultModelProvider
+import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
@@ -12,7 +12,6 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Shell
-import de.cau.cs.se.software.evaluation.views.NamedValue
 
 class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
@@ -32,16 +31,16 @@ class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		val Resource source = resourceSet.getResource(URI.createPlatformResourceURI(file.fullPath.toString, true), true)
 		
 		if (source.contents.size > 0) {
-			val result = ResultModelProvider.INSTANCE
+			val result = AnalysisResultModelProvider.INSTANCE
 			
 			val model = source.contents.get(0) as EPackage
 			
 			val emfMetaModel = new TransformationEMFInstanceToHypergraph(monitor)
 			emfMetaModel.generate(model)
 			
-			result.values.add(new NamedValue(project.name, "number of modules", emfMetaModel.result.modules.size))
-			result.values.add(new NamedValue(project.name, "number of nodes", emfMetaModel.result.nodes.size))
-			result.values.add(new NamedValue(project.name, "number of edges", emfMetaModel.result.edges.size))
+			result.addResult(project.name, "number of modules", emfMetaModel.result.modules.size)
+			result.addResult(project.name, "number of nodes", emfMetaModel.result.nodes.size)
+			result.addResult(project.name, "number of edges", emfMetaModel.result.edges.size)
 			
 			calculateSize(emfMetaModel.result, monitor, result)
 		

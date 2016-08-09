@@ -1,12 +1,10 @@
 package de.cau.cs.se.software.evaluation.jobs
 
-import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
-import org.eclipse.swt.widgets.Shell
 import org.eclipse.core.runtime.Status
-import de.cau.cs.se.software.evaluation.views.ResultModelProvider
-import de.cau.cs.se.software.evaluation.views.NamedValue
+import org.eclipse.swt.widgets.Shell
 
 class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
@@ -21,13 +19,13 @@ class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
 	}
 	
 	override protected run(IProgressMonitor monitor) {
-		val result = ResultModelProvider.INSTANCE
+		val result = AnalysisResultModelProvider.INSTANCE
 		
 		val generator = new CoCoMEMegaModel()
 		val graph = generator.createMegaModelAnalysis(complete)
 		
-		result.values.add(new NamedValue(project.name, "number of nodes", graph.nodes.size))
-		result.values.add(new NamedValue(project.name, "number of edges", graph.edges.size))
+		result.addResult(project.name, "number of nodes", graph.nodes.size)
+		result.addResult(project.name, "number of edges", graph.edges.size)
 		
 		updateView(graph)
 		

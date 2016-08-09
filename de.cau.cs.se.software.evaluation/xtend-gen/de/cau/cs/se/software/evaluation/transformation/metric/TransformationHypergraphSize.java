@@ -27,6 +27,7 @@ import de.cau.cs.se.software.evaluation.state.RowPatternTable;
 import de.cau.cs.se.software.evaluation.state.StateFactory;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
 import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
+import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
@@ -61,6 +62,10 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     int _size_2 = _nodes_1.size();
     int _plus_1 = (_multiply + _size_2);
     this.monitor.beginTask(this.name, _plus_1);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return Double.valueOf(0.0);
+    }
     final Hypergraph systemGraph = this.createSystemGraph(input);
     final RowPatternTable table = this.createRowPatternTable(systemGraph, input);
     double _calculateSize = this.calculateSize(systemGraph, table);
@@ -75,6 +80,10 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     double size = 0;
     for (int i = 0; (i < system.getNodes().size()); i++) {
       {
+        boolean _isCanceled = this.monitor.isCanceled();
+        if (_isCanceled) {
+          return 0.0;
+        }
         this.monitor.worked(1);
         EList<RowPattern> _patterns = table.getPatterns();
         EList<Node> _nodes = system.getNodes();
@@ -86,7 +95,7 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
           double _minus = (-_log2);
           size = (_size + _minus);
         } else {
-          System.out.println("Disconnected component. Result is tainted.");
+          LogModelProvider.INSTANCE.addMessage("Hypergraph Model Error", "A component is disconnected, but should be connected. Result is tainted.");
         }
       }
     }

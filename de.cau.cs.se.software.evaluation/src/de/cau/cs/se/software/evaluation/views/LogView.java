@@ -15,12 +15,8 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.views;
 
-import java.io.IOException;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -32,31 +28,26 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
 
 import de.cau.cs.se.software.evaluation.Activator;
-import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 
 /**
  * The Main analysis result view class.
  *
  * @author Reiner Jung
  */
-public class AnalysisResultView extends ViewPart {
+public class LogView extends ViewPart {
 
 	/**
 	 * The ID of the view as specified by the extension.
 	 */
-	public static final String ID = "de.cau.cs.se.software.evaluation.views.AnalysisResultView";
+	public static final String ID = "de.cau.cs.se.software.evaluation.views.LogView";
 
 	private TableViewer viewer;
-	private Action exportDataAction;
-	private Action exportHypergraphAction;
 	private Action clearViewAction;
-	private Hypergraph graph = null;
-	private IProject project = null;
 
 	/**
 	 * The constructor.
 	 */
-	public AnalysisResultView() {
+	public LogView() {
 		super();
 	}
 
@@ -82,7 +73,7 @@ public class AnalysisResultView extends ViewPart {
 		table.setLinesVisible(true);
 
 		this.viewer.setContentProvider(ArrayContentProvider.getInstance());
-		this.viewer.setInput(AnalysisResultModelProvider.INSTANCE.getValues());
+		this.viewer.setInput(LogModelProvider.INSTANCE.getMessages());
 
 		// define layout for the viewer
 		final GridData gridData = new GridData();
@@ -98,7 +89,7 @@ public class AnalysisResultView extends ViewPart {
 		// create a column for the first name
 		final TableViewerColumn columnProject = new TableViewerColumn(this.viewer, SWT.NONE);
 		columnProject.getColumn().setWidth(200);
-		columnProject.getColumn().setText("Project");
+		columnProject.getColumn().setText("Context");
 		columnProject.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
@@ -110,7 +101,7 @@ public class AnalysisResultView extends ViewPart {
 
 		final TableViewerColumn columnProperty = new TableViewerColumn(this.viewer, SWT.NONE);
 		columnProperty.getColumn().setWidth(400);
-		columnProperty.getColumn().setText("Property");
+		columnProperty.getColumn().setText("Fully qualified name");
 		columnProperty.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
@@ -140,41 +131,11 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createActions() {
 
-		final AnalysisActionHandler actionHandler = new AnalysisActionHandler();
-
-		this.exportDataAction = new Action("Data Export", Activator.getImageDescriptor("/icons/data-export.gif")) {
-			@Override
-			public void run() {
-				try {
-					actionHandler.exportData(AnalysisResultView.this.viewer,
-							AnalysisResultView.this.getSite().getShell(),
-							AnalysisResultView.this.project);
-				} catch (final IOException e) {
-					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
-							"Export Error", "Error exporting data set " + e.getLocalizedMessage());
-				}
-			}
-
-		};
-
-		this.exportHypergraphAction = new Action("Graph Export", Activator.getImageDescriptor("/icons/graph-export.gif")) {
-			@Override
-			public void run() {
-				try {
-					actionHandler.exportGraph(AnalysisResultView.this.graph,
-							AnalysisResultView.this.getSite().getShell(),
-							AnalysisResultView.this.project);
-				} catch (final IOException e) {
-					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
-							"Export Error", "Error exporting hypergraph " + e.getLocalizedMessage());
-				}
-			}
-		};
-
 		this.clearViewAction = new Action("Clear Data in View", Activator.getImageDescriptor("/icons/sample.gif")) {
 			@Override
 			public void run() {
-				actionHandler.clearViewData(AnalysisResultView.this);
+				LogModelProvider.INSTANCE.clearMessages();
+				LogView.this.update();
 			}
 		};
 
@@ -185,8 +146,6 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createToolbar() {
 		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
-		manager.add(this.exportDataAction);
-		manager.add(this.exportHypergraphAction);
 		manager.add(this.clearViewAction);
 	}
 
@@ -198,10 +157,6 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
-	public void setHypergraph(final Hypergraph graph) {
-		this.graph = graph;
-	}
-
 	/**
 	 * Trigger the update of the view based on the model data.
 	 */
@@ -210,7 +165,4 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.refresh();
 	}
 
-	public void setProject(final IProject project) {
-		this.project = project;
-	}
 }

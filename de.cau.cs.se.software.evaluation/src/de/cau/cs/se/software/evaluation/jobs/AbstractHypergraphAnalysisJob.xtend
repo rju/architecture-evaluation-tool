@@ -15,21 +15,20 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.jobs
 
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphToGraphMapping
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationMaximalInterconnectedGraph
+import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView
-import de.cau.cs.se.software.evaluation.views.NamedValue
-import de.cau.cs.se.software.evaluation.views.ResultModelProvider
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
-import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
-import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph
-import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphToGraphMapping
 
 /**
  * Abstract class implementing the basic metrics of the Edward B. Allen entropy
@@ -55,12 +54,12 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * 
 	 * @return the calculated information size of the hypergraph
 	 */
-	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
 		val hypergraphSize = new TransformationHypergraphSize(monitor)
 		hypergraphSize.name = "Calculate system size"
 		hypergraphSize.generate(inputHypergraph)
 
-		result.values.add(new NamedValue(project.project.name, "hypergraph size", hypergraphSize.result))
+		result.addResult(project.project.name, "hypergraph size", hypergraphSize.result)
 		updateView(inputHypergraph)
 		
 		return hypergraphSize.result
@@ -75,13 +74,13 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * 
 	 * @return the calculated complexity of the hypergraph
 	 */
-	protected def calculateComplexity(Hypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+	protected def calculateComplexity(Hypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
 		val calculateComplexity = new CalculateComplexity(monitor)
 
 		/** Calculation for S -> S^#, S^#_i */
 		val complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system's hypergraph complexity")
 		
-		result.values.add(new NamedValue(project.project.name, "hypergraph complexity", complexity))
+		result.addResult(project.project.name, "hypergraph complexity", complexity)
 		updateView(inputHypergraph)
 
 		return complexity
@@ -97,14 +96,14 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * 
 	 * @return the coupling of the modular inter-module hyperedges only hypergraph 
 	 */
-	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
 		/** Determine intermodule hyperedges only modular graph for MS^* */
 		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
 		intermoduleHyperedgesOnlyGraph.generate(inputHypergraph)
 
 		val calculateComplexity = new CalculateComplexity(monitor)
 		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
-		result.values.add(new NamedValue(project.project.name, "inter module coupling", complexityIntermodule))	
+		result.addResult(project.project.name, "inter module coupling", complexityIntermodule)	
 		updateView(inputHypergraph)
 	}
 	
@@ -120,7 +119,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * 
 	 * @return the cohesion of the modular inter-module hyperedges only hypergraph
 	 */
-	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, ResultModelProvider result) {
+	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
 		/** Determine graph mapping of the hypergraph */
 		val modularGraph = new TransformationHypergraphToGraphMapping(monitor)
 		modularGraph.generate(inputHypergraph)
@@ -147,7 +146,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val cohesion = coupling/complexityMaximalInterconnected
 		
 		/** display results */
-		result.values.add(new NamedValue(project.project.name, "graph cohesion", cohesion))
+		result.addResult(project.project.name, "graph cohesion", cohesion)
 		updateView(inputHypergraph)
 		
 		return cohesion

@@ -50,6 +50,10 @@ public class ConnectedNodeHyperedgeOnlySizeJob extends Job {
     final TransformationHypergraphSize hypergraphSize = new TransformationHypergraphSize(monitor);
     while ((!Objects.equal((node = this.parent.getNextConnectedNodeTask()), null))) {
       {
+        boolean _isCanceled = monitor.isCanceled();
+        if (_isCanceled) {
+          return Status.CANCEL_STATUS;
+        }
         monitor.beginTask(("Determine S^#_" + Integer.valueOf(i)), 0);
         connectedNodeHyperedgesOnlyGraph.setNode(node);
         hypergraphSize.setName((("Determine Size(S^#_" + Integer.valueOf(i)) + ")"));

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation
 import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.IVariableBinding
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 class JavaHypergraphElementFactory {
 		
@@ -23,7 +24,7 @@ class JavaHypergraphElementFactory {
 	 * @return one new module
 	 */
 	def static createModuleForTypeBinding(ITypeBinding type, EModuleKind kind) {
-		System.out.println("Module for type " + type.determineFullyQualifiedName)
+		LogModelProvider.INSTANCE.addMessage("Module", type.determineFullyQualifiedName)
 		val module = HypergraphFactory.eINSTANCE.createModule
 		module.name = type.determineFullyQualifiedName
 		module.kind = kind

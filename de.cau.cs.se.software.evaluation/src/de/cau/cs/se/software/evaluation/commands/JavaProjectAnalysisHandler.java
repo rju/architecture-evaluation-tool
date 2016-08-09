@@ -17,13 +17,16 @@ package de.cau.cs.se.software.evaluation.commands;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 
-import de.cau.cs.se.software.evaluation.jobs.CollectInputModelJob;
 import de.cau.cs.se.software.evaluation.jobs.JavaProjectAnalysisJob;
 
 /**
@@ -41,22 +44,39 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 
 	@Override
 	protected void executeCalculation(final ISelection selection, final IWorkbenchPage activePage, final Shell shell) throws ExecutionException {
-		final CollectInputModelJob collectInputModelJob = new CollectInputModelJob(selection, shell);
-		collectInputModelJob.schedule();
-		try {
-			collectInputModelJob.join();
-			if (collectInputModelJob.getResult() == Status.OK_STATUS) {
-				final Job job = new JavaProjectAnalysisJob(collectInputModelJob.getProject(),
-						collectInputModelJob.getClasses(),
-						collectInputModelJob.getDataTypePatterns(),
-						collectInputModelJob.getObservedSystemPatterns());
-				job.schedule();
-			}
-		} catch (final InterruptedException e1) {
-			e1.printStackTrace();
+		final IProject project = this.findProject(selection);
+		if (project != null) {
+			final Job job = new JavaProjectAnalysisJob(project, shell);
+			job.schedule();
 		}
 
 		this.createAnalysisView(activePage);
+		this.createLogView(activePage);
 	}
 
+	/**
+	 * Find java project.
+	 *
+	 * @param selection
+	 *            the selected Java project
+	 * @param monitor
+	 *            the progress monitor
+	 */
+	private IProject findProject(final ISelection selection) {
+		if (selection instanceof IStructuredSelection) {
+			if (selection instanceof ITreeSelection) {
+				final TreeSelection treeSelection = (TreeSelection) selection;
+
+				while (treeSelection.iterator().hasNext()) {
+					final Object selectedElement = treeSelection.iterator().next();
+					if (selectedElement instanceof IProject) {
+						return (IProject) selectedElement;
+					} else if (selectedElement instanceof IJavaProject) {
+						return ((IJavaProject) selectedElement).getProject();
+					}
+				}
+			}
+		}
+		return null;
+	}
 }

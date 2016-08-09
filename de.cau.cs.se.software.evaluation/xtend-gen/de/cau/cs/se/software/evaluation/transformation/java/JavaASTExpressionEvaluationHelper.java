@@ -12,6 +12,7 @@ import de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory;
 import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper;
+import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
@@ -33,10 +34,29 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.xbase.lib.Conversions;
 
 @SuppressWarnings("all")
 public class JavaASTExpressionEvaluationHelper {
+  private static void displayMessage(final String title, final String message) {
+    Display _default = Display.getDefault();
+    _default.asyncExec(new Runnable() {
+      @Override
+      public void run() {
+        IWorkbench _workbench = PlatformUI.getWorkbench();
+        IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
+        final Shell shell = _activeWorkbenchWindow.getShell();
+        MessageDialog.openError(shell, title, message);
+      }
+    });
+  }
+  
   /**
    * Process an field access to a field of the super class. Generate a connection to a data edge.
    * If the edge is missing, which implies this is a framework super class, then add the edge.
@@ -75,6 +95,13 @@ public class JavaASTExpressionEvaluationHelper {
         }
         _xifexpression = _xifexpression_1;
       } else {
+        SimpleName _name = superFieldAccess.getName();
+        String _plus = ("Field binding for " + _name);
+        String _plus_1 = (_plus + " of node ");
+        String _name_1 = sourceNode.getName();
+        String _plus_2 = (_plus_1 + _name_1);
+        String _plus_3 = (_plus_2 + " could not be resolved.");
+        JavaASTExpressionEvaluationHelper.displayMessage("Java model incomplete", _plus_3);
         throw new UnsupportedOperationException("Field binding could not be resolved. Java model incomplete.");
       }
       _xblockexpression = _xifexpression;
@@ -121,7 +148,9 @@ public class JavaASTExpressionEvaluationHelper {
         final Node targetNode = JavaHypergraphQueryHelper.findOrCreateTargetNode(graph, calleeTypeBinding, calleeConstructorBinding);
         JavaASTExpressionEvaluationHelper.handleCallEdgeInsertion(graph, sourceNode, targetNode);
       } else {
-        System.out.println(("processClassInstanceCreation " + callee));
+        String _name = sourceNode.getName();
+        String _plus = ((("Callee constructor binding cannot be resolved in " + callee) + " for node ") + _name);
+        JavaASTExpressionEvaluationHelper.displayMessage("Binding Error", _plus);
       }
       List _arguments = callee.arguments();
       final Consumer<Object> _function_1 = (Object argument) -> {
@@ -270,10 +299,16 @@ public class JavaASTExpressionEvaluationHelper {
       }
     }
     if (!_matched) {
-      Class<? extends IBinding> _class = nameBinding.getClass();
-      String _plus = ("Binding type " + _class);
-      String _plus_1 = (_plus + " is not supported by processSimpleName");
-      throw new UnsupportedOperationException(_plus_1);
+      {
+        Class<? extends IBinding> _class = nameBinding.getClass();
+        String _plus = ("Binding type " + _class);
+        String _plus_1 = (_plus + " is not supported by processQualifiedName");
+        JavaASTExpressionEvaluationHelper.displayMessage("Missing Functionality", _plus_1);
+        Class<? extends IBinding> _class_1 = nameBinding.getClass();
+        String _plus_2 = ("Binding type " + _class_1);
+        String _plus_3 = (_plus_2 + " is not supported by processQualifiedName");
+        throw new UnsupportedOperationException(_plus_3);
+      }
     }
   }
   
@@ -317,7 +352,7 @@ public class JavaASTExpressionEvaluationHelper {
               String _name = JavaASTExpressionEvaluationHelper.class.getName();
               String _plus_4 = (_plus_3 + _name);
               String _plus_5 = (_plus_4 + ".processFieldAccess");
-              System.out.println(_plus_5);
+              LogModelProvider.INSTANCE.addMessage("Resolving Error", _plus_5);
             } else {
               EList<Edge> _edges_1 = sourceNode.getEdges();
               _xifexpression_1 = _edges_1.add(edge);
@@ -360,7 +395,7 @@ public class JavaASTExpressionEvaluationHelper {
                 String _name = JavaASTExpressionEvaluationHelper.class.getName();
                 String _plus_4 = (_plus_3 + _name);
                 String _plus_5 = (_plus_4 + ".processFieldAccess");
-                System.out.println(_plus_5);
+                LogModelProvider.INSTANCE.addMessage("Resolving Error", _plus_5);
               } else {
                 EList<Edge> _edges_1 = sourceNode.getEdges();
                 _xifexpression_1 = _edges_1.add(edge);
@@ -373,14 +408,24 @@ public class JavaASTExpressionEvaluationHelper {
         }
       }
       if (!_matched) {
-        Class<? extends Expression> _class = prefix.getClass();
-        String _name = _class.getName();
-        String _plus = ("Prefix type " + _name);
-        String _plus_1 = (_plus + " not supported ");
-        String _name_1 = JavaASTExpressionEvaluationHelper.class.getName();
-        String _plus_2 = (_plus_1 + _name_1);
-        String _plus_3 = (_plus_2 + ".processFieldAccess");
-        throw new UnsupportedOperationException(_plus_3);
+        {
+          Class<? extends Expression> _class = prefix.getClass();
+          String _name = _class.getName();
+          String _plus = ("Prefix type " + _name);
+          String _plus_1 = (_plus + " not supported ");
+          String _name_1 = JavaASTExpressionEvaluationHelper.class.getName();
+          String _plus_2 = (_plus_1 + _name_1);
+          String _plus_3 = (_plus_2 + ".processFieldAccess");
+          JavaASTExpressionEvaluationHelper.displayMessage("Missing Functionality", _plus_3);
+          Class<? extends Expression> _class_1 = prefix.getClass();
+          String _name_2 = _class_1.getName();
+          String _plus_4 = ("Prefix type " + _name_2);
+          String _plus_5 = (_plus_4 + " not supported ");
+          String _name_3 = JavaASTExpressionEvaluationHelper.class.getName();
+          String _plus_6 = (_plus_5 + _name_3);
+          String _plus_7 = (_plus_6 + ".processFieldAccess");
+          throw new UnsupportedOperationException(_plus_7);
+        }
       }
       _xblockexpression = _switchResult;
     }

@@ -24,10 +24,8 @@ import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHype
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationMaximalInterconnectedGraph;
+import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider;
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView;
-import de.cau.cs.se.software.evaluation.views.NamedValue;
-import de.cau.cs.se.software.evaluation.views.ResultModelProvider;
-import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -64,16 +62,14 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the calculated information size of the hypergraph
    */
-  protected Double calculateSize(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+  protected Double calculateSize(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationHypergraphSize hypergraphSize = new TransformationHypergraphSize(monitor);
     hypergraphSize.setName("Calculate system size");
     hypergraphSize.generate(inputHypergraph);
-    List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     Double _result = hypergraphSize.getResult();
-    NamedValue _namedValue = new NamedValue(_name, "hypergraph size", (_result).doubleValue());
-    _values.add(_namedValue);
+    result.addResult(_name, "hypergraph size", _result);
     this.updateView(inputHypergraph);
     return hypergraphSize.getResult();
   }
@@ -87,14 +83,12 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the calculated complexity of the hypergraph
    */
-  protected double calculateComplexity(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+  protected double calculateComplexity(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     final double complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system\'s hypergraph complexity");
-    List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
-    NamedValue _namedValue = new NamedValue(_name, "hypergraph complexity", complexity);
-    _values.add(_namedValue);
+    result.addResult(_name, "hypergraph complexity", Double.valueOf(complexity));
     this.updateView(inputHypergraph);
     return complexity;
   }
@@ -109,17 +103,15 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the coupling of the modular inter-module hyperedges only hypergraph
    */
-  protected void calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+  protected void calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationIntermoduleHyperedgesOnlyGraph intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor);
     intermoduleHyperedgesOnlyGraph.generate(inputHypergraph);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     ModularHypergraph _result = intermoduleHyperedgesOnlyGraph.getResult();
     final double complexityIntermodule = calculateComplexity.calculate(_result, "Calculate intermodule complexity");
-    List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
-    NamedValue _namedValue = new NamedValue(_name, "inter module coupling", complexityIntermodule);
-    _values.add(_namedValue);
+    result.addResult(_name, "inter module coupling", Double.valueOf(complexityIntermodule));
     this.updateView(inputHypergraph);
   }
   
@@ -134,7 +126,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    * 
    * @return the cohesion of the modular inter-module hyperedges only hypergraph
    */
-  protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final ResultModelProvider result) {
+  protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationHypergraphToGraphMapping modularGraph = new TransformationHypergraphToGraphMapping(monitor);
     modularGraph.generate(inputHypergraph);
     final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
@@ -151,11 +143,9 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
     final double coupling = calculateComplexity.calculate(_result_3, 
       "Calculate maximal interconnected graph complexity");
     final double cohesion = (coupling / complexityMaximalInterconnected);
-    List<NamedValue> _values = result.getValues();
     IProject _project = this.project.getProject();
     String _name = _project.getName();
-    NamedValue _namedValue = new NamedValue(_name, "graph cohesion", cohesion);
-    _values.add(_namedValue);
+    result.addResult(_name, "graph cohesion", Double.valueOf(cohesion));
     this.updateView(inputHypergraph);
     return cohesion;
   }

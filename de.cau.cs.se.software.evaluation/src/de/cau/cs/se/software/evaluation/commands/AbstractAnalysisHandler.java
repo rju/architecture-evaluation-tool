@@ -12,6 +12,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView;
+import de.cau.cs.se.software.evaluation.views.LogView;
 
 public abstract class AbstractAnalysisHandler extends AbstractHandler implements IHandler {
 
@@ -39,7 +40,21 @@ public abstract class AbstractAnalysisHandler extends AbstractHandler implements
 		try {
 			activePage.showView(AnalysisResultView.ID);
 		} catch (final PartInitException e) {
-			throw new ExecutionException("View initialization failed.", e);
+			throw new ExecutionException(AnalysisResultView.ID + "View initialization failed.", e);
+		}
+	}
+
+	/**
+	 * Start log view.
+	 *
+	 * @param activePage
+	 * @throws ExecutionException
+	 */
+	protected void createLogView(final IWorkbenchPage activePage) throws ExecutionException {
+		try {
+			activePage.showView(LogView.ID);
+		} catch (final PartInitException e) {
+			throw new ExecutionException(LogView.ID + "View initialization failed.", e);
 		}
 	}
 

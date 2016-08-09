@@ -15,6 +15,13 @@
             class="de.cau.cs.se.software.evaluation.views.AnalysisResultView"
             id="de.cau.cs.se.software.evaluation.views.AnalysisResultView">
       </view>
+      <view
+            category="de.cau.cs.se.software.evaluation"
+            class="de.cau.cs.se.software.evaluation.views.LogView"
+            icon="icons/sample.gif"
+            id="de.cau.cs.se.software.evaluation.views.LogView"
+            name="Analysis Log View">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">

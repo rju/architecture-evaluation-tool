@@ -7,6 +7,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
 import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
+import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import java.util.HashMap;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -111,12 +112,12 @@ public class TransformationHypergraphToGraphMapping extends AbstractTransformati
             EList<Edge> _edges_6 = this.result.getEdges();
             _edges_6.add(derivedEdge_1);
           } else {
-            int _size_3 = IterableExtensions.size(connectedNodes);
-            String _plus = ("unused edge " + Integer.valueOf(_size_3));
-            String _plus_1 = (_plus + " ");
             String _name_1 = edge.getName();
-            String _plus_2 = (_plus_1 + _name_1);
-            System.out.println(_plus_2);
+            String _plus = ("The edge " + _name_1);
+            String _plus_1 = (_plus + " is not used. Connected nodes are ");
+            int _size_3 = IterableExtensions.size(connectedNodes);
+            String _plus_2 = (_plus_1 + Integer.valueOf(_size_3));
+            LogModelProvider.INSTANCE.addMessage("Edge Warning", _plus_2);
           }
         }
       }
