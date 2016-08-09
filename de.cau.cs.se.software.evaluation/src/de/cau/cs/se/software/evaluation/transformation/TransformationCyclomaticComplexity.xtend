@@ -9,10 +9,12 @@ import org.eclipse.jdt.core.dom.TypeDeclaration
 
 class TransformationCyclomaticComplexity extends AbstractTransformation<List<AbstractTypeDeclaration>, List<Integer>> {
 	
-	val MAX_BUCKET = 100
-	
+	val START_BUCKET = 100
+	val MORE_BUCKET = 100
+		
+	var maxBucket = START_BUCKET
 	var topBucket = 0
-	val int[] buckets = newIntArrayOfSize(MAX_BUCKET)
+	var int[] buckets = newIntArrayOfSize(maxBucket)
 	
 	new(IProgressMonitor monitor) {
 		super(monitor)
@@ -23,7 +25,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 		
 		input.filter(TypeDeclaration).forEach[type | type.checkMethods]
 		
-		for (var i=0;i<=topBucket;i++) 
+		for (var i=0;i<maxBucket;i++) 
 			result.add(buckets.get(i))
 		
 		return result
@@ -35,11 +37,18 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 				val visitor = new CyclomaticComplexityVisitor("")
 				method.accept(visitor)
 				var bucket = visitor.cyclomatic
-				if (bucket > MAX_BUCKET)
-					bucket = MAX_BUCKET
+				while (bucket >= maxBucket) {
+					maxBucket += MORE_BUCKET
+					val int[] resizedBuckets = newIntArrayOfSize(maxBucket)
+					buckets.forEach[value, i| resizedBuckets.set(i, value)]
+					buckets = resizedBuckets
+					System.out.println("Resizing bucket number " + maxBucket + " for " + method.name)
+				}
+				
 				if (bucket > topBucket) {
 					topBucket = bucket
 				}
+				
 				buckets.set(bucket, buckets.get(bucket) + 1)
 			}
 		]

@@ -11,16 +11,23 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.xtext.xbase.lib.Conversions;
+import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 
 @SuppressWarnings("all")
 public class TransformationCyclomaticComplexity extends AbstractTransformation<List<AbstractTypeDeclaration>, List<Integer>> {
-  private final int MAX_BUCKET = 100;
+  private final int START_BUCKET = 100;
+  
+  private final int MORE_BUCKET = 100;
+  
+  private int maxBucket = this.START_BUCKET;
   
   private int topBucket = 0;
   
-  private final int[] buckets = new int[this.MAX_BUCKET];
+  private int[] buckets = new int[this.maxBucket];
   
   public TransformationCyclomaticComplexity(final IProgressMonitor monitor) {
     super(monitor);
@@ -35,7 +42,7 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
       this.checkMethods(type);
     };
     _filter.forEach(_function);
-    for (int i = 0; (i <= this.topBucket); i++) {
+    for (int i = 0; (i < this.maxBucket); i++) {
       int _get = this.buckets[i];
       this.result.add(Integer.valueOf(_get));
     }
@@ -51,8 +58,20 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
         final CyclomaticComplexityVisitor visitor = new CyclomaticComplexityVisitor("");
         method.accept(visitor);
         int bucket = visitor.getCyclomatic();
-        if ((bucket > this.MAX_BUCKET)) {
-          bucket = this.MAX_BUCKET;
+        while ((bucket >= this.maxBucket)) {
+          {
+            int _maxBucket = this.maxBucket;
+            this.maxBucket = (_maxBucket + this.MORE_BUCKET);
+            final int[] resizedBuckets = new int[this.maxBucket];
+            final Procedure2<Integer, Integer> _function_1 = (Integer value, Integer i) -> {
+              resizedBuckets[(i).intValue()] = (value).intValue();
+            };
+            IterableExtensions.<Integer>forEach(((Iterable<Integer>)Conversions.doWrapArray(this.buckets)), _function_1);
+            this.buckets = resizedBuckets;
+            SimpleName _name = method.getName();
+            String _plus = ((("Resizing bucket number " + Integer.valueOf(this.maxBucket)) + " for ") + _name);
+            System.out.println(_plus);
+          }
         }
         if ((bucket > this.topBucket)) {
           this.topBucket = bucket;
