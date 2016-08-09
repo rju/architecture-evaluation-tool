@@ -136,15 +136,7 @@ public class CoCoMEMegaModel {
       };
       final Node targetNode = IterableExtensions.<Node>findFirst(_nodes_1, _function_1);
       boolean _xifexpression = false;
-      boolean _and = false;
-      boolean _notEquals = (!Objects.equal(sourceNode, null));
-      if (!_notEquals) {
-        _and = false;
-      } else {
-        boolean _notEquals_1 = (!Objects.equal(targetNode, null));
-        _and = _notEquals_1;
-      }
-      if (_and) {
+      if (((!Objects.equal(sourceNode, null)) && (!Objects.equal(targetNode, null)))) {
         boolean _xblockexpression_1 = false;
         {
           final Edge edge = HypergraphFactory.eINSTANCE.createEdge();

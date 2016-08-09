@@ -16,24 +16,19 @@
 package de.cau.cs.se.software.evaluation.graph
 
 import com.google.common.collect.ImmutableList
-import de.cau.cs.kieler.core.kgraph.KNode
-import de.cau.cs.kieler.core.krendering.HorizontalAlignment
-import de.cau.cs.kieler.core.krendering.KRenderingFactory
-import de.cau.cs.kieler.core.krendering.LineStyle
-import de.cau.cs.kieler.core.krendering.VerticalAlignment
-import de.cau.cs.kieler.core.krendering.extensions.KColorExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KContainerRenderingExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KEdgeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KLabelExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions
-import de.cau.cs.kieler.kiml.options.Direction
-import de.cau.cs.kieler.kiml.options.EdgeRouting
-import de.cau.cs.kieler.kiml.options.LayoutOptions
-import de.cau.cs.kieler.klay.layered.properties.Properties
 import de.cau.cs.kieler.klighd.SynthesisOption
+import de.cau.cs.kieler.klighd.krendering.HorizontalAlignment
+import de.cau.cs.kieler.klighd.krendering.KRenderingFactory
+import de.cau.cs.kieler.klighd.krendering.LineStyle
+import de.cau.cs.kieler.klighd.krendering.VerticalAlignment
+import de.cau.cs.kieler.klighd.krendering.extensions.KColorExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KContainerRenderingExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KEdgeExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KLabelExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KNodeExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KPolylineExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KPortExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KRenderingExtensions
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
@@ -41,6 +36,10 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 import java.util.HashMap
 import java.util.Map
 import javax.inject.Inject
+import org.eclipse.elk.alg.layered.properties.LayeredOptions
+import org.eclipse.elk.core.options.Direction
+import org.eclipse.elk.core.options.EdgeRouting
+import org.eclipse.elk.graph.KNode
 
 class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
     
@@ -98,19 +97,20 @@ class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
         val root = hypergraph.createNode().associateWith(hypergraph);
                 
         root => [
+        	// TODO the merging must be false
             // de.cau.cs.kieler.klay.layered.properties.Properties
-            it.setLayoutOption(Properties.MERGE_EDGES, false)
-            it.setLayoutOption(LayoutOptions.LAYOUT_HIERARCHY, false)
-            it.setLayoutOption(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.circular")	
+            // it.setLayoutOption(Properties.MERGE_EDGES, false)
+            it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, false)
+//            it.setLayoutOption(LayeredOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.circular")	
 
-            it.setLayoutOption(LayoutOptions::SPACING, SPACING.objectValue as Float)
-            it.setLayoutOption(LayoutOptions::DIRECTION, switch(DIRECTION.objectValue) {
+            it.setLayoutOption(LayeredOptions::SPACING_NODE, SPACING.objectValue as Float)
+            it.setLayoutOption(LayeredOptions::DIRECTION, switch(DIRECTION.objectValue) {
             	case DIRECTION_UP: Direction::UP
             	case DIRECTION_DOWN: Direction::DOWN
             	case DIRECTION_LEFT: Direction::LEFT
             	case DIRECTION_RIGHT: Direction::RIGHT
             })
-            it.setLayoutOption(LayoutOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
+            it.setLayoutOption(LayeredOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
             	case ROUTING_POLYLINE: EdgeRouting::POLYLINE
             	case ROUTING_ORTHOGONAL: EdgeRouting::ORTHOGONAL
             	case ROUTING_SPLINES: EdgeRouting::SPLINES

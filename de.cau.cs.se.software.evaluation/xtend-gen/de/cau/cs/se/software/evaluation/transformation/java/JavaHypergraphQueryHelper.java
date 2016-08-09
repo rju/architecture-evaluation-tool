@@ -40,12 +40,10 @@ public class JavaHypergraphQueryHelper {
         final NodeReference derivedFrom = it.getDerivedFrom();
         boolean _switchResult = false;
         boolean _matched = false;
-        if (!_matched) {
-          if (derivedFrom instanceof MethodTrace) {
-            _matched=true;
-            Object _method = ((MethodTrace)derivedFrom).getMethod();
-            _switchResult = ((IMethodBinding) _method).isEqualTo(binding);
-          }
+        if (derivedFrom instanceof MethodTrace) {
+          _matched=true;
+          Object _method = ((MethodTrace)derivedFrom).getMethod();
+          _switchResult = ((IMethodBinding) _method).isEqualTo(binding);
         }
         if (!_matched) {
           if (derivedFrom instanceof TypeTrace) {
@@ -84,11 +82,9 @@ public class JavaHypergraphQueryHelper {
             final NodeReference derivedFrom = it.getDerivedFrom();
             boolean _switchResult = false;
             boolean _matched = false;
-            if (!_matched) {
-              if (derivedFrom instanceof MethodTrace) {
-                _matched=true;
-                _switchResult = false;
-              }
+            if (derivedFrom instanceof MethodTrace) {
+              _matched=true;
+              _switchResult = false;
             }
             if (!_matched) {
               if (derivedFrom instanceof TypeTrace) {
@@ -156,29 +152,7 @@ public class JavaHypergraphQueryHelper {
           Object _caller = trace.getCaller();
           final IMethodBinding caller = ((IMethodBinding) _caller);
           boolean _xifexpression_1 = false;
-          boolean _or = false;
-          boolean _and = false;
-          boolean _isEqualTo = caller.isEqualTo(endOne);
-          if (!_isEqualTo) {
-            _and = false;
-          } else {
-            boolean _isEqualTo_1 = callee.isEqualTo(endTwo);
-            _and = _isEqualTo_1;
-          }
-          if (_and) {
-            _or = true;
-          } else {
-            boolean _and_1 = false;
-            boolean _isEqualTo_2 = caller.isEqualTo(endTwo);
-            if (!_isEqualTo_2) {
-              _and_1 = false;
-            } else {
-              boolean _isEqualTo_3 = callee.isEqualTo(endOne);
-              _and_1 = _isEqualTo_3;
-            }
-            _or = _and_1;
-          }
-          if (_or) {
+          if (((caller.isEqualTo(endOne) && callee.isEqualTo(endTwo)) || (caller.isEqualTo(endTwo) && callee.isEqualTo(endOne)))) {
             _xifexpression_1 = true;
           } else {
             _xifexpression_1 = false;
@@ -266,18 +240,7 @@ public class JavaHypergraphQueryHelper {
   public static IVariableBinding findDataPropertyInClass(final SimpleName property, final ITypeBinding typeBinding, final List<String> dataTypePatterns) {
     IVariableBinding[] _declaredFields = typeBinding.getDeclaredFields();
     final Function1<IVariableBinding, Boolean> _function = (IVariableBinding it) -> {
-      boolean _and = false;
-      String _name = it.getName();
-      String _fullyQualifiedName = property.getFullyQualifiedName();
-      boolean _equals = _name.equals(_fullyQualifiedName);
-      if (!_equals) {
-        _and = false;
-      } else {
-        ITypeBinding _type = it.getType();
-        boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_type, dataTypePatterns);
-        _and = _isDataType;
-      }
-      return Boolean.valueOf(_and);
+      return Boolean.valueOf((it.getName().equals(property.getFullyQualifiedName()) && JavaHypergraphQueryHelper.isDataType(it.getType(), dataTypePatterns)));
     };
     return IterableExtensions.<IVariableBinding>findFirst(((Iterable<IVariableBinding>)Conversions.doWrapArray(_declaredFields)), _function);
   }

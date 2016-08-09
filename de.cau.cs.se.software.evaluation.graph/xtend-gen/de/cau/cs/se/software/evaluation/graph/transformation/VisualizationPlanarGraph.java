@@ -1,6 +1,7 @@
 package de.cau.cs.se.software.evaluation.graph.transformation;
 
 import com.google.common.base.Objects;
+import de.cau.cs.se.geco.architecture.framework.IGenerator;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarVisualizationGraph;
@@ -18,7 +19,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
 @SuppressWarnings("all")
-public class VisualizationPlanarGraph /* implements IGenerator<ModularHypergraph, PlanarVisualizationGraph>  */{
+public class VisualizationPlanarGraph implements IGenerator<ModularHypergraph, PlanarVisualizationGraph> {
   @Override
   public PlanarVisualizationGraph generate(final ModularHypergraph input) {
     final PlanarVisualizationGraph result = TransformationFactory.eINSTANCE.createPlanarVisualizationGraph();

@@ -137,28 +137,20 @@ public class CollectInputModelJob extends Job {
         final TreeSelection treeSelection = ((TreeSelection) this.selection);
         Iterator _iterator = treeSelection.iterator();
         final Function1<Object, Boolean> _function = (Object element) -> {
-          boolean _or = false;
-          if ((element instanceof IProject)) {
-            _or = true;
-          } else {
-            _or = (element instanceof IJavaProject);
-          }
-          return Boolean.valueOf(_or);
+          return Boolean.valueOf(((element instanceof IProject) || (element instanceof IJavaProject)));
         };
         final Object selectedElement = IteratorExtensions.<Object>findFirst(_iterator, _function);
         boolean _notEquals = (!Objects.equal(selectedElement, null));
         if (_notEquals) {
           boolean _matched = false;
-          if (!_matched) {
-            if (selectedElement instanceof IProject) {
-              _matched=true;
-              IJavaProject _javaProject = this.getJavaProject(((IProject)selectedElement));
-              List<IType> _scanForClasses = null;
-              if (_javaProject!=null) {
-                _scanForClasses=this.scanForClasses(_javaProject, monitor);
-              }
-              return _scanForClasses;
+          if (selectedElement instanceof IProject) {
+            _matched=true;
+            IJavaProject _javaProject = this.getJavaProject(((IProject)selectedElement));
+            List<IType> _scanForClasses = null;
+            if (_javaProject!=null) {
+              _scanForClasses=this.scanForClasses(_javaProject, monitor);
             }
+            return _scanForClasses;
           }
           if (!_matched) {
             if (selectedElement instanceof IJavaProject) {
@@ -307,7 +299,7 @@ public class CollectInputModelJob extends Job {
       boolean _exists = IterableExtensions.<String>exists(this.observedSystemPatterns, _function);
       if (_exists) {
         monitor.subTask(("Parsing " + outerTypeName));
-        final Hashtable options = JavaCore.getOptions();
+        final Hashtable<String, String> options = JavaCore.getOptions();
         JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
         final ASTParser parser = ASTParser.newParser(AST.JLS8);
         parser.setProject(this.project);

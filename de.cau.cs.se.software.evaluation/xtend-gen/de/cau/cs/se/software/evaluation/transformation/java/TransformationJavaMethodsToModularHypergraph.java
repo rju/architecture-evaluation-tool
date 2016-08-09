@@ -173,18 +173,7 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
   private boolean hasImplicitConstructor(final AbstractTypeDeclaration type) {
     if ((type instanceof TypeDeclaration)) {
       final TypeDeclaration clazz = ((TypeDeclaration) type);
-      boolean _and = false;
-      boolean _isInterface = clazz.isInterface();
-      boolean _not = (!_isInterface);
-      if (!_not) {
-        _and = false;
-      } else {
-        int _modifiers = clazz.getModifiers();
-        boolean _isAbstract = Modifier.isAbstract(_modifiers);
-        boolean _not_1 = (!_isAbstract);
-        _and = _not_1;
-      }
-      if (_and) {
+      if (((!clazz.isInterface()) && (!Modifier.isAbstract(clazz.getModifiers())))) {
         MethodDeclaration[] _methods = clazz.getMethods();
         final Function1<MethodDeclaration, Boolean> _function = (MethodDeclaration method) -> {
           return Boolean.valueOf(method.isConstructor());
@@ -258,12 +247,10 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
    */
   private boolean isDataType(final Type type, final List<String> dataTypePatterns) {
     boolean _matched = false;
-    if (!_matched) {
-      if (type instanceof ArrayType) {
-        _matched=true;
-        Type _elementType = ((ArrayType)type).getElementType();
-        return this.isDataType(_elementType, dataTypePatterns);
-      }
+    if (type instanceof ArrayType) {
+      _matched=true;
+      Type _elementType = ((ArrayType)type).getElementType();
+      return this.isDataType(_elementType, dataTypePatterns);
     }
     if (!_matched) {
       if (type instanceof ParameterizedType) {

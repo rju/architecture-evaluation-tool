@@ -62,18 +62,7 @@ public class JavaASTEvaluation {
    * @param method the method to be evaluated for property access and method calls
    */
   public static void evaluteMethod(final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode, final TypeDeclaration clazz, final MethodDeclaration method) {
-    boolean _and = false;
-    boolean _isInterface = clazz.isInterface();
-    boolean _not = (!_isInterface);
-    if (!_not) {
-      _and = false;
-    } else {
-      int _modifiers = method.getModifiers();
-      boolean _isAbstract = Modifier.isAbstract(_modifiers);
-      boolean _not_1 = (!_isAbstract);
-      _and = _not_1;
-    }
-    if (_and) {
+    if (((!clazz.isInterface()) && (!Modifier.isAbstract(method.getModifiers())))) {
       Block _body = method.getBody();
       List _statements = _body.statements();
       boolean _notEquals = (!Objects.equal(_statements, null));
@@ -100,12 +89,10 @@ public class JavaASTEvaluation {
    */
   public static void evaluateStatement(final Statement statement, final ModularHypergraph graph, final List<String> dataTypePatterns, final Node sourceNode) {
     boolean _matched = false;
-    if (!_matched) {
-      if (statement instanceof AssertStatement) {
-        _matched=true;
-        Expression _expression = ((AssertStatement)statement).getExpression();
-        JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
-      }
+    if (statement instanceof AssertStatement) {
+      _matched=true;
+      Expression _expression = ((AssertStatement)statement).getExpression();
+      JavaASTExpressionEvaluation.evaluate(_expression, sourceNode, graph, dataTypePatterns);
     }
     if (!_matched) {
       if (statement instanceof Block) {
@@ -322,13 +309,11 @@ public class JavaASTEvaluation {
           final Object type = ((TypeTrace) _derivedFrom_1).getType();
           boolean _switchResult = false;
           boolean _matched = false;
-          if (!_matched) {
-            if (type instanceof TypeDeclaration) {
-              _matched=true;
-              ITypeBinding _resolveBinding = ((TypeDeclaration)type).resolveBinding();
-              ITypeBinding _declaringClass = targetMethodBinding.getDeclaringClass();
-              _switchResult = _resolveBinding.isSubTypeCompatible(_declaringClass);
-            }
+          if (type instanceof TypeDeclaration) {
+            _matched=true;
+            ITypeBinding _resolveBinding = ((TypeDeclaration)type).resolveBinding();
+            ITypeBinding _declaringClass = targetMethodBinding.getDeclaringClass();
+            _switchResult = _resolveBinding.isSubTypeCompatible(_declaringClass);
           }
           if (!_matched) {
             if (type instanceof ITypeBinding) {
@@ -367,12 +352,10 @@ public class JavaASTEvaluation {
             final Object localMethod = ((MethodTrace) _derivedFrom_2).getMethod();
             boolean _switchResult = false;
             boolean _matched = false;
-            if (!_matched) {
-              if (localMethod instanceof MethodDeclaration) {
-                _matched=true;
-                IMethodBinding _resolveBinding = ((MethodDeclaration)localMethod).resolveBinding();
-                _switchResult = _resolveBinding.isSubsignature(targetMethodBinding);
-              }
+            if (localMethod instanceof MethodDeclaration) {
+              _matched=true;
+              IMethodBinding _resolveBinding = ((MethodDeclaration)localMethod).resolveBinding();
+              _switchResult = _resolveBinding.isSubsignature(targetMethodBinding);
             }
             if (!_matched) {
               if (localMethod instanceof IMethodBinding) {

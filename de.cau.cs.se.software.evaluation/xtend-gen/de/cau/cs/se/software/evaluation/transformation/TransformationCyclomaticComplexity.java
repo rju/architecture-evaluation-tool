@@ -70,7 +70,9 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
             this.buckets = resizedBuckets;
             SimpleName _name = method.getName();
             String _plus = ((("Resizing bucket number " + Integer.valueOf(this.maxBucket)) + " for ") + _name);
-            System.out.println(_plus);
+            String _plus_1 = (_plus + " to ");
+            String _plus_2 = (_plus_1 + Integer.valueOf(bucket));
+            System.out.println(_plus_2);
           }
         }
         if ((bucket > this.topBucket)) {

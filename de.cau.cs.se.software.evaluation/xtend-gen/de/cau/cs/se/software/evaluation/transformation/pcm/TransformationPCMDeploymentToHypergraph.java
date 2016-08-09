@@ -54,11 +54,9 @@ public class TransformationPCMDeploymentToHypergraph extends AbstractTransformat
         EList<RequiredRole> _requiredRoles_InterfaceRequiringEntity = ((BasicComponent)component).getRequiredRoles_InterfaceRequiringEntity();
         final Consumer<RequiredRole> _function_2 = (RequiredRole required) -> {
           boolean _matched = false;
-          if (!_matched) {
-            if (required instanceof OperationRequiredRole) {
-              _matched=true;
-              ((OperationRequiredRole)required).getRequiredInterface__OperationRequiredRole();
-            }
+          if (required instanceof OperationRequiredRole) {
+            _matched=true;
+            ((OperationRequiredRole)required).getRequiredInterface__OperationRequiredRole();
           }
           if (!_matched) {
             System.out.println(("other role " + required));

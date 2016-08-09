@@ -51,47 +51,45 @@ public class JavaASTExpressionEvaluation {
     final IMethodBinding sourceMethodBinding = ((IMethodBinding) _method);
     final ITypeBinding contextTypeBinding = sourceMethodBinding.getDeclaringClass();
     boolean _matched = false;
+    if (expression instanceof Annotation) {
+      _matched=true;
+    }
     if (!_matched) {
-      if (expression instanceof Annotation) {
+      if (expression instanceof BooleanLiteral) {
         _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof BooleanLiteral) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof CharacterLiteral) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof CharacterLiteral) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof NullLiteral) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof NullLiteral) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof NumberLiteral) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof NumberLiteral) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof StringLiteral) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof StringLiteral) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof ThisExpression) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof ThisExpression) {
-          _matched=true;
-        }
+    }
+    if (!_matched) {
+      if (expression instanceof TypeLiteral) {
+        _matched=true;
       }
-      if (!_matched) {
-        if (expression instanceof TypeLiteral) {
-          _matched=true;
-        }
-      }
-      if (_matched) {
-      }
+    }
+    if (_matched) {
     }
     if (!_matched) {
       if (expression instanceof ArrayAccess) {

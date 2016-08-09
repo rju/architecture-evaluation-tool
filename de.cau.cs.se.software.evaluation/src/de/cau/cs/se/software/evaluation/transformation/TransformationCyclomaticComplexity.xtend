@@ -42,7 +42,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 					val int[] resizedBuckets = newIntArrayOfSize(maxBucket)
 					buckets.forEach[value, i| resizedBuckets.set(i, value)]
 					buckets = resizedBuckets
-					System.out.println("Resizing bucket number " + maxBucket + " for " + method.name)
+					System.out.println("Resizing bucket number " + maxBucket + " for " + method.name + " to " + bucket)
 				}
 				
 				if (bucket > topBucket) {

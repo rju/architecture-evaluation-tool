@@ -175,15 +175,13 @@ public class JavaASTExpressionEvaluationHelper {
   public static void processLambdaExpression(final LambdaExpression lambda, final Node sourceNode, final ModularHypergraph graph, final List<String> dataTypePatterns) {
     final ASTNode body = lambda.getBody();
     boolean _matched = false;
-    if (!_matched) {
-      if (body instanceof Block) {
-        _matched=true;
-        List _statements = ((Block)body).statements();
-        final Consumer<Object> _function = (Object it) -> {
-          JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode);
-        };
-        _statements.forEach(_function);
-      }
+    if (body instanceof Block) {
+      _matched=true;
+      List _statements = ((Block)body).statements();
+      final Consumer<Object> _function = (Object it) -> {
+        JavaASTEvaluation.evaluateStatement(((Statement) it), graph, dataTypePatterns, sourceNode);
+      };
+      _statements.forEach(_function);
     }
     if (!_matched) {
       if (body instanceof Expression) {
@@ -232,16 +230,14 @@ public class JavaASTExpressionEvaluationHelper {
   public static void processSimpleName(final SimpleName name, final Node sourceNode, final ModularHypergraph graph) {
     final IBinding nameBinding = name.resolveBinding();
     boolean _matched = false;
-    if (!_matched) {
-      if (nameBinding instanceof IVariableBinding) {
-        _matched=true;
-        EList<Edge> _edges = graph.getEdges();
-        final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
-        boolean _notEquals = (!Objects.equal(edge, null));
-        if (_notEquals) {
-          EList<Edge> _edges_1 = sourceNode.getEdges();
-          _edges_1.add(edge);
-        }
+    if (nameBinding instanceof IVariableBinding) {
+      _matched=true;
+      EList<Edge> _edges = graph.getEdges();
+      final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
+      boolean _notEquals = (!Objects.equal(edge, null));
+      if (_notEquals) {
+        EList<Edge> _edges_1 = sourceNode.getEdges();
+        _edges_1.add(edge);
       }
     }
     if (!_matched) {
@@ -263,16 +259,14 @@ public class JavaASTExpressionEvaluationHelper {
   public static void processQualifiedName(final QualifiedName name, final Node sourceNode, final ModularHypergraph graph) {
     final IBinding nameBinding = name.resolveBinding();
     boolean _matched = false;
-    if (!_matched) {
-      if (nameBinding instanceof IVariableBinding) {
-        _matched=true;
-        EList<Edge> _edges = graph.getEdges();
-        final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
-        boolean _notEquals = (!Objects.equal(edge, null));
-        if (_notEquals) {
-          EList<Edge> _edges_1 = sourceNode.getEdges();
-          _edges_1.add(edge);
-        }
+    if (nameBinding instanceof IVariableBinding) {
+      _matched=true;
+      EList<Edge> _edges = graph.getEdges();
+      final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, ((IVariableBinding)nameBinding));
+      boolean _notEquals = (!Objects.equal(edge, null));
+      if (_notEquals) {
+        EList<Edge> _edges_1 = sourceNode.getEdges();
+        _edges_1.add(edge);
       }
     }
     if (!_matched) {
@@ -298,43 +292,41 @@ public class JavaASTExpressionEvaluationHelper {
       final Expression prefix = fieldAccess.getExpression();
       Boolean _switchResult = null;
       boolean _matched = false;
-      if (!_matched) {
-        if (prefix instanceof ThisExpression) {
-          _matched=true;
-          boolean _xifexpression = false;
-          ITypeBinding _resolveTypeBinding = fieldAccess.resolveTypeBinding();
-          boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_resolveTypeBinding, dataTypePatterns);
-          if (_isDataType) {
-            boolean _xblockexpression_1 = false;
-            {
-              EList<Edge> _edges = graph.getEdges();
-              IVariableBinding _resolveFieldBinding = fieldAccess.resolveFieldBinding();
-              final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _resolveFieldBinding);
-              boolean _xifexpression_1 = false;
-              boolean _equals = Objects.equal(edge, null);
-              if (_equals) {
-                Class<? extends ThisExpression> _class = ((ThisExpression)prefix).getClass();
-                String _plus = (("Missing edge for a data type property. " + 
-                  " Prefix ") + _class);
-                String _plus_1 = (_plus + " field ");
-                IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
-                String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
-                String _plus_3 = (_plus_2 + 
-                  " in ");
-                String _name = JavaASTExpressionEvaluationHelper.class.getName();
-                String _plus_4 = (_plus_3 + _name);
-                String _plus_5 = (_plus_4 + ".processFieldAccess");
-                System.out.println(_plus_5);
-              } else {
-                EList<Edge> _edges_1 = sourceNode.getEdges();
-                _xifexpression_1 = _edges_1.add(edge);
-              }
-              _xblockexpression_1 = _xifexpression_1;
+      if (prefix instanceof ThisExpression) {
+        _matched=true;
+        boolean _xifexpression = false;
+        ITypeBinding _resolveTypeBinding = fieldAccess.resolveTypeBinding();
+        boolean _isDataType = JavaHypergraphQueryHelper.isDataType(_resolveTypeBinding, dataTypePatterns);
+        if (_isDataType) {
+          boolean _xblockexpression_1 = false;
+          {
+            EList<Edge> _edges = graph.getEdges();
+            IVariableBinding _resolveFieldBinding = fieldAccess.resolveFieldBinding();
+            final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _resolveFieldBinding);
+            boolean _xifexpression_1 = false;
+            boolean _equals = Objects.equal(edge, null);
+            if (_equals) {
+              Class<? extends ThisExpression> _class = ((ThisExpression)prefix).getClass();
+              String _plus = (("Missing edge for a data type property. " + 
+                " Prefix ") + _class);
+              String _plus_1 = (_plus + " field ");
+              IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
+              String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
+              String _plus_3 = (_plus_2 + 
+                " in ");
+              String _name = JavaASTExpressionEvaluationHelper.class.getName();
+              String _plus_4 = (_plus_3 + _name);
+              String _plus_5 = (_plus_4 + ".processFieldAccess");
+              System.out.println(_plus_5);
+            } else {
+              EList<Edge> _edges_1 = sourceNode.getEdges();
+              _xifexpression_1 = _edges_1.add(edge);
             }
-            _xifexpression = _xblockexpression_1;
+            _xblockexpression_1 = _xifexpression_1;
           }
-          _switchResult = Boolean.valueOf(_xifexpression);
+          _xifexpression = _xblockexpression_1;
         }
+        _switchResult = Boolean.valueOf(_xifexpression);
       }
       if (!_matched) {
         if (prefix instanceof MethodInvocation) {

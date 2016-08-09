@@ -1,6 +1,7 @@
 package de.cau.cs.se.software.evaluation.graph.transformation;
 
 import com.google.common.base.Objects;
+import de.cau.cs.se.geco.architecture.framework.IGenerator;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarVisualizationGraph;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 import org.eclipse.emf.common.util.EList;
 
 @SuppressWarnings("all")
-public class ManipulatePlanarGraph /* implements IGenerator<PlanarVisualizationGraph, PlanarVisualizationGraph>  */{
+public class ManipulatePlanarGraph implements IGenerator<PlanarVisualizationGraph, PlanarVisualizationGraph> {
   private final boolean framework;
   
   private final boolean anonymous;

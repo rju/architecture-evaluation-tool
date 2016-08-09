@@ -16,29 +16,24 @@
 package de.cau.cs.se.software.evaluation.graph
 
 import com.google.common.collect.ImmutableList
-import de.cau.cs.kieler.core.kgraph.KNode
-import de.cau.cs.kieler.core.kgraph.KPort
-import de.cau.cs.kieler.core.krendering.KColor
-import de.cau.cs.kieler.core.krendering.KContainerRendering
-import de.cau.cs.kieler.core.krendering.KRenderingFactory
-import de.cau.cs.kieler.core.krendering.LineJoin
-import de.cau.cs.kieler.core.krendering.LineStyle
-import de.cau.cs.kieler.core.krendering.extensions.KColorExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KContainerRenderingExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KEdgeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KLabelExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KNodeExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPolylineExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KPortExtensions
-import de.cau.cs.kieler.core.krendering.extensions.KRenderingExtensions
-import de.cau.cs.kieler.kiml.klayoutdata.KShapeLayout
-import de.cau.cs.kieler.kiml.options.Direction
-import de.cau.cs.kieler.kiml.options.EdgeRouting
-import de.cau.cs.kieler.kiml.options.LayoutOptions
-import de.cau.cs.kieler.kiml.options.SizeConstraint
-import de.cau.cs.kieler.klay.layered.properties.Properties
 import de.cau.cs.kieler.klighd.SynthesisOption
+import de.cau.cs.kieler.klighd.krendering.KContainerRendering
+import de.cau.cs.kieler.klighd.krendering.KRenderingFactory
+import de.cau.cs.kieler.klighd.krendering.LineJoin
+import de.cau.cs.kieler.klighd.krendering.LineStyle
+import de.cau.cs.kieler.klighd.krendering.extensions.KColorExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KContainerRenderingExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KEdgeExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KLabelExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KNodeExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KPolylineExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KPortExtensions
+import de.cau.cs.kieler.klighd.krendering.extensions.KRenderingExtensions
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
+import de.cau.cs.se.software.evaluation.graph.transformation.ManipulatePlanarGraph
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode
+import de.cau.cs.se.software.evaluation.graph.transformation.VisualizationPlanarGraph
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
@@ -49,13 +44,14 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import javax.inject.Inject
+import org.eclipse.elk.alg.layered.properties.LayeredOptions
+import org.eclipse.elk.core.klayoutdata.KShapeLayout
+import org.eclipse.elk.core.options.Direction
+import org.eclipse.elk.core.options.EdgeRouting
+import org.eclipse.elk.core.options.PortConstraints
+import org.eclipse.elk.graph.KNode
+import org.eclipse.elk.graph.KPort
 import org.eclipse.emf.common.util.EList
-import static extension de.cau.cs.se.software.evaluation.graph.DiagramModelHelper.*
-import de.cau.cs.kieler.kiml.options.PortConstraints
-import de.cau.cs.se.software.evaluation.graph.transformation.VisualizationPlanarGraph
-import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode
-import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge
-import de.cau.cs.se.software.evaluation.graph.transformation.ManipulatePlanarGraph
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -142,19 +138,20 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     	val root = hypergraph.createNode().associateWith(hypergraph)
     	
     	root => [
+    		// TODO fix configuration
             // de.cau.cs.kieler.klay.layered.properties.Properties
-            it.setLayoutOption(Properties.MERGE_EDGES, true)
-            it.setLayoutOption(LayoutOptions.LAYOUT_HIERARCHY, true)
-            it.setLayoutOption(LayoutOptions::ALGORITHM, "de.cau.cs.kieler.klay.layered")	
+            // it.setLayoutOption(Properties.MERGE_EDGES, true)
+            it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, true)
+            // it.setLayoutOption(LayeredOptions::ALGORITHM, "de.cau.cs.kieler.klay.layered")	
 
-            it.setLayoutOption(LayoutOptions::SPACING, SPACING.objectValue as Float)
-            it.setLayoutOption(LayoutOptions::DIRECTION, switch(DIRECTION.objectValue) {
+            it.setLayoutOption(LayeredOptions::SPACING_NODE, SPACING.objectValue as Float)
+            it.setLayoutOption(LayeredOptions::DIRECTION, switch(DIRECTION.objectValue) {
             	case DIRECTION_UP: Direction::UP
             	case DIRECTION_DOWN: Direction::DOWN
             	case DIRECTION_LEFT: Direction::LEFT
             	case DIRECTION_RIGHT: Direction::RIGHT
             })
-            it.setLayoutOption(LayoutOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
+            it.setLayoutOption(LayeredOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
             	case ROUTING_POLYLINE: EdgeRouting::POLYLINE
             	case ROUTING_ORTHOGONAL: EdgeRouting::ORTHOGONAL
             	case ROUTING_SPLINES: EdgeRouting::SPLINES
@@ -259,8 +256,10 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		planarNodeMap.put(planarNode, moduleNode)
 		
 		moduleNode => [
-			it.setLayoutOption(LayoutOptions::PORT_SPACING, 20f)
-			it.setLayoutOption(LayoutOptions::SIZE_CONSTRAINT, SizeConstraint.minimumSizeWithPorts)
+			// TODO PORT_SPACING
+			it.setLayoutOption(LayeredOptions::PORT_BORDER_OFFSET, 20f)
+			// TODO SIZE_CONSTRAINT
+			// it.setLayoutOption(LayeredOptions::SIZE_CONSTRAINT, SizeConstraint.minimumSizeWithPorts)
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, planarNode.kind.backgroundColor, 0)
@@ -295,8 +294,8 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		moduleNode.getData(KShapeLayout).insets.top = 15 //bringt nicht wirklich Effekt
 
 		moduleNode => [	
-			it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
-			it.setLayoutOption(LayoutOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
+			it.setLayoutOption(LayeredOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			it.setLayoutOption(LayeredOptions::EDGE_ROUTING, EdgeRouting::POLYLINE)
 			it.addRoundedRectangle(10, 10) => [
 				it.lineWidth = 2
                 it.setBackgroundGradient("white".color, module.kind.backgroundColor, 0)
@@ -328,7 +327,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		nodeMap.put(node, kNode)
 		moduleNode.children += kNode
 		kNode => [
-			it.setLayoutOption(LayoutOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
+			it.setLayoutOption(LayeredOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
 			
 			//node.edges.forEach[graphEdge | graphEdge.createEdgePort(it, graphEdge.name)]
 			it.addRoundedRectangle(2,2) => [ 

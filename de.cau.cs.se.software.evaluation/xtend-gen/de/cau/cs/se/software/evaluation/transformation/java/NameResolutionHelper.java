@@ -79,29 +79,20 @@ public class NameResolutionHelper {
    * Fully qualified name of a method based on the method binding.
    */
   public static String determineFullyQualifiedName(final IMethodBinding binding) {
-    boolean _and = false;
-    ITypeBinding _declaringClass = binding.getDeclaringClass();
-    boolean _isAnonymous = _declaringClass.isAnonymous();
-    if (!_isAnonymous) {
-      _and = false;
-    } else {
-      boolean _isConstructor = binding.isConstructor();
-      _and = _isConstructor;
-    }
-    if (_and) {
+    if ((binding.getDeclaringClass().isAnonymous() && binding.isConstructor())) {
       String _xifexpression = null;
-      ITypeBinding _declaringClass_1 = binding.getDeclaringClass();
-      ITypeBinding[] _interfaces = _declaringClass_1.getInterfaces();
+      ITypeBinding _declaringClass = binding.getDeclaringClass();
+      ITypeBinding[] _interfaces = _declaringClass.getInterfaces();
       boolean _notEquals = (!Objects.equal(_interfaces, null));
       if (_notEquals) {
         String _xifexpression_1 = null;
-        ITypeBinding _declaringClass_2 = binding.getDeclaringClass();
-        ITypeBinding[] _interfaces_1 = _declaringClass_2.getInterfaces();
+        ITypeBinding _declaringClass_1 = binding.getDeclaringClass();
+        ITypeBinding[] _interfaces_1 = _declaringClass_1.getInterfaces();
         int _size = ((List<ITypeBinding>)Conversions.doWrapArray(_interfaces_1)).size();
         boolean _greaterThan = (_size > 0);
         if (_greaterThan) {
-          ITypeBinding _declaringClass_3 = binding.getDeclaringClass();
-          ITypeBinding[] _interfaces_2 = _declaringClass_3.getInterfaces();
+          ITypeBinding _declaringClass_2 = binding.getDeclaringClass();
+          ITypeBinding[] _interfaces_2 = _declaringClass_2.getInterfaces();
           ITypeBinding _get = _interfaces_2[0];
           String _name = _get.getName();
           _xifexpression_1 = ("." + _name);
@@ -111,12 +102,12 @@ public class NameResolutionHelper {
         _xifexpression = _xifexpression_1;
       } else {
         String _xifexpression_2 = null;
-        ITypeBinding _declaringClass_4 = binding.getDeclaringClass();
-        ITypeBinding _superclass = _declaringClass_4.getSuperclass();
+        ITypeBinding _declaringClass_3 = binding.getDeclaringClass();
+        ITypeBinding _superclass = _declaringClass_3.getSuperclass();
         boolean _notEquals_1 = (!Objects.equal(_superclass, null));
         if (_notEquals_1) {
-          ITypeBinding _declaringClass_5 = binding.getDeclaringClass();
-          ITypeBinding _superclass_1 = _declaringClass_5.getSuperclass();
+          ITypeBinding _declaringClass_4 = binding.getDeclaringClass();
+          ITypeBinding _superclass_1 = _declaringClass_4.getSuperclass();
           _xifexpression_2 = ("." + _superclass_1);
         } else {
           _xifexpression_2 = "";
@@ -124,13 +115,13 @@ public class NameResolutionHelper {
         _xifexpression = _xifexpression_2;
       }
       final String typeName = _xifexpression;
-      ITypeBinding _declaringClass_6 = binding.getDeclaringClass();
-      String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_6);
+      ITypeBinding _declaringClass_5 = binding.getDeclaringClass();
+      String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_5);
       String _plus = (_determineFullyQualifiedName + ".");
       return (_plus + typeName);
     } else {
-      ITypeBinding _declaringClass_7 = binding.getDeclaringClass();
-      String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_7);
+      ITypeBinding _declaringClass_6 = binding.getDeclaringClass();
+      String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_6);
       String _plus_1 = (_determineFullyQualifiedName_1 + ".");
       String _name_1 = binding.getName();
       return (_plus_1 + _name_1);
@@ -319,13 +310,11 @@ public class NameResolutionHelper {
    */
   public static String determineFullyQualifiedName(final Type type) {
     boolean _matched = false;
-    if (!_matched) {
-      if (type instanceof ArrayType) {
-        _matched=true;
-        Type _elementType = ((ArrayType)type).getElementType();
-        String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_elementType);
-        return (_determineFullyQualifiedName + "[]");
-      }
+    if (type instanceof ArrayType) {
+      _matched=true;
+      Type _elementType = ((ArrayType)type).getElementType();
+      String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_elementType);
+      return (_determineFullyQualifiedName + "[]");
     }
     if (!_matched) {
       if (type instanceof ParameterizedType) {
@@ -349,11 +338,9 @@ public class NameResolutionHelper {
         String _switchResult_1 = null;
         PrimitiveType.Code _primitiveTypeCode = ((PrimitiveType)type).getPrimitiveTypeCode();
         boolean _matched_1 = false;
-        if (!_matched_1) {
-          if (Objects.equal(_primitiveTypeCode, PrimitiveType.BOOLEAN)) {
-            _matched_1=true;
-            _switchResult_1 = "boolean";
-          }
+        if (Objects.equal(_primitiveTypeCode, PrimitiveType.BOOLEAN)) {
+          _matched_1=true;
+          _switchResult_1 = "boolean";
         }
         if (!_matched_1) {
           if (Objects.equal(_primitiveTypeCode, PrimitiveType.BYTE)) {
@@ -410,35 +397,25 @@ public class NameResolutionHelper {
       if (type instanceof QualifiedType) {
         _matched=true;
         String _xifexpression = null;
-        boolean _and = false;
-        SimpleName _name = ((QualifiedType)type).getName();
-        boolean _notEquals = (!Objects.equal(_name, null));
-        if (!_notEquals) {
-          _and = false;
-        } else {
-          Type _qualifier = ((QualifiedType)type).getQualifier();
-          boolean _notEquals_1 = (!Objects.equal(_qualifier, null));
-          _and = _notEquals_1;
-        }
-        if (_and) {
-          SimpleName _name_1 = ((QualifiedType)type).getName();
-          String _fullyQualifiedName = _name_1.getFullyQualifiedName();
+        if (((!Objects.equal(((QualifiedType)type).getName(), null)) && (!Objects.equal(((QualifiedType)type).getQualifier(), null)))) {
+          SimpleName _name = ((QualifiedType)type).getName();
+          String _fullyQualifiedName = _name.getFullyQualifiedName();
           String _plus = ("L" + _fullyQualifiedName);
           String _plus_1 = (_plus + ".");
-          Type _qualifier_1 = ((QualifiedType)type).getQualifier();
-          String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_qualifier_1);
+          Type _qualifier = ((QualifiedType)type).getQualifier();
+          String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_qualifier);
           String _plus_2 = (_plus_1 + _determineFullyQualifiedName);
           _xifexpression = (_plus_2 + ";");
         } else {
           String _xifexpression_1 = null;
-          SimpleName _name_2 = ((QualifiedType)type).getName();
-          boolean _notEquals_2 = (!Objects.equal(_name_2, null));
-          if (_notEquals_2) {
-            SimpleName _name_3 = ((QualifiedType)type).getName();
-            _xifexpression_1 = _name_3.getFullyQualifiedName();
+          SimpleName _name_1 = ((QualifiedType)type).getName();
+          boolean _notEquals = (!Objects.equal(_name_1, null));
+          if (_notEquals) {
+            SimpleName _name_2 = ((QualifiedType)type).getName();
+            _xifexpression_1 = _name_2.getFullyQualifiedName();
           } else {
-            Type _qualifier_2 = ((QualifiedType)type).getQualifier();
-            _xifexpression_1 = NameResolutionHelper.determineFullyQualifiedName(_qualifier_2);
+            Type _qualifier_1 = ((QualifiedType)type).getQualifier();
+            _xifexpression_1 = NameResolutionHelper.determineFullyQualifiedName(_qualifier_1);
           }
           _xifexpression = _xifexpression_1;
         }

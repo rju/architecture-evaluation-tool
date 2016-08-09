@@ -43,11 +43,9 @@ public class CyclomaticComplexityVisitor extends ASTVisitor {
   public boolean visit(final InfixExpression node) {
     InfixExpression.Operator _operator = node.getOperator();
     boolean _matched = false;
-    if (!_matched) {
-      if (Objects.equal(_operator, InfixExpression.Operator.CONDITIONAL_AND)) {
-        _matched=true;
-        this.cyclomatic++;
-      }
+    if (Objects.equal(_operator, InfixExpression.Operator.CONDITIONAL_AND)) {
+      _matched=true;
+      this.cyclomatic++;
     }
     if (!_matched) {
       if (Objects.equal(_operator, InfixExpression.Operator.CONDITIONAL_OR)) {
