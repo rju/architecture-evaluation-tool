@@ -43,6 +43,7 @@ class JavaHypergraphElementFactory {
 	 * @return a node
 	 */
 	def static createNodeForMethod(IMethodBinding binding) {
+		LogModelProvider.INSTANCE.addMessage("Node", binding.determineFullyQualifiedName)
 		val node = HypergraphFactory.eINSTANCE.createNode
 		node.name = binding.determineFullyQualifiedName
 		val derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace

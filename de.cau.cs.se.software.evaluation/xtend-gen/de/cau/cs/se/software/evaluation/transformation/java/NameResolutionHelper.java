@@ -108,7 +108,10 @@ public class NameResolutionHelper {
         if (_notEquals_1) {
           ITypeBinding _declaringClass_4 = binding.getDeclaringClass();
           ITypeBinding _superclass_1 = _declaringClass_4.getSuperclass();
-          _xifexpression_2 = ("." + _superclass_1);
+          String _plus = ("." + _superclass_1);
+          String _plus_1 = (_plus + " ");
+          String _parameterNames = NameResolutionHelper.parameterNames(binding);
+          _xifexpression_2 = (_plus_1 + _parameterNames);
         } else {
           _xifexpression_2 = "";
         }
@@ -117,15 +120,30 @@ public class NameResolutionHelper {
       final String typeName = _xifexpression;
       ITypeBinding _declaringClass_5 = binding.getDeclaringClass();
       String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_5);
-      String _plus = (_determineFullyQualifiedName + ".");
-      return (_plus + typeName);
+      String _plus_2 = (_determineFullyQualifiedName + ".");
+      String _plus_3 = (_plus_2 + typeName);
+      String _plus_4 = (_plus_3 + " ");
+      String _parameterNames_1 = NameResolutionHelper.parameterNames(binding);
+      return (_plus_4 + _parameterNames_1);
     } else {
       ITypeBinding _declaringClass_6 = binding.getDeclaringClass();
       String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(_declaringClass_6);
-      String _plus_1 = (_determineFullyQualifiedName_1 + ".");
+      String _plus_5 = (_determineFullyQualifiedName_1 + ".");
       String _name_1 = binding.getName();
-      return (_plus_1 + _name_1);
+      String _plus_6 = (_plus_5 + _name_1);
+      String _plus_7 = (_plus_6 + " ");
+      String _parameterNames_2 = NameResolutionHelper.parameterNames(binding);
+      return (_plus_7 + _parameterNames_2);
     }
+  }
+  
+  private static String parameterNames(final IMethodBinding binding) {
+    ITypeBinding[] _parameterTypes = binding.getParameterTypes();
+    final Function1<ITypeBinding, String> _function = (ITypeBinding it) -> {
+      return NameResolutionHelper.determineFullyQualifiedName(it);
+    };
+    List<String> _map = ListExtensions.<ITypeBinding, String>map(((List<ITypeBinding>)Conversions.doWrapArray(_parameterTypes)), _function);
+    return IterableExtensions.join(_map, ",");
   }
   
   /**

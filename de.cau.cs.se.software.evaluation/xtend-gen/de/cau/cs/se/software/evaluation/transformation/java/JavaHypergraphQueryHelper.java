@@ -43,7 +43,9 @@ public class JavaHypergraphQueryHelper {
         if (derivedFrom instanceof MethodTrace) {
           _matched=true;
           Object _method = ((MethodTrace)derivedFrom).getMethod();
-          _switchResult = ((IMethodBinding) _method).isEqualTo(binding);
+          IMethodBinding _methodDeclaration = ((IMethodBinding) _method).getMethodDeclaration();
+          IMethodBinding _methodDeclaration_1 = binding.getMethodDeclaration();
+          _switchResult = _methodDeclaration.isEqualTo(_methodDeclaration_1);
         }
         if (!_matched) {
           if (derivedFrom instanceof TypeTrace) {

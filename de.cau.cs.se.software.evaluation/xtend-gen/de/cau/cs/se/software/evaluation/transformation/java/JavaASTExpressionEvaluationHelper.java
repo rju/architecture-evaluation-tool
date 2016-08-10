@@ -337,22 +337,14 @@ public class JavaASTExpressionEvaluationHelper {
           {
             EList<Edge> _edges = graph.getEdges();
             IVariableBinding _resolveFieldBinding = fieldAccess.resolveFieldBinding();
-            final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _resolveFieldBinding);
+            IVariableBinding _variableDeclaration = _resolveFieldBinding.getVariableDeclaration();
+            final Edge edge = JavaHypergraphQueryHelper.findDataEdge(_edges, _variableDeclaration);
             boolean _xifexpression_1 = false;
             boolean _equals = Objects.equal(edge, null);
             if (_equals) {
-              Class<? extends ThisExpression> _class = ((ThisExpression)prefix).getClass();
-              String _plus = (("Missing edge for a data type property. " + 
-                " Prefix ") + _class);
-              String _plus_1 = (_plus + " field ");
               IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
-              String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
-              String _plus_3 = (_plus_2 + 
-                " in ");
-              String _name = JavaASTExpressionEvaluationHelper.class.getName();
-              String _plus_4 = (_plus_3 + _name);
-              String _plus_5 = (_plus_4 + ".processFieldAccess");
-              LogModelProvider.INSTANCE.addMessage("Resolving Error", _plus_5);
+              String _plus = ("Resolving failed in this expression. Missing edge for a data type property. " + _resolveFieldBinding_1);
+              LogModelProvider.INSTANCE.addMessage("Error", _plus);
             } else {
               EList<Edge> _edges_1 = sourceNode.getEdges();
               _xifexpression_1 = _edges_1.add(edge);
@@ -384,18 +376,9 @@ public class JavaASTExpressionEvaluationHelper {
               boolean _xifexpression_1 = false;
               boolean _equals = Objects.equal(edge, null);
               if (_equals) {
-                Class<? extends FieldAccess> _class = ((FieldAccess)prefix).getClass();
-                String _plus = (("Missing edge for a data type property. " + 
-                  " Prefix ") + _class);
-                String _plus_1 = (_plus + " field ");
                 IVariableBinding _resolveFieldBinding_1 = fieldAccess.resolveFieldBinding();
-                String _plus_2 = (_plus_1 + _resolveFieldBinding_1);
-                String _plus_3 = (_plus_2 + 
-                  " in ");
-                String _name = JavaASTExpressionEvaluationHelper.class.getName();
-                String _plus_4 = (_plus_3 + _name);
-                String _plus_5 = (_plus_4 + ".processFieldAccess");
-                LogModelProvider.INSTANCE.addMessage("Resolving Error", _plus_5);
+                String _plus = ("Resolving failed in field access expression. Missing edge for a data type property. " + _resolveFieldBinding_1);
+                LogModelProvider.INSTANCE.addMessage("Error", _plus);
               } else {
                 EList<Edge> _edges_1 = sourceNode.getEdges();
                 _xifexpression_1 = _edges_1.add(edge);

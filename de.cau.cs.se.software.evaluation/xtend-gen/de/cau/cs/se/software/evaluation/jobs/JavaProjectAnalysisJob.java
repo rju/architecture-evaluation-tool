@@ -115,6 +115,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
             this.calculateComplexity(inputHypergraph, monitor, result);
             this.calculateCoupling(inputHypergraph, monitor, result);
             this.calculateCohesion(inputHypergraph, monitor, result);
+            this.updateLogView();
             monitor.done();
             return Status.OK_STATUS;
           } else {
@@ -122,6 +123,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
           }
         }
       }
+      this.updateLogView();
       return Status.CANCEL_STATUS;
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);

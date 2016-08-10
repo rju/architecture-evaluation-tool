@@ -50,9 +50,11 @@ public class JavaHypergraphElementFactory {
    * @return a node
    */
   public static Node createNodeForMethod(final IMethodBinding binding) {
-    final Node node = HypergraphFactory.eINSTANCE.createNode();
     String _determineFullyQualifiedName = NameResolutionHelper.determineFullyQualifiedName(binding);
-    node.setName(_determineFullyQualifiedName);
+    LogModelProvider.INSTANCE.addMessage("Node", _determineFullyQualifiedName);
+    final Node node = HypergraphFactory.eINSTANCE.createNode();
+    String _determineFullyQualifiedName_1 = NameResolutionHelper.determineFullyQualifiedName(binding);
+    node.setName(_determineFullyQualifiedName_1);
     final MethodTrace derivedFrom = HypergraphFactory.eINSTANCE.createMethodTrace();
     derivedFrom.setMethod(binding);
     node.setDerivedFrom(derivedFrom);

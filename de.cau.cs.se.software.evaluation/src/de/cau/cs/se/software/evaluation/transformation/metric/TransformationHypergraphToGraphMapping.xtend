@@ -66,7 +66,7 @@ class TransformationHypergraphToGraphMapping extends AbstractTransformation<Modu
 			}
 			
 		]
-		
+						
 		return result
 	}
 	

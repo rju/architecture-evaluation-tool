@@ -65,12 +65,18 @@ class NameResolutionHelper {
 				} else
 					""
 			} else if (binding.declaringClass.superclass != null)
-				"." + binding.declaringClass.superclass
+				"." + binding.declaringClass.superclass + " " + binding.parameterNames
 			else
 				""
-			return binding.declaringClass.determineFullyQualifiedName + "." + typeName
+			return binding.declaringClass.determineFullyQualifiedName + "." + typeName 
+				+ " " + binding.parameterNames
 		} else
-			return binding.declaringClass.determineFullyQualifiedName + "." + binding.name
+			return binding.declaringClass.determineFullyQualifiedName + "." + binding.name 
+				+ " " + binding.parameterNames
+	}
+	
+	private def static parameterNames(IMethodBinding binding) {
+		binding.parameterTypes.map[it.determineFullyQualifiedName].join(',')
 	}
 	
 	/**

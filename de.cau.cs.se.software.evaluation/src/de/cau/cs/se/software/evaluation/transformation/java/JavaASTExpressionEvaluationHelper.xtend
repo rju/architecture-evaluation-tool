@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display
 import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.ui.PlatformUI
 import de.cau.cs.se.software.evaluation.views.LogModelProvider
+import de.cau.cs.se.software.evaluation.hypergraph.FieldTrace
 
 class JavaASTExpressionEvaluationHelper {
 
@@ -269,12 +270,11 @@ class JavaASTExpressionEvaluationHelper {
 	    switch(prefix) {
 	    	ThisExpression: { /** there must be an edge iff this is a data type property */
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
-		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
+		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding.variableDeclaration)
 		    		if (edge == null) {
-		    			// TODO how can this happen?
-		    			LogModelProvider.INSTANCE.addMessage("Resolving Error", "Missing edge for a data type property. " + 
-		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
-		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+		    			LogModelProvider.INSTANCE.addMessage("Error", 
+		    				"Resolving failed in this expression. Missing edge for a data type property. "
+		    				 + fieldAccess.resolveFieldBinding)
 		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
 		    			//" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
 		    			//" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
@@ -295,9 +295,9 @@ class JavaASTExpressionEvaluationHelper {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge == null) {
 		    			// TODO how can this happen?
-		    			LogModelProvider.INSTANCE.addMessage("Resolving Error", "Missing edge for a data type property. " + 
-		    			" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
-		    			" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+		    			LogModelProvider.INSTANCE.addMessage("Error", 
+		    				"Resolving failed in field access expression. Missing edge for a data type property. "
+		    				+ fieldAccess.resolveFieldBinding)
 		    			//throw new UnsupportedOperationException("Missing edge for a data type property. " + 
 		    			//" Prefix " + prefix.class + " field " + fieldAccess.resolveFieldBinding + 
 		    			//" in " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"

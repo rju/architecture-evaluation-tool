@@ -61,7 +61,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 
 		result.addResult(project.project.name, "hypergraph size", hypergraphSize.result)
 		updateView(inputHypergraph)
-		
+				
 		return hypergraphSize.result
 	}
 	

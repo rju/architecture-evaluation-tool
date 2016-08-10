@@ -87,7 +87,9 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 					calculateCoupling(inputHypergraph, monitor, result)
 
 					calculateCohesion(inputHypergraph, monitor, result)
-
+					
+					updateLogView()
+					
 					monitor.done()
 
 					return Status.OK_STATUS
@@ -96,6 +98,8 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 				}
 			}
 		}
+		
+		updateLogView()
 		
 		return Status.CANCEL_STATUS
 	}

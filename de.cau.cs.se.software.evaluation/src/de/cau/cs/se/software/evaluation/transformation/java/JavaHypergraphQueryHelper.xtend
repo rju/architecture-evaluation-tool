@@ -31,7 +31,7 @@ class JavaHypergraphQueryHelper {
 		nodes.findFirst[
 			val derivedFrom = it.derivedFrom
 			switch (derivedFrom) {
-				MethodTrace: (derivedFrom.method as IMethodBinding).isEqualTo(binding)
+				MethodTrace: (derivedFrom.method as IMethodBinding).methodDeclaration.isEqualTo(binding.methodDeclaration)
 				TypeTrace: false
 				default:
 					throw new UnsupportedOperationException("Nodes cannot be derived from " + derivedFrom.class)
