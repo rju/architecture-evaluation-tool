@@ -15,7 +15,6 @@
  */
 package de.cau.cs.se.software.evaluation.jobs;
 
-import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.jobs.CalculateComplexity;
@@ -34,9 +33,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.xtext.xbase.lib.Exceptions;
 
 /**
  * Abstract class implementing the basic metrics of the Edward B. Allen entropy
@@ -64,13 +61,15 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    */
   protected Double calculateSize(final Hypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationHypergraphSize hypergraphSize = new TransformationHypergraphSize(monitor);
-    hypergraphSize.setName("Calculate system size");
+    int _workEstimate = hypergraphSize.workEstimate(inputHypergraph);
+    monitor.beginTask("Calculate system size", _workEstimate);
+    monitor.subTask("");
     hypergraphSize.generate(inputHypergraph);
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     Double _result = hypergraphSize.getResult();
     result.addResult(_name, "hypergraph size", _result);
-    this.updateView(inputHypergraph);
+    this.updateView();
     return hypergraphSize.getResult();
   }
   
@@ -89,7 +88,7 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     result.addResult(_name, "hypergraph complexity", Double.valueOf(complexity));
-    this.updateView(inputHypergraph);
+    this.updateView();
     return complexity;
   }
   
@@ -105,14 +104,17 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    */
   protected void calculateCoupling(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationIntermoduleHyperedgesOnlyGraph intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor);
+    int _workEstimate = intermoduleHyperedgesOnlyGraph.workEstimate(inputHypergraph);
+    monitor.beginTask("Create intermodule hyperedges only graph", _workEstimate);
     intermoduleHyperedgesOnlyGraph.generate(inputHypergraph);
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     ModularHypergraph _result = intermoduleHyperedgesOnlyGraph.getResult();
-    final double complexityIntermodule = calculateComplexity.calculate(_result, "Calculate intermodule complexity");
+    final double complexityIntermodule = calculateComplexity.calculate(_result, 
+      "Calculate intermodule complexity");
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     result.addResult(_name, "inter module coupling", Double.valueOf(complexityIntermodule));
-    this.updateView(inputHypergraph);
+    this.updateView();
   }
   
   /**
@@ -128,19 +130,28 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
    */
   protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationHypergraphToGraphMapping modularGraph = new TransformationHypergraphToGraphMapping(monitor);
+    final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
+    final TransformationIntraModuleGraph intraModuleGraph = new TransformationIntraModuleGraph(monitor);
+    int _workEstimate = modularGraph.workEstimate(inputHypergraph);
+    int _workEstimate_1 = maximalInterconnectedGraph.workEstimate(inputHypergraph);
+    int _plus = (_workEstimate + _workEstimate_1);
+    int _workEstimate_2 = intraModuleGraph.workEstimate(inputHypergraph);
+    int _plus_1 = (_plus + _workEstimate_2);
+    monitor.beginTask("Calculate Cohesion", _plus_1);
+    monitor.subTask("Create graph from hypergraph");
     modularGraph.generate(inputHypergraph);
     boolean _isCanceled = monitor.isCanceled();
     if (_isCanceled) {
       return 0;
     }
-    final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
+    monitor.subTask("Create maximal interconnected graph");
     ModularHypergraph _result = modularGraph.getResult();
     maximalInterconnectedGraph.generate(_result);
     boolean _isCanceled_1 = monitor.isCanceled();
     if (_isCanceled_1) {
       return 0;
     }
-    final TransformationIntraModuleGraph intraModuleGraph = new TransformationIntraModuleGraph(monitor);
+    monitor.subTask("Create intra module graph");
     ModularHypergraph _result_1 = modularGraph.getResult();
     intraModuleGraph.generate(_result_1);
     boolean _isCanceled_2 = monitor.isCanceled();
@@ -166,38 +177,25 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
     IProject _project = this.project.getProject();
     String _name = _project.getName();
     result.addResult(_name, "graph cohesion", Double.valueOf(cohesion));
-    this.updateView(inputHypergraph);
+    this.updateView();
     return cohesion;
   }
   
   /**
    * Update the analysis view after updating its content.
    */
-  protected void updateView(final Hypergraph hypergraph) {
+  protected void updateView() {
     IWorkbench _workbench = PlatformUI.getWorkbench();
     Display _display = _workbench.getDisplay();
     _display.syncExec(new Runnable() {
       @Override
       public void run() {
-        try {
-          IWorkbench _workbench = PlatformUI.getWorkbench();
-          IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
-          IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
-          final IViewPart part = _activePage.showView(AnalysisResultView.ID);
-          boolean _notEquals = (!Objects.equal(hypergraph, null));
-          if (_notEquals) {
-            ((AnalysisResultView) part).setHypergraph(hypergraph);
-          }
-          ((AnalysisResultView) part).setProject(AbstractHypergraphAnalysisJob.this.project);
-          ((AnalysisResultView) part).update();
-        } catch (final Throwable _t) {
-          if (_t instanceof PartInitException) {
-            final PartInitException e = (PartInitException)_t;
-            e.printStackTrace();
-          } else {
-            throw Exceptions.sneakyThrow(_t);
-          }
-        }
+        IWorkbench _workbench = PlatformUI.getWorkbench();
+        IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
+        IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
+        final IViewPart part = _activePage.findView(AnalysisResultView.ID);
+        ((AnalysisResultView) part).setProject(AbstractHypergraphAnalysisJob.this.project);
+        ((AnalysisResultView) part).update();
       }
     });
   }

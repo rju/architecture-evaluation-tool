@@ -4,6 +4,7 @@ import de.cau.cs.se.software.evaluation.transformation.TransformationCyclomaticC
 import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode
 import de.cau.cs.se.software.evaluation.transformation.java.TransformationJavaMethodsToModularHypergraph
 import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 import de.cau.cs.se.software.evaluation.views.LogView
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -32,7 +33,6 @@ import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
-import de.cau.cs.se.software.evaluation.views.LogModelProvider
 
 class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
@@ -74,7 +74,8 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 					LogModelProvider.INSTANCE.projectName = project.name
 					
 					val classes = types.collectAllSourceClasses(dataTypePatterns, observedSystemPatterns, monitor)
-
+					monitor.subTask("")
+					
 					calculateCodeStatistics(classes, monitor, result)
 
 					val inputHypergraph = createHypergraphForJavaProject(dataTypePatterns, observedSystemPatterns,
@@ -109,9 +110,15 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	 */
 	private def calculateCodeStatistics(List<AbstractTypeDeclaration> classes, IProgressMonitor monitor,
 		AnalysisResultModelProvider result) {
+		
 		val linesOfCodeMetric = new TransformationLinesOfCode(monitor)
-		linesOfCodeMetric.generate(classes)
 		val javaMethodComplexity = new TransformationCyclomaticComplexity(monitor)
+		
+		monitor.beginTask("Calculate code statistics", linesOfCodeMetric.workEstimate(classes) +
+			javaMethodComplexity.workEstimate(classes)
+		)
+
+		linesOfCodeMetric.generate(classes)				
 		javaMethodComplexity.generate(classes)
 
 		result.addResult(project.project.name, "size of observed system", classes.size)
@@ -120,7 +127,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 			result.addResult(project.project.name, "cyclomatic complexity bucket " + i,
 				javaMethodComplexity.result.get(i))
 		}
-		updateView(null)
+		updateView()
 	}
 
 	/**
@@ -136,14 +143,18 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		/** construct analysis. */
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(javaProject, dataTypePatterns,
 			observedSystemPatterns, monitor)
+		
+		monitor.beginTask("Process java project " + javaProject.elementName, javaToModularHypergraph.workEstimate(classes))
 
 		javaToModularHypergraph.generate(classes)
+
+		result.resultHypergraph = javaToModularHypergraph.result
 
 		result.addResult(project.name, "number of modules", javaToModularHypergraph.result.modules.size)
 		result.addResult(project.name, "number of nodes", javaToModularHypergraph.result.nodes.size)
 		result.addResult(project.name, "number of edges", javaToModularHypergraph.result.edges.size)
 
-		updateView(javaToModularHypergraph.result)
+		updateView()
 		updateLogView()
 
 		return javaToModularHypergraph.result
@@ -190,6 +201,8 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 				]
 			}
 		]
+
+		monitor.subTask("")
 
 		return classes
 	}
@@ -326,13 +339,9 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	private def updateLogView() {
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
 			public override void run() {
-				try {
-					val part2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().
-						showView(LogView.ID)
-					(part2 as LogView).update()
-				} catch (PartInitException e) {
-					e.printStackTrace()
-				}
+				val part2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+						getActivePage().findView(LogView.ID)
+				(part2 as LogView).update()
 			}
 		})
 	}

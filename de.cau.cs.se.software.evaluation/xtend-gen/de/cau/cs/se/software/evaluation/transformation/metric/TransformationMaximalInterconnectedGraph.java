@@ -40,6 +40,83 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
   
   @Override
   public ModularHypergraph generate(final ModularHypergraph input) {
+    ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
+    this.result = _createModularHypergraph;
+    EList<Node> _nodes = input.getNodes();
+    final Consumer<Node> _function = (Node it) -> {
+      EList<Node> _nodes_1 = this.result.getNodes();
+      Node _deriveNode = HypergraphCreationHelper.deriveNode(it);
+      _nodes_1.add(_deriveNode);
+    };
+    _nodes.forEach(_function);
+    EList<Node> _nodes_1 = input.getNodes();
+    int _size = _nodes_1.size();
+    this.monitor.worked(_size);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return null;
+    }
+    EList<Module> _modules = input.getModules();
+    final Consumer<Module> _function_1 = (Module module) -> {
+      boolean _isCanceled_1 = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled_1);
+      if (_not) {
+        final Module derivedModule = HypergraphCreationHelper.deriveModule(module);
+        EList<Node> _nodes_2 = module.getNodes();
+        final Consumer<Node> _function_2 = (Node node) -> {
+          EList<Node> _nodes_3 = derivedModule.getNodes();
+          EList<Node> _nodes_4 = this.result.getNodes();
+          final Function1<Node, Boolean> _function_3 = (Node derivedNode) -> {
+            NodeReference _derivedFrom = derivedNode.getDerivedFrom();
+            Node _node = ((NodeTrace) _derivedFrom).getNode();
+            return Boolean.valueOf(Objects.equal(_node, node));
+          };
+          Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_4, _function_3);
+          _nodes_3.add(_findFirst);
+        };
+        _nodes_2.forEach(_function_2);
+        EList<Module> _modules_1 = this.result.getModules();
+        _modules_1.add(derivedModule);
+        EList<Node> _nodes_3 = input.getNodes();
+        int _size_1 = _nodes_3.size();
+        this.monitor.worked(_size_1);
+      }
+    };
+    _modules.forEach(_function_1);
+    EList<Node> _nodes_2 = this.result.getNodes();
+    final Procedure2<Node, Integer> _function_2 = (Node startNode, Integer startIndex) -> {
+      boolean _isCanceled_1 = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled_1);
+      if (_not) {
+        for (int index = ((startIndex).intValue() + 1); (index < this.result.getNodes().size()); index++) {
+          {
+            EList<Node> _nodes_3 = this.result.getNodes();
+            final Node endNode = _nodes_3.get(index);
+            final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+            String _name = startNode.getName();
+            String _plus = (_name + "-");
+            String _name_1 = endNode.getName();
+            String _plus_1 = (_plus + _name_1);
+            edge.setName(_plus_1);
+            EList<Edge> _edges = startNode.getEdges();
+            _edges.add(edge);
+            EList<Edge> _edges_1 = endNode.getEdges();
+            _edges_1.add(edge);
+            EList<Edge> _edges_2 = this.result.getEdges();
+            _edges_2.add(edge);
+          }
+        }
+        EList<Node> _nodes_3 = input.getNodes();
+        int _size_1 = _nodes_3.size();
+        this.monitor.worked(_size_1);
+      }
+    };
+    IterableExtensions.<Node>forEach(_nodes_2, _function_2);
+    return this.result;
+  }
+  
+  @Override
+  public int workEstimate(final ModularHypergraph input) {
     EList<Node> _nodes = input.getNodes();
     int _size = _nodes.size();
     EList<Module> _modules = input.getModules();
@@ -53,80 +130,6 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
     EList<Node> _nodes_3 = input.getNodes();
     int _size_4 = _nodes_3.size();
     int _multiply_1 = (_size_3 * _size_4);
-    int _plus_1 = (_plus + _multiply_1);
-    this.monitor.beginTask("Create maximal interconnected graph", _plus_1);
-    ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
-    this.result = _createModularHypergraph;
-    EList<Node> _nodes_4 = input.getNodes();
-    final Consumer<Node> _function = (Node it) -> {
-      EList<Node> _nodes_5 = this.result.getNodes();
-      Node _deriveNode = HypergraphCreationHelper.deriveNode(it);
-      _nodes_5.add(_deriveNode);
-    };
-    _nodes_4.forEach(_function);
-    EList<Node> _nodes_5 = input.getNodes();
-    int _size_5 = _nodes_5.size();
-    this.monitor.worked(_size_5);
-    boolean _isCanceled = this.monitor.isCanceled();
-    if (_isCanceled) {
-      return null;
-    }
-    EList<Module> _modules_1 = input.getModules();
-    final Consumer<Module> _function_1 = (Module module) -> {
-      boolean _isCanceled_1 = this.monitor.isCanceled();
-      boolean _not = (!_isCanceled_1);
-      if (_not) {
-        final Module derivedModule = HypergraphCreationHelper.deriveModule(module);
-        EList<Node> _nodes_6 = module.getNodes();
-        final Consumer<Node> _function_2 = (Node node) -> {
-          EList<Node> _nodes_7 = derivedModule.getNodes();
-          EList<Node> _nodes_8 = this.result.getNodes();
-          final Function1<Node, Boolean> _function_3 = (Node derivedNode) -> {
-            NodeReference _derivedFrom = derivedNode.getDerivedFrom();
-            Node _node = ((NodeTrace) _derivedFrom).getNode();
-            return Boolean.valueOf(Objects.equal(_node, node));
-          };
-          Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_8, _function_3);
-          _nodes_7.add(_findFirst);
-        };
-        _nodes_6.forEach(_function_2);
-        EList<Module> _modules_2 = this.result.getModules();
-        _modules_2.add(derivedModule);
-        EList<Node> _nodes_7 = input.getNodes();
-        int _size_6 = _nodes_7.size();
-        this.monitor.worked(_size_6);
-      }
-    };
-    _modules_1.forEach(_function_1);
-    EList<Node> _nodes_6 = this.result.getNodes();
-    final Procedure2<Node, Integer> _function_2 = (Node startNode, Integer startIndex) -> {
-      boolean _isCanceled_1 = this.monitor.isCanceled();
-      boolean _not = (!_isCanceled_1);
-      if (_not) {
-        for (int index = ((startIndex).intValue() + 1); (index < this.result.getNodes().size()); index++) {
-          {
-            EList<Node> _nodes_7 = this.result.getNodes();
-            final Node endNode = _nodes_7.get(index);
-            final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-            String _name = startNode.getName();
-            String _plus_2 = (_name + "-");
-            String _name_1 = endNode.getName();
-            String _plus_3 = (_plus_2 + _name_1);
-            edge.setName(_plus_3);
-            EList<Edge> _edges = startNode.getEdges();
-            _edges.add(edge);
-            EList<Edge> _edges_1 = endNode.getEdges();
-            _edges_1.add(edge);
-            EList<Edge> _edges_2 = this.result.getEdges();
-            _edges_2.add(edge);
-          }
-        }
-        EList<Node> _nodes_7 = input.getNodes();
-        int _size_6 = _nodes_7.size();
-        this.monitor.worked(_size_6);
-      }
-    };
-    IterableExtensions.<Node>forEach(_nodes_6, _function_2);
-    return this.result;
+    return (_plus + _multiply_1);
   }
 }

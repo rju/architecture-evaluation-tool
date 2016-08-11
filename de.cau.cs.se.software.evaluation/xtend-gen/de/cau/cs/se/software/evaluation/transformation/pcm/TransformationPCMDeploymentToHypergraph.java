@@ -95,6 +95,13 @@ public class TransformationPCMDeploymentToHypergraph extends AbstractTransformat
     System.out.println(("strange component type " + component));
   }
   
+  @Override
+  public int workEstimate(final org.palladiosimulator.pcm.system.System input) {
+    EList<AssemblyContext> _assemblyContexts__ComposedStructure = input.getAssemblyContexts__ComposedStructure();
+    int _size = _assemblyContexts__ComposedStructure.size();
+    return (_size * 2);
+  }
+  
   private void createNodeForComponent(final RepositoryComponent component, final Module module) {
     if (component instanceof BasicComponent) {
       _createNodeForComponent((BasicComponent)component, module);

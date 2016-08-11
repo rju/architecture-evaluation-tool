@@ -72,6 +72,7 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
         EList<Node> _nodes_1 = this.result.getNodes();
         Node _deriveNode = HypergraphCreationHelper.deriveNode(selectedNode);
         _nodes_1.add(_deriveNode);
+        this.monitor.worked(1);
         EList<Edge> _edges = selectedNode.getEdges();
         final Consumer<Edge> _function = (Edge edge) -> {
           EList<Edge> _edges_1 = this.result.getEdges();
@@ -79,13 +80,19 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
           _edges_1.add(_deriveEdge);
         };
         _edges.forEach(_function);
-        EList<Edge> _edges_1 = this.result.getEdges();
+        EList<Edge> _edges_1 = selectedNode.getEdges();
+        int _size = _edges_1.size();
+        this.monitor.worked(_size);
+        EList<Edge> _edges_2 = this.result.getEdges();
         final Consumer<Edge> _function_1 = (Edge edge) -> {
           EList<Node> _nodes_2 = input.getNodes();
           EList<Node> _nodes_3 = this.result.getNodes();
           this.createAndLinkNodesConnectedToEdge(edge, _nodes_2, _nodes_3);
+          EList<Node> _nodes_4 = input.getNodes();
+          int _size_1 = _nodes_4.size();
+          this.monitor.worked(_size_1);
         };
-        _edges_1.forEach(_function_1);
+        _edges_2.forEach(_function_1);
         return this.result;
       } else {
         _xifexpression_1 = null;
@@ -118,5 +125,38 @@ public class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTran
         _edges_1.add(edge);
       }
     }
+  }
+  
+  @Override
+  public int workEstimate(final Hypergraph input) {
+    int _xblockexpression = (int) 0;
+    {
+      Node _xifexpression = null;
+      EList<Node> _nodes = input.getNodes();
+      boolean _contains = _nodes.contains(this.startNode);
+      if (_contains) {
+        _xifexpression = this.startNode;
+      } else {
+        _xifexpression = null;
+      }
+      final Node selectedNode = _xifexpression;
+      int _xifexpression_1 = (int) 0;
+      boolean _notEquals = (!Objects.equal(selectedNode, null));
+      if (_notEquals) {
+        EList<Edge> _edges = selectedNode.getEdges();
+        int _size = _edges.size();
+        int _plus = (1 + _size);
+        EList<Edge> _edges_1 = selectedNode.getEdges();
+        int _size_1 = _edges_1.size();
+        EList<Node> _nodes_1 = input.getNodes();
+        int _size_2 = _nodes_1.size();
+        int _multiply = (_size_1 * _size_2);
+        _xifexpression_1 = (_plus + _multiply);
+      } else {
+        _xifexpression_1 = 0;
+      }
+      _xblockexpression = _xifexpression_1;
+    }
+    return _xblockexpression;
   }
 }

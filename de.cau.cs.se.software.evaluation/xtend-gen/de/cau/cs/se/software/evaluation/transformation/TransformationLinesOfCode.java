@@ -33,6 +33,7 @@ public class TransformationLinesOfCode extends AbstractTransformation<List<Abstr
         long _plus = ((this.result).longValue() + _longValue);
         this.result = Long.valueOf(_plus);
       }
+      this.monitor.worked(1);
     };
     input.forEach(_function);
     return this.result;
@@ -54,5 +55,10 @@ public class TransformationLinesOfCode extends AbstractTransformation<List<Abstr
       _xifexpression = 0;
     }
     return _xifexpression;
+  }
+  
+  @Override
+  public int workEstimate(final List<AbstractTypeDeclaration> input) {
+    return input.size();
   }
 }

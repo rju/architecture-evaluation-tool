@@ -21,6 +21,7 @@ class TransformationLinesOfCode extends AbstractTransformation<List<AbstractType
 				var loc = compilationUnit.calculateLOC(type) - compilationUnit.calculateLOC(type.javadoc)
 				result = result + Integer.valueOf(loc).longValue
 			}
+			monitor.worked(1)
 		]
 		
 		return result
@@ -32,6 +33,10 @@ class TransformationLinesOfCode extends AbstractTransformation<List<AbstractType
 			compilationUnit.getLineNumber(node.startPosition) + 1
 		else
 			0
+	}
+	
+	override workEstimate(List<AbstractTypeDeclaration> input) {
+		input.size
 	}
 	
 }

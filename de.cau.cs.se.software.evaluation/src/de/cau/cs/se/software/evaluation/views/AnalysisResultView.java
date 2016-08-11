@@ -15,12 +15,9 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.views;
 
-import java.io.IOException;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -30,9 +27,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
-
-import de.cau.cs.se.software.evaluation.Activator;
-import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 
 /**
  * The Main analysis result view class.
@@ -47,10 +41,6 @@ public class AnalysisResultView extends ViewPart {
 	public static final String ID = "de.cau.cs.se.software.evaluation.views.AnalysisResultView";
 
 	private TableViewer viewer;
-	private Action exportDataAction;
-	private Action exportHypergraphAction;
-	private Action clearViewAction;
-	private Hypergraph graph = null;
 	private IProject project = null;
 
 	/**
@@ -68,8 +58,6 @@ public class AnalysisResultView extends ViewPart {
 	public void createPartControl(final Composite parent) {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		// create Actions
-		this.createActions();
 		// create Toolbar
 		this.createToolbar();
 
@@ -102,9 +90,7 @@ public class AnalysisResultView extends ViewPart {
 		columnProject.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getProjectName();
+				return ((NamedValue) element).getProjectName();
 			}
 		});
 
@@ -114,9 +100,7 @@ public class AnalysisResultView extends ViewPart {
 		columnProperty.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getPropertyName();
+				return ((NamedValue) element).getPropertyName();
 			}
 		});
 
@@ -127,56 +111,9 @@ public class AnalysisResultView extends ViewPart {
 		columnValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getValue();
+				return ((NamedValue) element).getValue();
 			}
 		});
-
-	}
-
-	/**
-	 * Creates Actions for Toolbar.
-	 */
-	private void createActions() {
-
-		final AnalysisActionHandler actionHandler = new AnalysisActionHandler();
-
-		this.exportDataAction = new Action("Data Export", Activator.getImageDescriptor("/icons/data-export.gif")) {
-			@Override
-			public void run() {
-				try {
-					actionHandler.exportData(AnalysisResultView.this.viewer,
-							AnalysisResultView.this.getSite().getShell(),
-							AnalysisResultView.this.project);
-				} catch (final IOException e) {
-					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
-							"Export Error", "Error exporting data set " + e.getLocalizedMessage());
-				}
-			}
-
-		};
-
-		this.exportHypergraphAction = new Action("Graph Export", Activator.getImageDescriptor("/icons/graph-export.gif")) {
-			@Override
-			public void run() {
-				try {
-					actionHandler.exportGraph(AnalysisResultView.this.graph,
-							AnalysisResultView.this.getSite().getShell(),
-							AnalysisResultView.this.project);
-				} catch (final IOException e) {
-					MessageDialog.openError(AnalysisResultView.this.viewer.getControl().getShell(),
-							"Export Error", "Error exporting hypergraph " + e.getLocalizedMessage());
-				}
-			}
-		};
-
-		this.clearViewAction = new Action("Clear Data in View", Activator.getImageDescriptor("/icons/sample.gif")) {
-			@Override
-			public void run() {
-				actionHandler.clearViewData(AnalysisResultView.this);
-			}
-		};
 
 	}
 
@@ -185,9 +122,15 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createToolbar() {
 		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
-		manager.add(this.exportDataAction);
-		manager.add(this.exportHypergraphAction);
-		manager.add(this.clearViewAction);
+		manager.add(new ExportDataAction(this.getSite().getShell(), this.project));
+		manager.add(new ExportGraphAction(this.getSite().getShell(), this.project));
+		manager.add(new Action("Clear result view", UIIcons.ICON_CLEAR_VIEW) {
+			@Override
+			public void run() {
+				AnalysisResultModelProvider.INSTANCE.clearValues();
+				AnalysisResultView.this.viewer.refresh();
+			}
+		});
 	}
 
 	/**
@@ -198,19 +141,15 @@ public class AnalysisResultView extends ViewPart {
 		this.viewer.getControl().setFocus();
 	}
 
-	public void setHypergraph(final Hypergraph graph) {
-		this.graph = graph;
-	}
-
 	/**
 	 * Trigger the update of the view based on the model data.
 	 */
 	public void update() {
-		this.setFocus();
 		this.viewer.refresh();
 	}
 
 	public void setProject(final IProject project) {
 		this.project = project;
 	}
+
 }

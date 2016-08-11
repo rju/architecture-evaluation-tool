@@ -35,11 +35,15 @@ class CalculateComplexity {
 	 * @param input a modular system
 	 */
 	def calculate(Hypergraph input, String message) {
-		this.monitor.beginTask(message, input.nodes.size + 1)
-		/** S^# (hyperedges only graph) */
 		val hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
+		val size = new TransformationHypergraphSize(monitor)
+				
+		this.monitor.beginTask(message, hyperedgesOnlyGraph.workEstimate(input) + size.workEstimate(input))
+		
+		/** S^# (hyperedges only graph) */
 		hyperedgesOnlyGraph.generate(input)
-		this.monitor.worked(1)
+		
+		this.monitor.worked(hyperedgesOnlyGraph.workEstimate(input))
 		if (this.monitor.canceled)
 			return 0
 		
@@ -66,8 +70,7 @@ class CalculateComplexity {
 		}
 		
 		/** calculate size of S^# and S^#_i */
-		val size = new TransformationHypergraphSize(monitor)
-		size.name = "Determine Size(S^#)"
+		monitor.subTask("Determine Size(S^#)")
 		size.generate(hyperedgesOnlyGraph.result)
 		
 		if (this.monitor.canceled) {

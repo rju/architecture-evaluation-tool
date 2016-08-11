@@ -4,33 +4,32 @@ import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Node
+import de.cau.cs.se.software.evaluation.views.LogModelProvider
 import java.util.List
+import org.eclipse.jdt.core.dom.Block
 import org.eclipse.jdt.core.dom.ClassInstanceCreation
 import org.eclipse.jdt.core.dom.Expression
 import org.eclipse.jdt.core.dom.FieldAccess
 import org.eclipse.jdt.core.dom.IMethodBinding
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.IVariableBinding
+import org.eclipse.jdt.core.dom.LambdaExpression
 import org.eclipse.jdt.core.dom.MethodInvocation
 import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.SimpleName
+import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.SuperFieldAccess
 import org.eclipse.jdt.core.dom.SuperMethodInvocation
 import org.eclipse.jdt.core.dom.ThisExpression
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.swt.widgets.Display
+import org.eclipse.ui.PlatformUI
 
 import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
+import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
-import org.eclipse.jdt.core.dom.Statement
-import org.eclipse.jdt.core.dom.LambdaExpression
-import org.eclipse.jdt.core.dom.Block
-import org.eclipse.swt.widgets.Display
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.ui.PlatformUI
-import de.cau.cs.se.software.evaluation.views.LogModelProvider
-import de.cau.cs.se.software.evaluation.hypergraph.FieldTrace
 
 class JavaASTExpressionEvaluationHelper {
 

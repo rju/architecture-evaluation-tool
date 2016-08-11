@@ -47,6 +47,8 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
       int _get = this.buckets[i];
       this.result.add(Integer.valueOf(_get));
     }
+    int _size = input.size();
+    this.monitor.worked(_size);
     return this.result;
   }
   
@@ -85,5 +87,10 @@ public class TransformationCyclomaticComplexity extends AbstractTransformation<L
       }
     };
     ((List<MethodDeclaration>)Conversions.doWrapArray(_methods)).forEach(_function);
+  }
+  
+  @Override
+  public int workEstimate(final List<AbstractTypeDeclaration> input) {
+    return input.size();
   }
 }

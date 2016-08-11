@@ -27,7 +27,7 @@ import java.util.List;
 public enum LogModelProvider {
 	INSTANCE;
 
-	private final List<NamedValue<String>> values;
+	private final List<NamedValue> values;
 
 	private String project;
 
@@ -42,7 +42,7 @@ public enum LogModelProvider {
 		this.values.clear();
 	}
 
-	public List<NamedValue<String>> getMessages() {
+	public List<NamedValue> getMessages() {
 		return this.values;
 	}
 
@@ -51,6 +51,6 @@ public enum LogModelProvider {
 	}
 
 	public void addMessage(final String kind, final String message) {
-		this.values.add(new NamedValue<>(this.project, kind, message));
+		this.values.add(new NamedValue(this.project, kind, message));
 	}
 }

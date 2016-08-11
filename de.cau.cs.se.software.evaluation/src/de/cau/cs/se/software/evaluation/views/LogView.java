@@ -27,8 +27,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.part.ViewPart;
 
-import de.cau.cs.se.software.evaluation.Activator;
-
 /**
  * The Main analysis result view class.
  *
@@ -42,7 +40,6 @@ public class LogView extends ViewPart {
 	public static final String ID = "de.cau.cs.se.software.evaluation.views.LogView";
 
 	private TableViewer viewer;
-	private Action clearViewAction;
 
 	/**
 	 * The constructor.
@@ -59,8 +56,6 @@ public class LogView extends ViewPart {
 	public void createPartControl(final Composite parent) {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		// create Actions
-		this.createActions();
 		// create Toolbar
 		this.createToolbar();
 
@@ -93,51 +88,30 @@ public class LogView extends ViewPart {
 		columnProject.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getProjectName();
+				return ((NamedValue) element).getProjectName();
 			}
 		});
 
 		final TableViewerColumn columnProperty = new TableViewerColumn(this.viewer, SWT.NONE);
-		columnProperty.getColumn().setWidth(400);
+		columnProperty.getColumn().setWidth(200);
 		columnProperty.getColumn().setText("Fully qualified name");
 		columnProperty.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getPropertyName();
+				return ((NamedValue) element).getPropertyName();
 			}
 		});
 
 		// create a column for the first name
 		final TableViewerColumn columnValue = new TableViewerColumn(this.viewer, SWT.NONE);
-		columnValue.getColumn().setWidth(200);
+		columnValue.getColumn().setWidth(400);
 		columnValue.getColumn().setText("Value");
 		columnValue.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
-				@SuppressWarnings("unchecked")
-				final NamedValue<String> value = (NamedValue<String>) element;
-				return value.getValue();
+				return ((NamedValue) element).getValue();
 			}
 		});
-
-	}
-
-	/**
-	 * Creates Actions for Toolbar.
-	 */
-	private void createActions() {
-
-		this.clearViewAction = new Action("Clear Data in View", Activator.getImageDescriptor("/icons/sample.gif")) {
-			@Override
-			public void run() {
-				LogModelProvider.INSTANCE.clearMessages();
-				LogView.this.update();
-			}
-		};
 
 	}
 
@@ -146,7 +120,13 @@ public class LogView extends ViewPart {
 	 */
 	private void createToolbar() {
 		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
-		manager.add(this.clearViewAction);
+		manager.add(new Action("Clear log view", UIIcons.ICON_CLEAR_VIEW) {
+			@Override
+			public void run() {
+				LogModelProvider.INSTANCE.clearMessages();
+				LogView.this.update();
+			}
+		});
 	}
 
 	/**
@@ -161,7 +141,6 @@ public class LogView extends ViewPart {
 	 * Trigger the update of the view based on the model data.
 	 */
 	public void update() {
-		this.setFocus();
 		this.viewer.refresh();
 	}
 

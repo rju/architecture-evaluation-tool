@@ -38,11 +38,6 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 	}
 	
 	override generate(ModularHypergraph input) {
-		monitor.beginTask("Create intermodule hyperedges only graph",
-			input.edges.size * (input.nodes.size + input.modules.size) + // find all intermodule edges
-			input.edges.size * input.nodes.size + // upper bound of node and edge iteration
-			input.modules.size * input.nodes.size // copy modules
-		)
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		
 		/** detect all edges crossing module boundaries */
@@ -108,6 +103,12 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		}
 		
 		return false
+	}
+	
+	override workEstimate(ModularHypergraph input) {
+		input.edges.size * (input.nodes.size + input.modules.size) + // find all intermodule edges
+		input.edges.size * input.nodes.size + // upper bound of node and edge iteration
+		input.modules.size * input.nodes.size // copy modules
 	}
 	
 }

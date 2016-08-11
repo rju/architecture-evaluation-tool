@@ -28,6 +28,8 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 		
 		for (var i=0;i<=topBucket;i++) 
 			result.add(buckets.get(i))
+			
+		monitor.worked(input.size)
 		
 		return result
 	}
@@ -53,6 +55,10 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 				buckets.set(bucket, buckets.get(bucket) + 1)
 			}
 		]
+	}
+	
+	override workEstimate(List<AbstractTypeDeclaration> input) {
+		input.size
 	}
 	
 }

@@ -37,5 +37,10 @@ abstract class AbstractTransformation<S,T> implements IGenerator<S,T> {
 	def T getResult() {
 		this.result
 	}
+	
+	/**
+	 * Output work estimate of a transformation for a given input.
+	 */
+	def int workEstimate(S input);
 		
 }

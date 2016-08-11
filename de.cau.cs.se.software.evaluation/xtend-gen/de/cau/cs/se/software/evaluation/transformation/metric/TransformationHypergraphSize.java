@@ -28,40 +28,27 @@ import de.cau.cs.se.software.evaluation.state.StateFactory;
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation;
 import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper;
 import de.cau.cs.se.software.evaluation.views.LogModelProvider;
+import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
+import org.eclipse.xtext.xbase.lib.Functions.Function2;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 
 /**
  * Calculate the information size of a hypergraph.
  */
 @SuppressWarnings("all")
 public class TransformationHypergraphSize extends AbstractTransformation<Hypergraph, Double> {
-  private String name;
-  
   public TransformationHypergraphSize(final IProgressMonitor monitor) {
     super(monitor);
   }
   
-  public String setName(final String name) {
-    return this.name = name;
-  }
-  
   @Override
   public Double generate(final Hypergraph input) {
-    EList<Edge> _edges = input.getEdges();
-    int _size = _edges.size();
-    EList<Node> _nodes = input.getNodes();
-    int _size_1 = _nodes.size();
-    int _plus = (_size + _size_1);
-    int _multiply = (_plus * 2);
-    EList<Node> _nodes_1 = input.getNodes();
-    int _size_2 = _nodes_1.size();
-    int _plus_1 = (_multiply + _size_2);
-    this.monitor.beginTask(this.name, _plus_1);
     boolean _isCanceled = this.monitor.isCanceled();
     if (_isCanceled) {
       return Double.valueOf(0.0);
@@ -84,16 +71,18 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
         if (_isCanceled) {
           return 0.0;
         }
-        this.monitor.worked(1);
-        EList<RowPattern> _patterns = table.getPatterns();
         EList<Node> _nodes = system.getNodes();
-        Node _get = _nodes.get(i);
+        int _size = _nodes.size();
+        this.monitor.worked(_size);
+        EList<RowPattern> _patterns = table.getPatterns();
+        EList<Node> _nodes_1 = system.getNodes();
+        Node _get = _nodes_1.get(i);
         final double probability = this.lookupProbability(_patterns, _get, system);
         if ((probability > 0.0d)) {
-          double _size = size;
+          double _size_1 = size;
           double _log2 = this.log2(probability);
           double _minus = (-_log2);
-          size = (_size + _minus);
+          size = (_size_1 + _minus);
         } else {
           LogModelProvider.INSTANCE.addMessage("Hypergraph Model Error", "A component is disconnected, but should be connected. Result is tainted.");
         }
@@ -168,10 +157,16 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
       _patterns.add(_calculateRowPattern);
     };
     _nodes.forEach(_function_1);
-    this.compactPatternTable(patternTable);
     EList<Node> _nodes_1 = input.getNodes();
     int _size_1 = _nodes_1.size();
-    this.monitor.worked(_size_1);
+    EList<Node> _nodes_2 = input.getNodes();
+    int _size_2 = _nodes_2.size();
+    int _multiply = (_size_1 * _size_2);
+    this.monitor.worked(_multiply);
+    this.compactPatternTable(patternTable);
+    EList<Node> _nodes_3 = input.getNodes();
+    int _size_3 = _nodes_3.size();
+    this.monitor.worked(_size_3);
     return patternTable;
   }
   
@@ -204,36 +199,53 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
    * Find duplicate pattern in the pattern table and merge the pattern rows.
    */
   private void compactPatternTable(final RowPatternTable table) {
+    EList<RowPattern> _patterns = table.getPatterns();
+    int _size = _patterns.size();
+    EList<RowPattern> _patterns_1 = table.getPatterns();
+    RowPattern _get = _patterns_1.get(0);
+    EList<Boolean> _pattern = _get.getPattern();
+    int _size_1 = _pattern.size();
+    final int tick = (_size * _size_1);
+    EList<RowPattern> _patterns_2 = table.getPatterns();
+    final int length = _patterns_2.size();
     for (int i = 0; (i < table.getPatterns().size()); i++) {
-      boolean _isCanceled = this.monitor.isCanceled();
-      boolean _not = (!_isCanceled);
-      if (_not) {
-        for (int j = (i + 1); (j < table.getPatterns().size()); j++) {
-          EList<RowPattern> _patterns = table.getPatterns();
-          RowPattern _get = _patterns.get(j);
-          EList<Boolean> _pattern = _get.getPattern();
-          EList<RowPattern> _patterns_1 = table.getPatterns();
-          RowPattern _get_1 = _patterns_1.get(i);
-          EList<Boolean> _pattern_1 = _get_1.getPattern();
-          boolean _matchPattern = this.matchPattern(_pattern, _pattern_1);
-          if (_matchPattern) {
-            EList<RowPattern> _patterns_2 = table.getPatterns();
-            final RowPattern basePattern = _patterns_2.get(i);
+      {
+        this.monitor.worked(tick);
+        boolean _isCanceled = this.monitor.isCanceled();
+        boolean _not = (!_isCanceled);
+        if (_not) {
+          for (int j = (i + 1); (j < table.getPatterns().size()); j++) {
             EList<RowPattern> _patterns_3 = table.getPatterns();
-            RowPattern _get_2 = _patterns_3.get(j);
-            EList<Node> _nodes = _get_2.getNodes();
-            final Consumer<Node> _function = (Node node) -> {
-              EList<Node> _nodes_1 = basePattern.getNodes();
-              _nodes_1.add(node);
-            };
-            _nodes.forEach(_function);
+            RowPattern _get_1 = _patterns_3.get(j);
+            EList<Boolean> _pattern_1 = _get_1.getPattern();
             EList<RowPattern> _patterns_4 = table.getPatterns();
-            _patterns_4.remove(j);
-            j--;
+            RowPattern _get_2 = _patterns_4.get(i);
+            EList<Boolean> _pattern_2 = _get_2.getPattern();
+            boolean _matchPattern = this.matchPattern(_pattern_1, _pattern_2);
+            if (_matchPattern) {
+              EList<RowPattern> _patterns_5 = table.getPatterns();
+              final RowPattern basePattern = _patterns_5.get(i);
+              EList<RowPattern> _patterns_6 = table.getPatterns();
+              RowPattern _get_3 = _patterns_6.get(j);
+              EList<Node> _nodes = _get_3.getNodes();
+              final Consumer<Node> _function = (Node node) -> {
+                EList<Node> _nodes_1 = basePattern.getNodes();
+                _nodes_1.add(node);
+              };
+              _nodes.forEach(_function);
+              EList<RowPattern> _patterns_7 = table.getPatterns();
+              _patterns_7.remove(j);
+              j--;
+            }
           }
         }
       }
     }
+    EList<RowPattern> _patterns_3 = table.getPatterns();
+    int _size_2 = _patterns_3.size();
+    int _minus = (length - _size_2);
+    int _multiply = (_minus * tick);
+    this.monitor.worked(_multiply);
   }
   
   /**
@@ -307,6 +319,9 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
         _edges_2.forEach(_function_2);
         EList<Node> _nodes_2 = systemGraph.getNodes();
         _nodes_2.add(derivedNode);
+        EList<Edge> _edges_3 = node.getEdges();
+        int _size_1 = _edges_3.size();
+        this.monitor.worked(_size_1);
       }
     };
     _nodes_1.forEach(_function_1);
@@ -314,5 +329,52 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     int _size_1 = _nodes_2.size();
     this.monitor.worked(_size_1);
     return systemGraph;
+  }
+  
+  @Override
+  public int workEstimate(final Hypergraph input) {
+    int _xblockexpression = (int) 0;
+    {
+      EList<Edge> _edges = input.getEdges();
+      int _size = _edges.size();
+      EList<Node> _nodes = input.getNodes();
+      int _size_1 = _nodes.size();
+      int _plus = (_size + _size_1);
+      EList<Node> _nodes_1 = input.getNodes();
+      final Function1<Node, Integer> _function = (Node it) -> {
+        EList<Edge> _edges_1 = it.getEdges();
+        return Integer.valueOf(_edges_1.size());
+      };
+      List<Integer> _map = ListExtensions.<Node, Integer>map(_nodes_1, _function);
+      final Function2<Integer, Integer, Integer> _function_1 = (Integer p1, Integer p2) -> {
+        return Integer.valueOf(((p1).intValue() + (p2).intValue()));
+      };
+      Integer _reduce = IterableExtensions.<Integer>reduce(_map, _function_1);
+      int _plus_1 = (_plus + (_reduce).intValue());
+      EList<Edge> _edges_1 = input.getEdges();
+      int _size_2 = _edges_1.size();
+      int _plus_2 = (_plus_1 + _size_2);
+      EList<Node> _nodes_2 = input.getNodes();
+      int _size_3 = _nodes_2.size();
+      EList<Node> _nodes_3 = input.getNodes();
+      int _size_4 = _nodes_3.size();
+      int _multiply = (_size_3 * _size_4);
+      int _plus_3 = (_plus_2 + _multiply);
+      EList<Node> _nodes_4 = input.getNodes();
+      int _size_5 = _nodes_4.size();
+      EList<Node> _nodes_5 = input.getNodes();
+      int _size_6 = _nodes_5.size();
+      int _multiply_1 = (_size_5 * _size_6);
+      EList<Edge> _edges_2 = input.getEdges();
+      int _size_7 = _edges_2.size();
+      int _multiply_2 = (_multiply_1 * _size_7);
+      /* (_plus_3 + _multiply_2); */
+      EList<Node> _nodes_6 = input.getNodes();
+      int _size_8 = _nodes_6.size();
+      EList<Node> _nodes_7 = input.getNodes();
+      int _size_9 = _nodes_7.size();
+      _xblockexpression = (_size_8 * _size_9);
+    }
+    return _xblockexpression;
   }
 }

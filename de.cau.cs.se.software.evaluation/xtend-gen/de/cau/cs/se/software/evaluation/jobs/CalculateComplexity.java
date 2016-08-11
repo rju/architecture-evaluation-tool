@@ -41,20 +41,22 @@ public class CalculateComplexity {
    * @param input a modular system
    */
   public double calculate(final Hypergraph input, final String message) {
-    EList<Node> _nodes = input.getNodes();
-    int _size = _nodes.size();
-    int _plus = (_size + 1);
-    this.monitor.beginTask(message, _plus);
     final TransformationHyperedgesOnlyGraph hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(this.monitor);
+    final TransformationHypergraphSize size = new TransformationHypergraphSize(this.monitor);
+    int _workEstimate = hyperedgesOnlyGraph.workEstimate(input);
+    int _workEstimate_1 = size.workEstimate(input);
+    int _plus = (_workEstimate + _workEstimate_1);
+    this.monitor.beginTask(message, _plus);
     hyperedgesOnlyGraph.generate(input);
-    this.monitor.worked(1);
+    int _workEstimate_2 = hyperedgesOnlyGraph.workEstimate(input);
+    this.monitor.worked(_workEstimate_2);
     boolean _isCanceled = this.monitor.isCanceled();
     if (_isCanceled) {
       return 0;
     }
     Hypergraph _result = hyperedgesOnlyGraph.getResult();
-    EList<Node> _nodes_1 = _result.getNodes();
-    Iterator<Node> _iterator = _nodes_1.iterator();
+    EList<Node> _nodes = _result.getNodes();
+    Iterator<Node> _iterator = _nodes.iterator();
     this.globalHyperEdgesOnlyGraphNodes = _iterator;
     this.complexity = 0;
     boolean _isCanceled_1 = this.monitor.isCanceled();
@@ -78,8 +80,7 @@ public class CalculateComplexity {
       jobs.forEach(_function);
       return 0.0;
     }
-    final TransformationHypergraphSize size = new TransformationHypergraphSize(this.monitor);
-    size.setName("Determine Size(S^#)");
+    this.monitor.subTask("Determine Size(S^#)");
     Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
     size.generate(_result_1);
     boolean _isCanceled_3 = this.monitor.isCanceled();

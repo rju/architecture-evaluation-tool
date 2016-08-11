@@ -109,6 +109,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
             String _name_1 = this.project.getName();
             LogModelProvider.INSTANCE.setProjectName(_name_1);
             final List<AbstractTypeDeclaration> classes = this.collectAllSourceClasses(types, dataTypePatterns, observedSystemPatterns, monitor);
+            monitor.subTask("");
             this.calculateCodeStatistics(classes, monitor, result);
             final ModularHypergraph inputHypergraph = this.createHypergraphForJavaProject(dataTypePatterns, observedSystemPatterns, classes, monitor, result);
             this.calculateSize(inputHypergraph, monitor, result);
@@ -135,8 +136,12 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
    */
   private void calculateCodeStatistics(final List<AbstractTypeDeclaration> classes, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationLinesOfCode linesOfCodeMetric = new TransformationLinesOfCode(monitor);
-    linesOfCodeMetric.generate(classes);
     final TransformationCyclomaticComplexity javaMethodComplexity = new TransformationCyclomaticComplexity(monitor);
+    int _workEstimate = linesOfCodeMetric.workEstimate(classes);
+    int _workEstimate_1 = javaMethodComplexity.workEstimate(classes);
+    int _plus = (_workEstimate + _workEstimate_1);
+    monitor.beginTask("Calculate code statistics", _plus);
+    linesOfCodeMetric.generate(classes);
     javaMethodComplexity.generate(classes);
     IProject _project = this.project.getProject();
     String _name = _project.getName();
@@ -153,7 +158,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
       Integer _get = _result_1.get(i);
       result.addResult(_name_2, ("cyclomatic complexity bucket " + Integer.valueOf(i)), (_get).intValue());
     }
-    this.updateView(null);
+    this.updateView();
   }
   
   /**
@@ -161,24 +166,29 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
    */
   private ModularHypergraph createHypergraphForJavaProject(final List<String> dataTypePatterns, final List<String> observedSystemPatterns, final List<AbstractTypeDeclaration> classes, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationJavaMethodsToModularHypergraph javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(this.javaProject, dataTypePatterns, observedSystemPatterns, monitor);
+    String _elementName = this.javaProject.getElementName();
+    String _plus = ("Process java project " + _elementName);
+    int _workEstimate = javaToModularHypergraph.workEstimate(classes);
+    monitor.beginTask(_plus, _workEstimate);
     javaToModularHypergraph.generate(classes);
-    String _name = this.project.getName();
     ModularHypergraph _result = javaToModularHypergraph.getResult();
-    EList<Module> _modules = _result.getModules();
+    result.setResultHypergraph(_result);
+    String _name = this.project.getName();
+    ModularHypergraph _result_1 = javaToModularHypergraph.getResult();
+    EList<Module> _modules = _result_1.getModules();
     int _size = _modules.size();
     result.addResult(_name, "number of modules", _size);
     String _name_1 = this.project.getName();
-    ModularHypergraph _result_1 = javaToModularHypergraph.getResult();
-    EList<Node> _nodes = _result_1.getNodes();
+    ModularHypergraph _result_2 = javaToModularHypergraph.getResult();
+    EList<Node> _nodes = _result_2.getNodes();
     int _size_1 = _nodes.size();
     result.addResult(_name_1, "number of nodes", _size_1);
     String _name_2 = this.project.getName();
-    ModularHypergraph _result_2 = javaToModularHypergraph.getResult();
-    EList<Edge> _edges = _result_2.getEdges();
+    ModularHypergraph _result_3 = javaToModularHypergraph.getResult();
+    EList<Edge> _edges = _result_3.getEdges();
     int _size_2 = _edges.size();
     result.addResult(_name_2, "number of edges", _size_2);
-    ModularHypergraph _result_3 = javaToModularHypergraph.getResult();
-    this.updateView(_result_3);
+    this.updateView();
     this.updateLogView();
     return javaToModularHypergraph.getResult();
   }
@@ -236,6 +246,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
       }
     };
     types.forEach(_function);
+    monitor.subTask("");
     return classes;
   }
   
@@ -428,20 +439,11 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
     _display.syncExec(new Runnable() {
       @Override
       public void run() {
-        try {
-          IWorkbench _workbench = PlatformUI.getWorkbench();
-          IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
-          IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
-          final IViewPart part2 = _activePage.showView(LogView.ID);
-          ((LogView) part2).update();
-        } catch (final Throwable _t) {
-          if (_t instanceof PartInitException) {
-            final PartInitException e = (PartInitException)_t;
-            e.printStackTrace();
-          } else {
-            throw Exceptions.sneakyThrow(_t);
-          }
-        }
+        IWorkbench _workbench = PlatformUI.getWorkbench();
+        IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
+        IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
+        final IViewPart part2 = _activePage.findView(LogView.ID);
+        ((LogView) part2).update();
       }
     });
   }

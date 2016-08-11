@@ -38,7 +38,9 @@ public abstract class AbstractAnalysisHandler extends AbstractHandler implements
 	 */
 	protected void createAnalysisView(final IWorkbenchPage activePage) throws ExecutionException {
 		try {
-			activePage.showView(AnalysisResultView.ID);
+			if (activePage.findView(AnalysisResultView.ID) == null) {
+				activePage.showView(AnalysisResultView.ID);
+			}
 		} catch (final PartInitException e) {
 			throw new ExecutionException(AnalysisResultView.ID + "View initialization failed.", e);
 		}
@@ -52,7 +54,9 @@ public abstract class AbstractAnalysisHandler extends AbstractHandler implements
 	 */
 	protected void createLogView(final IWorkbenchPage activePage) throws ExecutionException {
 		try {
-			activePage.showView(LogView.ID);
+			if (activePage.findView(LogView.ID) == null) {
+				activePage.showView(LogView.ID);
+			}
 		} catch (final PartInitException e) {
 			throw new ExecutionException(LogView.ID + "View initialization failed.", e);
 		}

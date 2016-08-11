@@ -66,4 +66,8 @@ class TransformationPCMDeploymentToHypergraph extends AbstractTransformation<Sys
 		java.lang.System.out.println("strange component type " + component)
 	}
 	
+	override workEstimate(System input) {
+		input.assemblyContexts__ComposedStructure.size *2
+	}
+	
 }

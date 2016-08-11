@@ -76,8 +76,16 @@ class TransformationHypergraphToGraphMapping extends AbstractTransformation<Modu
 			}
 			
 		]
+		
+		// TODO this is a very limited approach, better distribute
+		monitor.worked(input.workEstimate)
 						
 		return result
+	}
+	
+	override workEstimate(ModularHypergraph input) {
+		input.modules.size + input.nodes.size +
+		input.edges.size * (input.nodes.size + 2)
 	}
 	
 }

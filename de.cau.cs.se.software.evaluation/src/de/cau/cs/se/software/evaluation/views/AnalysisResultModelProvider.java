@@ -18,6 +18,8 @@ package de.cau.cs.se.software.evaluation.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
+
 /**
  * Enumeration used as singleton for the result model provider.
  *
@@ -27,7 +29,8 @@ import java.util.List;
 public enum AnalysisResultModelProvider {
 	INSTANCE;
 
-	private final List<NamedValue<String>> values;
+	private final List<NamedValue> values;
+	private Hypergraph hypergraph;
 
 	private AnalysisResultModelProvider() {
 		this.values = new ArrayList<>();
@@ -41,18 +44,26 @@ public enum AnalysisResultModelProvider {
 	}
 
 	public void addResult(final String project, final String label, final Double value) {
-		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+		this.values.add(new NamedValue(project, label, String.valueOf(value)));
 	}
 
 	public void addResult(final String project, final String label, final int value) {
-		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+		this.values.add(new NamedValue(project, label, String.valueOf(value)));
 	}
 
 	public void addResult(final String project, final String label, final long value) {
-		this.values.add(new NamedValue<>(project, label, String.valueOf(value)));
+		this.values.add(new NamedValue(project, label, String.valueOf(value)));
 	}
 
-	public List<NamedValue<String>> getValues() {
+	public void setResultHypergraph(final Hypergraph hypergraph) {
+		this.hypergraph = hypergraph;
+	}
+
+	public Hypergraph getResultHypergraph() {
+		return this.hypergraph;
+	}
+
+	public List<NamedValue> getValues() {
 		return this.values;
 	}
 }

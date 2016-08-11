@@ -70,6 +70,12 @@ class TransformationEMFInstanceToHypergraph extends AbstractTransformation<EPack
 			ePackage.name
 	}
 	
+	override workEstimate(EPackage input) {
+		1 + // resolvePackages
+		1 + // classes
+		1 // references
+	}
+	
 
 	
 }

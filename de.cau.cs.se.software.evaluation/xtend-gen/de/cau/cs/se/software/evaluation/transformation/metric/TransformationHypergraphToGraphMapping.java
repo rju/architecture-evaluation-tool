@@ -135,6 +135,24 @@ public class TransformationHypergraphToGraphMapping extends AbstractTransformati
       }
     };
     _edges.forEach(_function_2);
+    int _workEstimate = this.workEstimate(input);
+    this.monitor.worked(_workEstimate);
     return this.result;
+  }
+  
+  @Override
+  public int workEstimate(final ModularHypergraph input) {
+    EList<Module> _modules = input.getModules();
+    int _size = _modules.size();
+    EList<Node> _nodes = input.getNodes();
+    int _size_1 = _nodes.size();
+    int _plus = (_size + _size_1);
+    EList<Edge> _edges = input.getEdges();
+    int _size_2 = _edges.size();
+    EList<Node> _nodes_1 = input.getNodes();
+    int _size_3 = _nodes_1.size();
+    int _plus_1 = (_size_3 + 2);
+    int _multiply = (_size_2 * _plus_1);
+    return (_plus + _multiply);
   }
 }

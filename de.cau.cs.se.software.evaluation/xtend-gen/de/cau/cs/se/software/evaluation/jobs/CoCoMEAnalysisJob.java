@@ -38,7 +38,8 @@ public class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
     EList<Edge> _edges = graph.getEdges();
     int _size_1 = _edges.size();
     result.addResult(_name_1, "number of edges", _size_1);
-    this.updateView(graph);
+    result.setResultHypergraph(graph);
+    this.updateView();
     this.calculateSize(graph, monitor, result);
     this.calculateComplexity(graph, monitor, result);
     monitor.done();

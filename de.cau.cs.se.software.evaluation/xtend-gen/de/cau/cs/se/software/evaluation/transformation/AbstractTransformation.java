@@ -38,4 +38,9 @@ public abstract class AbstractTransformation<S extends Object, T extends Object>
   public T getResult() {
     return this.result;
   }
+  
+  /**
+   * Output work estimate of a transformation for a given input.
+   */
+  public abstract int workEstimate(final S input);
 }

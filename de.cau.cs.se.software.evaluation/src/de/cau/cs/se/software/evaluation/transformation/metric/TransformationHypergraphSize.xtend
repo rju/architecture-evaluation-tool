@@ -34,19 +34,12 @@ import de.cau.cs.se.software.evaluation.views.LogModelProvider
  * Calculate the information size of a hypergraph.
  */
 class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Double> {
-
-	var String name
 	
 	new(IProgressMonitor monitor) {
 		super(monitor)
 	}
-		
-	def setName(String name) {
-		this.name = name
-	}
-
+	
 	override generate(Hypergraph input) {
-		monitor.beginTask(this.name, (input.edges.size + input.nodes.size)*2 + input.nodes.size)
 		if (this.monitor.canceled)
 			return 0.0
 			
@@ -68,7 +61,7 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		for (var int i=0;i<system.nodes.size;i++) {
 			if (this.monitor.canceled)
 				return 0.0
-			monitor.worked(1)
+			monitor.worked(system.nodes.size)
 			val probability = table.patterns.lookupProbability(system.nodes.get(i), system)
 			if (probability > 0.0d) 
 				size+= (-log2(probability))
@@ -112,6 +105,8 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 			return null
 		
 		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
+		monitor.worked(input.nodes.size * input.nodes.size)
+		
 		patternTable.compactPatternTable
 		monitor.worked(input.nodes.size)
 						
@@ -137,7 +132,11 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 * Find duplicate pattern in the pattern table and merge the pattern rows.
 	 */
 	private def void compactPatternTable(RowPatternTable table) {
+		val tick = table.patterns.size * table.patterns.get(0).pattern.size
+		val length = table.patterns.size
+		
 		for (var int i=0;i<table.patterns.size;i++) {
+			monitor.worked(tick)
 			if (!this.monitor.canceled) {
 				for (var int j=i+1; j<table.patterns.size; j++) {
 					if (matchPattern(table.patterns.get(j).pattern,table.patterns.get(i).pattern)) {
@@ -149,6 +148,8 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 				}
 			}
 		}
+		
+		monitor.worked((length-table.patterns.size)*tick)
 	}
 	
 	/**
@@ -193,11 +194,18 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 					derivedNode.edges.add(derivedEdge)
 				]
 				systemGraph.nodes.add(derivedNode)
+				monitor.worked(node.edges.size)
 			}
 		]
 		monitor.worked(system.nodes.size)
 					
 		return systemGraph
+	}
+	
+	override workEstimate(Hypergraph input) {
+		input.edges.size + input.nodes.size + input.nodes.map[it.edges.size].reduce[p1, p2| p1 + p2] + // createSystemGraph
+		input.edges.size + input.nodes.size * input.nodes.size + input.nodes.size * input.nodes.size * input.edges.size // createRowPatternTable
+		input.nodes.size * input.nodes.size // calculateSize
 	}
 	
 }

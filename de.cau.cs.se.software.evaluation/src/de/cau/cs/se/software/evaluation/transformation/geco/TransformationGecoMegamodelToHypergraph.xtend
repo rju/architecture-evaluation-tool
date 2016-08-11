@@ -102,5 +102,10 @@ class TransformationGecoMegamodelToHypergraph extends AbstractTransformation<Gec
 			}
 		}
 	}
+	
+	override workEstimate(GecoModel input) {
+		input.models.size +
+		input.fragments.size
+	}
 		
 }

@@ -56,13 +56,6 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	 * Main transformation routine.
 	 */
 	override generate(List<AbstractTypeDeclaration> input) {
-		monitor.beginTask("Process java project " + this.project.elementName,
-			input.size + // modules
-			input.size + // properties for each class
-			input.size + // methods
-			input.size + // implicit constructors
-			input.size // edges
-		)
 		result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		/** create modules for all classes */
 		input.forEach[clazz | result.modules.add(createModuleForTypeBinding(clazz.resolveBinding, EModuleKind.SYSTEM))]
@@ -189,6 +182,14 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 			default:
 				return false
 		}
+	}
+	
+	override workEstimate(List<AbstractTypeDeclaration> input) {
+		input.size + // modules
+		input.size + // properties for each class
+		input.size + // methods
+		input.size + // implicit constructors
+		input.size // edges
 	}
 	
 	

@@ -27,7 +27,6 @@ import de.cau.cs.se.software.evaluation.views.AnalysisResultView
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
-import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
 /**
@@ -55,12 +54,14 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * @return the calculated information size of the hypergraph
 	 */
 	protected def calculateSize(Hypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
-		val hypergraphSize = new TransformationHypergraphSize(monitor)
-		hypergraphSize.name = "Calculate system size"
+		val hypergraphSize = new TransformationHypergraphSize(monitor)	
+		monitor.beginTask("Calculate system size", hypergraphSize.workEstimate(inputHypergraph))
+		monitor.subTask("")
+		
 		hypergraphSize.generate(inputHypergraph)
 
 		result.addResult(project.project.name, "hypergraph size", hypergraphSize.result)
-		updateView(inputHypergraph)
+		updateView()
 				
 		return hypergraphSize.result
 	}
@@ -81,7 +82,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system's hypergraph complexity")
 		
 		result.addResult(project.project.name, "hypergraph complexity", complexity)
-		updateView(inputHypergraph)
+		updateView()
 
 		return complexity
 	}
@@ -99,12 +100,18 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	protected def calculateCoupling(ModularHypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
 		/** Determine intermodule hyperedges only modular graph for MS^* */
 		val intermoduleHyperedgesOnlyGraph = new TransformationIntermoduleHyperedgesOnlyGraph(monitor)
+		
+		monitor.beginTask("Create intermodule hyperedges only graph", 
+			intermoduleHyperedgesOnlyGraph.workEstimate(inputHypergraph)
+		)
+		
 		intermoduleHyperedgesOnlyGraph.generate(inputHypergraph)
 
 		val calculateComplexity = new CalculateComplexity(monitor)
-		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, "Calculate intermodule complexity")
+		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, 
+			"Calculate intermodule complexity")
 		result.addResult(project.project.name, "inter module coupling", complexityIntermodule)	
-		updateView(inputHypergraph)
+		updateView()
 	}
 	
 	
@@ -120,20 +127,30 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 * @return the cohesion of the modular inter-module hyperedges only hypergraph
 	 */
 	protected def calculateCohesion(ModularHypergraph inputHypergraph, IProgressMonitor monitor, AnalysisResultModelProvider result) {
-		/** Determine graph mapping of the hypergraph */
 		val modularGraph = new TransformationHypergraphToGraphMapping(monitor)
+		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
+		val intraModuleGraph = new TransformationIntraModuleGraph(monitor)
+		
+		monitor.beginTask("Calculate Cohesion", modularGraph.workEstimate(inputHypergraph) + 
+			maximalInterconnectedGraph.workEstimate(inputHypergraph) +
+			intraModuleGraph.workEstimate(inputHypergraph))
+		
+		/** Determine graph mapping of the hypergraph */
+		monitor.subTask("Create graph from hypergraph")
 		modularGraph.generate(inputHypergraph)
+		
 		if (monitor.canceled)
 			return 0
 		
-		/** Determine maximal interconnected modular graph MS^(n) */
-		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
+		/** Determine maximal interconnected modular graph MS^(n) */	
+		monitor.subTask("Create maximal interconnected graph")
 		maximalInterconnectedGraph.generate(modularGraph.result)
+		
 		if (monitor.canceled)
 			return 0
 		
 		/** Determine maximal intra module graph MS^° */
-		val intraModuleGraph = new TransformationIntraModuleGraph(monitor)
+		monitor.subTask("Create intra module graph")		
 		intraModuleGraph.generate(modularGraph.result)
 		
 		if (monitor.canceled)
@@ -160,7 +177,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		
 		/** display results */
 		result.addResult(project.project.name, "graph cohesion", cohesion)
-		updateView(inputHypergraph)
+		updateView()
 		
 		return cohesion
 	}
@@ -168,17 +185,13 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	/**
 	 * Update the analysis view after updating its content.
 	 */
-	protected def updateView(Hypergraph hypergraph) {
+	protected def updateView() {
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
        		public override void run() {
-	           try { 
-					val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(AnalysisResultView.ID)
-					if (hypergraph != null) (part as AnalysisResultView).setHypergraph(hypergraph)
-					(part as AnalysisResultView).setProject(project)
-					(part as AnalysisResultView).update()
-	           } catch (PartInitException e) {
-	                e.printStackTrace()
-	           }
+				val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+					getActivePage().findView(AnalysisResultView.ID)
+				(part as AnalysisResultView).setProject(project)
+				(part as AnalysisResultView).update()
 	    	}
      	})
 	}

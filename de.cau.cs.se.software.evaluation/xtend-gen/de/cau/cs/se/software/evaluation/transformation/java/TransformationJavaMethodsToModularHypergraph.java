@@ -68,18 +68,6 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
    */
   @Override
   public ModularHypergraph generate(final List<AbstractTypeDeclaration> input) {
-    String _elementName = this.project.getElementName();
-    String _plus = ("Process java project " + _elementName);
-    int _size = input.size();
-    int _size_1 = input.size();
-    int _plus_1 = (_size + _size_1);
-    int _size_2 = input.size();
-    int _plus_2 = (_plus_1 + _size_2);
-    int _size_3 = input.size();
-    int _plus_3 = (_plus_2 + _size_3);
-    int _size_4 = input.size();
-    int _plus_4 = (_plus_3 + _size_4);
-    this.monitor.beginTask(_plus, _plus_4);
     ModularHypergraph _createModularHypergraph = HypergraphFactory.eINSTANCE.createModularHypergraph();
     this.result = _createModularHypergraph;
     final Consumer<AbstractTypeDeclaration> _function = (AbstractTypeDeclaration clazz) -> {
@@ -89,22 +77,22 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
       _modules.add(_createModuleForTypeBinding);
     };
     input.forEach(_function);
-    int _size_5 = input.size();
-    this.monitor.worked(_size_5);
+    int _size = input.size();
+    this.monitor.worked(_size);
     final Consumer<AbstractTypeDeclaration> _function_1 = (AbstractTypeDeclaration clazz) -> {
       EList<Edge> _edges = this.result.getEdges();
       this.createEdgesForClassProperties(_edges, clazz, this.dataTypePatterns);
     };
     input.forEach(_function_1);
-    int _size_6 = input.size();
-    this.monitor.worked(_size_6);
+    int _size_1 = input.size();
+    this.monitor.worked(_size_1);
     final Consumer<AbstractTypeDeclaration> _function_2 = (AbstractTypeDeclaration clazz) -> {
       EList<Node> _nodes = this.result.getNodes();
       this.createNodesForMethods(_nodes, clazz);
     };
     input.forEach(_function_2);
-    int _size_7 = input.size();
-    this.monitor.worked(_size_7);
+    int _size_2 = input.size();
+    this.monitor.worked(_size_2);
     final Function1<AbstractTypeDeclaration, Boolean> _function_3 = (AbstractTypeDeclaration clazz) -> {
       return Boolean.valueOf(this.hasImplicitConstructor(clazz));
     };
@@ -126,14 +114,14 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
       _nodes_1.add(node);
     };
     _filter.forEach(_function_4);
-    int _size_8 = input.size();
-    this.monitor.worked(_size_8);
+    int _size_3 = input.size();
+    this.monitor.worked(_size_3);
     final Consumer<AbstractTypeDeclaration> _function_5 = (AbstractTypeDeclaration clazz) -> {
       this.resolveEdges(this.result, this.dataTypePatterns, clazz);
     };
     input.forEach(_function_5);
-    int _size_9 = input.size();
-    this.monitor.worked(_size_9);
+    int _size_4 = input.size();
+    this.monitor.worked(_size_4);
     return this.result;
   }
   
@@ -309,5 +297,18 @@ public class TransformationJavaMethodsToModularHypergraph extends AbstractTransf
       }
     }
     return false;
+  }
+  
+  @Override
+  public int workEstimate(final List<AbstractTypeDeclaration> input) {
+    int _size = input.size();
+    int _size_1 = input.size();
+    int _plus = (_size + _size_1);
+    int _size_2 = input.size();
+    int _plus_1 = (_plus + _size_2);
+    int _size_3 = input.size();
+    int _plus_2 = (_plus_1 + _size_3);
+    int _size_4 = input.size();
+    return (_plus_2 + _size_4);
   }
 }

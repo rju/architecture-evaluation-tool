@@ -22,10 +22,10 @@ package de.cau.cs.se.software.evaluation.views;
  * @author Reiner Jung
  *
  */
-public class NamedValue<T> {
+public class NamedValue {
 	private final String projectName;
 	private final String propertyName;
-	private final T value;
+	private final String value;
 
 	/**
 	 * Create one new name value pair.
@@ -37,7 +37,7 @@ public class NamedValue<T> {
 	 * @param value
 	 *            the value associated for this label
 	 */
-	public NamedValue(final String projectName, final String propertyName, final T value) {
+	public NamedValue(final String projectName, final String propertyName, final String value) {
 		this.projectName = projectName;
 		this.propertyName = propertyName;
 		this.value = value;
@@ -51,7 +51,7 @@ public class NamedValue<T> {
 		return this.propertyName;
 	}
 
-	public T getValue() {
+	public String getValue() {
 		return this.value;
 	}
 

@@ -105,4 +105,11 @@ public class TransformationEMFInstanceToHypergraph extends AbstractTransformatio
     }
     return _xifexpression;
   }
+  
+  @Override
+  public int workEstimate(final EPackage input) {
+    return ((1 + 
+      1) + 
+      1);
+  }
 }

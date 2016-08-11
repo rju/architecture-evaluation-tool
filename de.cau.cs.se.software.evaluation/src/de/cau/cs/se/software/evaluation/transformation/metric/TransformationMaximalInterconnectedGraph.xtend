@@ -30,11 +30,6 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 	}
 	
 	override generate(ModularHypergraph input) {
-		monitor.beginTask("Create maximal interconnected graph",
-			input.nodes.size + // copy nodes
-			input.modules.size * input.nodes.size + // copy modules and assign nodes
-			input.nodes.size * input.nodes.size // create edges
-		)
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		/** copy all nodes */
 		input.nodes.forEach[this.result.nodes.add(HypergraphCreationHelper.deriveNode(it))]
@@ -70,6 +65,12 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 		]
 		
 		return this.result
+	}
+	
+	override workEstimate(ModularHypergraph input) {
+		input.nodes.size + // copy nodes
+		input.modules.size * input.nodes.size + // copy modules and assign nodes
+		input.nodes.size * input.nodes.size // create edges
 	}
 	
 }

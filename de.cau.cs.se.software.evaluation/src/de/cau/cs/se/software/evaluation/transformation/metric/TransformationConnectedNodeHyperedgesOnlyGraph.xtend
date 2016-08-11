@@ -51,10 +51,17 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 		if (selectedNode != null) {	
 			this.result = HypergraphFactory.eINSTANCE.createHypergraph
 			this.result.nodes.add(HypergraphCreationHelper.deriveNode(selectedNode))
+			monitor.worked(1)
+				
 			// find all connected edges and copy them
 			selectedNode.edges.forEach[edge | this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))]
+			monitor.worked(selectedNode.edges.size)
+						
 			// find all connected nodes
-			this.result.edges.forEach[edge | createAndLinkNodesConnectedToEdge(edge, input.nodes, this.result.nodes)]
+			this.result.edges.forEach[edge | 
+				createAndLinkNodesConnectedToEdge(edge, input.nodes, this.result.nodes)
+				monitor.worked(input.nodes.size)
+			]
 			
 			return this.result
 		} else
@@ -73,6 +80,16 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 				newNode.edges.add(edge)
 			}
 		}
+	}
+	
+	override workEstimate(Hypergraph input) {
+		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
+		if (selectedNode != null) {	
+			1 + 
+			selectedNode.edges.size +
+			selectedNode.edges.size * input.nodes.size // createAndLinkNodesConnectedToEdge estimate
+		} else
+			0 
 	}
 	
 }

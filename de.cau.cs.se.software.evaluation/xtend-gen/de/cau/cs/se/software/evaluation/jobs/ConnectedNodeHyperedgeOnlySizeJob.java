@@ -54,12 +54,14 @@ public class ConnectedNodeHyperedgeOnlySizeJob extends Job {
         if (_isCanceled) {
           return Status.CANCEL_STATUS;
         }
-        monitor.beginTask(("Determine S^#_" + Integer.valueOf(i)), 0);
+        int _workEstimate = hypergraphSize.workEstimate(this.input);
+        int _workEstimate_1 = connectedNodeHyperedgesOnlyGraph.workEstimate(this.input);
+        int _plus = (_workEstimate + _workEstimate_1);
+        monitor.beginTask(("Determine S^#_" + Integer.valueOf(i)), _plus);
         connectedNodeHyperedgesOnlyGraph.setNode(node);
-        hypergraphSize.setName((("Determine Size(S^#_" + Integer.valueOf(i)) + ")"));
-        Hypergraph _generate = connectedNodeHyperedgesOnlyGraph.generate(this.input);
-        Double _generate_1 = hypergraphSize.generate(_generate);
-        this.parent.deliverConnectedNodeHyperedgesOnlySizeResult((_generate_1).doubleValue());
+        final Hypergraph connectedNodeGraph = connectedNodeHyperedgesOnlyGraph.generate(this.input);
+        Double _generate = hypergraphSize.generate(connectedNodeGraph);
+        this.parent.deliverConnectedNodeHyperedgesOnlySizeResult((_generate).doubleValue());
         i++;
       }
     }

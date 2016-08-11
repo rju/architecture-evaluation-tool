@@ -48,14 +48,14 @@ class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 		while ((node = parent.getNextConnectedNodeTask) != null) {
 			if (monitor.canceled)
 				return Status.CANCEL_STATUS
-			monitor.beginTask("Determine S^#_" + i, 0)
+			monitor.beginTask("Determine S^#_" + i, hypergraphSize.workEstimate(input) + 
+				connectedNodeHyperedgesOnlyGraph.workEstimate(input)
+			)
 			// S^#_i 
 			connectedNodeHyperedgesOnlyGraph.node = node
-			hypergraphSize.name = "Determine Size(S^#_" + i + ")"
-			
-			parent.deliverConnectedNodeHyperedgesOnlySizeResult(
-				hypergraphSize.generate(connectedNodeHyperedgesOnlyGraph.generate(input))
-			)
+			val connectedNodeGraph = connectedNodeHyperedgesOnlyGraph.generate(input)
+						
+			parent.deliverConnectedNodeHyperedgesOnlySizeResult(hypergraphSize.generate(connectedNodeGraph))
 			i++
 		}
 		

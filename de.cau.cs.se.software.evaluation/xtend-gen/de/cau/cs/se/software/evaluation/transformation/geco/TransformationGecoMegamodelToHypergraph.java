@@ -206,4 +206,13 @@ public class TransformationGecoMegamodelToHypergraph extends AbstractTransformat
     }
     return _switchResult;
   }
+  
+  @Override
+  public int workEstimate(final GecoModel input) {
+    EList<ModelSequence> _models = input.getModels();
+    int _size = _models.size();
+    EList<Fragment> _fragments = input.getFragments();
+    int _size_1 = _fragments.size();
+    return (_size + _size_1);
+  }
 }

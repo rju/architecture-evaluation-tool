@@ -19,10 +19,10 @@ import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
-import de.cau.cs.se.software.evaluation.hypergraph.EdgeTrace
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
+import java.util.HashMap
 
 /**
  * Copy only connected nodes to the result graph.
@@ -34,21 +34,31 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 	}
 	
 	override generate(Hypergraph input) {
+		val edgeMap = new HashMap<Edge,Edge>
+		
 		this.result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
-			this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))
+			val derivedEdge = HypergraphCreationHelper.deriveEdge(edge)
+			edgeMap.put(edge, derivedEdge)
+			this.result.edges.add(derivedEdge)
 		}
 		for (Node node : input.nodes) {
 			if (!monitor.canceled) {			
 				if (node.edges.size > 0) {
 					val resultNode = HypergraphCreationHelper.deriveNode(node)
-					node.edges.forEach[edge | resultNode.edges.add(result.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
+					node.edges.forEach[edge | 
+						resultNode.edges.add(edgeMap.get(edge))
+					]
 					this.result.nodes.add(resultNode)
 				}
 			}
 		}
 		
 		return this.result		
+	}
+	
+	override workEstimate(Hypergraph input) {
+		input.edges.size + input.nodes.map[it.edges.size].reduce[p1, p2| p1 + p2]
 	}
 
 	

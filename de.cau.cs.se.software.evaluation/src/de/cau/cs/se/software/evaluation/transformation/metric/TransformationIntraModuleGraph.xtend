@@ -55,4 +55,8 @@ class TransformationIntraModuleGraph extends AbstractTransformation<ModularHyper
 		return result
 	}
 	
+	override workEstimate(ModularHypergraph input) {
+		input.modules.size + input.nodes.size + input.edges.size * input.nodes.size
+	}
+	
 }
