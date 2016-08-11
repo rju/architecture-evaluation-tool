@@ -123,14 +123,21 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		/** Determine graph mapping of the hypergraph */
 		val modularGraph = new TransformationHypergraphToGraphMapping(monitor)
 		modularGraph.generate(inputHypergraph)
-				
+		if (monitor.canceled)
+			return 0
+		
 		/** Determine maximal interconnected modular graph MS^(n) */
 		val maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor)
 		maximalInterconnectedGraph.generate(modularGraph.result)
+		if (monitor.canceled)
+			return 0
 		
 		/** Determine maximal intra module graph MS^° */
 		val intraModuleGraph = new TransformationIntraModuleGraph(monitor)
 		intraModuleGraph.generate(modularGraph.result)
+		
+		if (monitor.canceled)
+			return 0
 		
 		val calculateComplexity = new CalculateComplexity(monitor)
 		
@@ -138,10 +145,16 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val complexityMaximalInterconnected = 
 			calculateComplexity.calculate(maximalInterconnectedGraph.result, 
 				"Calculate maximal interconnected graph complexity")
+			
+		if (monitor.canceled)
+			return 0
 				
 		val coupling = 
 			calculateComplexity.calculate(intraModuleGraph.result, 
-				"Calculate maximal interconnected graph complexity")
+				"Calculate intra-module graph complexity")
+				
+		if (monitor.canceled)
+			return 0
 		
 		val cohesion = coupling/complexityMaximalInterconnected
 		

@@ -51,26 +51,30 @@ public class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hy
     }
     EList<Node> _nodes = input.getNodes();
     for (final Node node : _nodes) {
-      EList<Edge> _edges_2 = node.getEdges();
-      int _size = _edges_2.size();
-      boolean _greaterThan = (_size > 0);
-      if (_greaterThan) {
-        final Node resultNode = HypergraphCreationHelper.deriveNode(node);
-        EList<Edge> _edges_3 = node.getEdges();
-        final Consumer<Edge> _function = (Edge edge_1) -> {
-          EList<Edge> _edges_4 = resultNode.getEdges();
-          EList<Edge> _edges_5 = this.result.getEdges();
-          final Function1<Edge, Boolean> _function_1 = (Edge it) -> {
-            EdgeReference _derivedFrom = it.getDerivedFrom();
-            Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
-            return Boolean.valueOf(Objects.equal(_edge, edge_1));
+      boolean _isCanceled = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled);
+      if (_not) {
+        EList<Edge> _edges_2 = node.getEdges();
+        int _size = _edges_2.size();
+        boolean _greaterThan = (_size > 0);
+        if (_greaterThan) {
+          final Node resultNode = HypergraphCreationHelper.deriveNode(node);
+          EList<Edge> _edges_3 = node.getEdges();
+          final Consumer<Edge> _function = (Edge edge_1) -> {
+            EList<Edge> _edges_4 = resultNode.getEdges();
+            EList<Edge> _edges_5 = this.result.getEdges();
+            final Function1<Edge, Boolean> _function_1 = (Edge it) -> {
+              EdgeReference _derivedFrom = it.getDerivedFrom();
+              Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
+              return Boolean.valueOf(Objects.equal(_edge, edge_1));
+            };
+            Edge _findFirst = IterableExtensions.<Edge>findFirst(_edges_5, _function_1);
+            _edges_4.add(_findFirst);
           };
-          Edge _findFirst = IterableExtensions.<Edge>findFirst(_edges_5, _function_1);
-          _edges_4.add(_findFirst);
-        };
-        _edges_3.forEach(_function);
-        EList<Node> _nodes_1 = this.result.getNodes();
-        _nodes_1.add(resultNode);
+          _edges_3.forEach(_function);
+          EList<Node> _nodes_1 = this.result.getNodes();
+          _nodes_1.add(resultNode);
+        }
       }
     }
     return this.result;

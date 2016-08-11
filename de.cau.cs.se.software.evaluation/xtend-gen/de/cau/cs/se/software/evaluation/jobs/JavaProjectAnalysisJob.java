@@ -131,7 +131,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   }
   
   /**
-   * Claculate code statistics.
+   * Calculate code statistics.
    */
   private void calculateCodeStatistics(final List<AbstractTypeDeclaration> classes, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationLinesOfCode linesOfCodeMetric = new TransformationLinesOfCode(monitor);

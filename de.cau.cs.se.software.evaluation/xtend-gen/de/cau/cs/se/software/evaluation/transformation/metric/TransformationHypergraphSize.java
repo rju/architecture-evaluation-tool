@@ -156,6 +156,10 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     EList<Edge> _edges_1 = input.getEdges();
     int _size = _edges_1.size();
     this.monitor.worked(_size);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return null;
+    }
     EList<Node> _nodes = systemGraph.getNodes();
     final Consumer<Node> _function_1 = (Node node) -> {
       EList<RowPattern> _patterns = patternTable.getPatterns();
@@ -201,28 +205,32 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
    */
   private void compactPatternTable(final RowPatternTable table) {
     for (int i = 0; (i < table.getPatterns().size()); i++) {
-      for (int j = (i + 1); (j < table.getPatterns().size()); j++) {
-        EList<RowPattern> _patterns = table.getPatterns();
-        RowPattern _get = _patterns.get(j);
-        EList<Boolean> _pattern = _get.getPattern();
-        EList<RowPattern> _patterns_1 = table.getPatterns();
-        RowPattern _get_1 = _patterns_1.get(i);
-        EList<Boolean> _pattern_1 = _get_1.getPattern();
-        boolean _matchPattern = this.matchPattern(_pattern, _pattern_1);
-        if (_matchPattern) {
-          EList<RowPattern> _patterns_2 = table.getPatterns();
-          final RowPattern basePattern = _patterns_2.get(i);
-          EList<RowPattern> _patterns_3 = table.getPatterns();
-          RowPattern _get_2 = _patterns_3.get(j);
-          EList<Node> _nodes = _get_2.getNodes();
-          final Consumer<Node> _function = (Node node) -> {
-            EList<Node> _nodes_1 = basePattern.getNodes();
-            _nodes_1.add(node);
-          };
-          _nodes.forEach(_function);
-          EList<RowPattern> _patterns_4 = table.getPatterns();
-          _patterns_4.remove(j);
-          j--;
+      boolean _isCanceled = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled);
+      if (_not) {
+        for (int j = (i + 1); (j < table.getPatterns().size()); j++) {
+          EList<RowPattern> _patterns = table.getPatterns();
+          RowPattern _get = _patterns.get(j);
+          EList<Boolean> _pattern = _get.getPattern();
+          EList<RowPattern> _patterns_1 = table.getPatterns();
+          RowPattern _get_1 = _patterns_1.get(i);
+          EList<Boolean> _pattern_1 = _get_1.getPattern();
+          boolean _matchPattern = this.matchPattern(_pattern, _pattern_1);
+          if (_matchPattern) {
+            EList<RowPattern> _patterns_2 = table.getPatterns();
+            final RowPattern basePattern = _patterns_2.get(i);
+            EList<RowPattern> _patterns_3 = table.getPatterns();
+            RowPattern _get_2 = _patterns_3.get(j);
+            EList<Node> _nodes = _get_2.getNodes();
+            final Consumer<Node> _function = (Node node) -> {
+              EList<Node> _nodes_1 = basePattern.getNodes();
+              _nodes_1.add(node);
+            };
+            _nodes.forEach(_function);
+            EList<RowPattern> _patterns_4 = table.getPatterns();
+            _patterns_4.remove(j);
+            j--;
+          }
         }
       }
     }
@@ -274,24 +282,32 @@ public class TransformationHypergraphSize extends AbstractTransformation<Hypergr
     EList<Edge> _edges_1 = system.getEdges();
     int _size = _edges_1.size();
     this.monitor.worked(_size);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return null;
+    }
     EList<Node> _nodes_1 = system.getNodes();
     final Consumer<Node> _function_1 = (Node node) -> {
-      final Node derivedNode = HypergraphCreationHelper.deriveNode(node);
-      EList<Edge> _edges_2 = node.getEdges();
-      final Consumer<Edge> _function_2 = (Edge edge) -> {
-        EList<Edge> _edges_3 = systemGraph.getEdges();
-        final Function1<Edge, Boolean> _function_3 = (Edge it) -> {
-          EdgeReference _derivedFrom = it.getDerivedFrom();
-          Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
-          return Boolean.valueOf(Objects.equal(_edge, edge));
+      boolean _isCanceled_1 = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled_1);
+      if (_not) {
+        final Node derivedNode = HypergraphCreationHelper.deriveNode(node);
+        EList<Edge> _edges_2 = node.getEdges();
+        final Consumer<Edge> _function_2 = (Edge edge) -> {
+          EList<Edge> _edges_3 = systemGraph.getEdges();
+          final Function1<Edge, Boolean> _function_3 = (Edge it) -> {
+            EdgeReference _derivedFrom = it.getDerivedFrom();
+            Edge _edge = ((EdgeTrace) _derivedFrom).getEdge();
+            return Boolean.valueOf(Objects.equal(_edge, edge));
+          };
+          final Edge derivedEdge = IterableExtensions.<Edge>findFirst(_edges_3, _function_3);
+          EList<Edge> _edges_4 = derivedNode.getEdges();
+          _edges_4.add(derivedEdge);
         };
-        final Edge derivedEdge = IterableExtensions.<Edge>findFirst(_edges_3, _function_3);
-        EList<Edge> _edges_4 = derivedNode.getEdges();
-        _edges_4.add(derivedEdge);
-      };
-      _edges_2.forEach(_function_2);
-      EList<Node> _nodes_2 = systemGraph.getNodes();
-      _nodes_2.add(derivedNode);
+        _edges_2.forEach(_function_2);
+        EList<Node> _nodes_2 = systemGraph.getNodes();
+        _nodes_2.add(derivedNode);
+      }
     };
     _nodes_1.forEach(_function_1);
     EList<Node> _nodes_2 = system.getNodes();

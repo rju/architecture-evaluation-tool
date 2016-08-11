@@ -36,33 +36,43 @@ class TransformationHypergraphToGraphMapping extends AbstractTransformation<Modu
 			module.nodes.forEach[nodeModuleMap.put(it, module)]
 			result.modules += derivedModule
 		]
+		
+		if (monitor.canceled)
+			return null
+		
 		input.nodes.forEach[node | 
 			val derivedNode = node.deriveNode
 			nodeMap.put(node, derivedNode)
 			result.nodes += derivedNode
 		]
+		
+		if (monitor.canceled)
+			return null
+			
 		input.edges.forEach[edge |
-			val connectedNodes = input.nodes.filter[it.edges.contains(edge)]
-			if (connectedNodes.size > 2) {
-				val module = nodeModuleMap.get(connectedNodes.get(0))
-				val derivedNode = result.createNode(moduleMap.get(module), edge.name, edge)
-				connectedNodes.forEach[connectedNode |
-					result.createEdge(nodeMap.get(connectedNode), derivedNode, connectedNode.name + "::" + derivedNode.name, edge)
-				]
-			} else if (connectedNodes.size == 2) {
-				val derivedEdge = edge.deriveEdge
-				nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
-				nodeMap.get(connectedNodes.get(1)).edges.add(derivedEdge)
-				
-				result.edges += derivedEdge
-			} else if (connectedNodes.size == 1) {
-				val derivedEdge = edge.deriveEdge
-				nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
-				nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
-				
-				result.edges += derivedEdge
-			} else {
-				LogModelProvider.INSTANCE.addMessage("Edge Warning", "The edge " + edge.name + " is not used. Connected nodes are " + connectedNodes.size)
+			if (!monitor.canceled) {
+				val connectedNodes = input.nodes.filter[it.edges.contains(edge)]
+				if (connectedNodes.size > 2) {
+					val module = nodeModuleMap.get(connectedNodes.get(0))
+					val derivedNode = result.createNode(moduleMap.get(module), edge.name, edge)
+					connectedNodes.forEach[connectedNode |
+						result.createEdge(nodeMap.get(connectedNode), derivedNode, connectedNode.name + "::" + derivedNode.name, edge)
+					]
+				} else if (connectedNodes.size == 2) {
+					val derivedEdge = edge.deriveEdge
+					nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
+					nodeMap.get(connectedNodes.get(1)).edges.add(derivedEdge)
+					
+					result.edges += derivedEdge
+				} else if (connectedNodes.size == 1) {
+					val derivedEdge = edge.deriveEdge
+					nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
+					nodeMap.get(connectedNodes.get(0)).edges.add(derivedEdge)
+					
+					result.edges += derivedEdge
+				} else {
+					LogModelProvider.INSTANCE.addMessage("Edge Warning", "The edge " + edge.name + " is not used. Connected nodes are " + connectedNodes.size)
+				}
 			}
 			
 		]

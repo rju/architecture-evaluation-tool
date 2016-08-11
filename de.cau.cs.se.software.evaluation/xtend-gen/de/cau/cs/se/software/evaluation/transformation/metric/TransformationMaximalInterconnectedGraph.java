@@ -67,52 +67,64 @@ public class TransformationMaximalInterconnectedGraph extends AbstractTransforma
     EList<Node> _nodes_5 = input.getNodes();
     int _size_5 = _nodes_5.size();
     this.monitor.worked(_size_5);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return null;
+    }
     EList<Module> _modules_1 = input.getModules();
     final Consumer<Module> _function_1 = (Module module) -> {
-      final Module derivedModule = HypergraphCreationHelper.deriveModule(module);
-      EList<Node> _nodes_6 = module.getNodes();
-      final Consumer<Node> _function_2 = (Node node) -> {
-        EList<Node> _nodes_7 = derivedModule.getNodes();
-        EList<Node> _nodes_8 = this.result.getNodes();
-        final Function1<Node, Boolean> _function_3 = (Node derivedNode) -> {
-          NodeReference _derivedFrom = derivedNode.getDerivedFrom();
-          Node _node = ((NodeTrace) _derivedFrom).getNode();
-          return Boolean.valueOf(Objects.equal(_node, node));
+      boolean _isCanceled_1 = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled_1);
+      if (_not) {
+        final Module derivedModule = HypergraphCreationHelper.deriveModule(module);
+        EList<Node> _nodes_6 = module.getNodes();
+        final Consumer<Node> _function_2 = (Node node) -> {
+          EList<Node> _nodes_7 = derivedModule.getNodes();
+          EList<Node> _nodes_8 = this.result.getNodes();
+          final Function1<Node, Boolean> _function_3 = (Node derivedNode) -> {
+            NodeReference _derivedFrom = derivedNode.getDerivedFrom();
+            Node _node = ((NodeTrace) _derivedFrom).getNode();
+            return Boolean.valueOf(Objects.equal(_node, node));
+          };
+          Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_8, _function_3);
+          _nodes_7.add(_findFirst);
         };
-        Node _findFirst = IterableExtensions.<Node>findFirst(_nodes_8, _function_3);
-        _nodes_7.add(_findFirst);
-      };
-      _nodes_6.forEach(_function_2);
-      EList<Module> _modules_2 = this.result.getModules();
-      _modules_2.add(derivedModule);
-      EList<Node> _nodes_7 = input.getNodes();
-      int _size_6 = _nodes_7.size();
-      this.monitor.worked(_size_6);
+        _nodes_6.forEach(_function_2);
+        EList<Module> _modules_2 = this.result.getModules();
+        _modules_2.add(derivedModule);
+        EList<Node> _nodes_7 = input.getNodes();
+        int _size_6 = _nodes_7.size();
+        this.monitor.worked(_size_6);
+      }
     };
     _modules_1.forEach(_function_1);
     EList<Node> _nodes_6 = this.result.getNodes();
     final Procedure2<Node, Integer> _function_2 = (Node startNode, Integer startIndex) -> {
-      for (int index = ((startIndex).intValue() + 1); (index < this.result.getNodes().size()); index++) {
-        {
-          EList<Node> _nodes_7 = this.result.getNodes();
-          final Node endNode = _nodes_7.get(index);
-          final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
-          String _name = startNode.getName();
-          String _plus_2 = (_name + "-");
-          String _name_1 = endNode.getName();
-          String _plus_3 = (_plus_2 + _name_1);
-          edge.setName(_plus_3);
-          EList<Edge> _edges = startNode.getEdges();
-          _edges.add(edge);
-          EList<Edge> _edges_1 = endNode.getEdges();
-          _edges_1.add(edge);
-          EList<Edge> _edges_2 = this.result.getEdges();
-          _edges_2.add(edge);
+      boolean _isCanceled_1 = this.monitor.isCanceled();
+      boolean _not = (!_isCanceled_1);
+      if (_not) {
+        for (int index = ((startIndex).intValue() + 1); (index < this.result.getNodes().size()); index++) {
+          {
+            EList<Node> _nodes_7 = this.result.getNodes();
+            final Node endNode = _nodes_7.get(index);
+            final Edge edge = HypergraphFactory.eINSTANCE.createEdge();
+            String _name = startNode.getName();
+            String _plus_2 = (_name + "-");
+            String _name_1 = endNode.getName();
+            String _plus_3 = (_plus_2 + _name_1);
+            edge.setName(_plus_3);
+            EList<Edge> _edges = startNode.getEdges();
+            _edges.add(edge);
+            EList<Edge> _edges_1 = endNode.getEdges();
+            _edges_1.add(edge);
+            EList<Edge> _edges_2 = this.result.getEdges();
+            _edges_2.add(edge);
+          }
         }
+        EList<Node> _nodes_7 = input.getNodes();
+        int _size_6 = _nodes_7.size();
+        this.monitor.worked(_size_6);
       }
-      EList<Node> _nodes_7 = input.getNodes();
-      int _size_6 = _nodes_7.size();
-      this.monitor.worked(_size_6);
     };
     IterableExtensions.<Node>forEach(_nodes_6, _function_2);
     return this.result;

@@ -48,13 +48,17 @@ public class CalculateComplexity {
     final TransformationHyperedgesOnlyGraph hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(this.monitor);
     hyperedgesOnlyGraph.generate(input);
     this.monitor.worked(1);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return 0;
+    }
     Hypergraph _result = hyperedgesOnlyGraph.getResult();
     EList<Node> _nodes_1 = _result.getNodes();
     Iterator<Node> _iterator = _nodes_1.iterator();
     this.globalHyperEdgesOnlyGraphNodes = _iterator;
     this.complexity = 0;
-    boolean _isCanceled = this.monitor.isCanceled();
-    if (_isCanceled) {
+    boolean _isCanceled_1 = this.monitor.isCanceled();
+    if (_isCanceled_1) {
       return 0;
     }
     final List<Job> jobs = new ArrayList<Job>();
@@ -66,26 +70,34 @@ public class CalculateComplexity {
         job.schedule();
       }
     }
-    final TransformationHypergraphSize size = new TransformationHypergraphSize(this.monitor);
-    size.setName("Determine Size(S^#)");
-    Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
-    size.generate(_result_1);
-    boolean _isCanceled_1 = this.monitor.isCanceled();
-    if (_isCanceled_1) {
+    boolean _isCanceled_2 = this.monitor.isCanceled();
+    if (_isCanceled_2) {
       final Consumer<Job> _function = (Job it) -> {
         it.cancel();
       };
       jobs.forEach(_function);
       return 0.0;
     }
-    final Consumer<Job> _function_1 = (Job it) -> {
+    final TransformationHypergraphSize size = new TransformationHypergraphSize(this.monitor);
+    size.setName("Determine Size(S^#)");
+    Hypergraph _result_1 = hyperedgesOnlyGraph.getResult();
+    size.generate(_result_1);
+    boolean _isCanceled_3 = this.monitor.isCanceled();
+    if (_isCanceled_3) {
+      final Consumer<Job> _function_1 = (Job it) -> {
+        it.cancel();
+      };
+      jobs.forEach(_function_1);
+      return 0.0;
+    }
+    final Consumer<Job> _function_2 = (Job it) -> {
       try {
         it.join();
       } catch (Throwable _e) {
         throw Exceptions.sneakyThrow(_e);
       }
     };
-    jobs.forEach(_function_1);
+    jobs.forEach(_function_2);
     double _complexity = this.complexity;
     Double _result_2 = size.getResult();
     this.complexity = (_complexity - (_result_2).doubleValue());

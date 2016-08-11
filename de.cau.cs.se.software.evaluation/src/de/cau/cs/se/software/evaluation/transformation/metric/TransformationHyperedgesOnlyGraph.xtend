@@ -33,16 +33,18 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 		super(monitor)
 	}
 	
-	override generate(Hypergraph input) {		
+	override generate(Hypergraph input) {
 		this.result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
 			this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))
 		}
 		for (Node node : input.nodes) {
-			if (node.edges.size > 0) {
-				val resultNode = HypergraphCreationHelper.deriveNode(node)
-				node.edges.forEach[edge | resultNode.edges.add(result.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
-				this.result.nodes.add(resultNode)
+			if (!monitor.canceled) {			
+				if (node.edges.size > 0) {
+					val resultNode = HypergraphCreationHelper.deriveNode(node)
+					node.edges.forEach[edge | resultNode.edges.add(result.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge])]
+					this.result.nodes.add(resultNode)
+				}
 			}
 		}
 		

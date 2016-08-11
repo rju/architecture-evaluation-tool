@@ -42,6 +42,10 @@ public class TransformationIntraModuleGraph extends AbstractTransformation<Modul
       _modules_1.add(derivedModule);
     };
     _modules.forEach(_function);
+    boolean _isCanceled = this.monitor.isCanceled();
+    if (_isCanceled) {
+      return null;
+    }
     EList<Node> _nodes = input.getNodes();
     final Consumer<Node> _function_1 = (Node node) -> {
       final Node derivedNode = HypergraphCreationHelper.deriveNode(node);
@@ -50,6 +54,10 @@ public class TransformationIntraModuleGraph extends AbstractTransformation<Modul
       _nodes_1.add(derivedNode);
     };
     _nodes.forEach(_function_1);
+    boolean _isCanceled_1 = this.monitor.isCanceled();
+    if (_isCanceled_1) {
+      return null;
+    }
     EList<Edge> _edges = input.getEdges();
     final Consumer<Edge> _function_2 = (Edge edge) -> {
       EList<Node> _nodes_1 = input.getNodes();

@@ -36,11 +36,12 @@ class CalculateComplexity {
 	 */
 	def calculate(Hypergraph input, String message) {
 		this.monitor.beginTask(message, input.nodes.size + 1)
-		
 		/** S^# (hyperedges only graph) */
 		val hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
 		hyperedgesOnlyGraph.generate(input)
 		this.monitor.worked(1)
+		if (this.monitor.canceled)
+			return 0
 		
 		/** S^#_i (hyperedges only graphs for each node graph) */	
 		globalHyperEdgesOnlyGraphNodes = hyperedgesOnlyGraph.result.nodes.iterator
@@ -57,6 +58,11 @@ class CalculateComplexity {
 			val job = new ConnectedNodeHyperedgeOnlySizeJob("S^#_i " + j, this, hyperedgesOnlyGraph.result)
 			jobs.add(job)
 			job.schedule
+		}
+		
+		if (this.monitor.canceled) {
+			jobs.forEach[it.cancel]
+			return 0.0
 		}
 		
 		/** calculate size of S^# and S^#_i */

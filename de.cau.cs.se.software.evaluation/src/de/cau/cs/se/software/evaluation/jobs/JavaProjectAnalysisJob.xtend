@@ -105,7 +105,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	}
 
 	/**
-	 * Claculate code statistics.
+	 * Calculate code statistics.
 	 */
 	private def calculateCodeStatistics(List<AbstractTypeDeclaration> classes, IProgressMonitor monitor,
 		AnalysisResultModelProvider result) {

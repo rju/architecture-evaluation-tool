@@ -29,11 +29,19 @@ class TransformationIntraModuleGraph extends AbstractTransformation<ModularHyper
 			module.nodes.forEach[nodeModuleMap.put(it, module)]
 			result.modules += derivedModule
 		]
+		
+		if (monitor.canceled)
+			return null
+		
 		input.nodes.forEach[node | 
 			val derivedNode = node.deriveNode
 			nodeMap.put(node, derivedNode)
 			result.nodes += derivedNode
 		]
+		
+		if (monitor.canceled)
+			return null
+		
 		input.edges.forEach[edge |
 			val connectedNodes = input.nodes.filter[it.edges.contains(edge)]
 			val module = nodeModuleMap.get(connectedNodes.get(0))

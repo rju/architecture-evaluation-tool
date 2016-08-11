@@ -129,19 +129,39 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
   protected double calculateCohesion(final ModularHypergraph inputHypergraph, final IProgressMonitor monitor, final AnalysisResultModelProvider result) {
     final TransformationHypergraphToGraphMapping modularGraph = new TransformationHypergraphToGraphMapping(monitor);
     modularGraph.generate(inputHypergraph);
+    boolean _isCanceled = monitor.isCanceled();
+    if (_isCanceled) {
+      return 0;
+    }
     final TransformationMaximalInterconnectedGraph maximalInterconnectedGraph = new TransformationMaximalInterconnectedGraph(monitor);
     ModularHypergraph _result = modularGraph.getResult();
     maximalInterconnectedGraph.generate(_result);
+    boolean _isCanceled_1 = monitor.isCanceled();
+    if (_isCanceled_1) {
+      return 0;
+    }
     final TransformationIntraModuleGraph intraModuleGraph = new TransformationIntraModuleGraph(monitor);
     ModularHypergraph _result_1 = modularGraph.getResult();
     intraModuleGraph.generate(_result_1);
+    boolean _isCanceled_2 = monitor.isCanceled();
+    if (_isCanceled_2) {
+      return 0;
+    }
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
     ModularHypergraph _result_2 = maximalInterconnectedGraph.getResult();
     final double complexityMaximalInterconnected = calculateComplexity.calculate(_result_2, 
       "Calculate maximal interconnected graph complexity");
+    boolean _isCanceled_3 = monitor.isCanceled();
+    if (_isCanceled_3) {
+      return 0;
+    }
     ModularHypergraph _result_3 = intraModuleGraph.getResult();
     final double coupling = calculateComplexity.calculate(_result_3, 
-      "Calculate maximal interconnected graph complexity");
+      "Calculate intra-module graph complexity");
+    boolean _isCanceled_4 = monitor.isCanceled();
+    if (_isCanceled_4) {
+      return 0;
+    }
     final double cohesion = (coupling / complexityMaximalInterconnected);
     IProject _project = this.project.getProject();
     String _name = _project.getName();

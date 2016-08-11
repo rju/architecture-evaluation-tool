@@ -39,28 +39,34 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 		/** copy all nodes */
 		input.nodes.forEach[this.result.nodes.add(HypergraphCreationHelper.deriveNode(it))]
 		monitor.worked(input.nodes.size)
+		if (monitor.canceled)
+			return null
 		
 		/** copy module boundaries */
 		input.modules.forEach[module |
-			val derivedModule = HypergraphCreationHelper.deriveModule(module)
-			module.nodes.forEach[node | 
-				derivedModule.nodes.add(this.result.nodes.
-					findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node])
-			]
-			this.result.modules.add(derivedModule)
-			monitor.worked(input.nodes.size)
+			if (!monitor.canceled) {
+				val derivedModule = HypergraphCreationHelper.deriveModule(module)
+				module.nodes.forEach[node | 
+					derivedModule.nodes.add(this.result.nodes.
+						findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node])
+				]
+				this.result.modules.add(derivedModule)
+				monitor.worked(input.nodes.size)
+			}
 		]
 		/** create one simple edge between every node */
 		this.result.nodes.forEach[startNode,startIndex |
-			for(var index = startIndex + 1; index < this.result.nodes.size; index++) {
-				val endNode = this.result.nodes.get(index)
-				val edge = HypergraphFactory.eINSTANCE.createEdge
-				edge.name = startNode.name + "-" + endNode.name
-				startNode.edges.add(edge)
-				endNode.edges.add(edge)
-				this.result.edges.add(edge)
+			if (!monitor.canceled) {
+				for(var index = startIndex + 1; index < this.result.nodes.size; index++) {
+					val endNode = this.result.nodes.get(index)
+					val edge = HypergraphFactory.eINSTANCE.createEdge
+					edge.name = startNode.name + "-" + endNode.name
+					startNode.edges.add(edge)
+					endNode.edges.add(edge)
+					this.result.edges.add(edge)
+				}
+				monitor.worked(input.nodes.size)
 			}
-			monitor.worked(input.nodes.size)
 		]
 		
 		return this.result

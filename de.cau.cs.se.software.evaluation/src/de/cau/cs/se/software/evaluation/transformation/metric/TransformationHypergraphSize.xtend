@@ -108,10 +108,13 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
 		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
 		monitor.worked(input.edges.size)
+		if (this.monitor.canceled)
+			return null
+		
 		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
 		patternTable.compactPatternTable
 		monitor.worked(input.nodes.size)
-				
+						
 		return patternTable	
 	}
 	
@@ -135,12 +138,14 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 */
 	private def void compactPatternTable(RowPatternTable table) {
 		for (var int i=0;i<table.patterns.size;i++) {
-			for (var int j=i+1; j<table.patterns.size; j++) {
-				if (matchPattern(table.patterns.get(j).pattern,table.patterns.get(i).pattern)) {
-					val basePattern = table.patterns.get(i)
-					table.patterns.get(j).nodes.forEach[node | basePattern.nodes.add(node)]
-					table.patterns.remove(j)
-					j--
+			if (!this.monitor.canceled) {
+				for (var int j=i+1; j<table.patterns.size; j++) {
+					if (matchPattern(table.patterns.get(j).pattern,table.patterns.get(i).pattern)) {
+						val basePattern = table.patterns.get(i)
+						table.patterns.get(j).nodes.forEach[node | basePattern.nodes.add(node)]
+						table.patterns.remove(j)
+						j--
+					}
 				}
 			}
 		}
@@ -177,13 +182,18 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 		
 		system.edges.forEach[edge | systemGraph.edges.add(edge.deriveEdge)]
 		monitor.worked(system.edges.size)
+		if (this.monitor.canceled)
+			return null
+		
 		system.nodes.forEach[node |
-			val derivedNode = node.deriveNode 
-			node.edges.forEach[edge |
-				val derivedEdge = systemGraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge] 
-				derivedNode.edges.add(derivedEdge)
-			]
-			systemGraph.nodes.add(derivedNode)
+			if (!this.monitor.canceled) {
+				val derivedNode = node.deriveNode 
+				node.edges.forEach[edge |
+					val derivedEdge = systemGraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge] 
+					derivedNode.edges.add(derivedEdge)
+				]
+				systemGraph.nodes.add(derivedNode)
+			}
 		]
 		monitor.worked(system.nodes.size)
 					
