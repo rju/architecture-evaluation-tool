@@ -188,7 +188,10 @@ public class JavaASTExpressionEvaluationHelper {
     } else {
       String _string = callee.toString();
       String _plus = ("Internal error: The method binding could not be resolved for " + _string);
-      throw new UnsupportedOperationException(_plus);
+      String _plus_1 = (_plus + " called ");
+      String _name = sourceNode.getName();
+      String _plus_2 = (_plus_1 + _name);
+      throw new UnsupportedOperationException(_plus_2);
     }
   }
   

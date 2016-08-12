@@ -156,7 +156,7 @@ class JavaASTExpressionEvaluationHelper {
 		    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
 	    	}
 	    } else {
-	    	throw new UnsupportedOperationException("Internal error: The method binding could not be resolved for " + callee.toString)
+	    	throw new UnsupportedOperationException("Internal error: The method binding could not be resolved for " + callee.toString + " called " + sourceNode.name)
 	    }
     }
     
