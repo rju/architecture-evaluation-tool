@@ -21,12 +21,10 @@ import org.eclipse.swt.widgets.Shell;
 public class ExportGraphAction extends Action {
 
 	private final Shell shell;
-	private final IProject project;
 
-	public ExportGraphAction(final Shell shell, final IProject project) {
+	public ExportGraphAction(final Shell shell) {
 		super("Graph Export", UIIcons.ICON_GRAPH_EXPORT);
 		this.shell = shell;
-		this.project = project;
 	}
 
 	@Override
@@ -35,10 +33,11 @@ public class ExportGraphAction extends Action {
 			if (AnalysisResultModelProvider.INSTANCE.getResultHypergraph() == null) {
 				MessageDialog.openWarning(null, "Missing EObject", "No Graph (EObject) found.");
 			} else {
+				final IProject project = AnalysisResultModelProvider.INSTANCE.getProject();
 				final FileDialog dialog = new FileDialog(this.shell, SWT.SAVE);
 				dialog.setText("Save");
-				if (this.project != null) {
-					dialog.setFilterPath(this.project.getLocation().toString());
+				if (project != null) {
+					dialog.setFilterPath(project.getLocation().toString());
 				}
 				final String[] filterExt = { "*.xmi", "*.*" };
 				dialog.setFilterExtensions(filterExt);
@@ -66,7 +65,7 @@ public class ExportGraphAction extends Action {
 					resource.save(stream, null);
 					stream.close();
 					try {
-						this.project.refreshLocal(IResource.DEPTH_INFINITE, null);
+						project.refreshLocal(IResource.DEPTH_INFINITE, null);
 					} catch (final CoreException e) {
 						e.printStackTrace();
 					}

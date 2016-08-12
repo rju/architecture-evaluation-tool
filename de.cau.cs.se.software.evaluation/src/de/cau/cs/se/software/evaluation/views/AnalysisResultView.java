@@ -15,7 +15,6 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.views;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -41,7 +40,6 @@ public class AnalysisResultView extends ViewPart {
 	public static final String ID = "de.cau.cs.se.software.evaluation.views.AnalysisResultView";
 
 	private TableViewer viewer;
-	private IProject project = null;
 
 	/**
 	 * The constructor.
@@ -122,8 +120,8 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	private void createToolbar() {
 		final IToolBarManager manager = this.getViewSite().getActionBars().getToolBarManager();
-		manager.add(new ExportDataAction(this.getSite().getShell(), this.project));
-		manager.add(new ExportGraphAction(this.getSite().getShell(), this.project));
+		manager.add(new ExportDataAction(this.getSite().getShell()));
+		manager.add(new ExportGraphAction(this.getSite().getShell()));
 		manager.add(new Action("Clear result view", UIIcons.ICON_CLEAR_VIEW) {
 			@Override
 			public void run() {
@@ -146,10 +144,6 @@ public class AnalysisResultView extends ViewPart {
 	 */
 	public void update() {
 		this.viewer.refresh();
-	}
-
-	public void setProject(final IProject project) {
-		this.project = project;
 	}
 
 }

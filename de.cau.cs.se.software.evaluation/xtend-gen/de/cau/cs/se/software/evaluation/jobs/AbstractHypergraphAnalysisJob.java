@@ -194,7 +194,6 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
         IWorkbenchWindow _activeWorkbenchWindow = _workbench.getActiveWorkbenchWindow();
         IWorkbenchPage _activePage = _activeWorkbenchWindow.getActivePage();
         final IViewPart part = _activePage.findView(AnalysisResultView.ID);
-        ((AnalysisResultView) part).setProject(AbstractHypergraphAnalysisJob.this.project);
         ((AnalysisResultView) part).update();
       }
     });

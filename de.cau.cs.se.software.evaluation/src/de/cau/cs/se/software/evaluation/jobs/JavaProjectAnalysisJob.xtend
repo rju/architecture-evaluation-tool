@@ -59,6 +59,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	 */
 	protected override IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("Collect project information", 0)
+		AnalysisResultModelProvider.INSTANCE.project = project
 
 		val dataTypePatterns = getPatternFile(project.project, DATA_TYPE_PATTERN_FILE, DATA_TYPE_PATTERN_TITLE)
 		if (dataTypePatterns != null) {

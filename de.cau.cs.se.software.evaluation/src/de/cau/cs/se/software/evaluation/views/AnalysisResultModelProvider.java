@@ -18,6 +18,8 @@ package de.cau.cs.se.software.evaluation.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 
 /**
@@ -31,6 +33,7 @@ public enum AnalysisResultModelProvider {
 
 	private final List<NamedValue> values;
 	private Hypergraph hypergraph;
+	private IProject project;
 
 	private AnalysisResultModelProvider() {
 		this.values = new ArrayList<>();
@@ -66,4 +69,13 @@ public enum AnalysisResultModelProvider {
 	public List<NamedValue> getValues() {
 		return this.values;
 	}
+
+	public IProject getProject() {
+		return this.project;
+	}
+
+	public void setProject(final IProject project) {
+		this.project = project;
+	}
+
 }

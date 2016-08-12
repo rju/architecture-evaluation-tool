@@ -84,6 +84,7 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   protected IStatus run(final IProgressMonitor monitor) {
     try {
       monitor.beginTask("Collect project information", 0);
+      AnalysisResultModelProvider.INSTANCE.setProject(this.project);
       IProject _project = this.project.getProject();
       final List<String> dataTypePatterns = this.getPatternFile(_project, this.DATA_TYPE_PATTERN_FILE, this.DATA_TYPE_PATTERN_TITLE);
       boolean _notEquals = (!Objects.equal(dataTypePatterns, null));

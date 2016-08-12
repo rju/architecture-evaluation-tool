@@ -190,7 +190,6 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
        		public override void run() {
 				val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 					getActivePage().findView(AnalysisResultView.ID)
-				(part as AnalysisResultView).setProject(project)
 				(part as AnalysisResultView).update()
 	    	}
      	})

@@ -17,12 +17,10 @@ import org.eclipse.swt.widgets.Shell;
 public class ExportDataAction extends Action {
 
 	private final Shell shell;
-	private final IProject project;
 
-	public ExportDataAction(final Shell shell, final IProject project) {
+	public ExportDataAction(final Shell shell) {
 		super("Data Export", UIIcons.ICON_DATA_EXPORT);
 		this.shell = shell;
-		this.project = project;
 	}
 
 	@Override
@@ -31,10 +29,11 @@ public class ExportDataAction extends Action {
 			if (AnalysisResultModelProvider.INSTANCE.getValues().size() == 0) {
 				MessageDialog.openWarning(this.shell, "Missing values", "There are values to export.");
 			} else {
+				final IProject project = AnalysisResultModelProvider.INSTANCE.getProject();
 				final FileDialog dialog = new FileDialog(this.shell, SWT.SAVE);
 				dialog.setText("Save");
-				if (this.project != null) {
-					dialog.setFilterPath(this.project.getLocation().toString());
+				if (project != null) {
+					dialog.setFilterPath(project.getLocation().toString());
 				}
 				final String[] filterExt = { "*.csv", "*.*" };
 				dialog.setFilterExtensions(filterExt);
@@ -53,7 +52,7 @@ public class ExportDataAction extends Action {
 					br.write(sb.toString());
 					br.close();
 					try {
-						this.project.refreshLocal(IResource.DEPTH_INFINITE, null);
+						project.refreshLocal(IResource.DEPTH_INFINITE, null);
 					} catch (final CoreException e) {
 						e.printStackTrace();
 					}
