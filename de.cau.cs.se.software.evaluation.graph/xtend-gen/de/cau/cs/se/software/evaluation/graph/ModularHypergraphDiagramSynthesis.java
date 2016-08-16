@@ -21,9 +21,12 @@ import de.cau.cs.kieler.klighd.SynthesisOption;
 import de.cau.cs.kieler.klighd.krendering.KColor;
 import de.cau.cs.kieler.klighd.krendering.KContainerRendering;
 import de.cau.cs.kieler.klighd.krendering.KEllipse;
+import de.cau.cs.kieler.klighd.krendering.KGridPlacement;
 import de.cau.cs.kieler.klighd.krendering.KPolyline;
 import de.cau.cs.kieler.klighd.krendering.KRectangle;
 import de.cau.cs.kieler.klighd.krendering.KRenderingFactory;
+import de.cau.cs.kieler.klighd.krendering.KRoundedRectangle;
+import de.cau.cs.kieler.klighd.krendering.KText;
 import de.cau.cs.kieler.klighd.krendering.LineJoin;
 import de.cau.cs.kieler.klighd.krendering.LineStyle;
 import de.cau.cs.kieler.klighd.krendering.extensions.KColorExtensions;
@@ -35,8 +38,11 @@ import de.cau.cs.kieler.klighd.krendering.extensions.KPolylineExtensions;
 import de.cau.cs.kieler.klighd.krendering.extensions.KPortExtensions;
 import de.cau.cs.kieler.klighd.krendering.extensions.KRenderingExtensions;
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis;
+import de.cau.cs.se.software.evaluation.graph.transformation.ManipulatePlanarGraph;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge;
 import de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode;
+import de.cau.cs.se.software.evaluation.graph.transformation.PlanarVisualizationGraph;
+import de.cau.cs.se.software.evaluation.graph.transformation.VisualizationPlanarGraph;
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind;
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
@@ -48,6 +54,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.inject.Inject;
+import org.eclipse.elk.alg.layered.properties.LayeredOptions;
+import org.eclipse.elk.core.klayoutdata.KInsets;
+import org.eclipse.elk.core.klayoutdata.KShapeLayout;
+import org.eclipse.elk.core.options.Direction;
+import org.eclipse.elk.core.options.EdgeRouting;
+import org.eclipse.elk.core.options.PortConstraints;
 import org.eclipse.elk.graph.KEdge;
 import org.eclipse.elk.graph.KNode;
 import org.eclipse.elk.graph.KPort;
@@ -191,11 +203,105 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
   
   @Override
   public KNode transform(final ModularHypergraph hypergraph) {
-    throw new Error("Unresolved compilation problems:"
-      + "\nThe method or field LAYOUT_HIERARCHY is undefined for the type Class<LayeredOptions>"
-      + "\nThe method or field SPACING_NODE is undefined for the type Class<LayeredOptions>"
-      + "\nThe method or field DIRECTION is undefined for the type Class<LayeredOptions>"
-      + "\nThe method or field EDGE_ROUTING is undefined for the type Class<LayeredOptions>");
+    KNode _createNode = this._kNodeExtensions.createNode(hypergraph);
+    final KNode root = this.<KNode>associateWith(_createNode, hypergraph);
+    final Procedure1<KNode> _function = (KNode it) -> {
+      this.<KNode, Boolean>setLayoutOption(it, LayeredOptions.LAYOUT_HIERARCHY, Boolean.valueOf(true));
+      Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.SPACING);
+      this.<KNode, Float>setLayoutOption(it, LayeredOptions.SPACING_NODE, ((Float) _objectValue));
+      Direction _switchResult = null;
+      Object _objectValue_1 = this.getObjectValue(ModularHypergraphDiagramSynthesis.DIRECTION);
+      boolean _matched = false;
+      if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_UP)) {
+        _matched=true;
+        _switchResult = Direction.UP;
+      }
+      if (!_matched) {
+        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_DOWN)) {
+          _matched=true;
+          _switchResult = Direction.DOWN;
+        }
+      }
+      if (!_matched) {
+        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_LEFT)) {
+          _matched=true;
+          _switchResult = Direction.LEFT;
+        }
+      }
+      if (!_matched) {
+        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_RIGHT)) {
+          _matched=true;
+          _switchResult = Direction.RIGHT;
+        }
+      }
+      this.<KNode, Direction>setLayoutOption(it, LayeredOptions.DIRECTION, _switchResult);
+      EdgeRouting _switchResult_1 = null;
+      Object _objectValue_2 = this.getObjectValue(ModularHypergraphDiagramSynthesis.ROUTING);
+      boolean _matched_1 = false;
+      if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_POLYLINE)) {
+        _matched_1=true;
+        _switchResult_1 = EdgeRouting.POLYLINE;
+      }
+      if (!_matched_1) {
+        if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_ORTHOGONAL)) {
+          _matched_1=true;
+          _switchResult_1 = EdgeRouting.ORTHOGONAL;
+        }
+      }
+      if (!_matched_1) {
+        if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_SPLINES)) {
+          _matched_1=true;
+          _switchResult_1 = EdgeRouting.SPLINES;
+        }
+      }
+      this.<KNode, EdgeRouting>setLayoutOption(it, LayeredOptions.EDGE_ROUTING, _switchResult_1);
+    };
+    ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
+    Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_NODES);
+    boolean _equals = Objects.equal(_objectValue, ModularHypergraphDiagramSynthesis.VISIBLE_NODES_NO);
+    if (_equals) {
+      final VisualizationPlanarGraph generatePlanarGraph = new VisualizationPlanarGraph();
+      Object _objectValue_1 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK);
+      boolean _equals_1 = Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.VISIBLE_FRAMEWORK_YES);
+      Object _objectValue_2 = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS);
+      boolean _equals_2 = Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.VISIBLE_ANONYMOUS_YES);
+      final ManipulatePlanarGraph manipulateGraph = new ManipulatePlanarGraph(_equals_1, _equals_2, 
+        true);
+      PlanarVisualizationGraph _generate = generatePlanarGraph.generate(hypergraph);
+      final PlanarVisualizationGraph planarGraph = manipulateGraph.generate(_generate);
+      EList<PlanarNode> _nodes = planarGraph.getNodes();
+      final Consumer<PlanarNode> _function_1 = (PlanarNode planarNode) -> {
+        EList<KNode> _children = root.getChildren();
+        KNode _createEmptyModule = this.createEmptyModule(planarNode);
+        _children.add(_createEmptyModule);
+      };
+      _nodes.forEach(_function_1);
+      EList<PlanarEdge> _edges = planarGraph.getEdges();
+      final Consumer<PlanarEdge> _function_2 = (PlanarEdge planarEdge) -> {
+        EList<PlanarNode> _nodes_1 = planarGraph.getNodes();
+        this.createAggregatedModuleEdge(planarEdge, _nodes_1);
+      };
+      _edges.forEach(_function_2);
+    } else {
+      final Procedure1<KNode> _function_3 = (KNode it) -> {
+        EList<Module> _modules = hypergraph.getModules();
+        final Consumer<Module> _function_4 = (Module module) -> {
+          EList<KNode> _children = root.getChildren();
+          KNode _createModuleWithNodes = this.createModuleWithNodes(module);
+          _children.add(_createModuleWithNodes);
+        };
+        _modules.forEach(_function_4);
+        EList<Edge> _edges_1 = hypergraph.getEdges();
+        final Consumer<Edge> _function_5 = (Edge edge) -> {
+          EList<Node> _nodes_1 = hypergraph.getNodes();
+          EList<KNode> _children = root.getChildren();
+          this.createGraphEdge(edge, _nodes_1, _children);
+        };
+        _edges_1.forEach(_function_5);
+      };
+      ObjectExtensions.<KNode>operator_doubleArrow(root, _function_3);
+    }
+    return root;
   }
   
   /**
@@ -328,8 +434,46 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    * Create module without nodes for simple display.
    */
   private KNode createEmptyModule(final PlanarNode planarNode) {
-    throw new Error("Unresolved compilation problems:"
-      + "\nThe method or field PORT_BORDER_OFFSET is undefined for the type Class<LayeredOptions>");
+    KNode _xblockexpression = null;
+    {
+      final KNode moduleNode = this._kNodeExtensions.createNode(planarNode);
+      this.planarNodeMap.put(planarNode, moduleNode);
+      final Procedure1<KNode> _function = (KNode it) -> {
+        this.<KNode, Float>setLayoutOption(it, LayeredOptions.PORT_BORDER_OFFSET, Float.valueOf(20f));
+        KRoundedRectangle _addRoundedRectangle = this._kRenderingExtensions.addRoundedRectangle(it, 10, 10);
+        final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
+          this._kRenderingExtensions.setLineWidth(it_1, 2);
+          KColor _color = this._kColorExtensions.getColor("white");
+          EModuleKind _kind = planarNode.getKind();
+          KColor _backgroundColor = this.getBackgroundColor(_kind);
+          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _backgroundColor, 0);
+          KColor _color_1 = this._kColorExtensions.getColor("black");
+          this._kRenderingExtensions.setShadow(it_1, _color_1);
+          KGridPlacement _setGridPlacement = this._kContainerRenderingExtensions.setGridPlacement(it_1, 1);
+          KGridPlacement _from = this._kRenderingExtensions.from(_setGridPlacement, this._kRenderingExtensions.LEFT, 10, 0, this._kRenderingExtensions.TOP, 20, 0);
+          this._kRenderingExtensions.to(_from, this._kRenderingExtensions.RIGHT, 10, 0, this._kRenderingExtensions.BOTTOM, 20, 0);
+          String _context = planarNode.getContext();
+          KText _addText = this._kContainerRenderingExtensions.addText(it_1, _context);
+          final Procedure1<KText> _function_2 = (KText it_2) -> {
+            this._kRenderingExtensions.setFontBold(it_2, false);
+            it_2.setCursorSelectable(false);
+            this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it_2, 1, 1, 1, 1);
+          };
+          ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
+          String _name = planarNode.getName();
+          KText _addText_1 = this._kContainerRenderingExtensions.addText(it_1, _name);
+          final Procedure1<KText> _function_3 = (KText it_2) -> {
+            this._kRenderingExtensions.setFontBold(it_2, true);
+            it_2.setCursorSelectable(true);
+            this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it_2, 1, 1, 1, 1);
+          };
+          ObjectExtensions.<KText>operator_doubleArrow(_addText_1, _function_3);
+        };
+        ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function_1);
+      };
+      _xblockexpression = ObjectExtensions.<KNode>operator_doubleArrow(moduleNode, _function);
+    }
+    return _xblockexpression;
   }
   
   /**
@@ -338,9 +482,48 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    * @param module the module to be rendered
    */
   private KNode createModuleWithNodes(final Module module) {
-    throw new Error("Unresolved compilation problems:"
-      + "\nThe method or field PORT_CONSTRAINTS is undefined for the type Class<LayeredOptions>"
-      + "\nThe method or field EDGE_ROUTING is undefined for the type Class<LayeredOptions>");
+    KNode _xblockexpression = null;
+    {
+      KNode _createNode = this._kNodeExtensions.createNode(module);
+      final KNode moduleNode = this.<KNode>associateWith(_createNode, module);
+      KShapeLayout _data = moduleNode.<KShapeLayout>getData(KShapeLayout.class);
+      KInsets _insets = _data.getInsets();
+      _insets.setTop(15);
+      final Procedure1<KNode> _function = (KNode it) -> {
+        this.<KNode, PortConstraints>setLayoutOption(it, LayeredOptions.PORT_CONSTRAINTS, PortConstraints.FREE);
+        this.<KNode, EdgeRouting>setLayoutOption(it, LayeredOptions.EDGE_ROUTING, EdgeRouting.POLYLINE);
+        KRoundedRectangle _addRoundedRectangle = this._kRenderingExtensions.addRoundedRectangle(it, 10, 10);
+        final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
+          this._kRenderingExtensions.setLineWidth(it_1, 2);
+          KColor _color = this._kColorExtensions.getColor("white");
+          EModuleKind _kind = module.getKind();
+          KColor _backgroundColor = this.getBackgroundColor(_kind);
+          this._kRenderingExtensions.<KRoundedRectangle>setBackgroundGradient(it_1, _color, _backgroundColor, 0);
+          KColor _color_1 = this._kColorExtensions.getColor("black");
+          this._kRenderingExtensions.setShadow(it_1, _color_1);
+          KGridPlacement _setGridPlacement = this._kContainerRenderingExtensions.setGridPlacement(it_1, 1);
+          KGridPlacement _from = this._kRenderingExtensions.from(_setGridPlacement, this._kRenderingExtensions.LEFT, 10, 0, this._kRenderingExtensions.TOP, 10, 0);
+          this._kRenderingExtensions.to(_from, this._kRenderingExtensions.RIGHT, 10, 0, this._kRenderingExtensions.BOTTOM, 10, 0);
+          String _name = module.getName();
+          KText _addText = this._kContainerRenderingExtensions.addText(it_1, _name);
+          final Procedure1<KText> _function_2 = (KText it_2) -> {
+            this._kRenderingExtensions.setFontBold(it_2, true);
+            it_2.setCursorSelectable(true);
+            this._kRenderingExtensions.<KText>setLeftTopAlignedPointPlacementData(it_2, 1, 1, 1, 1);
+          };
+          ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
+          this._kContainerRenderingExtensions.addChildArea(it_1);
+          EList<Node> _nodes = module.getNodes();
+          final Consumer<Node> _function_3 = (Node node) -> {
+            this.createGraphNode(node, it_1, module, moduleNode);
+          };
+          _nodes.forEach(_function_3);
+        };
+        ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function_1);
+      };
+      _xblockexpression = ObjectExtensions.<KNode>operator_doubleArrow(moduleNode, _function);
+    }
+    return _xblockexpression;
   }
   
   /**
@@ -349,8 +532,38 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
    * @param node the node to be rendered
    */
   private KNode createGraphNode(final Node node, final KContainerRendering parent, final Module module, final KNode moduleNode) {
-    throw new Error("Unresolved compilation problems:"
-      + "\nThe method or field PORT_CONSTRAINTS is undefined for the type Class<LayeredOptions>");
+    KNode _xblockexpression = null;
+    {
+      KNode _createNode = this._kNodeExtensions.createNode(node);
+      final KNode kNode = this.<KNode>associateWith(_createNode, node);
+      this.nodeMap.put(node, kNode);
+      EList<KNode> _children = moduleNode.getChildren();
+      _children.add(kNode);
+      final Procedure1<KNode> _function = (KNode it) -> {
+        this.<KNode, PortConstraints>setLayoutOption(it, LayeredOptions.PORT_CONSTRAINTS, PortConstraints.FREE);
+        KRoundedRectangle _addRoundedRectangle = this._kRenderingExtensions.addRoundedRectangle(it, 2, 2);
+        final Procedure1<KRoundedRectangle> _function_1 = (KRoundedRectangle it_1) -> {
+          this._kRenderingExtensions.setLineWidth(it_1, 2);
+          KColor _color = this._kColorExtensions.getColor("white");
+          this._kRenderingExtensions.setBackground(it_1, _color);
+          this._kRenderingExtensions.<KRoundedRectangle>setSurroundingSpace(it_1, 1, 0, 1, 0);
+          String _name = node.getName();
+          String _name_1 = module.getName();
+          int _length = _name_1.length();
+          int _plus = (_length + 1);
+          String _substring = _name.substring(_plus);
+          KText _addText = this._kContainerRenderingExtensions.addText(it_1, _substring);
+          final Procedure1<KText> _function_2 = (KText it_2) -> {
+            this._kRenderingExtensions.<KText>setSurroundingSpace(it_2, 10, 0, 10, 0);
+            it_2.setCursorSelectable(true);
+          };
+          ObjectExtensions.<KText>operator_doubleArrow(_addText, _function_2);
+        };
+        ObjectExtensions.<KRoundedRectangle>operator_doubleArrow(_addRoundedRectangle, _function_1);
+      };
+      _xblockexpression = ObjectExtensions.<KNode>operator_doubleArrow(kNode, _function);
+    }
+    return _xblockexpression;
   }
   
   private KPort getOrCreateEdgePort(final KNode kNode, final String label) {
