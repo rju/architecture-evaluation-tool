@@ -15,7 +15,6 @@
  */
 package de.cau.cs.se.software.evaluation.graph;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import de.cau.cs.kieler.klighd.SynthesisOption;
 import de.cau.cs.kieler.klighd.krendering.HorizontalAlignment;
@@ -42,14 +41,9 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import javax.inject.Inject;
-import org.eclipse.elk.alg.layered.properties.LayeredOptions;
-import org.eclipse.elk.core.options.Direction;
-import org.eclipse.elk.core.options.EdgeRouting;
 import org.eclipse.elk.graph.KEdge;
 import org.eclipse.elk.graph.KNode;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Extension;
 import org.eclipse.xtext.xbase.lib.ObjectExtensions;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
@@ -144,86 +138,11 @@ public class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergr
   
   @Override
   public KNode transform(final Hypergraph hypergraph) {
-    KNode _createNode = this._kNodeExtensions.createNode(hypergraph);
-    final KNode root = this.<KNode>associateWith(_createNode, hypergraph);
-    final Procedure1<KNode> _function = (KNode it) -> {
-      this.<KNode, Boolean>setLayoutOption(it, LayeredOptions.LAYOUT_HIERARCHY, Boolean.valueOf(false));
-      Object _objectValue = this.getObjectValue(HypergraphDiagramSynthesis.SPACING);
-      this.<KNode, Float>setLayoutOption(it, LayeredOptions.SPACING_NODE, ((Float) _objectValue));
-      Direction _switchResult = null;
-      Object _objectValue_1 = this.getObjectValue(HypergraphDiagramSynthesis.DIRECTION);
-      boolean _matched = false;
-      if (Objects.equal(_objectValue_1, HypergraphDiagramSynthesis.DIRECTION_UP)) {
-        _matched=true;
-        _switchResult = Direction.UP;
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, HypergraphDiagramSynthesis.DIRECTION_DOWN)) {
-          _matched=true;
-          _switchResult = Direction.DOWN;
-        }
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, HypergraphDiagramSynthesis.DIRECTION_LEFT)) {
-          _matched=true;
-          _switchResult = Direction.LEFT;
-        }
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, HypergraphDiagramSynthesis.DIRECTION_RIGHT)) {
-          _matched=true;
-          _switchResult = Direction.RIGHT;
-        }
-      }
-      this.<KNode, Direction>setLayoutOption(it, LayeredOptions.DIRECTION, _switchResult);
-      EdgeRouting _switchResult_1 = null;
-      Object _objectValue_2 = this.getObjectValue(HypergraphDiagramSynthesis.ROUTING);
-      boolean _matched_1 = false;
-      if (Objects.equal(_objectValue_2, HypergraphDiagramSynthesis.ROUTING_POLYLINE)) {
-        _matched_1=true;
-        _switchResult_1 = EdgeRouting.POLYLINE;
-      }
-      if (!_matched_1) {
-        if (Objects.equal(_objectValue_2, HypergraphDiagramSynthesis.ROUTING_ORTHOGONAL)) {
-          _matched_1=true;
-          _switchResult_1 = EdgeRouting.ORTHOGONAL;
-        }
-      }
-      if (!_matched_1) {
-        if (Objects.equal(_objectValue_2, HypergraphDiagramSynthesis.ROUTING_SPLINES)) {
-          _matched_1=true;
-          _switchResult_1 = EdgeRouting.SPLINES;
-        }
-      }
-      this.<KNode, EdgeRouting>setLayoutOption(it, LayeredOptions.EDGE_ROUTING, _switchResult_1);
-      EList<Node> _nodes = hypergraph.getNodes();
-      final Consumer<Node> _function_1 = (Node node) -> {
-        EList<KNode> _children = root.getChildren();
-        KNode _createGraphNode = this.createGraphNode(node);
-        _children.add(_createGraphNode);
-      };
-      _nodes.forEach(_function_1);
-      EList<Edge> _edges = hypergraph.getEdges();
-      final Consumer<Edge> _function_2 = (Edge edge) -> {
-        EList<KNode> _children = root.getChildren();
-        KNode _createGraphEdge = this.createGraphEdge(edge);
-        _children.add(_createGraphEdge);
-      };
-      _edges.forEach(_function_2);
-      EList<Node> _nodes_1 = hypergraph.getNodes();
-      final Consumer<Node> _function_3 = (Node node) -> {
-        EList<Edge> _edges_1 = node.getEdges();
-        final Consumer<Edge> _function_4 = (Edge edge) -> {
-          KNode _get = this.edgeMap.get(edge);
-          KNode _get_1 = this.nodeMap.get(node);
-          this.drawEdge(_get, _get_1);
-        };
-        _edges_1.forEach(_function_4);
-      };
-      _nodes_1.forEach(_function_3);
-    };
-    ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
-    return root;
+    throw new Error("Unresolved compilation problems:"
+      + "\nThe method or field LAYOUT_HIERARCHY is undefined for the type Class<LayeredOptions>"
+      + "\nThe method or field SPACING_NODE is undefined for the type Class<LayeredOptions>"
+      + "\nThe method or field DIRECTION is undefined for the type Class<LayeredOptions>"
+      + "\nThe method or field EDGE_ROUTING is undefined for the type Class<LayeredOptions>");
   }
   
   /**
