@@ -13,7 +13,7 @@
     <name>Static software analysis based an hypergraphs</name>
 
     <properties>
-        <tycho.version>0.23.0</tycho.version>
+        <tycho.version>0.25.0</tycho.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
         <eclipse-repo.url>http://download.eclipse.org/releases/neon</eclipse-repo.url>
         <kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/</kieler-repo.url>
@@ -23,11 +23,11 @@
         <checkstyle.config.location>../cs-conf.xml</checkstyle.config.location>
     </properties>
 
-	<modules>
-        <module>../de.cau.cs.se.software.evaluation</module>
-        <module>../de.cau.cs.se.software.evaluation.graph</module>
-        <module>../de.cau.cs.se.software.evaluation.feature</module>
-        <module>../de.cau.cs.se.software.evaluation.updatesite</module>
+    <modules>
+        <module>de.cau.cs.se.software.evaluation</module>
+        <module>de.cau.cs.se.software.evaluation.graph</module>
+        <module>de.cau.cs.se.software.evaluation.feature</module>
+        <module>de.cau.cs.se.software.evaluation.repository</module>
     </modules>
 
     <repositories>
