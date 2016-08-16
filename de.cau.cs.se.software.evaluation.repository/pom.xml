@@ -15,9 +15,9 @@
 
 	<properties>
 		<!-- Relative path to the repo being uploaded -->
-		<repo.path>${project.build.directory}/repository/</repo.path>
+		<repo-path>${project.build.directory}/repository/</repo-path>
 		<!-- <updatesite.path>file:///srv/vhosts/eus/se/snapshot/</updatesite.path> -->
-		<updatesite.path>file:///home/rju/eus/snapshot/</updatesite.path>
+		<updatesite-path>file:///home/rju/eus/snapshot/</updatesite-path>
 	</properties>
 
 	<build>
@@ -35,7 +35,7 @@
 							<goal>upload</goal>
 						</goals>
 						<configuration>
-							<fromDir>${repo.path}</fromDir>
+							<fromDir>${repo-path}</fromDir>
 							<includes>**</includes>
 							<url>${updatesite-path}</url>
 							<toDir>.</toDir>
