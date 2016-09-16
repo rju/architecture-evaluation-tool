@@ -26,6 +26,11 @@
     <property name="charset"        value=""/> JVM file.encoding property
     !-->
 
+
+    <module name="SuppressionFilter">
+    	<property name="file" value="${basedir}/suppressions.xml" />
+    </module>
+
     <!--
      !________________________________________________________________________________________
      !
@@ -171,6 +176,7 @@
 
     <module name="TreeWalker">
         <!-- KIEKER -->
+        <property name="tabWidth" value="4"/>
         <module name="FileContentsHolder"/>
 
         <!--
@@ -1210,10 +1216,6 @@
             <property name="allowEmptyMethods"      value="true"/>
         </module>
 
-    </module>
-
-    <module name="SuppressionFilter">
-        <property name="file" value="../suppressions.xml" />
     </module>
 
 </module>
