@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.cau.cs.se.software.evaluation.transformation.java;
+package de.cau.cs.se.software.evaluation.java.transformation;
 
 import com.google.common.base.Objects;
 import java.util.List;

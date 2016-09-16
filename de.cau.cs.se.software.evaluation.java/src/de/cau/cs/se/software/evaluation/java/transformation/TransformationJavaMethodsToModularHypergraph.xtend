@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
@@ -24,10 +24,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.UnionType
 import org.eclipse.jdt.core.dom.WildcardType
 
-import static de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
-import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
+import static de.cau.cs.se.software.evaluation.java.transformation.JavaASTEvaluation.*
+import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation

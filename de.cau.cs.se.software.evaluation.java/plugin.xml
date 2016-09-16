@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="right"
+               id="de.cau.cs.se.software.evaluation.views.AnalysisResultView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="de.cau.cs.se.software.evaluation.java.JavaProjectAnalysisHandler"
+            id="de.cau.cs.se.software.evaluation.commands.analysis.java"
+            name="Java Analysis">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <command
+            commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
+            label="Java Analysis"
+            style="push"
+            tooltip="Run Java analysis">
+      </command>
+	  </menuContribution>
+	  <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+	     <!-- menu
+	           id="de.cau.cs.se.software.evaluation.popups"
+	           label="Analysis Complexity">
+	     </menu -->
+	     <command
+	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
+	                  label="Java Analysis"
+	                  style="push"
+	                  tooltip="Run Java analysis">
+	     </command>
+	  </menuContribution>
+	  <menuContribution
+	        locationURI="popup:de.cau.cs.se.software.evaluation.popups?after=additions">
+	     <command
+	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
+	                  label="Java Analysis"
+	                  style="push"
+	                  tooltip="Run Java analysis">
+	     </command>
+      </menuContribution>
+   </extension>
+
+</plugin>

@@ -1,9 +1,11 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.TypeTrace
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+
 import java.util.List
 import org.eclipse.jdt.core.dom.AssertStatement
 import org.eclipse.jdt.core.dom.Block
@@ -34,14 +36,13 @@ import org.eclipse.jdt.core.dom.TypeDeclaration
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement
 import org.eclipse.jdt.core.dom.WhileStatement
-
-import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
-
-import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
-import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import org.eclipse.jdt.core.dom.ContinueStatement
+
+import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory.*
+
+import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluation.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphQueryHelper.*
 
 class JavaASTEvaluation {
 	

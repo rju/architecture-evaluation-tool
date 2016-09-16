@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package de.cau.cs.se.software.evaluation.commands;
+package de.cau.cs.se.software.evaluation.java;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
@@ -27,7 +27,7 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 
-import de.cau.cs.se.software.evaluation.jobs.JavaProjectAnalysisJob;
+import de.cau.cs.se.software.evaluation.commands.AbstractAnalysisHandler;
 
 /**
  * @author Reiner Jung

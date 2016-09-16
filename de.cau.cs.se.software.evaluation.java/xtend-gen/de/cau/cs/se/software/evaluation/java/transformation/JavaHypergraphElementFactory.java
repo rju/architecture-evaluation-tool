@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java;
+package de.cau.cs.se.software.evaluation.java.transformation;
 
 import de.cau.cs.se.software.evaluation.hypergraph.CallerCalleeTrace;
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind;
@@ -9,7 +9,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.TypeTrace;
-import de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper;
+import de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper;
 import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;

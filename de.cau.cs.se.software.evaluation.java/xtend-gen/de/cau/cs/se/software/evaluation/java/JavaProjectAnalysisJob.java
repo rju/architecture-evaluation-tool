@@ -1,15 +1,15 @@
-package de.cau.cs.se.software.evaluation.jobs;
+package de.cau.cs.se.software.evaluation.java;
 
 import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
+import de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper;
+import de.cau.cs.se.software.evaluation.java.transformation.TransformationJavaMethodsToModularHypergraph;
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob;
 import de.cau.cs.se.software.evaluation.transformation.TransformationCyclomaticComplexity;
 import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode;
-import de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper;
-import de.cau.cs.se.software.evaluation.transformation.java.TransformationJavaMethodsToModularHypergraph;
 import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider;
 import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import de.cau.cs.se.software.evaluation.views.LogView;
@@ -56,6 +56,11 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 
+/**
+ * Analysis job executed for a given project.
+ * 
+ * @author Reiner Jung
+ */
 @SuppressWarnings("all")
 public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   private final IJavaProject javaProject;

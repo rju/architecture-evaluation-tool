@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="de.cau.cs.se.software.evaluation.java.feature"
+      label="Software evaluation feature for Java"
+      version="1.0.0.qualifier"
+      provider-name="Software Engineering Group, Kiel University">
+
+   <plugin
+         id="de.cau.cs.se.software.evaluation.java"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.qualifier"
+         unpack="false"/>
+</feature>

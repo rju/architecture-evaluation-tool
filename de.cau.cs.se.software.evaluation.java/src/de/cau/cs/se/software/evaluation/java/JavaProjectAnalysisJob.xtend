@@ -1,8 +1,8 @@
-package de.cau.cs.se.software.evaluation.jobs
+package de.cau.cs.se.software.evaluation.java
 
 import de.cau.cs.se.software.evaluation.transformation.TransformationCyclomaticComplexity
 import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode
-import de.cau.cs.se.software.evaluation.transformation.java.TransformationJavaMethodsToModularHypergraph
+import de.cau.cs.se.software.evaluation.java.transformation.TransformationJavaMethodsToModularHypergraph
 import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import de.cau.cs.se.software.evaluation.views.LogModelProvider
 import de.cau.cs.se.software.evaluation.views.LogView
@@ -32,8 +32,14 @@ import org.eclipse.swt.widgets.Shell
 import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
+import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
 
+/**
+ * Analysis job executed for a given project.
+ * 
+ * @author Reiner Jung
+ */
 class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	val IJavaProject javaProject
@@ -337,7 +343,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		})
 	}
 	
-	private def updateLogView() {
+	private def updateLogView() {		
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
 			public override void run() {
 				val part2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow().

@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 import org.eclipse.jdt.core.dom.IVariableBinding
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.views.LogModelProvider

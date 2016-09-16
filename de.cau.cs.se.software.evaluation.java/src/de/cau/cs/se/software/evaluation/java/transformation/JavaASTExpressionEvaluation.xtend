@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
@@ -33,11 +33,12 @@ import org.eclipse.jdt.core.dom.ThisExpression
 import org.eclipse.jdt.core.dom.TypeLiteral
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
-
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluationHelper.*
 import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.LambdaExpression
 import org.eclipse.jdt.core.dom.ExpressionMethodReference
+
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluationHelper.*
+
 
 class JavaASTExpressionEvaluation {
 

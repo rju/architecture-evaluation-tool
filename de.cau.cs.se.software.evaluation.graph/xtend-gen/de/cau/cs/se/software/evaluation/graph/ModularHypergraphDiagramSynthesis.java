@@ -57,7 +57,6 @@ import javax.inject.Inject;
 import org.eclipse.elk.alg.layered.properties.LayeredOptions;
 import org.eclipse.elk.core.klayoutdata.KInsets;
 import org.eclipse.elk.core.klayoutdata.KShapeLayout;
-import org.eclipse.elk.core.options.Direction;
 import org.eclipse.elk.core.options.EdgeRouting;
 import org.eclipse.elk.core.options.PortConstraints;
 import org.eclipse.elk.graph.KEdge;
@@ -206,55 +205,6 @@ public class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<
     KNode _createNode = this._kNodeExtensions.createNode(hypergraph);
     final KNode root = this.<KNode>associateWith(_createNode, hypergraph);
     final Procedure1<KNode> _function = (KNode it) -> {
-      this.<KNode, Boolean>setLayoutOption(it, LayeredOptions.LAYOUT_HIERARCHY, Boolean.valueOf(true));
-      Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.SPACING);
-      this.<KNode, Float>setLayoutOption(it, LayeredOptions.SPACING_NODE, ((Float) _objectValue));
-      Direction _switchResult = null;
-      Object _objectValue_1 = this.getObjectValue(ModularHypergraphDiagramSynthesis.DIRECTION);
-      boolean _matched = false;
-      if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_UP)) {
-        _matched=true;
-        _switchResult = Direction.UP;
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_DOWN)) {
-          _matched=true;
-          _switchResult = Direction.DOWN;
-        }
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_LEFT)) {
-          _matched=true;
-          _switchResult = Direction.LEFT;
-        }
-      }
-      if (!_matched) {
-        if (Objects.equal(_objectValue_1, ModularHypergraphDiagramSynthesis.DIRECTION_RIGHT)) {
-          _matched=true;
-          _switchResult = Direction.RIGHT;
-        }
-      }
-      this.<KNode, Direction>setLayoutOption(it, LayeredOptions.DIRECTION, _switchResult);
-      EdgeRouting _switchResult_1 = null;
-      Object _objectValue_2 = this.getObjectValue(ModularHypergraphDiagramSynthesis.ROUTING);
-      boolean _matched_1 = false;
-      if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_POLYLINE)) {
-        _matched_1=true;
-        _switchResult_1 = EdgeRouting.POLYLINE;
-      }
-      if (!_matched_1) {
-        if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_ORTHOGONAL)) {
-          _matched_1=true;
-          _switchResult_1 = EdgeRouting.ORTHOGONAL;
-        }
-      }
-      if (!_matched_1) {
-        if (Objects.equal(_objectValue_2, ModularHypergraphDiagramSynthesis.ROUTING_SPLINES)) {
-          _matched_1=true;
-          _switchResult_1 = EdgeRouting.SPLINES;
-        }
-      }
-      this.<KNode, EdgeRouting>setLayoutOption(it, LayeredOptions.EDGE_ROUTING, _switchResult_1);
     };
     ObjectExtensions.<KNode>operator_doubleArrow(root, _function);
     Object _objectValue = this.getObjectValue(ModularHypergraphDiagramSynthesis.VISIBLE_NODES);

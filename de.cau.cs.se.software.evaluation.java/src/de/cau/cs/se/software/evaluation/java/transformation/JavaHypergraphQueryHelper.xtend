@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.CallerCalleeTrace
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
@@ -8,6 +8,8 @@ import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.TypeTrace
+import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+
 import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.jdt.core.dom.IMethodBinding
@@ -15,10 +17,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.IVariableBinding
 import org.eclipse.jdt.core.dom.SimpleName
 
-import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
+import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.NameResolutionHelper.*
-import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
+import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 
 class JavaHypergraphQueryHelper {
 	/**

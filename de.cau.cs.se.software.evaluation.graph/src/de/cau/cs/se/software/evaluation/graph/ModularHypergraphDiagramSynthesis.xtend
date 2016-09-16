@@ -141,21 +141,22 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
     		// TODO fix configuration
             // de.cau.cs.kieler.klay.layered.properties.Properties
             // it.setLayoutOption(Properties.MERGE_EDGES, true)
-            it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, true)
+            // it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, true)
             // it.setLayoutOption(LayeredOptions::ALGORITHM, "de.cau.cs.kieler.klay.layered")	
 
-            it.setLayoutOption(LayeredOptions::SPACING_NODE, SPACING.objectValue as Float)
-            it.setLayoutOption(LayeredOptions::DIRECTION, switch(DIRECTION.objectValue) {
-            	case DIRECTION_UP: Direction::UP
-            	case DIRECTION_DOWN: Direction::DOWN
-            	case DIRECTION_LEFT: Direction::LEFT
-            	case DIRECTION_RIGHT: Direction::RIGHT
-            })
-            it.setLayoutOption(LayeredOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
-            	case ROUTING_POLYLINE: EdgeRouting::POLYLINE
-            	case ROUTING_ORTHOGONAL: EdgeRouting::ORTHOGONAL
-            	case ROUTING_SPLINES: EdgeRouting::SPLINES
-            })
+			// TODO warns that is no longer supported
+            // it.setLayoutOption(LayeredOptions::SPACING_NODE, SPACING.objectValue as Float)
+//            it.setLayoutOption(LayeredOptions::DIRECTION, switch(DIRECTION.objectValue) {
+//            	case DIRECTION_UP: Direction::UP
+//            	case DIRECTION_DOWN: Direction::DOWN
+//            	case DIRECTION_LEFT: Direction::LEFT
+//            	case DIRECTION_RIGHT: Direction::RIGHT
+//            })
+//            it.setLayoutOption(LayeredOptions::EDGE_ROUTING, switch(ROUTING.objectValue) {
+//            	case ROUTING_POLYLINE: EdgeRouting::POLYLINE
+//            	case ROUTING_ORTHOGONAL: EdgeRouting::ORTHOGONAL
+//            	case ROUTING_SPLINES: EdgeRouting::SPLINES
+//            })
         ]
             
     	if (VISIBLE_NODES.objectValue == VISIBLE_NODES_NO) {

@@ -1,32 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="de.cau.cs.kieler.klighd.diagramSyntheses">
-   <diagramSynthesis
-         class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis"
-         id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
-   </diagramSynthesis>
-   <diagramSynthesis
-         class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.HypergraphDiagramSynthesis"
-         id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
-   </diagramSynthesis>
+	<extension
+	 point="de.cau.cs.kieler.klighd.diagramSyntheses">
+		<diagramSynthesis
+			 class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis"
+			 id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
+		</diagramSynthesis>
+		<diagramSynthesis
+			 class="de.cau.cs.kieler.klighd.syntheses.GuiceBasedSynthesisFactory:de.cau.cs.se.software.evaluation.graph.HypergraphDiagramSynthesis"
+			 id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagramSynthesis">
+		</diagramSynthesis>
+	</extension>
+	<extension
+	      point="org.eclipse.ui.commands">
+	   <category
+	         description="Modular Hypergraph diagrams"
+	         id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagrams"
+	         name="ModularHypergraphDiagrams">
+	   </category>
+	   <command
+	         categoryId="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagrams"
+	         defaultHandler="de.cau.cs.se.software.evaluation.graph.OpenDiagramHandler"
+	         description="Primitive helper command that opens KLighD-based ModularHypergraph diagrams."
+	         id="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
+	         name="Open Modular Hypergraph diagram">
+	   </command>
+	</extension>
+	
+	<extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
+      <command
+            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
+            label="Modular Hypergraph Diagram"
+            style="push"
+            tooltip="Open Diagram">
+      </command>
+	  </menuContribution>
+	  <menuContribution
+        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+      <command
+            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
+            label="Modular Hypergraph Diagram"
+            style="push"
+            tooltip="Open Diagram">
+      </command>
+	  </menuContribution>
+	  <menuContribution
+	        locationURI="popup:de.cau.cs.se.software.evaluation.popups?after=additions">
+      <command
+            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
+            label="Modular Hypergraph Diagram"
+            style="push"
+            tooltip="Open Diagram">
+      </command>
+      </menuContribution>
    </extension>
-<extension
-      point="org.eclipse.ui.commands">
-   <category
-         description="ModularHypergraph diagrams"
-         id="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagrams"
-         name="ModularHypergraphDiagrams">
-   </category>
-   <command
-         categoryId="de.cau.cs.se.software.evaluation.graph.ModularHypergraphDiagrams"
-         defaultHandler="de.cau.cs.se.software.evaluation.graph.OpenDiagramHandler"
-         description="Primitive helper command that opens KLighD-based ModularHypergraph diagrams."
-         id="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-         name="Open ModularHypergraph diagram">
-   </command>
-</extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated PlanarVisualization -->

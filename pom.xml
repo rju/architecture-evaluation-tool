@@ -8,7 +8,7 @@
 	<packaging>pom</packaging>
 	<name>Static software analysis based an hypergraphs</name>
 
-    <properties>
+	<properties>
 		<tycho-version>0.25.0</tycho-version>
 		<tycho-extras-version>0.25.0</tycho-extras-version>
 		<xtext-version>2.10.0</xtext-version>
@@ -17,30 +17,34 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<eclipse-repo.url>http://download.eclipse.org/releases/neon</eclipse-repo.url>
 		<kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/</kieler-repo.url>
-		<elk-repo.url>http://download.eclipse.org/elk/updates/releases/0.1.0/</elk-repo.url>        
+		<elk-repo.url>http://download.eclipse.org/elk/updates/releases/0.1.0/</elk-repo.url>
 		<geco-repo.url>https://build.se.informatik.uni-kiel.de/eus/geco/snapshot/</geco-repo.url>
 		<palladio-repo.url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo.url>
 		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
-    </properties>
+	</properties>
 
-    <modules>
-        <module>de.cau.cs.se.software.evaluation</module>
-        <module>de.cau.cs.se.software.evaluation.graph</module>
-        <module>de.cau.cs.se.software.evaluation.feature</module>
-	<module>de.cau.cs.se.software.evaluation.target</module>
-        <module>de.cau.cs.se.software.evaluation.repository</module>
-    </modules>
+	<modules>
+		<module>de.cau.cs.se.software.evaluation</module>
+		<module>de.cau.cs.se.software.evaluation.java</module>
+<!-- 		<module>de.cau.cs.se.software.evaluation.emf</module> -->
+<!-- 		<module>de.cau.cs.se.software.evaluation.geco</module> -->
+<!-- 		<module>de.cau.cs.se.software.evaluation.pcm</module> -->
+		<module>de.cau.cs.se.software.evaluation.graph</module>
+		<module>de.cau.cs.se.software.evaluation.feature</module>
+		<module>de.cau.cs.se.software.evaluation.target</module>
+		<module>de.cau.cs.se.software.evaluation.repository</module>
+	</modules>
 
 
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <extensions>true</extensions>
-            </plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
@@ -134,8 +138,47 @@
 				<configuration>
 					<linkXRef>false</linkXRef>
 				</configuration>
+			</plugin>			
+			<plugin>
+				<groupId>org.eclipse.xtend</groupId>
+				<artifactId>xtend-maven-plugin</artifactId>
+				<version>2.10.0</version>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											exec-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.4.0,)
+										</versionRange>
+										<goals>
+											<goal>java</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<repositories>

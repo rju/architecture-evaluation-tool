@@ -1,10 +1,10 @@
-package de.cau.cs.se.software.evaluation.transformation.java;
+package de.cau.cs.se.software.evaluation.java.transformation;
 
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeReference;
-import de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluationHelper;
+import de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluationHelper;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.core.dom.Annotation;

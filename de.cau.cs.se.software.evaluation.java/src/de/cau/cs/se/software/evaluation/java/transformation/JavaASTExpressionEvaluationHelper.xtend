@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java
+package de.cau.cs.se.software.evaluation.java.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.hypergraph.MethodTrace
@@ -25,11 +25,11 @@ import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Display
 import org.eclipse.ui.PlatformUI
 
-import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory.*
+import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory.*
 
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
-import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTEvaluation.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluation.*
+import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphQueryHelper.*
 import org.eclipse.jdt.core.dom.ExpressionMethodReference
 
 class JavaASTExpressionEvaluationHelper {

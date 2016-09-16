@@ -1,4 +1,4 @@
-package de.cau.cs.se.software.evaluation.transformation.java;
+package de.cau.cs.se.software.evaluation.java.transformation;
 
 import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind;
@@ -8,10 +8,10 @@ import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Module;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.hypergraph.NodeReference;
-import de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation;
-import de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation;
-import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphElementFactory;
-import de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper;
+import de.cau.cs.se.software.evaluation.java.transformation.JavaASTEvaluation;
+import de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluation;
+import de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory;
+import de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphQueryHelper;
 import de.cau.cs.se.software.evaluation.views.LogModelProvider;
 import java.util.List;
 import java.util.function.Consumer;

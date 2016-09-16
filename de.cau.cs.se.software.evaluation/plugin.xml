@@ -45,30 +45,15 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="de.cau.cs.se.software.evaluation.commands.JavaProjectAnalysisHandler"
-            id="de.cau.cs.se.software.evaluation.commands.analysis.java"
-            name="Analysis Java">
-      </command>
-      <command
             defaultHandler="de.cau.cs.se.software.evaluation.commands.ModelAnalysisHandler"
             id="de.cau.cs.se.software.evaluation.commands.analysis.model"
-            name="Analysis Model">
+            name="Model Analysis">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
         locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-	     <!-- menu
-	           id="de.cau.cs.se.software.evaluation.popups"
-	           label="Analysis Complexity">
-	     </menu -->
-      <command
-            commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
-            label="Analysis Java"
-            style="push"
-            tooltip="Run Java analysis">
-      </command>
       <command
             commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
             label="Analysis Model"
@@ -78,31 +63,15 @@
 	  </menuContribution>
 	  <menuContribution
         locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-	     <!-- menu
-	           id="de.cau.cs.se.software.evaluation.popups"
-	           label="Analysis Complexity">
-	     </menu -->
-	     <command
-	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
-	                  label="Analysis Java"
-	                  style="push"
-	                  tooltip="Run Java analysis">
-	     </command>
       <command
             commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
-            label="Analysis Model"
+            label="Model Analysis"
             style="push"
             tooltip="Run model analysis">
       </command>
 	  </menuContribution>
 	  <menuContribution
 	        locationURI="popup:de.cau.cs.se.software.evaluation.popups?after=additions">
-	     <command
-	           commandId="de.cau.cs.se.software.evaluation.commands.analysis.java"
-	                  label="Analysis Java"
-	                  style="push"
-	                  tooltip="Run Java analysis">
-	     </command>
       <command
             commandId="de.cau.cs.se.software.evaluation.commands.analysis.model"
             label="Analysis Model"
