@@ -65,8 +65,6 @@ import org.eclipse.xtext.xbase.lib.IterableExtensions;
 public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   private final IJavaProject javaProject;
   
-  private final Shell shell;
-  
   private String DATA_TYPE_PATTERN_FILE = "data-type-pattern.cfg";
   
   private String DATA_TYPE_PATTERN_TITLE = "data type pattern";
@@ -76,10 +74,9 @@ public class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
   private String OBSERVED_SYSTEM_TITLE = "observed system";
   
   public JavaProjectAnalysisJob(final IProject project, final Shell shell) {
-    super(project);
+    super(project, shell);
     IJavaProject _javaProject = this.getJavaProject(project);
     this.javaProject = _javaProject;
-    this.shell = shell;
   }
   
   /**

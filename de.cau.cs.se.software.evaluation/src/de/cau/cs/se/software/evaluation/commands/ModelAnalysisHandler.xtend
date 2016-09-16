@@ -1,26 +1,44 @@
 package de.cau.cs.se.software.evaluation.commands
 
-import org.eclipse.jface.viewers.ISelection
-import org.eclipse.ui.IWorkbenchPage
-import org.eclipse.swt.widgets.Shell
+import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.IAnalysisJobProvider
+import java.util.HashMap
+import java.util.Map
 import org.eclipse.core.commands.ExecutionException
+import org.eclipse.core.resources.IFile
+import org.eclipse.core.runtime.CoreException
+import org.eclipse.core.runtime.Platform
+import org.eclipse.jface.dialogs.MessageDialog
+import org.eclipse.jface.viewers.ISelection
 import org.eclipse.jface.viewers.IStructuredSelection
 import org.eclipse.jface.viewers.ITreeSelection
 import org.eclipse.jface.viewers.TreeSelection
-import org.eclipse.core.resources.IFile
-import org.eclipse.jface.dialogs.MessageDialog
-import de.cau.cs.se.software.evaluation.jobs.GecoMegamodelAnalysisJob
-import de.cau.cs.se.software.evaluation.jobs.EMFMetamodelAnalysisJob
-import de.cau.cs.se.software.evaluation.jobs.CoCoMEAnalysisJob
-import de.cau.cs.se.software.evaluation.jobs.PCMDeploymentAnalysisJob
+import org.eclipse.swt.widgets.Shell
+import org.eclipse.ui.IWorkbenchPage
 
 class ModelAnalysisHandler extends AbstractAnalysisHandler {
 
+	private val Map<String,IAnalysisJobProvider> providers = new HashMap<String,IAnalysisJobProvider>
+
 	/**
-	 * Empty default constructor, as proposed by checkstyle.
+	 * Initialization constructor.
 	 */
 	public new() {
 		super()
+		
+		val registry = Platform.getExtensionRegistry()
+  		val config = registry.getConfigurationElementsFor(AbstractHypergraphAnalysisJob.HYPERGRAPH_ANALYSIS_JOBS)
+	  	try {
+	  		config.forEach[element |
+	  			val ext = element
+	  			if (ext instanceof IAnalysisJobProvider) {
+	  				val provider = (ext as IAnalysisJobProvider)
+	  				providers.put(provider.fileExtension, provider)
+				}
+  			]
+		   } catch (CoreException ex) {
+		     	System.out.println(ex.getMessage())
+		}
 	}
 	
 	override protected executeCalculation(ISelection selection, IWorkbenchPage activePage, Shell shell) throws ExecutionException {
@@ -31,22 +49,19 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 				val iterator = treeSelection.iterator.filter(IFile)
 				if (iterator.hasNext) {
 					val file = iterator.next
-					val job = switch(file.fileExtension) {
-						case "geco" : new GecoMegamodelAnalysisJob(file.project, file, shell)
-						case "ecore" : new EMFMetamodelAnalysisJob(file.project, file, shell)
-						case "cocome" : new CoCoMEAnalysisJob(file.project, file.name.equals("megamodel.cocome"), shell)
-						case "system" : new PCMDeploymentAnalysisJob(file.project, file, shell)
-						default: {
-							MessageDialog.openInformation(shell, "Unknown Model Type", 
-								"The model type implied by the extension " + file.fileExtension + 
-								" is not supported.")
-							null
-						}
-					}
-					if (job != null) {
+					val provider = providers.get(file.fileExtension)
+						
+					if (provider != null) {
+						val job = provider.createAnalysisJob(file.project, file, shell)
 						job.schedule()
 						job.join
 						this.createAnalysisView(activePage)
+					} else {
+						// TODO make this a generic piece
+						//case "cocome" : new CoCoMEAnalysisJob(file.project, file.name.equals("megamodel.cocome"), shell)
+						MessageDialog.openInformation(shell, "Unknown Model Type", 
+							"The model type implied by the extension " + file.fileExtension + 
+							" is not supported.")
 					}
 				} else {
 					MessageDialog.openInformation(shell, "Empty selection", "No model selected for execution.")

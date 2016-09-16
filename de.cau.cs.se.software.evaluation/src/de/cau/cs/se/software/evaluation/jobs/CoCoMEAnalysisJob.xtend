@@ -7,17 +7,14 @@ import org.eclipse.core.runtime.Status
 import org.eclipse.swt.widgets.Shell
 
 class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
-	
-	val Shell shell
-	
+		
 	val boolean complete
 	
 	new(IProject project, boolean complete, Shell shell) {
-		super(project)
-		this.shell = shell
+		super(project, shell)
 		this.complete = complete
 	}
-	
+		
 	override protected run(IProgressMonitor monitor) {
 		val result = AnalysisResultModelProvider.INSTANCE
 		

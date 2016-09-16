@@ -15,13 +15,10 @@ import org.eclipse.swt.widgets.Shell;
 
 @SuppressWarnings("all")
 public class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
-  private final Shell shell;
-  
   private final boolean complete;
   
   public CoCoMEAnalysisJob(final IProject project, final boolean complete, final Shell shell) {
-    super(project);
-    this.shell = shell;
+    super(project, shell);
     this.complete = complete;
   }
   

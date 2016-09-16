@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -44,11 +45,16 @@ import org.eclipse.ui.PlatformUI;
  */
 @SuppressWarnings("all")
 public abstract class AbstractHypergraphAnalysisJob extends Job {
+  public static String HYPERGRAPH_ANALYSIS_JOBS = AbstractHypergraphAnalysisJob.class.getCanonicalName();
+  
   protected final IProject project;
   
-  public AbstractHypergraphAnalysisJob(final IProject project) {
+  protected final Shell shell;
+  
+  public AbstractHypergraphAnalysisJob(final IProject project, final Shell shell) {
     super(("Analysis " + project.getName()));
     this.project = project;
+    this.shell = shell;
   }
   
   /**

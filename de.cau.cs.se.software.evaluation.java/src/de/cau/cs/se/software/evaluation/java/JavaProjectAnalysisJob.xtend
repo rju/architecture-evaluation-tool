@@ -44,8 +44,6 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	val IJavaProject javaProject
 
-	val Shell shell
-
 	String DATA_TYPE_PATTERN_FILE = "data-type-pattern.cfg"
 
 	String DATA_TYPE_PATTERN_TITLE = "data type pattern"
@@ -55,9 +53,8 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	String OBSERVED_SYSTEM_TITLE = "observed system"
 
 	public new(IProject project, Shell shell) {
-		super(project)
+		super(project, shell)
 		this.javaProject = project.getJavaProject
-		this.shell = shell
 	}
 
 	/**
