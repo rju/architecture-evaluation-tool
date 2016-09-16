@@ -18,6 +18,7 @@ package de.cau.cs.se.software.evaluation.jobs;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph;
 import de.cau.cs.se.software.evaluation.jobs.CalculateComplexity;
+import de.cau.cs.se.software.evaluation.jobs.CalculateMaximalInterconnectedGraphComplexity;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphToGraphMapping;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntermoduleHyperedgesOnlyGraph;
@@ -159,8 +160,9 @@ public abstract class AbstractHypergraphAnalysisJob extends Job {
       return 0;
     }
     final CalculateComplexity calculateComplexity = new CalculateComplexity(monitor);
+    final CalculateMaximalInterconnectedGraphComplexity calculateMaximalInterconnectedGraphComplexity = new CalculateMaximalInterconnectedGraphComplexity(monitor);
     ModularHypergraph _result_2 = maximalInterconnectedGraph.getResult();
-    final double complexityMaximalInterconnected = calculateComplexity.calculate(_result_2, 
+    final double complexityMaximalInterconnected = calculateMaximalInterconnectedGraphComplexity.calculate(_result_2, 
       "Calculate maximal interconnected graph complexity");
     boolean _isCanceled_3 = monitor.isCanceled();
     if (_isCanceled_3) {

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -157,6 +158,12 @@ public class JavaASTExpressionEvaluation {
         if (_elseExpression!=null) {
           JavaASTExpressionEvaluation.evaluate(_elseExpression, sourceNode, graph, dataTypePatterns);
         }
+      }
+    }
+    if (!_matched) {
+      if (expression instanceof ExpressionMethodReference) {
+        _matched=true;
+        JavaASTExpressionEvaluationHelper.processExpressionMethodReference(((ExpressionMethodReference)expression), sourceNode, contextTypeBinding, graph, dataTypePatterns);
       }
     }
     if (!_matched) {

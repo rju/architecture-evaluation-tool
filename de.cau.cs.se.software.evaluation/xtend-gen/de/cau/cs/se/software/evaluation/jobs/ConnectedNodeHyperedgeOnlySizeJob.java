@@ -18,7 +18,7 @@ package de.cau.cs.se.software.evaluation.jobs;
 import com.google.common.base.Objects;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
-import de.cau.cs.se.software.evaluation.jobs.CalculateComplexity;
+import de.cau.cs.se.software.evaluation.jobs.ICalculationTask;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationConnectedNodeHyperedgesOnlyGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,11 +32,11 @@ import org.eclipse.core.runtime.jobs.Job;
  */
 @SuppressWarnings("all")
 public class ConnectedNodeHyperedgeOnlySizeJob extends Job {
-  private CalculateComplexity parent;
+  private ICalculationTask parent;
   
   private Hypergraph input;
   
-  public ConnectedNodeHyperedgeOnlySizeJob(final String name, final CalculateComplexity parent, final Hypergraph input) {
+  public ConnectedNodeHyperedgeOnlySizeJob(final String name, final ICalculationTask parent, final Hypergraph input) {
     super(name);
     this.parent = parent;
     this.input = input;

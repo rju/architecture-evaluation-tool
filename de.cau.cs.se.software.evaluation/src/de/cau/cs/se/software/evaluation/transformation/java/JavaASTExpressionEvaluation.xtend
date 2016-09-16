@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluationHelper.*
 import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.LambdaExpression
+import org.eclipse.jdt.core.dom.ExpressionMethodReference
 
 class JavaASTExpressionEvaluation {
 
@@ -83,7 +84,8 @@ class JavaASTExpressionEvaluation {
     			expression.elseExpression?.evaluate(sourceNode, graph, dataTypePatterns)
     		}
     		//CreationReference:
-    		//ExpressionMethodReference:
+    		// TODO check if the following line is correct.
+    		ExpressionMethodReference: expression.processExpressionMethodReference(sourceNode, contextTypeBinding, graph, dataTypePatterns)
     		FieldAccess: expression.processFieldAccess(sourceNode, contextTypeBinding, graph, dataTypePatterns)
     		InfixExpression: {
     			expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns)

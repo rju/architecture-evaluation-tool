@@ -29,11 +29,11 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
  */
 class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 		
-	CalculateComplexity parent
+	ICalculationTask parent
 	
 	Hypergraph input
 		
-	new(String name, CalculateComplexity parent, Hypergraph input) {
+	new(String name, ICalculationTask parent, Hypergraph input) {
 		super(name)
 		this.parent = parent
 		this.input = input

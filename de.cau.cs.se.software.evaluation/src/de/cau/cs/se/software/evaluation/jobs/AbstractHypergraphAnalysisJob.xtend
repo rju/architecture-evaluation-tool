@@ -157,10 +157,11 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 			return 0
 		
 		val calculateComplexity = new CalculateComplexity(monitor)
+		val calculateMaximalInterconnectedGraphComplexity = new CalculateMaximalInterconnectedGraphComplexity(monitor)
 		
 		/** Calculation for MS^(n) -> MS^(n)#, MS^(n)#_i */
 		val complexityMaximalInterconnected = 
-			calculateComplexity.calculate(maximalInterconnectedGraph.result, 
+			calculateMaximalInterconnectedGraphComplexity.calculate(maximalInterconnectedGraph.result, 
 				"Calculate maximal interconnected graph complexity")
 			
 		if (monitor.canceled)

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -273,10 +274,16 @@ public class JavaASTExpressionEvaluationHelper {
       }
     }
     if (!_matched) {
-      Class<? extends IBinding> _class = nameBinding.getClass();
-      String _plus = ("Binding type " + _class);
-      String _plus_1 = (_plus + " is not supported by processSimpleName");
-      throw new UnsupportedOperationException(_plus_1);
+      {
+        Class<? extends IBinding> _class = nameBinding.getClass();
+        String _plus = ("Binding type " + _class);
+        String _plus_1 = (_plus + " is not supported by processSimpleName");
+        JavaASTExpressionEvaluationHelper.displayMessage("Missing Functionality", _plus_1);
+        Class<? extends IBinding> _class_1 = nameBinding.getClass();
+        String _plus_2 = ("Binding type " + _class_1);
+        String _plus_3 = (_plus_2 + " is not supported by processSimpleName");
+        throw new UnsupportedOperationException(_plus_3);
+      }
     }
   }
   
@@ -313,6 +320,38 @@ public class JavaASTExpressionEvaluationHelper {
         throw new UnsupportedOperationException(_plus_3);
       }
     }
+  }
+  
+  /**
+   * Create a call edge link form the source node to the target method node.
+   * 
+   * @param field the accessed field
+   * @param sourceNode the node accessing the edge
+   * @param contextTypebinding the type binding of the context class
+   * @param graph the modular hypergraph
+   * @param dataTypePatterns a list of patterns to identify data types
+   */
+  public static boolean processExpressionMethodReference(final ExpressionMethodReference expressionMethodReference, final Node sourceNode, final ITypeBinding contextTypeBinding, final ModularHypergraph graph, final List<String> dataTypePatterns) {
+    boolean _xblockexpression = false;
+    {
+      SimpleName _name = expressionMethodReference.getName();
+      final IBinding methodBinding = _name.resolveBinding();
+      boolean _xifexpression = false;
+      if ((methodBinding instanceof IMethodBinding)) {
+        boolean _xblockexpression_1 = false;
+        {
+          IMethodBinding _methodBinding = JavaASTExpressionEvaluationHelper.getMethodBinding(sourceNode);
+          final Edge edge = JavaHypergraphElementFactory.createCallEdge(_methodBinding, ((IMethodBinding)methodBinding));
+          EList<Edge> _edges = sourceNode.getEdges();
+          _edges.add(edge);
+          EList<Edge> _edges_1 = graph.getEdges();
+          _xblockexpression_1 = _edges_1.add(edge);
+        }
+        _xifexpression = _xblockexpression_1;
+      }
+      _xblockexpression = _xifexpression;
+    }
+    return _xblockexpression;
   }
   
   /**

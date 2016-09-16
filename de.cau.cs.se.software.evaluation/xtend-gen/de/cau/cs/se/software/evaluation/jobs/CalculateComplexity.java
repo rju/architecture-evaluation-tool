@@ -3,6 +3,7 @@ package de.cau.cs.se.software.evaluation.jobs;
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph;
 import de.cau.cs.se.software.evaluation.hypergraph.Node;
 import de.cau.cs.se.software.evaluation.jobs.ConnectedNodeHyperedgeOnlySizeJob;
+import de.cau.cs.se.software.evaluation.jobs.ICalculationTask;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHyperedgesOnlyGraph;
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 
 @SuppressWarnings("all")
-public class CalculateComplexity {
+public class CalculateComplexity implements ICalculationTask {
   private final static int PARALLEL_TASKS = 8;
   
   /**
@@ -108,6 +109,7 @@ public class CalculateComplexity {
   /**
    * Used for the parallelization. Return the next task
    */
+  @Override
   public synchronized Node getNextConnectedNodeTask() {
     Node _xifexpression = null;
     boolean _hasNext = this.globalHyperEdgesOnlyGraphNodes.hasNext();
@@ -119,6 +121,7 @@ public class CalculateComplexity {
     return _xifexpression;
   }
   
+  @Override
   public synchronized void deliverConnectedNodeHyperedgesOnlySizeResult(final double size) {
     double _complexity = this.complexity;
     this.complexity = (_complexity + size);

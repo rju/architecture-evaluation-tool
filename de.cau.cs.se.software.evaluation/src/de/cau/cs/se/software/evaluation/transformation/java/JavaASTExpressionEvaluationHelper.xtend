@@ -30,6 +30,7 @@ import static de.cau.cs.se.software.evaluation.transformation.java.JavaHypergrap
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.transformation.java.JavaHypergraphQueryHelper.*
+import org.eclipse.jdt.core.dom.ExpressionMethodReference
 
 class JavaASTExpressionEvaluationHelper {
 
@@ -213,14 +214,18 @@ class JavaASTExpressionEvaluationHelper {
 	def static void processSimpleName(SimpleName name, Node sourceNode, ModularHypergraph graph)  {
 		val nameBinding = name.resolveBinding
 		switch(nameBinding) {
-			IVariableBinding: {
+			IVariableBinding: { /** this referes to a variable => data access edge. */
 				val edge = findDataEdge(graph.edges, nameBinding)
 				if (edge != null) { /** found an data edge */
 					sourceNode.edges.add(edge)
 				}
 			}
-			default:
+			default: {
+				displayMessage("Missing Functionality", "Binding type " 
+					+ nameBinding.class 
+					+ " is not supported by processSimpleName")
 				throw new UnsupportedOperationException("Binding type " + nameBinding.class + " is not supported by processSimpleName")
+			}
 		}
     }
 
@@ -251,6 +256,28 @@ class JavaASTExpressionEvaluationHelper {
 				)
 			}
 		}
+    }
+    
+    
+    /**
+     * Create a call edge link form the source node to the target method node.
+     * 
+     * @param field the accessed field
+     * @param sourceNode the node accessing the edge
+     * @param contextTypebinding the type binding of the context class
+     * @param graph the modular hypergraph
+     * @param dataTypePatterns a list of patterns to identify data types
+     */
+    def static processExpressionMethodReference(ExpressionMethodReference expressionMethodReference, Node sourceNode, ITypeBinding contextTypeBinding, 
+    	ModularHypergraph graph, List<String> dataTypePatterns
+    ) {
+    	val methodBinding = expressionMethodReference.name.resolveBinding
+    	
+    	if (methodBinding instanceof IMethodBinding) {
+    		val edge = createCallEdge(sourceNode.methodBinding, methodBinding)
+    		sourceNode.edges.add(edge)
+    		graph.edges.add(edge)
+    	}
     }
 
     /**
