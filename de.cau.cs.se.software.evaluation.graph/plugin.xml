@@ -28,37 +28,6 @@
 	   </command>
 	</extension>
 	
-	<extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-        locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
-      <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Modular Hypergraph Diagram"
-            style="push"
-            tooltip="Open Diagram">
-      </command>
-	  </menuContribution>
-	  <menuContribution
-        locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
-      <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Modular Hypergraph Diagram"
-            style="push"
-            tooltip="Open Diagram">
-      </command>
-	  </menuContribution>
-	  <menuContribution
-	        locationURI="popup:de.cau.cs.se.software.evaluation.popups?after=additions">
-      <command
-            commandId="de.cau.cs.se.software.evaluation.graph.openModularHypergraphDiagram"
-            label="Modular Hypergraph Diagram"
-            style="push"
-            tooltip="Open Diagram">
-      </command>
-      </menuContribution>
-   </extension>
-
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated PlanarVisualization -->
       <package
