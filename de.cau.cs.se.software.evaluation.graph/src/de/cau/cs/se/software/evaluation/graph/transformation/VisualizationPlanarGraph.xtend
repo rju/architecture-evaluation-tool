@@ -2,10 +2,8 @@ package de.cau.cs.se.software.evaluation.graph.transformation
 
 import de.cau.cs.se.geco.architecture.framework.IGenerator
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
-import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Module
-import de.cau.cs.se.software.evaluation.hypergraph.Node
 import java.util.HashMap
 import java.util.Map
 

@@ -18,15 +18,12 @@ package de.cau.cs.se.software.evaluation.graph
 import com.google.common.collect.ImmutableList
 import de.cau.cs.kieler.klighd.SynthesisOption
 import de.cau.cs.kieler.klighd.krendering.KContainerRendering
-import de.cau.cs.kieler.klighd.krendering.KRenderingFactory
 import de.cau.cs.kieler.klighd.krendering.LineJoin
 import de.cau.cs.kieler.klighd.krendering.LineStyle
 import de.cau.cs.kieler.klighd.krendering.extensions.KColorExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KContainerRenderingExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KEdgeExtensions
-import de.cau.cs.kieler.klighd.krendering.extensions.KLabelExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KNodeExtensions
-import de.cau.cs.kieler.klighd.krendering.extensions.KPolylineExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KPortExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KRenderingExtensions
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
@@ -39,7 +36,6 @@ import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.hypergraph.Node
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
 import java.util.Map
@@ -58,12 +54,12 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	@Inject extension KNodeExtensions
 	@Inject extension KEdgeExtensions
     @Inject extension KPortExtensions
-    @Inject extension KLabelExtensions
+    // @Inject extension KLabelExtensions
     @Inject extension KRenderingExtensions
     @Inject extension KContainerRenderingExtensions
-    @Inject extension KPolylineExtensions
+    // @Inject extension KPolylineExtensions
     @Inject extension KColorExtensions
-    extension KRenderingFactory = KRenderingFactory.eINSTANCE
+    // extension KRenderingFactory = KRenderingFactory.eINSTANCE
 		     
 		     
 	/** changes in visualization nodes on off */
@@ -118,9 +114,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
        
     
     var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
-    var Map<Module,KNode> moduleMap = new HashMap<Module,KNode>()
     var Map<String,KPort> portMap = new HashMap<String,KPort>()
-    var processedModules = new ArrayList<Module>()
 	
 	var Map<PlanarNode,KNode> planarNodeMap = new HashMap<PlanarNode,KNode>()
        

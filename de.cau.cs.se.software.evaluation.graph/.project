@@ -43,4 +43,15 @@
 		<nature>org.eclipse.pde.api.tools.apiAnalysisNature</nature>
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 	</natures>
+	<filteredResources>
+		<filter>
+			<id>1471037383203</id>
+			<name>bin</name>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-location-matches-false-true-bin/*</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
 </projectDescription>

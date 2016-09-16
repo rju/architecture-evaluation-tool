@@ -18,16 +18,12 @@ package de.cau.cs.se.software.evaluation.graph
 import com.google.common.collect.ImmutableList
 import de.cau.cs.kieler.klighd.SynthesisOption
 import de.cau.cs.kieler.klighd.krendering.HorizontalAlignment
-import de.cau.cs.kieler.klighd.krendering.KRenderingFactory
 import de.cau.cs.kieler.klighd.krendering.LineStyle
 import de.cau.cs.kieler.klighd.krendering.VerticalAlignment
 import de.cau.cs.kieler.klighd.krendering.extensions.KColorExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KContainerRenderingExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KEdgeExtensions
-import de.cau.cs.kieler.klighd.krendering.extensions.KLabelExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KNodeExtensions
-import de.cau.cs.kieler.klighd.krendering.extensions.KPolylineExtensions
-import de.cau.cs.kieler.klighd.krendering.extensions.KPortExtensions
 import de.cau.cs.kieler.klighd.krendering.extensions.KRenderingExtensions
 import de.cau.cs.kieler.klighd.syntheses.AbstractDiagramSynthesis
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
@@ -45,13 +41,13 @@ class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
     
 	@Inject extension KNodeExtensions
 	@Inject extension KEdgeExtensions
-    @Inject extension KPortExtensions
-    @Inject extension KLabelExtensions
+    //@Inject extension KPortExtensions
+    //@Inject extension KLabelExtensions
     @Inject extension KRenderingExtensions
     @Inject extension KContainerRenderingExtensions
-    @Inject extension KPolylineExtensions
+    //@Inject extension KPolylineExtensions
     @Inject extension KColorExtensions
-    extension KRenderingFactory = KRenderingFactory.eINSTANCE
+    //extension KRenderingFactory = KRenderingFactory.eINSTANCE
 		         
     /** changes in layout direction */
     private static val DIRECTION_NAME = "Layout Direction"
