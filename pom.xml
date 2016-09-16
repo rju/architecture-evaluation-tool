@@ -2,25 +2,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>de.cau.cs.se.software.evaluation</groupId>
 	<artifactId>de.cau.cs.se.software.evaluation.parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+
 	<packaging>pom</packaging>
+
 	<name>Static software analysis based an hypergraphs</name>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
 		<tycho-version>0.25.0</tycho-version>
 		<tycho-extras-version>0.25.0</tycho-extras-version>
 		<xtext-version>2.10.0</xtext-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<eclipse-repo.url>http://download.eclipse.org/releases/neon</eclipse-repo.url>
+
+		<eclipse-repo.url>http://download.eclipse.org/releases/neon/201606221000/</eclipse-repo.url>
 		<kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/</kieler-repo.url>
 		<elk-repo.url>http://download.eclipse.org/elk/updates/releases/0.1.0/</elk-repo.url>
+
 		<geco-repo.url>https://build.se.informatik.uni-kiel.de/eus/geco/snapshot/</geco-repo.url>
 		<palladio-repo.url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo.url>
-		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
 	</properties>
 
 	<modules>
@@ -35,8 +40,6 @@
 		<module>de.cau.cs.se.software.evaluation.repository</module>
 	</modules>
 
-
-
 	<build>
 		<plugins>
 			<plugin>
@@ -44,6 +47,16 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<compilerArgs>
+						<arg>-err:-forbidden,-discouraged</arg>
+					</compilerArgs>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -136,46 +149,56 @@
 				<artifactId>maven-checkstyle-plugin</artifactId>
 				<version>2.15</version>
 				<configuration>
-					<linkXRef>false</linkXRef>
+					<linkXRef>true</linkXRef>
+					<propertyExpansion>basedir=${basedir}</propertyExpansion>
 				</configuration>
-			</plugin>			
-			<plugin>
-				<groupId>org.eclipse.xtend</groupId>
-				<artifactId>xtend-maven-plugin</artifactId>
-				<version>2.10.0</version>
 			</plugin>
 		</plugins>
+
 		<pluginManagement>
+			<!-- xtend-maven-plugin is in pluginManagement instead of in plugins so 
+				that it doesn't run before the exec-maven-plugin's *.mwe2 gen; this way we 
+				can list it after. -->
 			<plugins>
 				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+					<groupId>org.eclipse.xtend</groupId>
+					<artifactId>xtend-maven-plugin</artifactId>
+					<version>2.10.0</version>
+					<executions>
+						<execution>
+							<phase>process-sources</phase>
+							<goals>
+								<goal>compile</goal>
+								<goal>xtend-install-debug-info</goal>
+								<goal>testCompile</goal>
+								<goal>xtend-test-install-debug-info</goal>
+							</goals>
+						</execution>
+					</executions>
 					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											exec-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.4.0,)
-										</versionRange>
-										<goals>
-											<goal>java</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
+						<outputDirectory>${basedir}/xtend-gen</outputDirectory>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.0.0</version>
+					<executions>
+						<execution>
+							<id>gen-clean</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>clean</goal>
+							</goals>
+							<configuration>
+								<filesets>
+									<fileset>
+										<directory>${basedir}/xtend-gen</directory>
+									</fileset>
+								</filesets>
+							</configuration>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -208,17 +231,25 @@
 			<url>${kieler-repo.url}</url>
 			<layout>p2</layout>
 		</repository>
+
+		<repository>
+			<id>central</id>
+			<name>Maven Central</name>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
 		<repository>
 			<id>geco</id>
 			<url>${geco-repo.url}</url>
 			<layout>p2</layout>
 		</repository>
+
 		<repository>
 			<id>palladio</id>
 			<url>${palladio-repo.url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
