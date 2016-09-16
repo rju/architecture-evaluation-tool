@@ -29,8 +29,20 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import de.cau.cs.se.software.evaluation.views.AnalysisResultView;
 import de.cau.cs.se.software.evaluation.views.LogView;
 
+/**
+ * Abstract analysis handler.
+ *
+ * @author reiner
+ *
+ */
 public abstract class AbstractAnalysisHandler extends AbstractHandler implements IHandler {
 
+	/**
+	 * Execute the given event.
+	 *
+	 * @param event
+	 *            the event to be processed.
+	 */
 	@Override
 	public Object execute(final ExecutionEvent event) throws ExecutionException {
 		final IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
