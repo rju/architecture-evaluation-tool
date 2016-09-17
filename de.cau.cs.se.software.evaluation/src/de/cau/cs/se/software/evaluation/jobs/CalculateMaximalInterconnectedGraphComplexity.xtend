@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor
 class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask {
 		
     /** Used in the parallelized version of this. */
-	var volatile Iterator<Node> globalHyperEdgesOnlyGraphNodes
+	var volatile Node globalHyperEdgesOnlyGraphNode
 	
 	var volatile double complexity
 	
@@ -66,7 +66,7 @@ class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask 
 			return 0
 		
 		/** S^#_i (hyperedges only graphs for each node graph) */	
-		globalHyperEdgesOnlyGraphNodes = hyperedgesOnlyGraph.result.nodes.iterator
+		globalHyperEdgesOnlyGraphNode = hyperedgesOnlyGraph.result.nodes.get(0)
 		
 		complexity = 0
 		
@@ -100,7 +100,7 @@ class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask 
 		/** wait for subtask. */
 		job.join
 
-		this.complexity -= (size.result * globalHyperEdgesOnlyGraphNodes.size)
+		this.complexity -= (size.result * hyperedgesOnlyGraph.result.nodes.size)
 				
 		return this.complexity
 	}
@@ -109,10 +109,9 @@ class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask 
 	 * Used for the parallelization. Return the next task
 	 */
 	override synchronized getNextConnectedNodeTask() {
-		if (globalHyperEdgesOnlyGraphNodes.hasNext)
-			globalHyperEdgesOnlyGraphNodes.next
-		else
-			null
+		val result = globalHyperEdgesOnlyGraphNode
+		globalHyperEdgesOnlyGraphNode = null
+		return result
 	}
 	
 	override synchronized deliverConnectedNodeHyperedgesOnlySizeResult(double size) {
