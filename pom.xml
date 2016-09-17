@@ -36,7 +36,7 @@
 		<module>de.cau.cs.se.software.evaluation.geco</module>
 		<module>de.cau.cs.se.software.evaluation.pcm</module>
 		<module>de.cau.cs.se.software.evaluation.java.feature</module>
-		<module>de.cau.cs.se.software.evaluation.emf.feature</module>
+		<!-- <module>de.cau.cs.se.software.evaluation.emf.feature</module> -->
 		<module>de.cau.cs.se.software.evaluation.geco.feature</module>
 		<module>de.cau.cs.se.software.evaluation.pcm.feature</module>
 		<module>de.cau.cs.se.software.evaluation.feature</module>
