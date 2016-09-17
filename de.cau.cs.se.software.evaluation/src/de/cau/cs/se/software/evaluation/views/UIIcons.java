@@ -28,10 +28,10 @@ import de.cau.cs.se.software.evaluation.Activator;
  */
 public final class UIIcons {
 
-	/** Do not instantiate. This is just a constant definition class. */
-	private UIIcons() {}
-
 	public final static ImageDescriptor ICON_DATA_EXPORT = Activator.getImageDescriptor("/icons/data-export.gif");
 	public final static ImageDescriptor ICON_GRAPH_EXPORT = Activator.getImageDescriptor("/icons/graph-export.gif");
 	public final static ImageDescriptor ICON_CLEAR_VIEW = Activator.getImageDescriptor("/icons/clear_co.gif");
+
+	/** Do not instantiate. This is just a constant definition class. */
+	private UIIcons() {}
 }
