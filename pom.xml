@@ -30,11 +30,15 @@
 
 	<modules>
 		<module>de.cau.cs.se.software.evaluation</module>
+		<module>de.cau.cs.se.software.evaluation.graph</module>
 		<module>de.cau.cs.se.software.evaluation.java</module>
 		<module>de.cau.cs.se.software.evaluation.emf</module>
 		<module>de.cau.cs.se.software.evaluation.geco</module>
 		<module>de.cau.cs.se.software.evaluation.pcm</module>
-		<module>de.cau.cs.se.software.evaluation.graph</module>
+		<module>de.cau.cs.se.software.evaluation.java.feature</module>
+		<module>de.cau.cs.se.software.evaluation.emf.feature</module>
+		<module>de.cau.cs.se.software.evaluation.geco.feature</module>
+		<module>de.cau.cs.se.software.evaluation.pcm.feature</module>
 		<module>de.cau.cs.se.software.evaluation.feature</module>
 		<module>de.cau.cs.se.software.evaluation.target</module>
 		<module>de.cau.cs.se.software.evaluation.repository</module>
