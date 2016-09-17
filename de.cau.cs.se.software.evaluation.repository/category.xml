@@ -12,8 +12,5 @@
    <feature url="features/de.cau.cs.se.software.evaluation.pcm.feature_1.0.0.qualifier.jar" id="de.cau.cs.se.software.evaluation.pcm.feature" version="1.0.0.qualifier">
       <category name="de.cau.cs.se.software.evaluation"/>
    </feature>
-   <feature url="features/de.cau.cs.se.software.evaluation.emf.feature_1.0.0.qualifier.jar" id="de.cau.cs.se.software.evaluation.emf.feature" version="1.0.0.qualifier">
-      <category name="de.cau.cs.se.software.evaluation"/>
-   </feature>
    <category-def name="de.cau.cs.se.software.evaluation" label="Software Artifact Evaluation"/>
 </site>
