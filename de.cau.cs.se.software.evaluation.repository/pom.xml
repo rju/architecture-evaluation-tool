@@ -11,7 +11,7 @@
 	<artifactId>de.cau.cs.se.software.evaluation.repository</artifactId>
 	<packaging>eclipse-repository</packaging>
 
-	<name>Software Evaluation Update Site</name>
+	<name>Software Evaluation - Update Site</name>
 
 	<properties>
 		<!-- Relative path to the repo being uploaded -->
