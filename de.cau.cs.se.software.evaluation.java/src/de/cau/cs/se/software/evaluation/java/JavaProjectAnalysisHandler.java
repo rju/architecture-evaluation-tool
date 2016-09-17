@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import de.cau.cs.se.software.evaluation.commands.AbstractAnalysisHandler;
 
 /**
+ * Handler for the java project analysis running the Java
+ * analysis job.
+ *
  * @author Reiner Jung
  *
  */
@@ -69,11 +72,10 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 
 				while (treeSelection.iterator().hasNext()) {
 					final Object selectedElement = treeSelection.iterator().next();
-					if (selectedElement instanceof IProject) {
+					if (selectedElement instanceof IProject)
 						return (IProject) selectedElement;
-					} else if (selectedElement instanceof IJavaProject) {
+					else if (selectedElement instanceof IJavaProject)
 						return ((IJavaProject) selectedElement).getProject();
-					}
 				}
 			}
 		}

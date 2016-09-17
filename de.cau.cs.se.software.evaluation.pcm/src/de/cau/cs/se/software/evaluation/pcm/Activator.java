@@ -32,7 +32,7 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 
 	/**
-	 * The constructor
+	 * The constructor.
 	 */
 	public Activator() {}
 
