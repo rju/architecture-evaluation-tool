@@ -152,7 +152,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 		javaToModularHypergraph.generate(classes)
 
-		result.resultHypergraph = javaToModularHypergraph.result
+		result.hypergraph = javaToModularHypergraph.result
 
 		result.addResult(project.name, "number of modules", javaToModularHypergraph.result.modules.size)
 		result.addResult(project.name, "number of nodes", javaToModularHypergraph.result.nodes.size)

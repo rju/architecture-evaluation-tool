@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 /**
  * Determine a connected node hyperedges only graph and calculate
  * its size.
+ * 
+ * @author Reiner Jung
  */
 class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 		

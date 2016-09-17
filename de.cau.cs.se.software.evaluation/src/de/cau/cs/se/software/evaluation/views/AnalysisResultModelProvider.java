@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,23 +46,53 @@ public enum AnalysisResultModelProvider {
 		this.values.clear();
 	}
 
-	public void addResult(final String project, final String label, final Double value) {
-		this.values.add(new NamedValue(project, label, String.valueOf(value)));
+	/**
+	 * Add data to the result model.
+	 *
+	 * @param projectLabel
+	 *            project name or identifier, e.g., the the Java project name
+	 * @param label
+	 *            a label that identifies the measurement
+	 * @param value
+	 *            the measurement (double)
+	 */
+	public void addResult(final String projectLabel, final String label, final Double value) {
+		this.values.add(new NamedValue(projectLabel, label, String.valueOf(value)));
 	}
 
-	public void addResult(final String project, final String label, final int value) {
-		this.values.add(new NamedValue(project, label, String.valueOf(value)));
+	/**
+	 * Add data to the result model.
+	 *
+	 * @param projectLabel
+	 *            project name or identifier, e.g., the the Java project name
+	 * @param label
+	 *            a label that identifies the measurement
+	 * @param value
+	 *            the measurement (integer)
+	 */
+	public void addResult(final String projectLabel, final String label, final int value) {
+		this.values.add(new NamedValue(projectLabel, label, String.valueOf(value)));
 	}
 
-	public void addResult(final String project, final String label, final long value) {
-		this.values.add(new NamedValue(project, label, String.valueOf(value)));
+	/**
+	 * Add data to the result model.
+	 *
+	 * @param projectLabel
+	 *            project name or identifier, e.g., the the Java project name
+	 * @param label
+	 *            a label that identifies the measurement
+	 * @param value
+	 *            the measurement (long)
+	 */
+	public void addResult(final String projectLabel, final String label, final long value) {
+		this.values.add(new NamedValue(projectLabel, label, String.valueOf(value)));
 	}
 
-	public void setResultHypergraph(final Hypergraph hypergraph) {
+	public void setHypergraph(final Hypergraph hypergraph) {
 		this.hypergraph = hypergraph;
 	}
 
-	public Hypergraph getResultHypergraph() {
+	public Hypergraph getHypergraph() {
 		return this.hypergraph;
 	}
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import org.eclipse.emf.ecore.EObject
 
+/**
+ * Special factory for hypergraphs.
+ * 
+ * @author Reiner Jung
+ */
 class HypergraphCreationHelper {
 	
 	/**

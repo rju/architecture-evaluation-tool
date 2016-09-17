@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import de.cau.cs.se.geco.architecture.framework.IGenerator
 /**
  * Abstract transformation class also defining the general interface
  * of transformations.
+ * 
+ * @author Reiner Jung
  */
 abstract class AbstractTransformation<S,T> implements IGenerator<S,T> {
 	

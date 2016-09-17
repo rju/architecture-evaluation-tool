@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public enum LogModelProvider {
 
 	private final List<NamedValue> values;
 
-	private String project;
+	private String projectName;
 
 	private LogModelProvider() {
 		this.values = new ArrayList<>();
@@ -46,11 +46,19 @@ public enum LogModelProvider {
 		return this.values;
 	}
 
-	public void setProjectName(final String project) {
-		this.project = project;
+	public void setProjectName(final String projectName) {
+		this.projectName = projectName;
 	}
 
+	/**
+	 * Add a message to the log.
+	 *
+	 * @param kind
+	 *            the kind of the message, e.g., error, warning, info
+	 * @param message
+	 *            the message text
+	 */
 	public void addMessage(final String kind, final String message) {
-		this.values.add(new NamedValue(this.project, kind, message));
+		this.values.add(new NamedValue(this.projectName, kind, message));
 	}
 }

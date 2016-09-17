@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright 2015
+ * Copyright (C) 2015 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
 /**
  * Create a hypergraph for a given hypergraph which contains only
  * those nodes which are connected by edges with the startNode. 
+ * 
+ * @author Reiner Jung
  */
 class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformation<Hypergraph, Hypergraph> {
 		
