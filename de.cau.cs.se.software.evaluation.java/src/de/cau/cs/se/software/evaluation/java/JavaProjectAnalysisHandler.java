@@ -72,10 +72,11 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 
 				while (treeSelection.iterator().hasNext()) {
 					final Object selectedElement = treeSelection.iterator().next();
-					if (selectedElement instanceof IProject)
+					if (selectedElement instanceof IProject) {
 						return (IProject) selectedElement;
-					else if (selectedElement instanceof IJavaProject)
+					} else if (selectedElement instanceof IJavaProject) {
 						return ((IJavaProject) selectedElement).getProject();
+					}
 				}
 			}
 		}
