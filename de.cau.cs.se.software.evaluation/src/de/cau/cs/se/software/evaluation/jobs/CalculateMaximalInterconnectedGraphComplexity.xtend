@@ -19,7 +19,6 @@ import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHyperedgesOnlyGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize
-import java.util.Iterator
 import org.eclipse.core.runtime.IProgressMonitor
 
 /**
