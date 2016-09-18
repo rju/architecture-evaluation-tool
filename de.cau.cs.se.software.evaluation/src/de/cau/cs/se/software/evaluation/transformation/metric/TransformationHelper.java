@@ -32,12 +32,19 @@ import de.cau.cs.se.software.evaluation.state.StateFactory;
 public class TransformationHelper {
 
 	/**
+	 * Private constructor to indicate helper class.
+	 */
+	private TransformationHelper() {
+
+	}
+
+	/**
 	 * Calculate the row pattern of a node based on its edges.
 	 *
+	 * @param table
+	 *            the complete row table
 	 * @param node
 	 *            where the pattern is calculated for
-	 * @param edgeList
-	 *            sequence of edges which define the table wide order of edges
 	 *
 	 * @returns the complete pattern
 	 */
@@ -56,6 +63,11 @@ public class TransformationHelper {
 
 	/**
 	 * Find duplicate pattern in the pattern table and merge the pattern rows.
+	 *
+	 * @param table
+	 *            the row table to be modified
+	 * @param monitor
+	 *            the progress monitor
 	 */
 	public static void compactPatternTable(final RowPatternTable table, final IProgressMonitor monitor) {
 		final int length = table.getPatterns().size();

@@ -58,6 +58,12 @@ public class RowPatternTable {
 		return this.patterns;
 	}
 
+	/**
+	 * Add all edges to the edge array.
+	 *
+	 * @param list
+	 *            list of edges
+	 */
 	public void setAllEdges(final EList<Edge> list) {
 		for (int i = 0; i < this.edges.length; i++) {
 			this.edges[i] = list.get(i);
