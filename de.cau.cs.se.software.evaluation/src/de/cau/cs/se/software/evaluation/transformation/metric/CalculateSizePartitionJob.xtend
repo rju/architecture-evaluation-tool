@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Status
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.state.RowPatternTable
-import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.software.evaluation.views.LogModelProvider
 import de.cau.cs.se.software.evaluation.state.RowPattern
 import de.cau.cs.se.software.evaluation.hypergraph.Node
@@ -78,9 +77,9 @@ class CalculateSizePartitionJob extends Job {
 	 * Find the row pattern for a given node and determine its probability. If no pattern
 	 * is found then the node is totally disconnected and the probability is 0.
 	 */
-	private def double lookupProbability(EList<RowPattern> patternList, Node node, Hypergraph system) {
-		val pattern = patternList.filter[p | p.nodes.contains(node)]
-		val double count = if (pattern.size > 0) pattern.get(0).nodes.size as double else 0
+	private def double lookupProbability(RowPattern[] patterns, Node node, Hypergraph system) {
+		val pattern = patterns.findFirst[it.nodes.contains(node)]
+		val double count = if (pattern != null) pattern.nodes.size as double else 0
 			
 		return count/((system.nodes.size + 1) as double)
 	}

@@ -33,8 +33,6 @@ Export-Package: de.cau.cs.se.software.evaluation,
  de.cau.cs.se.software.evaluation.hypergraph.util,
  de.cau.cs.se.software.evaluation.jobs,
  de.cau.cs.se.software.evaluation.state,
- de.cau.cs.se.software.evaluation.state.impl,
- de.cau.cs.se.software.evaluation.state.util,
  de.cau.cs.se.software.evaluation.transformation,
  de.cau.cs.se.software.evaluation.transformation.metric,
  de.cau.cs.se.software.evaluation.views

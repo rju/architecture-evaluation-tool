@@ -18,18 +18,15 @@ package de.cau.cs.se.software.evaluation.transformation.metric
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
-import de.cau.cs.se.software.evaluation.hypergraph.Node
-import de.cau.cs.se.software.evaluation.state.RowPattern
 import de.cau.cs.se.software.evaluation.state.RowPatternTable
 import de.cau.cs.se.software.evaluation.state.StateFactory
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import java.util.ArrayList
-import org.eclipse.core.runtime.IProgressMonitor
-import org.eclipse.emf.common.util.EList
-
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 import java.util.HashMap
 import java.util.Map
+import org.eclipse.core.runtime.IProgressMonitor
+
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 
 /**
  * Calculate the information size of a hypergraph.
@@ -97,81 +94,30 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 */
 	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph, Hypergraph input) {
 		monitor.subTask("Construct row pattern table")
-		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
-		patternTable.edges.addAll(systemGraph.edges)
+		val RowPatternTable patternTable = StateFactory.createRowPatternTable(
+			systemGraph.edges.size, systemGraph.nodes.size
+		)
+		patternTable.setAllEdges(systemGraph.edges)
 		monitor.worked(input.edges.size)
 		if (this.monitor.canceled)
 			return null
 		
 		systemGraph.nodes.forEach[node, i | 
 			monitor.subTask("Calculate row patterns " + i + " of " + systemGraph.nodes.size + " (width " + patternTable.edges.size + ")")
-			patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))
+			TransformationHelper.calculateRowPattern(patternTable, node)
 		]
 		monitor.worked(input.nodes.size * input.nodes.size)
 		
-		patternTable.compactPatternTable
-		monitor.worked(input.nodes.size)
+		TransformationHelper.compactPatternTable(patternTable, monitor)
 						
 		return patternTable	
 	}
+		
+
 	
-	/**
-	 * Calculate the row pattern of a node based on its edges.
-	 * 
-	 * @param node where the pattern is calculated for
-	 * @param edgeList sequence of edges which define the table wide order of edges
-	 * 
-	 * @returns the complete pattern
-	 */
-	private def RowPattern calculateRowPattern(Node node, EList<Edge> edgeList) {
-		val pattern = StateFactory.eINSTANCE.createRowPattern
-		pattern.nodes.add(node)
-		
-		edgeList.forEach[edge | pattern.pattern.add(node.edges.exists[it == edge])]
-		
-		return pattern
-	}
 	
-	/**
-	 * Find duplicate pattern in the pattern table and merge the pattern rows.
-	 */
-	private def void compactPatternTable(RowPatternTable table) {
-		monitor.subTask("Compact row patterns " + table.patterns.size)
-		
-		val tick = table.patterns.size * table.patterns.get(0).pattern.size
-		val length = table.patterns.size
-		
-		for (var int i=0;i<table.patterns.size;i++) {
-			monitor.subTask("Compact row patterns " + i + " of " + table.patterns.size)
-			monitor.worked(tick)
-			if (!this.monitor.canceled) {
-				for (var int j=i+1; j<table.patterns.size; j++) {
-					if (matchPattern(table.patterns.get(j).pattern,table.patterns.get(i).pattern)) {
-						val basePattern = table.patterns.get(i)
-						table.patterns.get(j).nodes.forEach[node | basePattern.nodes.add(node)]
-						table.patterns.remove(j)
-						j--
-					}
-				}
-			}
-		}
-		
-		monitor.worked((length-table.patterns.size)*tick)
-	}
 	
-	/**
-	 * Return true if both lists contain the same values in the list.
-	 */
-	private def matchPattern(EList<Boolean> leftList, EList<Boolean> rightList) {
-		if (leftList.size != rightList.size)
-			return false
-		for (var int i=0;i<leftList.size;i++) {
-			if (!leftList.get(i).equals(rightList.get(i)))
-				return false
-		}
-		
-		return true
-	}
+	
 			
 	/**
 	 * Create a system graph from a hypergraph of a system by adding an additional not connected

@@ -1,0 +1,80 @@
+package de.cau.cs.se.software.evaluation.transformation.metric;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import de.cau.cs.se.software.evaluation.hypergraph.Edge;
+import de.cau.cs.se.software.evaluation.hypergraph.Node;
+import de.cau.cs.se.software.evaluation.state.RowPattern;
+import de.cau.cs.se.software.evaluation.state.RowPatternTable;
+import de.cau.cs.se.software.evaluation.state.StateFactory;
+
+public class TransformationHelper {
+
+	/**
+	 * Calculate the row pattern of a node based on its edges.
+	 *
+	 * @param node
+	 *            where the pattern is calculated for
+	 * @param edgeList
+	 *            sequence of edges which define the table wide order of edges
+	 *
+	 * @returns the complete pattern
+	 */
+	public static void calculateRowPattern(final RowPatternTable table, final Node node) {
+		final RowPattern pattern = StateFactory.createRowPattern(table.getColumns());
+		pattern.getNodes().add(node);
+
+		int i = 0;
+		for (final Edge edge : table.getEdges()) {
+			pattern.getPattern()[i] = node.getEdges().contains(edge);
+			i++;
+		}
+
+		table.getPatterns().add(pattern);
+	}
+
+	/**
+	 * Find duplicate pattern in the pattern table and merge the pattern rows.
+	 */
+	public static void compactPatternTable(final RowPatternTable table, final IProgressMonitor monitor) {
+		final int length = table.getPatterns().size();
+		monitor.subTask("Compact row patterns " + length);
+
+		final int tick = length * table.getPatterns().get(0).getPattern().length;
+
+		for (int i = 0; i < length; i++) {
+			monitor.subTask("Compact row patterns " + i + " of " + length);
+			monitor.worked(tick);
+			if (!monitor.isCanceled()) {
+				for (int j = i + 1; j < table.getPatterns().size(); j++) {
+					final RowPattern leftPattern = table.getPatterns().get(i);
+					final RowPattern rightPattern = table.getPatterns().get(j);
+					if (TransformationHelper.matchPattern(leftPattern.getPattern(), rightPattern.getPattern())) {
+						leftPattern.getNodes().addAll(rightPattern.getNodes());
+						table.getPatterns().remove(j);
+						j--;
+					}
+				}
+			}
+		}
+
+		monitor.worked((length - table.getPatterns().size()) * tick);
+	}
+
+	/**
+	 * Return true if both lists contain the same values in the list.
+	 */
+	private static boolean matchPattern(final boolean[] leftList, final boolean[] rightList) {
+		if (leftList.length != rightList.length) {
+			return false;
+		}
+		for (int i = 0; i < leftList.length; i++) {
+			if (leftList[i] != rightList[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+}
