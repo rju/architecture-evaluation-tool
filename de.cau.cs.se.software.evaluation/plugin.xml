@@ -35,13 +35,6 @@
          </view>
       </perspectiveExtension>
    </extension>
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated HypergraphMetricsState -->
-      <package
-            uri="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
-            class="de.cau.cs.se.software.evaluation.state.StatePackage"
-            genModel="model/HypergraphState.genmodel"/>
-   </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -87,14 +80,6 @@
             uri="http://evaluation.se.cs.cau.de/hypergraph"
             class="de.cau.cs.se.software.evaluation.hypergraph.HypergraphPackage"
             genModel="model/Hypergraph.genmodel"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated HypergraphState -->
-      <package
-            uri="http://evalutation.se.cs.cau.de/hypergraph/metrics/state"
-            class="de.cau.cs.se.software.evaluation.state.StatePackage"
-            genModel="model/HypergraphState.genmodel"/>
    </extension>
 
 </plugin>
