@@ -16,10 +16,12 @@
  package de.cau.cs.se.software.evaluation.jobs
 
 import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
-import de.cau.cs.se.software.evaluation.hypergraph.Node
+import de.cau.cs.se.software.evaluation.transformation.metric.TransformationConnectedNodeHyperedgesOnlyGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHyperedgesOnlyGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationHypergraphSize
 import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.core.runtime.Status
+import org.eclipse.core.runtime.jobs.Job
 
 /**
  * This class is a modified version of CalculateComplexity specifically for
@@ -29,13 +31,8 @@ import org.eclipse.core.runtime.IProgressMonitor
  * 
  * @author Reiner Jung 
  */
-class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask {
+class CalculateMaximalInterconnectedGraphComplexity {
 		
-    /** Used in the parallelized version of this. */
-	var volatile Node globalHyperEdgesOnlyGraphNode
-	
-	var volatile double complexity
-	
 	val IProgressMonitor monitor
 	
 	new(IProgressMonitor monitor) {
@@ -53,24 +50,18 @@ class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask 
 	 */
 	def calculate(Hypergraph input, String message) {
 		val hyperedgesOnlyGraph = new TransformationHyperedgesOnlyGraph(monitor)
-		val size = new TransformationHypergraphSize(monitor)
 				
-		this.monitor.beginTask(message, hyperedgesOnlyGraph.workEstimate(input) + size.workEstimate(input))
+		this.monitor.beginTask(message, hyperedgesOnlyGraph.workEstimate(input))
 		
 		/** S^# (hyperedges only graph) */
 		hyperedgesOnlyGraph.generate(input)
 		
 		this.monitor.worked(hyperedgesOnlyGraph.workEstimate(input))
+
 		if (this.monitor.canceled)
 			return 0
 		
 		/** S^#_i (hyperedges only graphs for each node graph) */	
-		globalHyperEdgesOnlyGraphNode = hyperedgesOnlyGraph.result.nodes.get(0)
-		
-		complexity = 0
-		
-		if (this.monitor.canceled)
-			return 0
 
 		/**
 		 * For arbitrary graphs, each subgraph must be calculated separated,
@@ -80,42 +71,59 @@ class CalculateMaximalInterconnectedGraphComplexity implements ICalculationTask 
 		 */
 				
 		/** construct S^#_i and calculate the size of S^#_i */
-		val job = new ConnectedNodeHyperedgeOnlySizeJob("S^#_i (once)", this, hyperedgesOnlyGraph.result)
-		job.schedule
-		
-		if (this.monitor.canceled) {
-			job.cancel
-			return 0.0
-		}
-		
-		/** calculate size of S^# and S^#_i */
-		monitor.subTask("Determine Size(S^#)")
-		size.generate(hyperedgesOnlyGraph.result)
-		
-		if (this.monitor.canceled) {
-			job.cancel
-			return 0.0
-		}
-		/** wait for subtask. */
-		job.join
-
-		this.complexity -= (size.result * hyperedgesOnlyGraph.result.nodes.size)
+		val systemHashGraphJob = new Job("System graph computation") {
+			
+			private double size
+			
+			override protected run(IProgressMonitor monitor) {
+				val connectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(monitor)
+				val hypergraphSize = new TransformationHypergraphSize(monitor)
 				
-		return this.complexity
+				monitor.beginTask("Compute size for all S^#_n", hypergraphSize.workEstimate(hyperedgesOnlyGraph.result) + 
+					connectedNodeHyperedgesOnlyGraph.workEstimate(hyperedgesOnlyGraph.result)
+				)
+				
+				// S^#_i 
+				connectedNodeHyperedgesOnlyGraph.startNode = hyperedgesOnlyGraph.result.nodes.get(0)
+				val connectedNodeGraph = connectedNodeHyperedgesOnlyGraph.generate(hyperedgesOnlyGraph.result)
+				size = hypergraphSize.generate(connectedNodeGraph)
+				
+				return Status.OK_STATUS
+			}
+			
+			def double getSize() {
+				return size
+			}
+		}
+				
+		/** calculate size of S^# and S^#_i */
+		val hyperEdgesOnlyGraphJob = new Job("Hyperedges only graph size computation") {
+			
+			private double size
+			
+			override protected run(IProgressMonitor monitor) {
+				val hypergraphSize = new TransformationHypergraphSize(monitor)
+				
+				monitor.beginTask("Compute Size(S^#)", hypergraphSize.workEstimate(hyperedgesOnlyGraph.result))
+				
+				size = hypergraphSize.generate(hyperedgesOnlyGraph.result)
+							
+				return Status.OK_STATUS
+			}
+			
+			def double getSize() {
+				return size
+			}
+		}
+		
+		systemHashGraphJob.schedule
+		hyperEdgesOnlyGraphJob.schedule
+		
+		systemHashGraphJob.join
+		hyperEdgesOnlyGraphJob.join
+		
+		return (systemHashGraphJob.size * hyperedgesOnlyGraph.result.nodes.size) - hyperEdgesOnlyGraphJob.size
 	}
 	
-	/**
-	 * Used for the parallelization. Return the next task
-	 */
-	override synchronized getNextConnectedNodeTask() {
-		val result = globalHyperEdgesOnlyGraphNode
-		globalHyperEdgesOnlyGraphNode = null
-		return result
-	}
-	
-	override synchronized deliverConnectedNodeHyperedgesOnlySizeResult(double size) {
-		complexity += size
-		monitor.worked(1)
-	}
 	
 }

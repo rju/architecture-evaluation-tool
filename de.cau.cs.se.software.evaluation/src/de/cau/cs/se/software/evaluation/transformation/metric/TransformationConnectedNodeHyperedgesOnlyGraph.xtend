@@ -40,7 +40,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 		super(monitor)
 	}
 			
-	def void setNode(Node startNode) {
+	def void setStartNode(Node startNode) {
 		this.startNode = startNode
 	}
 	

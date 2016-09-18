@@ -15,25 +15,28 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.transformation.metric
 
-import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
-import de.cau.cs.se.software.evaluation.state.StateFactory
-import de.cau.cs.se.software.evaluation.state.RowPatternTable
-import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
-import org.eclipse.emf.common.util.EList
-import de.cau.cs.se.software.evaluation.state.RowPattern
-import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
-import org.eclipse.core.runtime.IProgressMonitor
-
-import de.cau.cs.se.software.evaluation.hypergraph.EdgeTrace
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
+import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
+import de.cau.cs.se.software.evaluation.hypergraph.Node
+import de.cau.cs.se.software.evaluation.state.RowPattern
+import de.cau.cs.se.software.evaluation.state.RowPatternTable
+import de.cau.cs.se.software.evaluation.state.StateFactory
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
+import java.util.ArrayList
+import org.eclipse.core.runtime.IProgressMonitor
+import org.eclipse.emf.common.util.EList
+
 import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
-import de.cau.cs.se.software.evaluation.views.LogModelProvider
+import java.util.HashMap
+import java.util.Map
 
 /**
  * Calculate the information size of a hypergraph.
  */
 class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Double> {
+	
+	val PARALLEL_JOBS = 8
 	
 	new(IProgressMonitor monitor) {
 		super(monitor)
@@ -55,41 +58,36 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	/**
 	 * Calculate the size of given system.
 	 */
-	private def double calculateSize(Hypergraph system, RowPatternTable table) {
+	private def double calculateSize(Hypergraph input, RowPatternTable table) {
 		var double size = 0
 		
-		for (var int i=0;i<system.nodes.size;i++) {
-			if (this.monitor.canceled)
-				return 0.0
-			monitor.worked(system.nodes.size)
-			val probability = table.patterns.lookupProbability(system.nodes.get(i), system)
-			if (probability > 0.0d) 
-				size+= (-log2(probability))
-			else
-				LogModelProvider.INSTANCE.addMessage("Hypergraph Model Error", "A component is disconnected, but should be connected. Result is tainted.")
+		val int length = input.nodes.size
+		val int partitionLength = length/PARALLEL_JOBS
+		
+		var start = 0
+		
+		val jobs = new ArrayList<CalculateSizePartitionJob>
+		
+		for(var i=0; i<PARALLEL_JOBS; i++) {
+			val job = new CalculateSizePartitionJob("Calculate size task " + i, input, table)
+			job.start = start
+			start = job.end = job.start + partitionLength
+			
+			if (i == 7 && job.end < length)
+				job.end = length
+			
+			job.schedule
+			jobs.add(job)
 		}
-				
+
+		for(var i=0; i<8 ; i++) {
+			val job = jobs.get(i)
+			job.join
+			size += job.resultSize
+		}	
+		
 		return size
 	}
-	
-	/**
-	 * Logarithm for base 2.
-	 */
-	private def double log2(double value) {
-		return Math.log(value)/Math.log(2)
-	}
-	
-	/**
-	 * Find the row pattern for a given node and determine its probability. If no pattern
-	 * is found then the node is totally disconnected and the probability is 0.
-	 */
-	private def double lookupProbability(EList<RowPattern> patternList, Node node, Hypergraph system) {
-		val pattern = patternList.filter[p | p.nodes.contains(node)]
-		val double count = if (pattern.size > 0) pattern.get(0).nodes.size as double else 0
-			
-		return count/((system.nodes.size + 1) as double)
-	}
-	
 
 	/**
 	 * Create a row pattern table for a system and a system graph.
@@ -98,13 +96,17 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 * Compact, rows with the same pattern
 	 */
 	private def RowPatternTable createRowPatternTable(Hypergraph systemGraph, Hypergraph input) {
+		monitor.subTask("Construct row pattern table")
 		val RowPatternTable patternTable = StateFactory.eINSTANCE.createRowPatternTable()
-		systemGraph.edges.forEach[edge | patternTable.edges.add(edge)]
+		patternTable.edges.addAll(systemGraph.edges)
 		monitor.worked(input.edges.size)
 		if (this.monitor.canceled)
 			return null
 		
-		systemGraph.nodes.forEach[node | patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))]
+		systemGraph.nodes.forEach[node, i | 
+			monitor.subTask("Calculate row patterns " + i + " of " + systemGraph.nodes.size + " (width " + patternTable.edges.size + ")")
+			patternTable.patterns.add(node.calculateRowPattern(patternTable.edges))
+		]
 		monitor.worked(input.nodes.size * input.nodes.size)
 		
 		patternTable.compactPatternTable
@@ -124,7 +126,9 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	private def RowPattern calculateRowPattern(Node node, EList<Edge> edgeList) {
 		val pattern = StateFactory.eINSTANCE.createRowPattern
 		pattern.nodes.add(node)
+		
 		edgeList.forEach[edge | pattern.pattern.add(node.edges.exists[it == edge])]
+		
 		return pattern
 	}
 	
@@ -132,10 +136,13 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 * Find duplicate pattern in the pattern table and merge the pattern rows.
 	 */
 	private def void compactPatternTable(RowPatternTable table) {
+		monitor.subTask("Compact row patterns " + table.patterns.size)
+		
 		val tick = table.patterns.size * table.patterns.get(0).pattern.size
 		val length = table.patterns.size
 		
 		for (var int i=0;i<table.patterns.size;i++) {
+			monitor.subTask("Compact row patterns " + i + " of " + table.patterns.size)
 			monitor.worked(tick)
 			if (!this.monitor.canceled) {
 				for (var int j=i+1; j<table.patterns.size; j++) {
@@ -175,24 +182,30 @@ class TransformationHypergraphSize extends AbstractTransformation<Hypergraph,Dou
 	 * @returns the system graph (Note: the system graph and the system share nodes)
 	 */
 	private def Hypergraph createSystemGraph(Hypergraph system) {
+		monitor.subTask("Create system graph")
 		val Hypergraph systemGraph = HypergraphFactory.eINSTANCE.createHypergraph
 		val environmentNode = HypergraphFactory.eINSTANCE.createNode
 		environmentNode.name = '_environment'
 		
 		systemGraph.nodes.add(environmentNode)
+
+		/** Lookup map for derived edges. */
+		val Map<Edge,Edge> derivedEdgeMap = new HashMap<Edge,Edge>
 		
-		system.edges.forEach[edge | systemGraph.edges.add(edge.deriveEdge)]
+		system.edges.forEach[
+			val derived = it.deriveEdge
+			derivedEdgeMap.put(it, derived)
+			systemGraph.edges.add(derived)
+		]
 		monitor.worked(system.edges.size)
 		if (this.monitor.canceled)
 			return null
-		
-		system.nodes.forEach[node |
+					
+		system.nodes.forEach[node,i |
+			monitor.subTask("Create system graph: nodes " + i + " of " + system.nodes.size)
 			if (!this.monitor.canceled) {
 				val derivedNode = node.deriveNode 
-				node.edges.forEach[edge |
-					val derivedEdge = systemGraph.edges.findFirst[(it.derivedFrom as EdgeTrace).edge == edge] 
-					derivedNode.edges.add(derivedEdge)
-				]
+				node.edges.forEach[derivedNode.edges.add(derivedEdgeMap.get(it))]
 				systemGraph.nodes.add(derivedNode)
 				monitor.worked(node.edges.size)
 			}

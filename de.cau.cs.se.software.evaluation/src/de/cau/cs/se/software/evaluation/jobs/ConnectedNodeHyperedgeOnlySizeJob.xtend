@@ -54,7 +54,7 @@ class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 				connectedNodeHyperedgesOnlyGraph.workEstimate(input)
 			)
 			// S^#_i 
-			connectedNodeHyperedgesOnlyGraph.node = node
+			connectedNodeHyperedgesOnlyGraph.startNode = node
 			val connectedNodeGraph = connectedNodeHyperedgesOnlyGraph.generate(input)
 						
 			parent.deliverConnectedNodeHyperedgesOnlySizeResult(hypergraphSize.generate(connectedNodeGraph))
