@@ -22,11 +22,25 @@ import org.eclipse.emf.common.util.EList;
 
 import de.cau.cs.se.software.evaluation.hypergraph.Edge;
 
+/**
+ * Row pattern table storage.
+ *
+ * @author Reiner Jung
+ *
+ */
 public class RowPatternTable {
 
 	private final Edge[] edges;
 	private final List<RowPattern> patterns;
 
+	/**
+	 * Initialize row pattern table.
+	 *
+	 * @param columns
+	 *            number of edge columns
+	 * @param rows
+	 *            number of node rows
+	 */
 	public RowPatternTable(final int columns, final int rows) {
 		this.edges = new Edge[columns];
 		this.patterns = new ArrayList<>(rows);
