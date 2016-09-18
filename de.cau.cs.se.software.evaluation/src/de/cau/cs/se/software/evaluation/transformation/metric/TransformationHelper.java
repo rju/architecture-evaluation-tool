@@ -29,7 +29,7 @@ import de.cau.cs.se.software.evaluation.state.StateFactory;
  * @author Reiner Jung
  *
  */
-public class TransformationHelper {
+public final class TransformationHelper {
 
 	/**
 	 * Private constructor to indicate helper class.
@@ -85,7 +85,7 @@ public class TransformationHelper {
 					if (TransformationHelper.matchPattern(leftPattern.getPattern(), rightPattern.getPattern())) {
 						leftPattern.getNodes().addAll(rightPattern.getNodes());
 						table.getPatterns().remove(j);
-						j--;
+						j--; // NOCS
 					}
 				}
 			}
