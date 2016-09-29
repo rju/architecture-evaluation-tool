@@ -26,7 +26,7 @@ import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
 import java.util.HashMap
 import java.util.Map
-import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory
 
 /**
  * Create a intermodule only hypergraph.
@@ -55,14 +55,14 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		 * copy all nodes connected to those edges
 		 */
 		interModuleEdges.forEach[edge | 
-			val derivedEdge = HypergraphCreationHelper.deriveEdge(edge)
+			val derivedEdge = HypergraphCreationFactory.deriveEdge(edge)
 			this.result.edges.add(derivedEdge)
 			input.nodes.filter[node | node.edges.contains(edge)].forEach[node |
 				var derivedNode = this.result.nodes.findFirst[derivedNode | 
 					(derivedNode.derivedFrom as NodeTrace).node == node
 				]
 				if (derivedNode == null) {
-					derivedNode = HypergraphCreationHelper.deriveNode(node)
+					derivedNode = HypergraphCreationFactory.deriveNode(node)
 					this.result.nodes.add(derivedNode)
 				}
 				derivedNode.edges.add(derivedEdge)
@@ -73,7 +73,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		
 		/** copy modules */
 		input.modules.forEach[module |
-			val derivedModule = HypergraphCreationHelper.deriveModule(module)
+			val derivedModule = HypergraphCreationFactory.deriveModule(module)
 			module.nodes.forEach[node | 
 				val derivedNode = this.result.nodes.findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node]
 				if (derivedNode != null) {

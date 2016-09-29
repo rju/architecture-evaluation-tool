@@ -20,11 +20,11 @@ import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 import java.util.HashMap
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.views.LogModelProvider
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 /**
  * Transform a hypergraph into a graph.

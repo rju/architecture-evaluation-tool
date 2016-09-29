@@ -6,7 +6,6 @@ import org.palladiosimulator.pcm.system.System
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 import org.palladiosimulator.pcm.repository.RepositoryComponent
 import org.palladiosimulator.pcm.repository.BasicComponent
 import org.palladiosimulator.pcm.repository.CompleteComponentType
@@ -14,6 +13,7 @@ import org.palladiosimulator.pcm.repository.CompositeComponent
 import de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace
 import org.palladiosimulator.pcm.core.composition.AssemblyContext
 import org.palladiosimulator.pcm.repository.OperationRequiredRole
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 class TransformationPCMDeploymentToHypergraph extends AbstractTransformation<System, ModularHypergraph> {
 	

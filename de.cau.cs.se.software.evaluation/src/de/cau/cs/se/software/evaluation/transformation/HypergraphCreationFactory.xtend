@@ -28,7 +28,7 @@ import org.eclipse.emf.ecore.EObject
  * 
  * @author Reiner Jung
  */
-class HypergraphCreationHelper {
+class HypergraphCreationFactory {
 	
 	/**
 	 * Create a node for a hypergraph and set the derived from reference to the

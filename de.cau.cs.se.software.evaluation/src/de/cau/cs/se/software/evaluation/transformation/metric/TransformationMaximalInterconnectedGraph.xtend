@@ -20,7 +20,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
-import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory
 
 class TransformationMaximalInterconnectedGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
 	
@@ -32,7 +32,7 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 	override generate(ModularHypergraph input) {
 		this.result = HypergraphFactory.eINSTANCE.createModularHypergraph
 		/** copy all nodes */
-		input.nodes.forEach[this.result.nodes.add(HypergraphCreationHelper.deriveNode(it))]
+		input.nodes.forEach[this.result.nodes.add(HypergraphCreationFactory.deriveNode(it))]
 		monitor.worked(input.nodes.size)
 		if (monitor.canceled)
 			return null
@@ -40,7 +40,7 @@ class TransformationMaximalInterconnectedGraph extends AbstractTransformation<Mo
 		/** copy module boundaries */
 		input.modules.forEach[module |
 			if (!monitor.canceled) {
-				val derivedModule = HypergraphCreationHelper.deriveModule(module)
+				val derivedModule = HypergraphCreationFactory.deriveModule(module)
 				module.nodes.forEach[node | 
 					derivedModule.nodes.add(this.result.nodes.
 						findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node])

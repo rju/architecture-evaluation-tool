@@ -9,11 +9,11 @@ import org.eclipse.emf.ecore.EClass
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import java.util.HashMap
 
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 import de.cau.cs.se.software.evaluation.hypergraph.ModelElementTrace
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import java.util.ArrayList
 import java.util.List
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 class TransformationEMFInstanceToHypergraph extends AbstractTransformation<EPackage, ModularHypergraph> {
 	

@@ -24,7 +24,7 @@ import org.eclipse.emf.common.util.EList
 import de.cau.cs.se.software.evaluation.hypergraph.NodeTrace
 import org.eclipse.core.runtime.IProgressMonitor
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
-import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory
 
 /**
  * Create a hypergraph for a given hypergraph which contains only
@@ -52,11 +52,11 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
 		if (selectedNode != null) {	
 			this.result = HypergraphFactory.eINSTANCE.createHypergraph
-			this.result.nodes.add(HypergraphCreationHelper.deriveNode(selectedNode))
+			this.result.nodes.add(HypergraphCreationFactory.deriveNode(selectedNode))
 			monitor.worked(1)
 				
 			// find all connected edges and copy them
-			selectedNode.edges.forEach[edge | this.result.edges.add(HypergraphCreationHelper.deriveEdge(edge))]
+			selectedNode.edges.forEach[edge | this.result.edges.add(HypergraphCreationFactory.deriveEdge(edge))]
 			monitor.worked(selectedNode.edges.size)
 						
 			// find all connected nodes
@@ -76,7 +76,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 			if (originalNode.edges.contains(originalEdge)) {
 				var newNode = nodes.findFirst[node | (node.derivedFrom as NodeTrace).node == originalNode]
 				if (newNode == null) {
-					newNode = HypergraphCreationHelper.deriveNode(originalNode)
+					newNode = HypergraphCreationFactory.deriveNode(originalNode)
 					nodes.add(newNode)
 				}
 				newNode.edges.add(edge)

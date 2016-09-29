@@ -21,8 +21,8 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
 import org.eclipse.core.runtime.IProgressMonitor
-import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper
 import java.util.HashMap
+import de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory
 
 /**
  * Copy only connected nodes to the result graph.
@@ -40,14 +40,14 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 		
 		this.result = HypergraphFactory.eINSTANCE.createHypergraph
 		for (Edge edge : input.edges) {
-			val derivedEdge = HypergraphCreationHelper.deriveEdge(edge)
+			val derivedEdge = HypergraphCreationFactory.deriveEdge(edge)
 			edgeMap.put(edge, derivedEdge)
 			this.result.edges.add(derivedEdge)
 		}
 		for (Node node : input.nodes) {
 			if (!monitor.canceled) {			
 				if (node.edges.size > 0) {
-					val resultNode = HypergraphCreationHelper.deriveNode(node)
+					val resultNode = HypergraphCreationFactory.deriveNode(node)
 					node.edges.forEach[edge | 
 						resultNode.edges.add(edgeMap.get(edge))
 					]

@@ -26,7 +26,7 @@ import java.util.HashMap
 import java.util.Map
 import org.eclipse.core.runtime.IProgressMonitor
 
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 /**
  * Calculate the information size of a hypergraph.

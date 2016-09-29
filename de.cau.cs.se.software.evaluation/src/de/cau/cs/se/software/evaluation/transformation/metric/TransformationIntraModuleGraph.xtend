@@ -22,8 +22,7 @@ import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 import java.util.HashMap
 import de.cau.cs.se.software.evaluation.hypergraph.Node
 import de.cau.cs.se.software.evaluation.hypergraph.Module
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
-
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 class TransformationIntraModuleGraph extends AbstractTransformation<ModularHypergraph, ModularHypergraph> {
 	

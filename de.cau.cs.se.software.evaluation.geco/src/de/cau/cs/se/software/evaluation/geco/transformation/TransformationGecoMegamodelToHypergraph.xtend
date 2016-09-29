@@ -14,10 +14,10 @@ import de.cau.cs.se.geco.architecture.architecture.Generator
 import org.eclipse.xtext.common.types.JvmGenericType
 
 import static extension de.cau.cs.se.geco.architecture.typing.ArchitectureTyping.*
-import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationHelper.*
 import de.cau.cs.se.geco.architecture.architecture.CombinedModel
 import de.cau.cs.se.geco.architecture.architecture.TargetModel
 import de.cau.cs.se.geco.architecture.architecture.SeparateModels
+import static extension de.cau.cs.se.software.evaluation.transformation.HypergraphCreationFactory.*
 
 /**
  * Transform geco model to a hypergraph.
