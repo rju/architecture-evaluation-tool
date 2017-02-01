@@ -60,6 +60,11 @@ class TransformationHyperedgesOnlyGraph extends AbstractTransformation<Hypergrap
 	}
 	
 	override workEstimate(Hypergraph input) {
+		if (input.nodes.size == 0) {
+			println("Warning: hypergraph is empty")
+			return 1
+		}
+		
 		input.edges.size + input.nodes.map[it.edges.size].reduce[p1, p2| p1 + p2]
 	}
 
