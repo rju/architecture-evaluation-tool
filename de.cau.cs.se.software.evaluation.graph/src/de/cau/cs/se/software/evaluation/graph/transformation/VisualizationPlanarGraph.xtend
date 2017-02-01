@@ -23,7 +23,10 @@ class VisualizationPlanarGraph implements IGenerator<ModularHypergraph, PlanarVi
 			} else
 				module.name
 			val separator = moduleQualifier.lastIndexOf('.')
-			node.name = moduleQualifier.substring(0,separator) 
+			if (separator == -1)
+				node.name = moduleQualifier
+			else
+				node.name = moduleQualifier.substring(0,separator)
 			node.context = moduleQualifier.substring(separator+1)
 			node.kind = module.kind
 			
