@@ -172,27 +172,5 @@ class HypergraphCreationFactory {
 		
 		return resultModule
 	}
-	
-	/**
-	 * Create an edge between two nodes. Despite the fact that our hypergraph
-	 * edges do not have a direction, we use the terms source and target here for
-	 * nodes to increase the understandability of the reoutine.
-	 * 
-	 * @param hypergraph a modular hypergraph
-	 * @param source a node of that hypergraph
-	 * @param target a second node of that hypergraph
-	 * 
-	 * @return an edge between these two nodes which is also added to the source and target node, as
-	 * well as the hypergraph 
-	 */
-	def static createUniqueEdge(ModularHypergraph hypergraph, Node source, Node target) {
-		val edgeSubset = source.edges.filter[sourceEdge | target.edges.exists[targetEdge | targetEdge == sourceEdge]]
-		val edgeName = source.name + "::" + target.name
-		val existingEdge = edgeSubset.findFirst[edge | edge.name.equals(edgeName)]
-		if (existingEdge == null) {			
-			return createEdge(hypergraph, source, target, edgeName, null)
-		} else
-			return existingEdge
-	}
-	
+		
 }

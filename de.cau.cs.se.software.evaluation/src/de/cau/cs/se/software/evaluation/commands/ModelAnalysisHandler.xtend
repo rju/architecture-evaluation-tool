@@ -48,9 +48,15 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 	 */
 	public new() {
 		super()
-		
+	}
+	
+	private def initializeProviders() {
 		val registry = Platform.getExtensionRegistry()
-  		val config = registry.getConfigurationElementsFor(AbstractHypergraphAnalysisJob.HYPERGRAPH_ANALYSIS_JOBS)
+		val extP = registry.extensionPoints.findFirst["HypergraphProvider".equals(it.label)]
+		extP.extensions.forEach[println("extension " + it.extensionPointUniqueIdentifier + " " + 
+			it.configurationElements.map[it.name + " " + it.attributeNames.map["a:" + it].join(", ")].join('\n')
+		)]
+  		val config = registry.getConfigurationElementsFor("analysisJob")
 	  	try {
 	  		config.forEach[element |
 	  			val ext = element
@@ -59,8 +65,8 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 	  				providers.put(provider.fileExtension, provider)
 				}
   			]
-		   } catch (CoreException ex) {
-		     	System.out.println(ex.getMessage())
+		} catch (CoreException ex) {
+			System.out.println(ex.getMessage())
 		}
 	}
 	
@@ -72,6 +78,9 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 	 * @param shell the UI display access.
 	 */
 	override protected executeCalculation(ISelection selection, IWorkbenchPage activePage, Shell shell) throws ExecutionException {
+		if (providers.size == 0) {
+			initializeProviders
+		}
 		if (selection instanceof IStructuredSelection) {
 			if (selection instanceof ITreeSelection) {
 				val TreeSelection treeSelection = selection as TreeSelection

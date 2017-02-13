@@ -38,7 +38,7 @@ import org.eclipse.ui.PlatformUI
  */
 abstract class AbstractHypergraphAnalysisJob extends Job {
 	
-	public static String HYPERGRAPH_ANALYSIS_JOBS = AbstractHypergraphAnalysisJob.canonicalName
+	public static String HYPERGRAPH_ANALYSIS_JOBS = "class" // AbstractHypergraphAnalysisJob.canonicalName
 
 	protected val IProject project
 			

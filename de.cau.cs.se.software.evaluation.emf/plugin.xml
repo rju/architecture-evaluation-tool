@@ -13,4 +13,10 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="de.cau.cs.se.software.evaluation.HypergraphProvider">
+      <analysisJob
+            class="de.cau.cs.se.software.evaluation.emf.EMFMetamodelAnalysisJobProvider">
+      </analysisJob>
+   </extension>
 </plugin>
