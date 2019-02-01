@@ -43,7 +43,7 @@ class TransformationEMFInstanceToHypergraph extends AbstractTransformation<EPack
 			val references = ((sourceNode.derivedFrom as ModelElementTrace).element as EClass).EReferences
 			references.forEach[reference |
 				val targetNode = nodeMap.get(reference.EReferenceType)
-				if (targetNode != null)
+				if (targetNode !== null)
 					createEdge(result, sourceNode, targetNode, reference.name, reference)
 				// else: the type is from an imported metamodel 
 			]
@@ -64,7 +64,7 @@ class TransformationEMFInstanceToHypergraph extends AbstractTransformation<EPack
 	 * Create full qualified package name.
 	 */
 	private def String determineName(EPackage ePackage) {
-		if (ePackage.ESuperPackage != null)
+		if (ePackage.ESuperPackage !== null)
 			ePackage.ESuperPackage.determineName + "." + ePackage.name
 		else
 			ePackage.name

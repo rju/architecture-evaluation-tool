@@ -32,7 +32,7 @@ import java.util.ArrayList
  */
 class CalculateComplexity implements ICalculationTask {
 	
-	private static val PARALLEL_TASKS = 8
+	static val PARALLEL_TASKS = 8
 	
     /** Used in the parallelized version of this. */
 	var volatile Iterator<Node> globalHyperEdgesOnlyGraphNodes

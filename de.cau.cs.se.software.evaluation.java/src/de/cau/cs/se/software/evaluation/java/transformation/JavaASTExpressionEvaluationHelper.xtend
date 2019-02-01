@@ -58,10 +58,10 @@ class JavaASTExpressionEvaluationHelper {
 		ModularHypergraph graph, List<String> dataTypePatterns
 	) {
 		val fieldBinding = superFieldAccess.resolveFieldBinding
-		if (fieldBinding != null) {
+		if (fieldBinding !== null) {
 			if (fieldBinding.type.isDataType(dataTypePatterns)) {
 				var edge = graph.edges.findDataEdge(fieldBinding)
-				if (edge == null) {
+				if (edge === null) {
 					edge = createDataEdge(fieldBinding)
 					graph.edges.add(edge)
 				}
@@ -96,7 +96,7 @@ class JavaASTExpressionEvaluationHelper {
     	if (!calleeTypeBinding.isDataType(dataTypePatterns)) { /** create only for behavior classes. */
     		val calleeConstructorBinding = callee.resolveConstructorBinding
     		// TODO why can this binding be null?
-    		if (calleeConstructorBinding != null) {
+    		if (calleeConstructorBinding !== null) {
 	    		/** check if the class is an anonymous class. */
 	    		if (calleeTypeBinding.anonymous) {
 	    			/** create a module for each new anonymous class and scan for methods. */
@@ -139,7 +139,7 @@ class JavaASTExpressionEvaluationHelper {
     	ModularHypergraph graph, List<String> dataTypePatterns 
     ) {
     	val calleeMethodBinding = callee.resolveMethodBinding
-    	if (calleeMethodBinding != null) {
+    	if (calleeMethodBinding !== null) {
 	    	val calleeTypeBinding = calleeMethodBinding.declaringClass
 	    	/**
 	    	 * If the class of this method is a data type class then ignore it, as methods of data type classes are operations
@@ -191,7 +191,7 @@ class JavaASTExpressionEvaluationHelper {
     	ModularHypergraph graph, List<String> dataTypePatterns
     ) {
 		val targetSuperMethodBinding = callee.resolveMethodBinding
-		if (targetSuperMethodBinding != null) {
+		if (targetSuperMethodBinding !== null) {
 			val targetNode = findOrCreateTargetNode(graph, targetSuperMethodBinding.declaringClass, targetSuperMethodBinding)
 			handleCallEdgeInsertion(graph, sourceNode, targetNode)
 		   	callee.arguments.forEach[
@@ -216,7 +216,7 @@ class JavaASTExpressionEvaluationHelper {
 		switch(nameBinding) {
 			IVariableBinding: { /** this referes to a variable => data access edge. */
 				val edge = findDataEdge(graph.edges, nameBinding)
-				if (edge != null) { /** found an data edge */
+				if (edge !== null) { /** found an data edge */
 					sourceNode.edges.add(edge)
 				}
 			}
@@ -243,7 +243,7 @@ class JavaASTExpressionEvaluationHelper {
 		switch(nameBinding) {
 			IVariableBinding: {
 				val edge = findDataEdge(graph.edges, nameBinding)
-				if (edge != null) { /** found an data edge */
+				if (edge !== null) { /** found an data edge */
 					sourceNode.edges.add(edge)
 				}
 			}
@@ -297,7 +297,7 @@ class JavaASTExpressionEvaluationHelper {
 	    	ThisExpression: { /** there must be an edge iff this is a data type property */
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding.variableDeclaration)
-		    		if (edge == null) {
+		    		if (edge === null) {
 		    			LogModelProvider.INSTANCE.addMessage("Error", 
 		    				"Resolving failed in this expression. Missing edge for a data type property. "
 		    				 + fieldAccess.resolveFieldBinding)
@@ -319,7 +319,7 @@ class JavaASTExpressionEvaluationHelper {
 	    	FieldAccess: {
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
-		    		if (edge == null) {
+		    		if (edge === null) {
 		    			// TODO how can this happen?
 		    			LogModelProvider.INSTANCE.addMessage("Error", 
 		    				"Resolving failed in field access expression. Missing edge for a data type property. "
@@ -356,7 +356,7 @@ class JavaASTExpressionEvaluationHelper {
    		val sourceMethodBinding = sourceNode.methodBinding
    		val targetMethodBinding = targetNode.methodBinding
    		var edge = findCallEdge(graph.edges, sourceMethodBinding, targetMethodBinding)
-	   	if (edge == null) {
+	   	if (edge === null) {
 	   		edge = createCallEdge(sourceMethodBinding, targetMethodBinding)
 	   		graph.edges.add(edge)
 		   	sourceNode.edges.add(edge)

@@ -59,12 +59,12 @@ class NameResolutionHelper {
 	 */
 	def static determineFullyQualifiedName(IMethodBinding binding) {
 		if (binding.declaringClass.anonymous && binding.constructor) {
-			val typeName = if (binding.declaringClass.interfaces != null) {
+			val typeName = if (binding.declaringClass.interfaces !== null) {
 				if (binding.declaringClass.interfaces.size > 0) {
 					"." + binding.declaringClass.interfaces.get(0).name
 				} else
 					""
-			} else if (binding.declaringClass.superclass != null)
+			} else if (binding.declaringClass.superclass !== null)
 				"." + binding.declaringClass.superclass + " " + binding.parameterNames
 			else
 				""
@@ -133,7 +133,7 @@ class NameResolutionHelper {
 	 * Determine the fully qualified name for a variable binding.
 	 */
 	def static determineFullyQualifiedName(IVariableBinding variableBinding) {
-		if (variableBinding.declaringMethod != null)
+		if (variableBinding.declaringMethod !== null)
 			variableBinding.declaringMethod.determineFullyQualifiedName + "." + variableBinding.name
 		else
 			variableBinding.declaringClass.determineFullyQualifiedName + "." + variableBinding.name
@@ -161,9 +161,9 @@ class NameResolutionHelper {
 					case PrimitiveType.VOID: "void"
 				}
 			QualifiedType:
-				return if (type.name != null && type.qualifier != null)
+				return if (type.name !== null && type.qualifier !== null)
 					'L' + type.name.fullyQualifiedName + "." + type.qualifier.determineFullyQualifiedName + ';'
-				else if (type.name != null)
+				else if (type.name !== null)
 					type.name.fullyQualifiedName
 				else
 					type.qualifier.determineFullyQualifiedName
@@ -186,12 +186,12 @@ class NameResolutionHelper {
 	 */
 	def static String determineFullyQualifiedName(ITypeBinding clazz) {
 		if (clazz.anonymous) {
-			val typeName = if (clazz.interfaces != null) {
+			val typeName = if (clazz.interfaces !== null) {
 				if (clazz.interfaces.size > 0) {
 					"." + clazz.interfaces.get(0).name
 				} else
 					""
-			} else if (clazz.superclass != null)
+			} else if (clazz.superclass !== null)
 				"." + clazz.superclass
 			else
 				""
@@ -212,8 +212,8 @@ class NameResolutionHelper {
 		} else if (clazz.parameterizedType) {
 			return clazz.package.name + "." + clazz.name
 		} else {
-			if (clazz != null) {
-				if (clazz.package != null)
+			if (clazz !== null) {
+				if (clazz.package !== null)
 					return clazz.package.name + "." + clazz.name
 				else
 					throw new Exception("y")

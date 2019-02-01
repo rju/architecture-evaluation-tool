@@ -47,7 +47,7 @@ class ConnectedNodeHyperedgeOnlySizeJob extends Job {
 		val connectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(monitor)
 		val hypergraphSize = new TransformationHypergraphSize(monitor)
 		
-		while ((node = parent.getNextConnectedNodeTask) != null) {
+		while ((node = parent.getNextConnectedNodeTask) !== null) {
 			if (monitor.canceled)
 				return Status.CANCEL_STATUS
 			monitor.beginTask("Determine S^#_" + i, hypergraphSize.workEstimate(input) + 

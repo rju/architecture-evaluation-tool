@@ -15,7 +15,6 @@
  ***************************************************************************/
 package de.cau.cs.se.software.evaluation.commands
 
-import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
 import de.cau.cs.se.software.evaluation.jobs.IAnalysisJobProvider
 import java.util.HashMap
 import java.util.Map
@@ -41,12 +40,12 @@ import org.eclipse.ui.IWorkbenchPage
  */
 class ModelAnalysisHandler extends AbstractAnalysisHandler {
 
-	private val Map<String,IAnalysisJobProvider> providers = new HashMap<String,IAnalysisJobProvider>
+	val Map<String,IAnalysisJobProvider> providers = new HashMap<String,IAnalysisJobProvider>
 
 	/**
 	 * Initialization constructor.
 	 */
-	public new() {
+	new() {
 		super()
 	}
 	
@@ -90,7 +89,7 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 					val file = iterator.next
 					val provider = providers.get(file.fileExtension)
 						
-					if (provider != null) {
+					if (provider !== null) {
 						val job = provider.createAnalysisJob(file.project, file, shell)
 						job.schedule()
 						job.join

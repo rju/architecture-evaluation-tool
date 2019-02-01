@@ -61,7 +61,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 				var derivedNode = this.result.nodes.findFirst[derivedNode | 
 					(derivedNode.derivedFrom as NodeTrace).node == node
 				]
-				if (derivedNode == null) {
+				if (derivedNode === null) {
 					derivedNode = HypergraphCreationFactory.deriveNode(node)
 					this.result.nodes.add(derivedNode)
 				}
@@ -76,7 +76,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 			val derivedModule = HypergraphCreationFactory.deriveModule(module)
 			module.nodes.forEach[node | 
 				val derivedNode = this.result.nodes.findFirst[derivedNode | (derivedNode.derivedFrom as NodeTrace).node == node]
-				if (derivedNode != null) {
+				if (derivedNode !== null) {
 					derivedModule.nodes.add(derivedNode)
 				}
 			]
@@ -95,7 +95,7 @@ class TransformationIntermoduleHyperedgesOnlyGraph extends AbstractTransformatio
 		var Module lastMatch = null
 		for (Node node : connectedNodes) {
 			val match = moduleNodeMap.get(node)
-			if (lastMatch != null) {
+			if (lastMatch !== null) {
 				if (lastMatch != match)
 					return true
 			}

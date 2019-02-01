@@ -79,7 +79,7 @@ class CalculateSizePartitionJob extends Job {
 	 */
 	private def double lookupProbability(RowPattern[] patterns, Node node, Hypergraph system) {
 		val pattern = patterns.findFirst[it.nodes.contains(node)]
-		val double count = if (pattern != null) pattern.nodes.size as double else 0
+		val double count = if (pattern !== null) pattern.nodes.size as double else 0
 			
 		return count/((system.nodes.size + 1) as double)
 	}

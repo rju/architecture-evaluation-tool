@@ -50,7 +50,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 	override generate(Hypergraph input) {
 		// find start node
 		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
-		if (selectedNode != null) {	
+		if (selectedNode !== null) {	
 			this.result = HypergraphFactory.eINSTANCE.createHypergraph
 			this.result.nodes.add(HypergraphCreationFactory.deriveNode(selectedNode))
 			monitor.worked(1)
@@ -75,7 +75,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 		for (Node originalNode : originalNodes) {
 			if (originalNode.edges.contains(originalEdge)) {
 				var newNode = nodes.findFirst[node | (node.derivedFrom as NodeTrace).node == originalNode]
-				if (newNode == null) {
+				if (newNode === null) {
 					newNode = HypergraphCreationFactory.deriveNode(originalNode)
 					nodes.add(newNode)
 				}
@@ -86,7 +86,7 @@ class TransformationConnectedNodeHyperedgesOnlyGraph extends AbstractTransformat
 	
 	override workEstimate(Hypergraph input) {
 		val selectedNode = if (input.nodes.contains(startNode)) startNode else null
-		if (selectedNode != null) {	
+		if (selectedNode !== null) {	
 			1 + 
 			selectedNode.edges.size +
 			selectedNode.edges.size * input.nodes.size // createAndLinkNodesConnectedToEdge estimate

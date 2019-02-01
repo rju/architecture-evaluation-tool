@@ -73,7 +73,7 @@ class CalculateMaximalInterconnectedGraphComplexity {
 		/** construct S^#_i and calculate the size of S^#_i */
 		val systemHashGraphJob = new Job("System graph computation") {
 			
-			private double size
+			double size
 			
 			override protected run(IProgressMonitor monitor) {
 				val connectedNodeHyperedgesOnlyGraph = new TransformationConnectedNodeHyperedgesOnlyGraph(monitor)
@@ -99,7 +99,7 @@ class CalculateMaximalInterconnectedGraphComplexity {
 		/** calculate size of S^# and S^#_i */
 		val hyperEdgesOnlyGraphJob = new Job("Hyperedges only graph size computation") {
 			
-			private double size
+			double size
 			
 			override protected run(IProgressMonitor monitor) {
 				val hypergraphSize = new TransformationHypergraphSize(monitor)

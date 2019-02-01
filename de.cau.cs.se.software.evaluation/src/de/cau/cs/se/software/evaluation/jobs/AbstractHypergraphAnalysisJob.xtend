@@ -194,7 +194,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 	 */
 	protected def updateView() {
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-       		public override void run() {
+       		override void run() {
 				val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 					getActivePage().findView(AnalysisResultView.ID)
 				(part as AnalysisResultView).update()

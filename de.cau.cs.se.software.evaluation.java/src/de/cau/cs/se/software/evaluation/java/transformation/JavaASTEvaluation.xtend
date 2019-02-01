@@ -55,10 +55,10 @@ class JavaASTEvaluation {
 	 * @param clazz declaring class of the given method
 	 * @param method the method to be evaluated for property access and method calls
 	 */
-	public static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, TypeDeclaration clazz, MethodDeclaration method) {
+	static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, TypeDeclaration clazz, MethodDeclaration method) {
 		// System.out.println("evaluateMethod <" + sourceNode.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		if (!clazz.interface && !Modifier.isAbstract(method.getModifiers())) {
-			if (method.body.statements != null) {
+			if (method.body.statements !== null) {
 				method.body.statements.forEach[statement | (statement as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
 			}
 		}
@@ -74,7 +74,7 @@ class JavaASTEvaluation {
 	 * @param clazz the context class
 	 * @param method the context method
 	 */
-	public static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode) {
+	static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode) {
 		// System.out.println("statement evaluate <" + node.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		switch (statement) {
 			AssertStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
@@ -153,7 +153,7 @@ class JavaASTEvaluation {
 				default: throw new UnsupportedOperationException(type.class + " is not supported as a source for module.")
 			}
 		]
-		if (module == null) {
+		if (module === null) {
 			module = createModuleForTypeBinding(invocation.resolveConstructorBinding.declaringClass, EModuleKind.FRAMEWORK)
 			graph.modules.add(module)
 		}
@@ -175,7 +175,7 @@ class JavaASTEvaluation {
 				false
 			}
 		]
-		if (targetNode == null) {
+		if (targetNode === null) {
 			targetNode = createNodeForSuperConstructorInvocation(targetMethodBinding)
 			module.nodes.add(targetNode)
 			graph.nodes.add(targetNode)
@@ -199,7 +199,7 @@ class JavaASTEvaluation {
 		val edge = createCallEdge(sourceMethodBinding, targetMethodBinding)
 		if (!graph.edges.exists[it.name.equals(edge.name)]) {
 			var targetNode = graph.nodes.findNodeForConstructorBinding(targetMethodBinding)
-			if (targetNode == null) {
+			if (targetNode === null) {
 				throw new UnsupportedOperationException("Internal error: Missing target node for method " + targetMethodBinding.determineFullyQualifiedName)
 			} else {
 				graph.edges.add(edge)

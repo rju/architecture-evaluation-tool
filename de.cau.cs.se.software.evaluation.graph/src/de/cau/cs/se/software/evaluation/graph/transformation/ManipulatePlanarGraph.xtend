@@ -27,7 +27,7 @@ class ManipulatePlanarGraph implements IGenerator<PlanarVisualizationGraph, Plan
 				case SYSTEM: node.duplicate
 				case INTERFACE: if (iface) node.duplicate
 			}
-			if (duplicateNode != null) {
+			if (duplicateNode !== null) {
 				result.nodes.add(duplicateNode)
 				nodeMap.put(node,duplicateNode)
 			}
@@ -37,8 +37,8 @@ class ManipulatePlanarGraph implements IGenerator<PlanarVisualizationGraph, Plan
  			val start = nodeMap.get(edge.start)
  			val end = nodeMap.get(edge.end)
  			
- 			if (start != null) {
- 				if (end != null) {
+ 			if (start !== null) {
+ 				if (end !== null) {
  					val duplicateEdge = TransformationFactory.eINSTANCE.createPlanarEdge
  					duplicateEdge.count = edge.count
  					start.edges.add(duplicateEdge)

@@ -40,14 +40,13 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import javax.inject.Inject
-import org.eclipse.elk.alg.layered.properties.LayeredOptions
-import org.eclipse.elk.core.klayoutdata.KShapeLayout
 import org.eclipse.elk.core.options.Direction
 import org.eclipse.elk.core.options.EdgeRouting
 import org.eclipse.elk.core.options.PortConstraints
-import org.eclipse.elk.graph.KNode
-import org.eclipse.elk.graph.KPort
 import org.eclipse.emf.common.util.EList
+import de.cau.cs.kieler.klighd.kgraph.KNode
+import de.cau.cs.kieler.klighd.kgraph.KPort
+import org.eclipse.elk.alg.layered.options.LayeredOptions
 
 class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<ModularHypergraph> {
     
@@ -63,54 +62,54 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		     
 		     
 	/** changes in visualization nodes on off */
-    private static val VISIBLE_NODES_NAME = "Nodes Visible"
-    private static val VISIBLE_NODES_NO = "Modules only"
-    private static val VISIBLE_NODES_YES = "Show nodes in modules"
+    static val VISIBLE_NODES_NAME = "Nodes Visible"
+    static val VISIBLE_NODES_NO = "Modules only"
+    static val VISIBLE_NODES_YES = "Show nodes in modules"
     
     /** changes in visualization anonymous classes on off */
-    private static val VISIBLE_ANONYMOUS_NAME = "Anonymous Classes"
-    private static val VISIBLE_ANONYMOUS_NO = "hidden"
-    private static val VISIBLE_ANONYMOUS_YES = "visible"
+    static val VISIBLE_ANONYMOUS_NAME = "Anonymous Classes"
+    static val VISIBLE_ANONYMOUS_NO = "hidden"
+    static val VISIBLE_ANONYMOUS_YES = "visible"
     
     /** changes in visualization anonymous classes on off */
-    private static val VISIBLE_FRAMEWORK_NAME = "Framework Classes"
-    private static val VISIBLE_FRAMEWORK_NO = "hidden"
-    private static val VISIBLE_FRAMEWORK_YES = "visible"
+    static val VISIBLE_FRAMEWORK_NAME = "Framework Classes"
+    static val VISIBLE_FRAMEWORK_NO = "hidden"
+    static val VISIBLE_FRAMEWORK_YES = "visible"
     
     /** changes in layout direction */
-    private static val DIRECTION_NAME = "Layout Direction"
-    private static val DIRECTION_UP = "up"
-    private static val DIRECTION_DOWN = "down"
-    private static val DIRECTION_LEFT = "left"
-    private static val DIRECTION_RIGHT = "right"
+    static val DIRECTION_NAME = "Layout Direction"
+    static val DIRECTION_UP = "up"
+    static val DIRECTION_DOWN = "down"
+    static val DIRECTION_LEFT = "left"
+    static val DIRECTION_RIGHT = "right"
     
     /** changes in edge routing */
-    private static val ROUTING_NAME = "Edge Routing"
-    private static val ROUTING_POLYLINE = "polyline"
-    private static val ROUTING_ORTHOGONAL = "orthogonal"
-    private static val ROUTING_SPLINES = "splines"
+    static val ROUTING_NAME = "Edge Routing"
+    static val ROUTING_POLYLINE = "polyline"
+    static val ROUTING_ORTHOGONAL = "orthogonal"
+    static val ROUTING_SPLINES = "splines"
     
-    private static val SPACING_NAME = "Spacing"
+    static val SPACING_NAME = "Spacing"
     
     /**
      * The filter option definition that allows users to customize the constructed class diagrams.
      */
-    private static val SynthesisOption VISIBLE_NODES = SynthesisOption::createChoiceOption(VISIBLE_NODES_NAME,
+    static val SynthesisOption VISIBLE_NODES = SynthesisOption::createChoiceOption(VISIBLE_NODES_NAME,
        ImmutableList::of(VISIBLE_NODES_YES, VISIBLE_NODES_NO), VISIBLE_NODES_NO)
        
-    private static val SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption::createChoiceOption(VISIBLE_ANONYMOUS_NAME,
+    static val SynthesisOption VISIBLE_ANONYMOUS = SynthesisOption::createChoiceOption(VISIBLE_ANONYMOUS_NAME,
        ImmutableList::of(VISIBLE_ANONYMOUS_YES, VISIBLE_ANONYMOUS_NO), VISIBLE_ANONYMOUS_NO)
        
-    private static val SynthesisOption VISIBLE_FRAMEWORK = SynthesisOption::createChoiceOption(VISIBLE_FRAMEWORK_NAME,
+    static val SynthesisOption VISIBLE_FRAMEWORK = SynthesisOption::createChoiceOption(VISIBLE_FRAMEWORK_NAME,
        ImmutableList::of(VISIBLE_FRAMEWORK_YES, VISIBLE_FRAMEWORK_NO), VISIBLE_FRAMEWORK_YES)
        
-    private static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
+    static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
        ImmutableList::of(DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT), DIRECTION_LEFT)
        
-    private static val SynthesisOption ROUTING = SynthesisOption::createChoiceOption(ROUTING_NAME,
+    static val SynthesisOption ROUTING = SynthesisOption::createChoiceOption(ROUTING_NAME,
        ImmutableList::of(ROUTING_POLYLINE, ROUTING_ORTHOGONAL, ROUTING_SPLINES), ROUTING_ORTHOGONAL)
        
-   	private static val SynthesisOption SPACING = SynthesisOption::createRangeOption(SPACING_NAME, 5f, 200f, 50f)
+   	static val SynthesisOption SPACING = SynthesisOption::createRangeOption(SPACING_NAME, 5f, 200f, 50f)
        
     
     var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
@@ -123,7 +122,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
      * <br>
      * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
      */
-    override public getDisplayedSynthesisOptions() {
+    override getDisplayedSynthesisOptions() {
         return ImmutableList::of(VISIBLE_NODES, VISIBLE_ANONYMOUS, VISIBLE_FRAMEWORK, DIRECTION, ROUTING, SPACING)
     }
 
@@ -252,7 +251,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		
 		moduleNode => [
 			// TODO PORT_SPACING
-			it.setLayoutOption(LayeredOptions::PORT_BORDER_OFFSET, 20f)
+			it.setLayoutOption(LayeredOptions::PORT_BORDER_OFFSET, 20d)
 			// TODO SIZE_CONSTRAINT
 			// it.setLayoutOption(LayeredOptions::SIZE_CONSTRAINT, SizeConstraint.minimumSizeWithPorts)
 			it.addRoundedRectangle(10, 10) => [
@@ -286,7 +285,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 		// a top-left name, and a set of nodes inside.
 						 
 		val moduleNode = module.createNode().associateWith(module)
-		moduleNode.getData(KShapeLayout).insets.top = 15 //bringt nicht wirklich Effekt
+		//moduleNode.getData(KShapeLayout).insets.top = 15 //bringt nicht wirklich Effekt
 
 		moduleNode => [	
 			it.setLayoutOption(LayeredOptions.PORT_CONSTRAINTS, PortConstraints.FREE)
@@ -340,7 +339,7 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 	
 	//create iff not exists & add to portMap & return port
 	private def KPort getOrCreateEdgePort(KNode kNode, String label) {
-		if (portMap.get(label) == null) {
+		if (portMap.get(label) === null) {
 			kNode.ports.add(createPort() => [
 	    		it.setPortSize(2,2)
 	    		it.addRectangle.setBackground("black".color).lineJoin=LineJoin.JOIN_ROUND
@@ -386,23 +385,23 @@ class ModularHypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Modular
 			// else use ports	
 		} else {
 			//if no HyperEdgePart
-			if(left.parent != null) {		
+			if(left.parent !== null) {		
 				//Edge from inner-Node to parentPort (left) (iff not exists yet)
-				if (portMap.get(left.toString + '_to_' + right.parent.toString) == null) {
+				if (portMap.get(left.toString + '_to_' + right.parent.toString) === null) {
 					drawEdge(left, left.parent,
 						getOrCreateEdgePort(left, left.toString + '_to_' + right.parent.toString),
 						getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString)
 					)
 				}
 				//Edge between parentPorts (iff not exists yet)
-				if (portMap.get(right.parent.toString + '_to_' + left.parent.toString) == null) {
+				if (portMap.get(right.parent.toString + '_to_' + left.parent.toString) === null) {
 					drawEdge(left.parent, right.parent,
 						getOrCreateEdgePort(left.parent, left.parent.toString + '_to_' + right.parent.toString),
 						getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)
 					)
 				}
 				//Edge from inner-Node to parentPort (right) (iff not exists yet)
-				if (portMap.get(right.toString + '_to_' + left.parent.toString) == null) {
+				if (portMap.get(right.toString + '_to_' + left.parent.toString) === null) {
 					drawEdge(right, right.parent, 
 						getOrCreateEdgePort(right, right.toString + '_to_' + left.parent.toString),
 						getOrCreateEdgePort(right.parent, right.parent.toString + '_to_' + left.parent.toString)

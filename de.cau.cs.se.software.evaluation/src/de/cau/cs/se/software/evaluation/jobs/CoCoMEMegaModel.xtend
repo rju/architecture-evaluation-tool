@@ -127,7 +127,7 @@ class CoCoMEMegaModel {
 		val sourceNode = graph.nodes.findFirst[node | node.name.equals(sourceNodeName)]
 		val targetNode = graph.nodes.findFirst[node | node.name.equals(targetNodeName)]
 		
-		if (sourceNode != null && targetNode != null) {
+		if (sourceNode !== null && targetNode !== null) {
 			val edge = HypergraphFactory.eINSTANCE.createEdge
 			edge.name = sourceNodeName + "::" + targetNodeName
 			graph.edges.add(edge)
@@ -135,8 +135,8 @@ class CoCoMEMegaModel {
 			sourceNode.edges.add(edge)
 			targetNode.edges.add(edge)
 		} else {
-			if (sourceNode == null) System.out.println("missing source node " + sourceNodeName)
-			if (targetNode == null) System.out.println("missing target node " + targetNodeName)
+			if (sourceNode === null) System.out.println("missing source node " + sourceNodeName)
+			if (targetNode === null) System.out.println("missing target node " + targetNodeName)
 		}
 	}
 }

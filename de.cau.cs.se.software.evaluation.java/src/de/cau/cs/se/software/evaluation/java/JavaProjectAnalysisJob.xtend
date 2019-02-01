@@ -52,7 +52,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	String OBSERVED_SYSTEM_TITLE = "observed system"
 
-	public new(IProject project, Shell shell) {
+	new(IProject project, Shell shell) {
 		super(project, shell)
 		this.javaProject = project.getJavaProject
 	}
@@ -65,15 +65,15 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		AnalysisResultModelProvider.INSTANCE.project = project
 
 		val dataTypePatterns = getPatternFile(project.project, DATA_TYPE_PATTERN_FILE, DATA_TYPE_PATTERN_TITLE)
-		if (dataTypePatterns != null) {
+		if (dataTypePatterns !== null) {
 			val observedSystemPatterns = getPatternFile(project.project, OBSERVED_SYSTEM_PATTERN_FILE,
 				OBSERVED_SYSTEM_TITLE)
-			if (observedSystemPatterns != null) {
+			if (observedSystemPatterns !== null) {
 				val types = new ArrayList<IType>()
 				monitor.subTask("Scanning project " + project.project.name)
 				javaProject.allPackageFragmentRoots.forEach[root|types.checkForTypes(root, monitor)]
 
-				if (types != null) {
+				if (types !== null) {
 					val result = AnalysisResultModelProvider.INSTANCE
 					LogModelProvider.INSTANCE.projectName = project.name
 					
@@ -192,7 +192,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 		types.forEach [ jdtType |
 			val unit = jdtType.getUnitForType(observedSystemPatterns, monitor)
-			if (unit != null) {
+			if (unit !== null) {
 				unit.types.forEach [ unitType |
 					if (unitType instanceof TypeDeclaration) {
 						val type = unitType as TypeDeclaration
@@ -261,7 +261,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	 */
 	private def List<String> getPatternFile(IProject project, String filename, String title) {
 		val patternFile = project.findMember(filename) as IFile
-		if (patternFile != null) {
+		if (patternFile !== null) {
 			if (patternFile.isSynchronized(1)) {
 				return readPattern(patternFile)
 			}
@@ -284,7 +284,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		val List<String> patterns = new ArrayList<String>()
 		val reader = new BufferedReader(new InputStreamReader(file.contents))
 		var String line
-		while ((line = reader.readLine()) != null) {
+		while ((line = reader.readLine()) !== null) {
 			patterns.add(line.replaceAll("\\.", "\\."))
 		}
 
@@ -330,7 +330,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	private def showErrorMessage(String title, String message) {
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-			public override void run() {
+			override void run() {
 				try {
 					MessageDialog.openError(shell, title, message)
 				} catch (PartInitException e) {
@@ -342,7 +342,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
 	private def updateLogView() {		
 		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-			public override void run() {
+			override void run() {
 				val part2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 						getActivePage().findView(LogView.ID)
 				(part2 as LogView).update()

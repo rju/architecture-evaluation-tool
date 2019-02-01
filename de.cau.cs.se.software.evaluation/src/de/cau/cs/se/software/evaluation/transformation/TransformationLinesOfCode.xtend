@@ -49,7 +49,7 @@ class TransformationLinesOfCode extends AbstractTransformation<List<AbstractType
 	}
 	
 	private def calculateLOC(CompilationUnit compilationUnit, ASTNode node) {
-		if (node != null)
+		if (node !== null)
 			compilationUnit.getLineNumber(node.length + node.startPosition) - 
 			compilationUnit.getLineNumber(node.startPosition) + 1
 		else

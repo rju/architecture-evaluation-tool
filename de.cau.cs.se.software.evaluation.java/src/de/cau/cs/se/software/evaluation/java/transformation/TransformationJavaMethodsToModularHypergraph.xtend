@@ -45,7 +45,7 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	public new(IJavaProject project, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
+	new(IJavaProject project, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
 		super(monitor)
 		this.project = project
 		this.dataTypePatterns = dataTypePatterns
@@ -175,7 +175,7 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 			UnionType:
 				return type.types.forall[it.isDataType(dataTypePatterns)]
 			WildcardType:
-				return if (type.bound != null)
+				return if (type.bound !== null)
 					type.bound.isDataType(dataTypePatterns)
 				else
 					true	

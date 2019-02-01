@@ -57,7 +57,7 @@ class TransformationCyclomaticComplexity extends AbstractTransformation<List<Abs
 	
 	private def checkMethods(TypeDeclaration declaration) {
 		declaration.methods.forEach[method |
-			if (method.body != null) {
+			if (method.body !== null) {
 				val visitor = new CyclomaticComplexityVisitor("")
 				method.accept(visitor)
 				var bucket = visitor.cyclomatic

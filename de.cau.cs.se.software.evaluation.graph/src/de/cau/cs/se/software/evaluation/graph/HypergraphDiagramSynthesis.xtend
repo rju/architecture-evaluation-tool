@@ -32,10 +32,10 @@ import de.cau.cs.se.software.evaluation.hypergraph.Node
 import java.util.HashMap
 import java.util.Map
 import javax.inject.Inject
-import org.eclipse.elk.alg.layered.properties.LayeredOptions
 import org.eclipse.elk.core.options.Direction
 import org.eclipse.elk.core.options.EdgeRouting
-import org.eclipse.elk.graph.KNode
+import de.cau.cs.kieler.klighd.kgraph.KNode
+import org.eclipse.elk.alg.layered.options.LayeredOptions
 
 class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
     
@@ -50,30 +50,30 @@ class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
     //extension KRenderingFactory = KRenderingFactory.eINSTANCE
 		         
     /** changes in layout direction */
-    private static val DIRECTION_NAME = "Layout Direction"
-    private static val DIRECTION_UP = "up"
-    private static val DIRECTION_DOWN = "down"
-    private static val DIRECTION_LEFT = "left"
-    private static val DIRECTION_RIGHT = "right"
+    static val DIRECTION_NAME = "Layout Direction"
+    static val DIRECTION_UP = "up"
+    static val DIRECTION_DOWN = "down"
+    static val DIRECTION_LEFT = "left"
+    static val DIRECTION_RIGHT = "right"
     
     /** changes in edge routing */
-    private static val ROUTING_NAME = "Edge Routing"
-    private static val ROUTING_POLYLINE = "polyline"
-    private static val ROUTING_ORTHOGONAL = "orthogonal"
-    private static val ROUTING_SPLINES = "splines"
+    static val ROUTING_NAME = "Edge Routing"
+    static val ROUTING_POLYLINE = "polyline"
+    static val ROUTING_ORTHOGONAL = "orthogonal"
+    static val ROUTING_SPLINES = "splines"
     
-    private static val SPACING_NAME = "Spacing"
+    static val SPACING_NAME = "Spacing"
     
     /**
      * The filter option definition that allows users to customize the constructed class diagrams.
      */             
-    private static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
+    static val SynthesisOption DIRECTION = SynthesisOption::createChoiceOption(DIRECTION_NAME,
        ImmutableList::of(DIRECTION_UP, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT), DIRECTION_LEFT)
        
-    private static val SynthesisOption ROUTING = SynthesisOption::createChoiceOption(ROUTING_NAME,
+    static val SynthesisOption ROUTING = SynthesisOption::createChoiceOption(ROUTING_NAME,
        ImmutableList::of(ROUTING_POLYLINE, ROUTING_ORTHOGONAL, ROUTING_SPLINES), ROUTING_POLYLINE)
        
-   	private static val SynthesisOption SPACING = SynthesisOption::createRangeOption(SPACING_NAME, 5f, 200f, 50f)
+   	static val SynthesisOption SPACING = SynthesisOption::createRangeOption(SPACING_NAME, 5d, 200d, 50d)
        
     
     var Map<Node,KNode> nodeMap = new HashMap<Node,KNode>()
@@ -84,7 +84,7 @@ class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
      * <br>
      * Registers the diagram filter option declared above, which allow users to tailor the constructed diagrams.
      */
-    override public getDisplayedSynthesisOptions() {
+    override getDisplayedSynthesisOptions() {
         return ImmutableList::of(DIRECTION, ROUTING, SPACING)
     }
 
@@ -96,10 +96,10 @@ class HypergraphDiagramSynthesis extends AbstractDiagramSynthesis<Hypergraph> {
         	// TODO the merging must be false
             // de.cau.cs.kieler.klay.layered.properties.Properties
             // it.setLayoutOption(Properties.MERGE_EDGES, false)
-            it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, false)
+            //it.setLayoutOption(LayeredOptions.LAYOUT_HIERARCHY, false)
 //            it.setLayoutOption(LayeredOptions::ALGORITHM, "de.cau.cs.kieler.kiml.ogdf.circular")	
 
-            it.setLayoutOption(LayeredOptions::SPACING_NODE, SPACING.objectValue as Float)
+            it.setLayoutOption(LayeredOptions::SPACING_NODE_NODE, SPACING.objectValue as Double)
             it.setLayoutOption(LayeredOptions::DIRECTION, switch(DIRECTION.objectValue) {
             	case DIRECTION_UP: Direction::UP
             	case DIRECTION_DOWN: Direction::DOWN

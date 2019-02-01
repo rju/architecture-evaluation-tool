@@ -48,7 +48,7 @@ class JavaHypergraphQueryHelper {
 	 */
 	def static findNodeForConstructorBinding(EList<Node> nodes, IMethodBinding binding) {
 		val result = nodes.findNodeForMethodBinding(binding)
-		if (result == null) { /** now check if there is an implicit constructor node. */
+		if (result === null) { /** now check if there is an implicit constructor node. */
 			nodes.findFirst[
 				val derivedFrom = it.derivedFrom
 				switch (derivedFrom) {
@@ -124,9 +124,9 @@ class JavaHypergraphQueryHelper {
      */
     def static findOrCreateTargetNode(ModularHypergraph graph, ITypeBinding typeBinding, IMethodBinding methodBinding) {
     	var targetNode = graph.nodes.findNodeForMethodBinding(methodBinding)
-    	if (targetNode == null) { /** node does not yet exist. It must be a framework class. */
+    	if (targetNode === null) { /** node does not yet exist. It must be a framework class. */
     		var module = graph.modules.findModule(typeBinding)
-    		if (module == null) { /** Module does not exists. Add it on demand. */
+    		if (module === null) { /** Module does not exists. Add it on demand. */
     			module = createModuleForTypeBinding(typeBinding, EModuleKind.FRAMEWORK)
     			graph.modules.add(module) 
     		}

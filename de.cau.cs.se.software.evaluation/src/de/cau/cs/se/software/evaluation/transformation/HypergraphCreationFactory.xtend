@@ -42,7 +42,7 @@ class HypergraphCreationFactory {
 		val node = HypergraphFactory.eINSTANCE.createNode
 		node.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			node.derivedFrom = reference
@@ -84,7 +84,7 @@ class HypergraphCreationFactory {
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			edge.derivedFrom = reference
@@ -110,7 +110,7 @@ class HypergraphCreationFactory {
 		val module = HypergraphFactory.eINSTANCE.createModule
 		module.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			module.derivedFrom = reference

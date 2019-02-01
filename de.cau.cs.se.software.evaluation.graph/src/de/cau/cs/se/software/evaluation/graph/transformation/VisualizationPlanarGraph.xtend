@@ -44,7 +44,7 @@ class VisualizationPlanarGraph implements IGenerator<ModularHypergraph, PlanarVi
 						val startPlanarNode = moduleMap.get(startModule)
 						val endPlanarNode = moduleMap.get(endModule)
 						val planarEdge = startPlanarNode.edges.findFirst[endPlanarNode.edges.contains(it)]
-						if (planarEdge == null) {
+						if (planarEdge === null) {
 							result.edges += createPlanarEdge(startPlanarNode, endPlanarNode)
 						} else {
 							planarEdge.count = planarEdge.count + 1

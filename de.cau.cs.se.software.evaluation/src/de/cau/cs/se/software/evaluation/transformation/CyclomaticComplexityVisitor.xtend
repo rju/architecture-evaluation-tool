@@ -34,11 +34,15 @@ import org.eclipse.jdt.core.dom.LambdaExpression
  */
 class CyclomaticComplexityVisitor extends ASTVisitor {
 
-	private var int cyclomatic = 1;
-	private val String source;
+	var int cyclomatic = 1
+	val String source
 
 	new(String source) {
 		this.source = source;
+	}
+	
+	def getSource() {
+		return source
 	}
 	
 	def getCyclomatic() {
