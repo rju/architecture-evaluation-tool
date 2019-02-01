@@ -16,7 +16,7 @@
 	<properties>
 		<!-- Relative path to the repo being uploaded -->
 		<repo-path>${project.build.directory}/repository/</repo-path>
-		<updatesite-path>file:///srv/vhosts/eus/se/snapshot/</updatesite-path>
+		<updatesite-path>sftp://repo@repo.se.internal/var/www/html/se/</updatesite-path>
 		<!-- <updatesite-path>file:///home/reiner/eus/se/snapshot/</updatesite-path> -->
 	</properties>
 
@@ -58,7 +58,7 @@
 							<fromDir>${repo-path}</fromDir>
 							<includes>**</includes>
 							<url>${updatesite-path}</url>
-							<toDir>.</toDir>
+							<toDir>snapshot</toDir>
 						</configuration>
 					</execution>
 				</executions>
