@@ -6,6 +6,32 @@ b) a set of analysis metrics and transfromations for these hypergraphs and modul
 
 See "adding support for a metamodel" in the wiki.
 
+## Eclipse-Repository
+
+A pre-compiled of the **architecture evaluation tool** can be found at
+* snapshot version https://maui.se.informatik.uni-kiel.de/repo/se/snapshot
+* release versions https://maui.se.informatik.uni-kiel.de/repo/se/releases/ (when they come available)
+
+## Compiling the tool yourself
+
+The **architecture evaluation tool** uses maven as build system. To compile the plugins
+* git clone https://github.com/rju/architecture-evaluation-tool.git
+* mvn compile
+* mvn package (currently you need to modify the pom.xml in de.cau.cs.se.software.evaluation.repository to be able to deploy the repository to your own location)
+* Add the repository location to your eclipse update sites and install the tool
+
+### Linux
+
+We tested this with
+* maven 3.5.4
+* Java 8 (oracle version)
+* Eclipse Oxygen
+* Ubuntu 16.04, 17.10, 18.04, 18.10
+
+### Windows
+
+
+
 ## JVM Languages Support
 
 The tool will be extended to support other languages, like Xtend and Groovy to complement the Java project analysis. For the analyses the tool requires two distinct inputs:
