@@ -12,6 +12,19 @@ A pre-compiled of the **architecture evaluation tool** can be found at
 * snapshot version https://maui.se.informatik.uni-kiel.de/repo/se/snapshot
 * release versions https://maui.se.informatik.uni-kiel.de/repo/se/releases/ (when they come available)
 
+## Dependencies
+
+Tested with:
+* maven 3.5.4, 3.6.0
+* Java 8 (oracle version) does not compile with Java 9 or higher
+* Eclipse Oxygen
+
+Operating systems:
+* Ubuntu 16.04, 17.10, 18.04, 18.10
+* MacOS
+
+**Note:** There have been reports that it does not compile on Windows using the Windows Linux Subsystem.
+
 ## Compiling the tool yourself
 
 The **architecture evaluation tool** uses maven as build system. To compile the plugins
@@ -20,17 +33,15 @@ The **architecture evaluation tool** uses maven as build system. To compile the 
 * mvn package (currently you need to modify the pom.xml in de.cau.cs.se.software.evaluation.repository to be able to deploy the repository to your own location)
 * Add the repository location to your eclipse update sites and install the tool
 
-### Linux
+## Using Eclipse to build
 
-We tested this with
-* maven 3.5.4
-* Java 8 (oracle version)
-* Eclipse Oxygen
-* Ubuntu 16.04, 17.10, 18.04, 18.10
-
-### Windows
-
-
+* Import project as maven projects
+* Set API-baseline
+* Required plugins for Eclipse which you should install in advance
+  ** [PCM v4.0](https://sdqweb.ipd.kit.edu/wiki/PCM_Installation) is necessary for the PCM evaluation part
+  ** [Geco](https://maui.se.informatik.uni-kiel.de/repo/geco/release/1.0.0 or https://maui.se.informatik.uni-kiel.de/repo/geco/snapshot) provides basic infrastructure for all transformations
+  ** [Klighd](http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly-openkieler/) (Without Ptolemy) used for graph visualization
+* Trigger clean and build 
 
 ## JVM Languages Support
 
