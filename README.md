@@ -22,8 +22,9 @@ Tested with:
 Operating systems:
 * Ubuntu 16.04, 17.10, 18.04, 18.10
 * MacOS
+* Windows 7 + maven 3.6.0 + Java 8
 
-**Note:** There have been reports that it does not compile on Windows using the Windows Linux Subsystem.
+**Note:** It has been reported that it does not compile on Windows using the Windows Linux Subsystem.
 
 ## Compiling the tool yourself
 
