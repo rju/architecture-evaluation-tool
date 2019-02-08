@@ -14,24 +14,24 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
-		<tycho-version>1.3.0</tycho-version>
-		<tycho-extras-version>1.3.0</tycho-extras-version>
+		<tychoVersion>1.3.0</tychoVersion>
+		<tychoVersion>1.3.0</tychoVersion>
 		
-		<xtext-version>2.16.0</xtext-version>
-		<xtend-maven-version>2.16.0</xtend-maven-version>
+		<xtextVersion>2.16.0</xtextVersion>
+		<xtendVersion>2.16.0</xtendVersion>
 
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
-		<platform-version>[3.9,4.7)</platform-version>
+		<platformVersion>[3.9,4.7)</platformVersion>
 
-		<eclipse-repo.url>http://download.eclipse.org/releases/oxygen/</eclipse-repo.url>
+		<eclipseRepoUrl>http://download.eclipse.org/releases/oxygen/</eclipseRepoUrl>
 		<!--  old http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/ -->
-		<kieler-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/</kieler-repo.url>
-		<elk-repo.url>http://download.eclipse.org/elk/updates/releases/0.3.0/</elk-repo.url>
+		<kiekerRepoUrl>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/</kiekerRepoUrl>
+		<elkRepoUrl>http://download.eclipse.org/elk/updates/releases/0.3.0/</elkRepoUrl>
 
-		<geco-repo.url>https://maui.se.informatik.uni-kiel.de/repo/geco/release/1.0.0/</geco-repo.url>
-		<palladio-repo.url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo.url>
+		<gecoRepoUrl>https://maui.se.informatik.uni-kiel.de/repo/geco/release/1.0.0/</gecoRepoUrl>
+		<palladioRepoUrl>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladioRepoUrl>
 	</properties>
 
 	<modules>
@@ -55,13 +55,13 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<configuration>
 					<compilerArgs>
 						<arg>-err:-forbidden,-discouraged</arg>
@@ -71,7 +71,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<executions>
 					<execution>
 						<id>plugin-source</id>
@@ -84,7 +84,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<executions>
 					<execution>
 						<id>source-feature</id>
@@ -98,7 +98,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<executions>
 					<execution>
 						<id>attach-p2-metadata</id>
@@ -112,7 +112,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<configuration>
 					<pomDependencies>consider</pomDependencies>
 					<target>
@@ -173,7 +173,7 @@
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>
-					<version>${xtend-maven-version}</version>
+					<version>${xtendVersion}</version>
 					<executions>
 						<execution>
 							<phase>process-sources</phase>
@@ -217,12 +217,12 @@
 	<repositories>
 		<repository>
 			<id>eclipse</id>
-			<url>${eclipse-repo.url}</url>
+			<url>${eclipseRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>elk</id>
-			<url>${elk-repo.url}</url>
+			<url>${elkRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
@@ -238,7 +238,7 @@
 		</repository>
 		<repository>
 			<id>kieler</id>
-			<url>${kieler-repo.url}</url>
+			<url>${kiekerRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
 
@@ -249,13 +249,13 @@
 		</repository>
 		<repository>
 			<id>geco</id>
-			<url>${geco-repo.url}</url>
+			<url>${gecoRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
 
 		<repository>
 			<id>palladio</id>
-			<url>${palladio-repo.url}</url>
+			<url>${palladioRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>

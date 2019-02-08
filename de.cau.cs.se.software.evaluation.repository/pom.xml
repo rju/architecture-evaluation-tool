@@ -15,18 +15,23 @@
 
 	<properties>
 		<!-- Relative path to the repo being uploaded -->
-		<repo-path>${project.build.directory}/repository/</repo-path>
-		<updatesite-path>sftp://repo@repo.se.internal/var/www/html/se/</updatesite-path>
-		<!-- <updatesite-path>file:///home/reiner/eus/se/snapshot/</updatesite-path> -->
+		<buildRepoPath>${project.build.directory}/repository/</buildRepoPath>
+		<updatesitePath>sftp://repo@repo.se.internal/var/www/html/</updatesitePath>
 	</properties>
 
 	<build>
 		<extensions>
-			<!-- Enabling the use of file transfer -->
+			<!-- Enabling the use of ssh transfer -->
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
 				<version>3.0.0</version>
+			</extension>
+			<!-- Enabling the use of file transfer -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-file</artifactId>
+				<version>2.6</version>
 			</extension>
 		</extensions>
 
@@ -34,7 +39,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-director-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<executions>
 					<execution>
 						<id>materialize-products</id>
@@ -53,7 +58,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-repository-plugin</artifactId>
-				<version>${tycho-version}</version>
+				<version>${tychoVersion}</version>
 				<configuration>
                 			<includeAllDependencies>true</includeAllDependencies>
           			</configuration>
@@ -73,9 +78,9 @@
 						</goals>
 						<configuration>
 							<serverId>repo</serverId>
-							<fromDir>${repo.path}</fromDir>
+							<fromDir>${buildRepoPath}</fromDir>
 							<includes>**</includes>
-							<url>${updatesite-path}</url>
+							<url>${updatesitePath}</url>
 							<toDir>snapshot</toDir>
 						</configuration>
 					</execution>
