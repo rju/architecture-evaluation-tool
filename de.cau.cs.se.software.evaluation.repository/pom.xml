@@ -16,7 +16,7 @@
 	<properties>
 		<!-- Relative path to the repo being uploaded -->
 		<buildRepoPath>${project.build.directory}/repository/</buildRepoPath>
-		<updatesitePath>sftp://repo@repo.se.internal/var/www/html/</updatesitePath>
+		<updatesitePath>sftp://repo@repo.se.internal/var/www/html/se/</updatesitePath>
 	</properties>
 
 	<build>
