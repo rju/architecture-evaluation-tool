@@ -73,7 +73,7 @@
 				<executions>
 					<execution>
 						<id>upload-repo</id>
-						<phase>package</phase><!-- deploy does not work. The maven deploy plugin runs ammok ->
+						<phase>package</phase><!-- deploy does not work. The maven deploy plugin runs ammok -->
 						<goals>
 							<goal>upload</goal>
 						</goals>
