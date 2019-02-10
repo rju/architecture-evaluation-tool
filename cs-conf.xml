@@ -19,12 +19,6 @@
 		<property name="file" value="${config_loc}/suppressions.xml" />
 	</module>
 
-	<module name="SuppressWithNearbyCommentFilter">
-		<property name="commentFormat" value="NOCS" />
-		<property name="checkFormat" value=".*" />
-		<property name="influenceFormat" value="0" />
-	</module>
-
 	<!-- !________________________________________________________________________________________ 
 		! ! D U P L I C A T E S !________________________________________________________________________________________ 
 		! -->
@@ -103,6 +97,12 @@
 
 	<module name="TreeWalker">
 		<property name="tabWidth" value="4" />
+
+		<module name="SuppressWithNearbyCommentFilter">
+			<property name="commentFormat" value="NOCS" />
+			<property name="checkFormat" value=".*" />
+			<property name="influenceFormat" value="0" />
+		</module>
 
 		<!-- !________________________________________________________________________________________ 
 			! ! A N N O T A T I O N S !________________________________________________________________________________________ 
@@ -199,7 +199,6 @@
 			<property name="option" value="same" />
 			<property name="tokens"
 				value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE" />
-			<property name="shouldStartLine" value="true" />
 		</module>
 
 
