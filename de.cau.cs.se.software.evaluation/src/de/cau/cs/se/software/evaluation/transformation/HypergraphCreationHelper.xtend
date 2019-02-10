@@ -42,7 +42,7 @@ class HypergraphCreationHelper {
 		val node = HypergraphFactory.eINSTANCE.createNode
 		node.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			node.derivedFrom = reference
@@ -84,7 +84,7 @@ class HypergraphCreationHelper {
 		val edge = HypergraphFactory.eINSTANCE.createEdge
 		edge.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			edge.derivedFrom = reference
@@ -110,7 +110,7 @@ class HypergraphCreationHelper {
 		val module = HypergraphFactory.eINSTANCE.createModule
 		module.name = name
 		
-		if (element != null) {
+		if (element !== null) {
 			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
 			reference.element = element
 			module.derivedFrom = reference
@@ -189,7 +189,7 @@ class HypergraphCreationHelper {
 		val edgeSubset = source.edges.filter[sourceEdge | target.edges.exists[targetEdge | targetEdge == sourceEdge]]
 		val edgeName = source.name + "::" + target.name
 		val existingEdge = edgeSubset.findFirst[edge | edge.name.equals(edgeName)]
-		if (existingEdge == null) {			
+		if (existingEdge === null) {			
 			return createEdge(hypergraph, source, target, edgeName, null)
 		} else
 			return existingEdge
