@@ -160,7 +160,8 @@
 				<version>2.15</version>
 				<configuration>
 					<linkXRef>true</linkXRef>
-					<propertyExpansion>basedir=${basedir}</propertyExpansion>
+					<propertyExpansion>config_loc=${basedir}</propertyExpansion>
+					<configLocation>cs-conf.xml</configLocation>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (C) 2016 Reiner Jung
+ * Copyright (C) 2019 Reiner Jung
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package de.cau.cs.se.software.evaluation.emf
-
-import de.cau.cs.se.software.evaluation.jobs.IAnalysisJobProvider
-import org.eclipse.core.resources.IProject
-import org.eclipse.core.resources.IFile
-import org.eclipse.swt.widgets.Shell
-
-class EMFMetamodelAnalysisJobProvider implements IAnalysisJobProvider {
-	
-	override createAnalysisJob(IProject project, IFile file, Shell shell) {
-		return new EMFMetamodelAnalysisJob(project, file, shell)
-	}
-	
-	override getFileExtension() { "ecore" }
-	
-}
+package de.cau.cs.se.software.evaluation.geco;
