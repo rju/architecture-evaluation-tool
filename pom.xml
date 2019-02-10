@@ -167,11 +167,9 @@
 						<configLocation>cs-conf.xml</configLocation>
 					</configuration>
 				</plugin>
-			</plugins>
-			<!-- xtend-maven-plugin is in pluginManagement instead of in plugins so 
-				that it doesn't run before the exec-maven-plugin's *.mwe2 gen; this way we 
-				can list it after. -->
-			<plugins>
+				<!-- xtend-maven-plugin is in pluginManagement instead of in plugins 
+					so that it doesn't run before the exec-maven-plugin's *.mwe2 gen; this way 
+					we can list it after. -->
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>
