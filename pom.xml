@@ -15,8 +15,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
 		<tychoVersion>1.3.0</tychoVersion>
-		<tychoVersion>1.3.0</tychoVersion>
-		
+
 		<xtextVersion>2.16.0</xtextVersion>
 		<xtendVersion>2.16.0</xtendVersion>
 
