@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -25,7 +26,7 @@
 		<platformVersion>[3.9,4.7)</platformVersion>
 
 		<eclipseRepoUrl>http://download.eclipse.org/releases/oxygen/</eclipseRepoUrl>
-		<!--  old http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/ -->
+		<!-- old http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/ -->
 		<kiekerRepoUrl>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/</kiekerRepoUrl>
 		<elkRepoUrl>http://download.eclipse.org/elk/updates/releases/0.3.0/</elkRepoUrl>
 
@@ -151,21 +152,22 @@
 					</environments>
 				</configuration>
 			</plugin>
-
-			<!-- checkstyle plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.15</version>
-				<configuration>
-					<linkXRef>true</linkXRef>
-					<propertyExpansion>config_loc=${basedir}</propertyExpansion>
-					<configLocation>cs-conf.xml</configLocation>
-				</configuration>
-			</plugin>
 		</plugins>
 
 		<pluginManagement>
+			<plugins>
+				<!-- checkstyle plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>3.0.0</version>
+					<configuration>
+						<linkXRef>true</linkXRef>
+						<propertyExpansion>config_loc=${maven.multiModuleProjectDirectory}</propertyExpansion>
+						<configLocation>cs-conf.xml</configLocation>
+					</configuration>
+				</plugin>
+			</plugins>
 			<!-- xtend-maven-plugin is in pluginManagement instead of in plugins so 
 				that it doesn't run before the exec-maven-plugin's *.mwe2 gen; this way we 
 				can list it after. -->
