@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -93,8 +92,9 @@ public class ExportGraphAction extends Action {
 					stream.close();
 					try {
 						project.refreshLocal(IResource.DEPTH_INFINITE, null);
-					} catch (final CoreException e) {
-						e.printStackTrace();
+					} catch (final Exception e) {
+						System.out.println("Warning: could not refresh resources.");
+						// e.printStackTrace();
 					}
 				}
 			}

@@ -16,11 +16,12 @@
 package de.cau.cs.se.software.evaluation.transformation
 
 import de.cau.cs.se.software.evaluation.hypergraph.Edge
+import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.HypergraphFactory
 import de.cau.cs.se.software.evaluation.hypergraph.ModularHypergraph
 import de.cau.cs.se.software.evaluation.hypergraph.Module
 import de.cau.cs.se.software.evaluation.hypergraph.Node
-import de.cau.cs.se.software.evaluation.hypergraph.Hypergraph
+import java.util.Set
 import org.eclipse.emf.ecore.EObject
 
 /**
@@ -94,6 +95,31 @@ class HypergraphCreationFactory {
 		hypergraph.edges.add(edge)
 		source.edges.add(edge)
 		target.edges.add(edge)
+		
+		return edge
+	}
+	
+	/**
+	 * Create a hyperedge for a hypergraph between a set of nodes.
+	 * 
+	 * @param hypergraph
+	 * @param nodes set of nodes
+	 * @param name the name of the edge
+	 * @param element a model element related to that edge
+	 */
+	def static createHyperedge(Hypergraph hypergraph, Set<Node> nodes, String name, EObject element) {
+		val edge = HypergraphFactory.eINSTANCE.createEdge
+		edge.name = name
+		
+		if (element != null) {
+			val reference = HypergraphFactory.eINSTANCE.createModelElementTrace
+			reference.element = element
+			edge.derivedFrom = reference
+		} else
+			edge.derivedFrom = null
+		
+		hypergraph.edges.add(edge)
+		nodes.forEach[edges.add(edge)]
 		
 		return edge
 	}
