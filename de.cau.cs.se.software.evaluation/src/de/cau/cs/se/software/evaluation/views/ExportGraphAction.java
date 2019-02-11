@@ -93,14 +93,14 @@ public class ExportGraphAction extends Action {
 					try {
 						project.refreshLocal(IResource.DEPTH_INFINITE, null);
 					} catch (final Exception e) {
-						System.out.println("Warning: could not refresh resources.");
-						// e.printStackTrace();
+						MessageDialog.openWarning(this.shell,
+								"Export Warning", "Cannot refresh resources. Cause: " + e.getLocalizedMessage());
 					}
 				}
 			}
 		} catch (final IOException e) {
 			MessageDialog.openError(this.shell,
-					"Export Error", "Error exporting hypergraph " + e.getLocalizedMessage());
+					"Export Error", "Error exporting hypergraph. Cause: " + e.getLocalizedMessage());
 		}
 	}
 }
