@@ -4,8 +4,7 @@ UPDATE_SITE_URL = "sftp://repo@repo.se.internal/var/www/html/se"
 pipeline {
 	agent 'any'
 	tools {
-		maven 'Maven 3.6.1'
-		jdk 'jdk8'
+		maven 'Maven 3.6.1'	
 	}
 	stages {
 		stage ('Checkout') {
