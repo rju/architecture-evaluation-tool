@@ -17,7 +17,7 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				sh 'mvn -Dmaven.multiModuleProjectDirectory=' + env.WORKSPACE + ' --batch-mode compile'
+				sh 'mvn -DmultiModuleProjectDirectory=' + env.WORKSPACE + ' --batch-mode compile'
 			}
 		}
 
