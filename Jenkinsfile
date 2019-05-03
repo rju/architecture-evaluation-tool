@@ -3,9 +3,6 @@ UPDATE_SITE_URL = "sftp://repo@repo.se.internal/var/www/html/se"
 
 pipeline {
 	agent 'any'
-	tools {
-		maven 'Maven 3.6.0'	
-	}
 	stages {
 		stage ('Checkout') {
 			steps {
@@ -17,7 +14,7 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				sh 'mvn -Dmaven.multiModuleProjectDirectory=.. --batch-mode compile'
+				sh 'mvn --batch-mode compile'
 			}
 		}
 
