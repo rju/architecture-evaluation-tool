@@ -7,7 +7,7 @@ pipeline {
 		maven 'Maven 3.6.0'
 	}
 	environment {
-		M2_HOME = env.WORKSPACE
+		M2_HOME = '.'
 	}
 	stages {
 		stage ('Checkout') {
