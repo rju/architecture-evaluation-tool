@@ -42,13 +42,11 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.TypeDeclaration
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.swt.widgets.Shell
-import org.eclipse.ui.PartInitException
 import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 /**
  * Analysis job executed for a given project.
@@ -67,8 +65,8 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	String OBSERVED_SYSTEM_TITLE = "observed system"
 
-	new(IProject project, Shell shell) {
-		super(project, shell)
+	new(IProject project, IOutputHandler handler) {
+		super(project, handler)
 		this.javaProject = project.getJavaProject
 	}
 
@@ -114,7 +112,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 					return Status.OK_STATUS
 				} else {
-					showErrorMessage("Project Setup Error", "No classes found for analysis.")
+					handler.error("Project Setup Error", "No classes found for analysis.")
 				}
 			}
 		}
@@ -264,7 +262,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	 * @return returns true if the given type is a data type and not a behavior type.
 	 */
 	private def boolean isClassDataType(ITypeBinding typeBinding, List<String> dataTypePatterns) {
-		// TODO this might be to simple.
+		// TODO this might be too simple.
 		val name = typeBinding.determineFullyQualifiedName
 		return dataTypePatterns.exists[pattern|name.matches(pattern)]
 	}
@@ -282,7 +280,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 			}
 		}
 
-		showErrorMessage(
+		handler.error(
 			"Configuration Error",
 			"The " + title + " file (" + filename + ") containing class name patterns is missing."
 		)
@@ -341,18 +339,6 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 				if(!(type as IType).binary) types.add(type)
 			}
 		]
-	}
-
-	private def showErrorMessage(String title, String message) {
-		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-			override void run() {
-				try {
-					MessageDialog.openError(shell, title, message)
-				} catch (PartInitException e) {
-					e.printStackTrace()
-				}
-			}
-		})
 	}
 	
 	private def updateLogView() {		

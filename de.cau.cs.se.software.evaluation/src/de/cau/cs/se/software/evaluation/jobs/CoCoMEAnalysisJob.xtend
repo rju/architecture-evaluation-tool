@@ -19,7 +19,6 @@ import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Status
-import org.eclipse.swt.widgets.Shell
 
 /** 
  * Special analysis job for megamodels.
@@ -32,8 +31,8 @@ class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
 		
 	val boolean complete
 	
-	new(IProject project, boolean complete, Shell shell) {
-		super(project, shell)
+	new(IProject project, boolean complete, IOutputHandler handler) {
+		super(project, handler)
 		this.complete = complete
 	}
 		

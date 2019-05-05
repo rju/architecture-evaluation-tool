@@ -36,6 +36,7 @@
 
 	<modules>
 		<module>de.cau.cs.se.software.evaluation</module>
+		<module>de.cau.cs.se.software.evaluation.headless</module>
 		<module>de.cau.cs.se.software.evaluation.graph</module>
 		<module>de.cau.cs.se.software.evaluation.java</module>
 		<module>de.cau.cs.se.software.evaluation.emf</module>

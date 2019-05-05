@@ -18,12 +18,12 @@ package de.cau.cs.se.software.evaluation.emf
 import de.cau.cs.se.software.evaluation.jobs.IAnalysisJobProvider
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.resources.IFile
-import org.eclipse.swt.widgets.Shell
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class EMFMetamodelAnalysisJobProvider implements IAnalysisJobProvider {
 	
-	override createAnalysisJob(IProject project, IFile file, Shell shell) {
-		return new EMFMetamodelAnalysisJob(project, file, shell)
+	override createAnalysisJob(IProject project, IFile file, IOutputHandler handler) {
+		return new EMFMetamodelAnalysisJob(project, file, handler)
 	}
 	
 	override getFileExtension() { "ecore" }
