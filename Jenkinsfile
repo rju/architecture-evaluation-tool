@@ -8,6 +8,7 @@ pipeline {
 	}
 	environment {
 		M2_HOME = '.'
+		MAVEN_OPS = '-Dmaven.multiModuleProjectDirectory=.'
 	}
 	stages {
 		stage ('Checkout') {
