@@ -8,7 +8,7 @@
 <repository location="http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<repository location="http://download.eclipse.org/releases/neon"/>
+<repository location="http://download.eclipse.org/releases/oxygen"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
