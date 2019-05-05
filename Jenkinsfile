@@ -6,6 +6,9 @@ pipeline {
 	tools {
 		maven 'Maven 3.6.0'
 	}
+	environment {
+		M2_HOME = env.WORKSPACE
+	}
 	stages {
 		stage ('Checkout') {
 			steps {
