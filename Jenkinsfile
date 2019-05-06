@@ -21,7 +21,11 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				sh 'mvn --batch-mode compile'
+				withMaven(
+					maven: 'M3'
+				) {
+					sh 'mvn --batch-mode compile'
+				}
 			}
 		}
 
