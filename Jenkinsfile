@@ -18,11 +18,7 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				sh '''
-					echo "PATH = ${PATH}"
-                    			echo "M2_HOME = ${M2_HOME}"
-				'''
-				sh 'mvn -X compile -Dmaven.multiModuleProjectDirectory=' + env.WORKSPACE
+				sh 'mvn --batch-mode compile'
 			}
 		}
 
