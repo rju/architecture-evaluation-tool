@@ -6,10 +6,7 @@ pipeline {
 	tools {
 		maven 'Maven 3.6.0'
 	}
-	environment {
-		M2_HOME = '.'
-		MAVEN_OPS = '-Dmaven.multiModuleProjectDirectory=.'
-	}
+
 	stages {
 		stage ('Checkout') {
 			steps {
@@ -21,11 +18,11 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				maven(
-					maven: 'M3'
-				) {
-					sh 'mvn --batch-mode compile'
-				}
+				sh '''
+					echo "PATH = ${PATH}"
+                    			echo "M2_HOME = ${M2_HOME}"
+				'''
+				sh 'mvn --batch-mode compile'
 			}
 		}
 
