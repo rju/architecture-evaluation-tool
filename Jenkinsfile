@@ -22,7 +22,9 @@ pipeline {
 					echo "PATH = ${PATH}"
                     			echo "M2_HOME = ${M2_HOME}"
 				'''
-				sh 'mvn -Dmaven.multiModuleProjectDirectory=' + env.WORKSPACE + ' --batch-mode compile'
+				sh '''
+					mvn -Dmaven.multiModuleProjectDirectory=${WORKSPACE} --batch-mode compile
+				'''
 			}
 		}
 
