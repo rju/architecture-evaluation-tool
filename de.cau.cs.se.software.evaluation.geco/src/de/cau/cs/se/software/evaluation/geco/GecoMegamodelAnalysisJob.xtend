@@ -26,11 +26,10 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Status
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.swt.widgets.Shell
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.resource.XtextResourceSet
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 /**
  * run job for the GECO megamodel evaluation.
@@ -43,8 +42,8 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 	@Inject
 	XtextResourceSet resourceSet
 			
-	new(IProject project, IFile file, Shell shell) {
-		super(project, shell)
+	new(IProject project, IFile file, IOutputHandler handler) {
+		super(project, handler)
 		this.file = file
 	}
 	
@@ -70,7 +69,7 @@ class GecoMegamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		
 			calculateComplexity(gecoMegamodel.result, monitor, result)			
 		} else {
-			MessageDialog.openError(this.shell, "Model empty", "The selected resource is empty.")
+			handler.error("Model empty", "The selected resource is empty.")
 		}
 								
 		monitor.done()

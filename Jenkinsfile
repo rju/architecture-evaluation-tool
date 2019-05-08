@@ -6,6 +6,7 @@ pipeline {
 	tools {
 		maven 'Maven 3.6.0'
 	}
+
 	stages {
 		stage ('Checkout') {
 			steps {
@@ -17,7 +18,7 @@ pipeline {
 
 		stage('Build') {
 			steps {
-				sh 'export maven.multiProjectDirectory=' + env.WORKSPACE + '; mvn -Dmaven.multiModuleProjectDirectory=' + env.WORKSPACE + ' --batch-mode compile'
+				sh 'mvn --batch-mode compile'
 			}
 		}
 

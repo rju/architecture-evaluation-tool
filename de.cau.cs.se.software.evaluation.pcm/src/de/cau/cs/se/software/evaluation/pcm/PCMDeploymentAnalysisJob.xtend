@@ -24,18 +24,17 @@ import org.eclipse.core.runtime.Status
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.swt.widgets.Shell
 import org.palladiosimulator.pcm.system.System
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class PCMDeploymentAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
 
 	IFile file
 		
-	new(IProject project, IFile file, Shell shell) {
-		super(project, shell)
+	new(IProject project, IFile file, IOutputHandler handler) {
+		super(project, handler)
 		this.file = file
 	}
 		
@@ -64,7 +63,7 @@ class PCMDeploymentAnalysisJob extends AbstractHypergraphAnalysisJob {
 			
 			calculateCohesion(deploymentModel.result, monitor, result)	
 		} else {
-			MessageDialog.openError(this.shell, "Model empty", "The selected resource is empty.")
+			handler.error("Model empty", "The selected resource is empty.")
 		}
 								
 		monitor.done()

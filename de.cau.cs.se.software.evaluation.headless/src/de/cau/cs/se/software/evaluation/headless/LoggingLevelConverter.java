@@ -1,5 +1,5 @@
 /***************************************************************************
- * Copyright (C) 2016 Reiner Jung
+ * Copyright 2018 Kieker Project (http://kieker-monitoring.net)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-package de.cau.cs.se.software.evaluation.geco
+package de.cau.cs.se.software.evaluation.headless;
 
-import de.cau.cs.se.software.evaluation.jobs.IAnalysisJobProvider
-import org.eclipse.core.resources.IProject
-import org.eclipse.core.resources.IFile
-import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
+import org.apache.log4j.Level;
 
-class GecoMegamodelAnalysisJobProvider implements IAnalysisJobProvider {
-	
-	override createAnalysisJob(IProject project, IFile file, IOutputHandler handler) {
-		return new  GecoMegamodelAnalysisJob(project, file, handler)
+/**
+ * Level converter for specifying the log level at command line.
+ *
+ * @author Reiner Jung
+ *
+ */
+public class LoggingLevelConverter implements com.beust.jcommander.IStringConverter<Level> {
+
+	/**
+	 * Create a LoggingLevelConverter.
+	 */
+	public LoggingLevelConverter() {
+		// default constructor
 	}
-	
-	override getFileExtension() { "geco" }
-	
+
+	@Override
+	public Level convert(final String levelName) {
+		return Level.toLevel(levelName);
+	}
+
 }

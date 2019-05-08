@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 
 import de.cau.cs.se.software.evaluation.commands.AbstractAnalysisHandler;
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler;
+import de.cau.cs.se.software.evaluation.jobs.UIOutputHandler;
 
 /**
  * Handler for the java project analysis running the Java
@@ -49,7 +51,8 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 	protected void executeCalculation(final ISelection selection, final IWorkbenchPage activePage, final Shell shell) throws ExecutionException {
 		final IProject project = this.findProject(selection);
 		if (project != null) {
-			final Job job = new JavaProjectAnalysisJob(project, shell);
+			IOutputHandler handler = new UIOutputHandler(shell);
+			final Job job = new JavaProjectAnalysisJob(project, handler);
 			job.schedule();
 		}
 

@@ -27,7 +27,6 @@ import de.cau.cs.se.software.evaluation.views.AnalysisResultView
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
-import org.eclipse.swt.widgets.Shell
 import org.eclipse.ui.PlatformUI
 
 /**
@@ -42,12 +41,12 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 
 	protected val IProject project
 			
-	protected val Shell shell
+	protected val IOutputHandler handler
 		
-	new (IProject project, Shell shell) {
+	new (IProject project, IOutputHandler handler) {
 		super("Analysis " + project.name)
 		this.project = project
-		this.shell = shell
+		this.handler = handler
 	}
 			
 	/** 

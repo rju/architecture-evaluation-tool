@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ITreeSelection
 import org.eclipse.jface.viewers.TreeSelection
 import org.eclipse.swt.widgets.Shell
 import org.eclipse.ui.IWorkbenchPage
+import de.cau.cs.se.software.evaluation.jobs.UIOutputHandler
 
 /**
  * The handler for model analysis is used to choose the
@@ -90,7 +91,7 @@ class ModelAnalysisHandler extends AbstractAnalysisHandler {
 					val provider = providers.get(file.fileExtension)
 						
 					if (provider !== null) {
-						val job = provider.createAnalysisJob(file.project, file, shell)
+						val job = provider.createAnalysisJob(file.project, file, new UIOutputHandler(shell))
 						job.schedule()
 						job.join
 						this.createAnalysisView(activePage)

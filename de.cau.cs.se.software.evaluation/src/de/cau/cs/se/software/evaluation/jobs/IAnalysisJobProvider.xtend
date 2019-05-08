@@ -17,7 +17,6 @@
 
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IProject
-import org.eclipse.swt.widgets.Shell
 
 /**
  * Extension point interface for analysis job provider.
@@ -38,9 +37,9 @@ interface IAnalysisJobProvider {
 	 * 
 	 * @param project the project where the file belong to
 	 * @param file the file containing the model or information where to find the model
-	 * @param shell refers to the display which is required to inform the user on the progress
+	 * @param handler refers to the output handler which is required to inform the user on the progress
 	 * 
 	 * @return returns an analysis job
 	 */
-	def AbstractHypergraphAnalysisJob createAnalysisJob(IProject project, IFile file, Shell shell)
+	def AbstractHypergraphAnalysisJob createAnalysisJob(IProject project, IFile file, IOutputHandler handler)
 }

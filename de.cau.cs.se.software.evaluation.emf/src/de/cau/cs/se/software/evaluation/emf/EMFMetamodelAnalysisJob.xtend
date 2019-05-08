@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl
 import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Shell
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 	
@@ -35,8 +36,8 @@ class EMFMetamodelAnalysisJob extends AbstractHypergraphAnalysisJob {
 		
 	Shell shell
 		
-	new(IProject project, IFile file, Shell shell) {
-		super(project, shell)
+	new(IProject project, IFile file, IOutputHandler handler) {
+		super(project, handler)
 		this.file = file
 	}
 				
