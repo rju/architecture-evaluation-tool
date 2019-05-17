@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.cau.cs.se.software.evaluation.headless;
 
@@ -13,14 +13,28 @@ import de.cau.cs.se.software.evaluation.jobs.IOutputHandler;
  */
 public class ConsoleOutputHandler implements IOutputHandler {
 
-	private Logger logger;
+	private final Logger logger;
 
-	public ConsoleOutputHandler(Logger logger) {
+	public ConsoleOutputHandler(final Logger logger) {
 		this.logger = logger;
 	}
-	
+
 	@Override
-	public void error(String header, String message) {
-		logger.error(String.format("%s: %s", header, message));
+	public void error(final String header, final String message) {
+		this.logger.error(String.format("%s: %s", header, message));
+	}
+
+	@Override
+	public void updateLogView() {
+		// nothing to be done here
+	}
+
+	@Override
+	public void updateResultView() {
+		// nothing to be done here
+	}
+
+	public void info(final String header, final String message) {
+		this.logger.info(String.format("%s: %s", header, message));
 	}
 }

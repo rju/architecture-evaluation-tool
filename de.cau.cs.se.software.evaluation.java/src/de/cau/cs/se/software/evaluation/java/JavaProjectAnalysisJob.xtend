@@ -20,13 +20,11 @@ import de.cau.cs.se.software.evaluation.transformation.TransformationLinesOfCode
 import de.cau.cs.se.software.evaluation.java.transformation.TransformationJavaMethodsToModularHypergraph
 import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
 import de.cau.cs.se.software.evaluation.views.LogModelProvider
-import de.cau.cs.se.software.evaluation.views.LogView
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.util.ArrayList
 import java.util.List
 import org.eclipse.core.resources.IFile
-import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.IStatus
 import org.eclipse.core.runtime.Status
@@ -42,11 +40,11 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.ITypeBinding
 import org.eclipse.jdt.core.dom.TypeDeclaration
-import org.eclipse.ui.PlatformUI
 
 import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 import de.cau.cs.se.software.evaluation.jobs.AbstractHypergraphAnalysisJob
 import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
+import org.eclipse.jdt.core.compiler.IProblem
 
 /**
  * Analysis job executed for a given project.
@@ -56,18 +54,13 @@ import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 
 	val IJavaProject javaProject
+		
+	val JavaAnalysisConfiguration configuration
 
-	String DATA_TYPE_PATTERN_FILE = "data-type-pattern.cfg"
-
-	String DATA_TYPE_PATTERN_TITLE = "data type pattern"
-
-	String OBSERVED_SYSTEM_PATTERN_FILE = "observed-system.cfg"
-
-	String OBSERVED_SYSTEM_TITLE = "observed system"
-
-	new(IProject project, IOutputHandler handler) {
-		super(project, handler)
-		this.javaProject = project.getJavaProject
+	new(JavaAnalysisConfiguration configuration, IJavaProject project, IOutputHandler handler) {
+		super(project.project, handler)
+		this.javaProject = project
+		this.configuration = configuration
 	}
 
 	/**
@@ -76,11 +69,12 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	protected override IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("Collect project information", 0)
 		AnalysisResultModelProvider.INSTANCE.project = project
+		
+		val compliance = JavaCore.VERSION_1_8 // make this a changable feature based on project settings
 
-		val dataTypePatterns = getPatternFile(project.project, DATA_TYPE_PATTERN_FILE, DATA_TYPE_PATTERN_TITLE)
+		val dataTypePatterns = readPattern(configuration.getDataTypePatternFile())
 		if (dataTypePatterns !== null) {
-			val observedSystemPatterns = getPatternFile(project.project, OBSERVED_SYSTEM_PATTERN_FILE,
-				OBSERVED_SYSTEM_TITLE)
+			val observedSystemPatterns = readPattern(configuration.getObservedSystemPatternFile())
 			if (observedSystemPatterns !== null) {
 				val types = new ArrayList<IType>()
 				monitor.subTask("Scanning project " + project.project.name)
@@ -90,23 +84,26 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 					val result = AnalysisResultModelProvider.INSTANCE
 					LogModelProvider.INSTANCE.projectName = project.name
 					
-					val classes = types.collectAllSourceClasses(dataTypePatterns, observedSystemPatterns, monitor)
-					monitor.subTask("")
+					if (!types.checkAllSourcesForIssues(observedSystemPatterns, compliance, monitor)) {  
 					
-					calculateCodeStatistics(classes, monitor, result)
-
-					val inputHypergraph = createHypergraphForJavaProject(dataTypePatterns, observedSystemPatterns,
-						classes, monitor, result)
-
-					calculateSize(inputHypergraph, monitor, result)
-
-					calculateComplexity(inputHypergraph, monitor, result)
-
-					calculateCoupling(inputHypergraph, monitor, result)
-
-					calculateCohesion(inputHypergraph, monitor, result)
-					
-					updateLogView()
+						val classes = types.collectAllSourceClasses(dataTypePatterns, observedSystemPatterns, compliance, monitor)
+						monitor.subTask("")
+						
+						calculateCodeStatistics(classes, monitor, result)
+	
+						val inputHypergraph = createHypergraphForJavaProject(dataTypePatterns, observedSystemPatterns,
+							classes, monitor, result)
+	
+						calculateSize(inputHypergraph, monitor, result)
+	
+						calculateComplexity(inputHypergraph, monitor, result)
+	
+						calculateCoupling(inputHypergraph, monitor, result)
+	
+						calculateCohesion(inputHypergraph, monitor, result)
+						
+						handler.updateLogView()
+					}
 					
 					monitor.done()
 
@@ -117,11 +114,11 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 			}
 		}
 		
-		updateLogView()
+		handler.updateLogView()
 		
 		return Status.CANCEL_STATUS
 	}
-
+		
 	/**
 	 * Calculate code statistics.
 	 */
@@ -144,7 +141,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 			result.addResult(project.project.name, "cyclomatic complexity bucket " + i,
 				javaMethodComplexity.result.get(i))
 		}
-		updateView()
+		handler.updateResultView()
 	}
 
 	/**
@@ -159,7 +156,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	) {
 		/** construct analysis. */
 		val javaToModularHypergraph = new TransformationJavaMethodsToModularHypergraph(javaProject, dataTypePatterns,
-			observedSystemPatterns, monitor)
+			observedSystemPatterns, monitor, handler)
 		
 		monitor.beginTask("Process java project " + javaProject.elementName, javaToModularHypergraph.workEstimate(classes))
 
@@ -171,20 +168,44 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		result.addResult(project.name, "number of nodes", javaToModularHypergraph.result.nodes.size)
 		result.addResult(project.name, "number of edges", javaToModularHypergraph.result.edges.size)
 
-		updateView()
-		updateLogView()
+		handler.updateResultView()
+		handler.updateLogView()
 
 		return javaToModularHypergraph.result
 	}
 
-	/**
-	 * Get Java project of a project.
-	 */
-	private def IJavaProject getJavaProject(IProject project) {
-		if (project.hasNature(JavaCore.NATURE_ID)) {
-			return JavaCore.create(project)
-		} else
-			return null
+	private def boolean checkAllSourcesForIssues(
+		List<IType> types, 
+		List<String> observedSystemPatterns,
+		String compliance,
+		IProgressMonitor monitor
+	) {
+		var hasErrors = false
+		for (jdtType : types) {
+			val unit = jdtType.getUnitForType(observedSystemPatterns, compliance, monitor)
+			if (unit !== null) {
+				unit.problems.forEach[problem |
+					handler.error(problem.header, String.format("%s.%s:%d %s",
+						unit.package.name,
+						jdtType.elementName,
+						problem.sourceLineNumber, problem.message
+					))
+				]
+				if (unit.problems.exists[it.error])
+					hasErrors = true;
+			}
+		}
+		
+		return hasErrors
+	}
+		
+	private def String header(IProblem problem) {
+		if (problem.error)
+			return "Compilation error"
+		else if (problem.info)
+			return "Information"
+		else
+			return "Warning"
 	}
 
 	/**
@@ -199,21 +220,25 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		List<IType> types,
 		List<String> dataTypePatterns,
 		List<String> observedSystemPatterns,
+		String compliance,
 		IProgressMonitor monitor
 	) {
 		val List<AbstractTypeDeclaration> classes = new ArrayList<AbstractTypeDeclaration>
 
 		types.forEach [ jdtType |
-			val unit = jdtType.getUnitForType(observedSystemPatterns, monitor)
+			val unit = jdtType.getUnitForType(observedSystemPatterns, compliance, monitor)
 			if (unit !== null) {
 				unit.types.forEach [ unitType |
 					if (unitType instanceof TypeDeclaration) {
 						val type = unitType as TypeDeclaration
 						val typeBinding = type.resolveBinding
-						val name = typeBinding.determineFullyQualifiedName
-						if (observedSystemPatterns.exists[name.matches(it)])
-							if (!isClassDataType(typeBinding, dataTypePatterns))
-								classes.add(type)
+						if (typeBinding !== null) {
+							val name = typeBinding.determineFullyQualifiedName
+							if (observedSystemPatterns.exists[name.matches(it)])
+								if (!isClassDataType(typeBinding, dataTypePatterns))
+									classes.add(type)
+						} else
+							handler.error("Analysis error", String.format("Tried to collect all source classes in unit %s for type %s", unit.package.name, unitType.name))
 					}
 				]
 			}
@@ -230,15 +255,16 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 	private def CompilationUnit getUnitForType(
 		IType type,
 		List<String> observedSystemPatterns,
+		String compliance,
 		IProgressMonitor monitor
 	) {
 		val outerTypeName = type.packageFragment.elementName + "." + type.elementName
 		if (observedSystemPatterns.exists[outerTypeName.matches(it)]) {
 			monitor.subTask("Parsing " + outerTypeName)
 			val options = JavaCore.getOptions()
-			JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options)
+			JavaCore.setComplianceOptions(compliance, options)
 
-			val ASTParser parser = ASTParser.newParser(AST.JLS8)
+			val ASTParser parser = ASTParser.newParser(AST.JLS10)
 			parser.setProject(this.javaProject)
 			parser.setCompilerOptions(options)
 			parser.kind = ASTParser.K_COMPILATION_UNIT
@@ -267,26 +293,7 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		return dataTypePatterns.exists[pattern|name.matches(pattern)]
 	}
 
-	/**
-	 * Get data type patterns.
-	 * 
-	 * @param project the project containing the data-type-pattern.cfg 
-	 */
-	private def List<String> getPatternFile(IProject project, String filename, String title) {
-		val patternFile = project.findMember(filename) as IFile
-		if (patternFile !== null) {
-			if (patternFile.isSynchronized(1)) {
-				return readPattern(patternFile)
-			}
-		}
 
-		handler.error(
-			"Configuration Error",
-			"The " + title + " file (" + filename + ") containing class name patterns is missing."
-		)
-
-		return null
-	}
 
 	/**
 	 * Read full qualified class name patterns form an IFile.
@@ -341,14 +348,4 @@ class JavaProjectAnalysisJob extends AbstractHypergraphAnalysisJob {
 		]
 	}
 	
-	private def updateLogView() {		
-		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-			override void run() {
-				val part2 = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-						getActivePage().findView(LogView.ID)
-				(part2 as LogView).update()
-			}
-		})
-	}
-
 }

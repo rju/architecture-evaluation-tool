@@ -46,12 +46,15 @@ import static extension de.cau.cs.se.software.evaluation.java.transformation.Nam
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment
 import de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
 import de.cau.cs.se.software.evaluation.transformation.AbstractTransformation
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class TransformationJavaMethodsToModularHypergraph extends AbstractTransformation<List<AbstractTypeDeclaration>,ModularHypergraph> {
 	
 	val IJavaProject project
 	val List<String> dataTypePatterns
 	val List<String> observedSystemPatterns
+	
+	val IOutputHandler handler
 		
 	/**
 	 * Create a new hypergraph generator utilizing a specific hypergraph set for a specific set of java resources.
@@ -60,11 +63,12 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 	 * @param scope the global scoper used to resolve classes during transformation
 	 * @param eclipse progress monitor
 	 */
-	new(IJavaProject project, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor) {
+	new(IJavaProject project, List<String> dataTypePatterns, List<String> observedSystemPatterns, IProgressMonitor monitor, IOutputHandler handler) {
 		super(monitor)
 		this.project = project
 		this.dataTypePatterns = dataTypePatterns
-		this.observedSystemPatterns = observedSystemPatterns 
+		this.observedSystemPatterns = observedSystemPatterns
+		this.handler = handler
 	}
 		
 	/**
@@ -113,7 +117,7 @@ class TransformationJavaMethodsToModularHypergraph extends AbstractTransformatio
 					((it.derivedFrom as MethodTrace).method as IMethodBinding).
 						isEqualTo(method.resolveBinding)
 				]
-				evaluteMethod(graph, dataTypePatterns, node, clazz, method)
+				evaluteMethod(graph, dataTypePatterns, node, clazz, method, handler)
 			]
 		}
 	}

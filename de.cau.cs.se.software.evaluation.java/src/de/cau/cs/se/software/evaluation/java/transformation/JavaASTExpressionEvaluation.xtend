@@ -53,7 +53,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression
 import org.eclipse.jdt.core.dom.ExpressionMethodReference
 
 import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluationHelper.*
-
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class JavaASTExpressionEvaluation {
 
@@ -61,7 +61,7 @@ class JavaASTExpressionEvaluation {
 	 * Expression evaluation tree walker.
 	 */
 	static def void evaluate(Expression expression, Node sourceNode,
-		ModularHypergraph graph, List<String> dataTypePatterns 
+		ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler 
 	) {
 		val sourceMethodBinding = (sourceNode.derivedFrom as MethodTrace).method as IMethodBinding
 		val contextTypeBinding = sourceMethodBinding.declaringClass 
@@ -76,54 +76,54 @@ class JavaASTExpressionEvaluation {
 			TypeLiteral: {}
 			/** expression types which require checks for call and data edge creation. */
 			ArrayAccess: {
-				expression.array.evaluate(sourceNode, graph, dataTypePatterns)
-				expression.index.evaluate(sourceNode, graph, dataTypePatterns)
+				expression.array.evaluate(sourceNode, graph, dataTypePatterns, handler)
+				expression.index.evaluate(sourceNode, graph, dataTypePatterns, handler)
 			}
     		ArrayCreation: {
-    			expression.dimensions.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
-    			expression.initializer?.evaluate(sourceNode, graph, dataTypePatterns)
+    			expression.dimensions.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
+    			expression.initializer?.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		}
     		ArrayInitializer: {
 				expression.expressions.forEach[
-					(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)
+					(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)
 				]
 			}
     		Assignment: {
-				expression.leftHandSide.evaluate(sourceNode, graph, dataTypePatterns)		
-				expression.rightHandSide.evaluate(sourceNode, graph, dataTypePatterns)
+				expression.leftHandSide.evaluate(sourceNode, graph, dataTypePatterns, handler)
+				expression.rightHandSide.evaluate(sourceNode, graph, dataTypePatterns, handler)
 			}
-    		CastExpression: expression.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    		ClassInstanceCreation: expression.processClassInstanceCreation(sourceNode, graph, dataTypePatterns)
+    		CastExpression: expression.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		ClassInstanceCreation: expression.processClassInstanceCreation(sourceNode, graph, dataTypePatterns, handler)
     		ConditionalExpression: {
-    			expression.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			expression.thenExpression.evaluate(sourceNode, graph, dataTypePatterns)
-    			expression.elseExpression?.evaluate(sourceNode, graph, dataTypePatterns)
+    			expression.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			expression.thenExpression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			expression.elseExpression?.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		}
     		//CreationReference:
     		// TODO check if the following line is correct.
     		ExpressionMethodReference: expression.processExpressionMethodReference(sourceNode, contextTypeBinding, graph, dataTypePatterns)
-    		FieldAccess: expression.processFieldAccess(sourceNode, contextTypeBinding, graph, dataTypePatterns)
+    		FieldAccess: expression.processFieldAccess(sourceNode, contextTypeBinding, graph, dataTypePatterns, handler)
     		InfixExpression: {
-    			expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns)
-				expression.rightOperand?.evaluate(sourceNode, graph, dataTypePatterns)
+    			expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns, handler)
+				expression.rightOperand?.evaluate(sourceNode, graph, dataTypePatterns, handler)
 			}
-    		InstanceofExpression: expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns)
-    		LambdaExpression: expression.processLambdaExpression(sourceNode, graph, dataTypePatterns)
-    		MethodInvocation: expression.processMethodInvocation(sourceNode, graph, dataTypePatterns)
+    		InstanceofExpression: expression.leftOperand.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		LambdaExpression: expression.processLambdaExpression(sourceNode, graph, dataTypePatterns, handler)
+    		MethodInvocation: expression.processMethodInvocation(sourceNode, graph, dataTypePatterns, handler)
     		//MethodReference:
     		//Name:
-    		ParenthesizedExpression: expression.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    		PostfixExpression: expression.operand.evaluate(sourceNode, graph, dataTypePatterns)
-    		PrefixExpression: expression.operand.evaluate(sourceNode, graph, dataTypePatterns)
-    		QualifiedName: expression.processQualifiedName(sourceNode, graph)
-    		SimpleName: expression.processSimpleName(sourceNode, graph)
-    		SuperFieldAccess: expression.processSuperFieldAccess(sourceNode, graph, dataTypePatterns)
-    		SuperMethodInvocation: expression.processSuperMethodInvocation(sourceNode, graph, dataTypePatterns) 
+    		ParenthesizedExpression: expression.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		PostfixExpression: expression.operand.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		PrefixExpression: expression.operand.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		QualifiedName: expression.processQualifiedName(sourceNode, graph, handler)
+    		SimpleName: expression.processSimpleName(sourceNode, graph, handler)
+    		SuperFieldAccess: expression.processSuperFieldAccess(sourceNode, graph, dataTypePatterns, handler)
+    		SuperMethodInvocation: expression.processSuperMethodInvocation(sourceNode, graph, dataTypePatterns, handler) 
     		//SuperMethodReference: 
     		//TypeMethodReference:
     		VariableDeclarationExpression: expression.fragments.forEach[
     			/** Note: local variable declaration is ignored. */
-				(it as VariableDeclarationFragment).initializer.evaluate(sourceNode, graph, dataTypePatterns)
+				(it as VariableDeclarationFragment).initializer.evaluate(sourceNode, graph, dataTypePatterns, handler)
 			] 
     		default:
     			throw new UnsupportedOperationException("Expressions of type " + expression.class + " are not supported. [" + expression + "]")

@@ -58,6 +58,7 @@ import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergrap
 import static extension de.cau.cs.se.software.evaluation.java.transformation.NameResolutionHelper.*
 import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphQueryHelper.*
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class JavaASTEvaluation {
 	
@@ -70,11 +71,11 @@ class JavaASTEvaluation {
 	 * @param clazz declaring class of the given method
 	 * @param method the method to be evaluated for property access and method calls
 	 */
-	static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, TypeDeclaration clazz, MethodDeclaration method) {
+	static def void evaluteMethod(ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, TypeDeclaration clazz, MethodDeclaration method, IOutputHandler handler) {
 		// System.out.println("evaluateMethod <" + sourceNode.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		if (!clazz.interface && !Modifier.isAbstract(method.getModifiers())) {
 			if (method.body.statements !== null) {
-				method.body.statements.forEach[statement | (statement as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
+				method.body.statements.forEach[statement | (statement as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, handler)]
 			}
 		}
 	}
@@ -89,61 +90,61 @@ class JavaASTEvaluation {
 	 * @param clazz the context class
 	 * @param method the context method
 	 */
-	static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode) {
+	static def void evaluateStatement(Statement statement, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, IOutputHandler handler) {
 		// System.out.println("statement evaluate <" + node.name + "> " + clazz.name.fullyQualifiedName + " - " + method.name.fullyQualifiedName)
 		switch (statement) {
-			AssertStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    		Block: statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
-    		ConstructorInvocation: handleConstructorInvocation(statement, graph, dataTypePatterns, sourceNode)
+			AssertStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		Block: statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, handler)]
+    		ConstructorInvocation: handleConstructorInvocation(statement, graph, dataTypePatterns, sourceNode, handler)
     		DoStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
     		EnhancedForStatement: {
     			/* we ignore local value declarations here (see paper) */
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
-    		ExpressionStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
+    		ExpressionStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		ForStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.initializers.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
-    			statement.updaters.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.initializers.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
+    			statement.updaters.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
     		IfStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.thenStatement.evaluateStatement(graph, dataTypePatterns, sourceNode)
-    			statement.elseStatement?.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.thenStatement.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
+    			statement.elseStatement?.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
-    		LabeledStatement: statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
-    		ReturnStatement: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns)
-    		SuperConstructorInvocation: handleSuperConstructorInvocation(statement, graph, sourceNode)
-    		SwitchCase: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns)
+    		LabeledStatement: statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
+    		ReturnStatement: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    		SuperConstructorInvocation: handleSuperConstructorInvocation(statement, graph, sourceNode, handler)
+    		SwitchCase: statement.expression?.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		SwitchStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, handler)]
     		}
     		SynchronizedStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
-    		ThrowStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
+    		ThrowStatement: statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		TryStatement: {
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     			statement.catchClauses.forEach[
-    				(it as CatchClause).body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    				(it as CatchClause).body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     			]
-    			statement.^finally?.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.^finally?.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
     		// TODO TypeDeclarationStatement: for now this must be ignored. However, I am not totally sure if the could 
     		// not happen inside a method anyway, as the whole AST is a little weird
     		VariableDeclarationStatement: statement.fragments.forEach[(it as VariableDeclarationFragment).
-    			initializer?.evaluate(sourceNode, graph, dataTypePatterns)
+    			initializer?.evaluate(sourceNode, graph, dataTypePatterns, handler)
     		]
     		WhileStatement: {
-    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns)
-    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode)
+    			statement.expression.evaluate(sourceNode, graph, dataTypePatterns, handler)
+    			statement.body.evaluateStatement(graph, dataTypePatterns, sourceNode, handler)
     		}
 			BreakStatement, ContinueStatement, EmptyStatement: return
     		default:
@@ -156,7 +157,7 @@ class JavaASTEvaluation {
 	/**
 	 * Handle an constructor call to the super class. This could be a method which is part of the framework.
 	 */
-	def static handleSuperConstructorInvocation(SuperConstructorInvocation invocation, ModularHypergraph graph, Node sourceNode) {
+	def static handleSuperConstructorInvocation(SuperConstructorInvocation invocation, ModularHypergraph graph, Node sourceNode, IOutputHandler handler) {
 		/** check if a modules exists for the super constructor class and a node exists for the super constructor. */
 		val sourceMethodBinding = (sourceNode.derivedFrom as MethodTrace).method as IMethodBinding
 		val targetMethodBinding = invocation.resolveConstructorBinding
@@ -208,7 +209,7 @@ class JavaASTEvaluation {
  	 * Handle an constructor 'this' invocation. This requires (a) an call edge from
  	 * this method to the called constructor and (b) an evaluation of all parameters.
  	 */
-	private def static handleConstructorInvocation(ConstructorInvocation invocation, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode) {
+	private def static handleConstructorInvocation(ConstructorInvocation invocation, ModularHypergraph graph, List<String> dataTypePatterns, Node sourceNode, IOutputHandler handler) {
 		val sourceMethodBinding = (sourceNode.derivedFrom as MethodTrace).method as IMethodBinding
 		val targetMethodBinding = invocation.resolveConstructorBinding
 		val edge = createCallEdge(sourceMethodBinding, targetMethodBinding)
@@ -223,7 +224,7 @@ class JavaASTEvaluation {
 				// System.out.println("handleConstructorInvocation <" + node.name + "> <" + targetNode.name + "> [" + edge.name + "]")
 			}
 		}
-		invocation.arguments.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
+		invocation.arguments.forEach[(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
 	}
 		
 }

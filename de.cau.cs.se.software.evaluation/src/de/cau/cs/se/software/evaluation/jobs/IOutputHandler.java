@@ -9,6 +9,9 @@ package de.cau.cs.se.software.evaluation.jobs;
  */
 public interface IOutputHandler {
 
-	public abstract void error(String header, String message);
+	void error(String header, String message);
 
+	void updateLogView();
+
+	public abstract void updateResultView();
 }

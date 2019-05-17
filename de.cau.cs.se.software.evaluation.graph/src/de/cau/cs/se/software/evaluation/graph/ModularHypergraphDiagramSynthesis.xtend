@@ -40,7 +40,6 @@ import java.util.HashMap
 import java.util.List
 import java.util.Map
 import javax.inject.Inject
-import org.eclipse.elk.core.options.Direction
 import org.eclipse.elk.core.options.EdgeRouting
 import org.eclipse.elk.core.options.PortConstraints
 import org.eclipse.emf.common.util.EList

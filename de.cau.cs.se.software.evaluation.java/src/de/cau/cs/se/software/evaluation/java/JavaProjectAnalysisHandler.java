@@ -17,9 +17,12 @@ package de.cau.cs.se.software.evaluation.java;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -40,6 +43,10 @@ import de.cau.cs.se.software.evaluation.jobs.UIOutputHandler;
  */
 public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implements IHandler {
 
+	private final String DATA_TYPE_PATTERN_TITLE = "data type pattern";
+
+	private final String OBSERVED_SYSTEM_TITLE = "observed system";
+
 	/**
 	 * Empty default constructor, as proposed by checkstyle.
 	 */
@@ -51,13 +58,42 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 	protected void executeCalculation(final ISelection selection, final IWorkbenchPage activePage, final Shell shell) throws ExecutionException {
 		final IProject project = this.findProject(selection);
 		if (project != null) {
-			IOutputHandler handler = new UIOutputHandler(shell);
-			final Job job = new JavaProjectAnalysisJob(project, handler);
-			job.schedule();
-		}
+			final IOutputHandler handler = new UIOutputHandler(shell);
+			final JavaAnalysisConfiguration configuration = new JavaAnalysisConfiguration();
+			configuration.setDataTypePatternFile(
+					this.getPatternFile(project, JavaAnalysisConfiguration.DATA_TYPE_PATTERN_FILENAME, this.DATA_TYPE_PATTERN_TITLE, handler));
+			configuration.setObservedSystemPatternFile(
+					this.getPatternFile(project, JavaAnalysisConfiguration.OBSERVED_SYSTEM_PATTERN_FILENAME, this.OBSERVED_SYSTEM_TITLE, handler));
 
-		this.createAnalysisView(activePage);
-		this.createLogView(activePage);
+			try {
+				final IJavaProject javaProject = this.getJavaProject(project);
+				if (javaProject != null) {
+					final Job job = new JavaProjectAnalysisJob(configuration, javaProject, handler);
+					job.schedule();
+
+					this.createAnalysisView(activePage);
+					this.createLogView(activePage);
+				} else {
+					handler.error("Project Error", "Project is not a Java project.");
+				}
+			} catch (final CoreException e) {
+				handler.error("Project Error", "Could not open project. Cause: " + e.getLocalizedMessage());
+			}
+		}
+	}
+
+	/**
+	 * Get Java project of a project.
+	 *
+	 * @throws CoreException
+	 *             on error
+	 */
+	private IJavaProject getJavaProject(final IProject project) throws CoreException {
+		if (project.hasNature(JavaCore.NATURE_ID)) {
+			return JavaCore.create(project);
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -83,6 +119,26 @@ public class JavaProjectAnalysisHandler extends AbstractAnalysisHandler implemen
 				}
 			}
 		}
+		return null;
+	}
+
+	/**
+	 * Get data type patterns.
+	 *
+	 * @param project
+	 *            the project containing the data-type-pattern.cfg
+	 * @param handler
+	 */
+	private IFile getPatternFile(final IProject project, final String filename, final String title, final IOutputHandler handler) {
+		final IFile patternFile = (IFile) project.findMember(filename);
+		if (patternFile != null) {
+			if (patternFile.isSynchronized(1)) {
+				return patternFile;
+			}
+		}
+
+		handler.error("Configuration Error", String.format("The %s file (%s) containing class name patterns is missing.", title, filename));
+
 		return null;
 	}
 }

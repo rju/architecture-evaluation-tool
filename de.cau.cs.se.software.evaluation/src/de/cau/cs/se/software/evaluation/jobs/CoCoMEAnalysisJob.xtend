@@ -46,7 +46,7 @@ class CoCoMEAnalysisJob extends AbstractHypergraphAnalysisJob {
 		result.addResult(project.name, "number of edges", graph.edges.size)
 		result.hypergraph = graph
 		
-		updateView()
+		handler.updateResultView()
 		
 		calculateSize(graph, monitor, result)
 		

@@ -36,9 +36,6 @@ import org.eclipse.jdt.core.dom.Statement
 import org.eclipse.jdt.core.dom.SuperFieldAccess
 import org.eclipse.jdt.core.dom.SuperMethodInvocation
 import org.eclipse.jdt.core.dom.ThisExpression
-import org.eclipse.jface.dialogs.MessageDialog
-import org.eclipse.swt.widgets.Display
-import org.eclipse.ui.PlatformUI
 
 import static de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphElementFactory.*
 
@@ -46,19 +43,9 @@ import static extension de.cau.cs.se.software.evaluation.java.transformation.Jav
 import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaASTExpressionEvaluation.*
 import static extension de.cau.cs.se.software.evaluation.java.transformation.JavaHypergraphQueryHelper.*
 import org.eclipse.jdt.core.dom.ExpressionMethodReference
+import de.cau.cs.se.software.evaluation.jobs.IOutputHandler
 
 class JavaASTExpressionEvaluationHelper {
-
-
-	
-	private static def displayMessage(String title, String message) {
-		Display.getDefault().asyncExec(new Runnable() {
-			override run() {
-				val shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-				MessageDialog.openError(shell, title, message)
-		  	}
-		});
-	}
 	
 	/**
 	 * Process an field access to a field of the super class. Generate a connection to a data edge.
@@ -67,10 +54,11 @@ class JavaASTExpressionEvaluationHelper {
 	 * @param superFieldAccess the super field accessed in an expression
 	 * @param sourceNode the node which must be connected to the edge
 	 * @param graph the hypergraph
-	 * @param dataTypePatterns string patterns to identify data types.
+	 * @param dataTypePatterns string patterns to identify data types
+	 * @param handler error and reporting handler
 	 */
 	def static processSuperFieldAccess(SuperFieldAccess superFieldAccess, Node sourceNode,
-		ModularHypergraph graph, List<String> dataTypePatterns
+		ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler
 	) {
 		val fieldBinding = superFieldAccess.resolveFieldBinding
 		if (fieldBinding !== null) {
@@ -83,11 +71,7 @@ class JavaASTExpressionEvaluationHelper {
 				sourceNode.edges.add(edge)
 			}
 		} else {
-			displayMessage("Java model incomplete","Field binding for " 
-				+ superFieldAccess.name 
-				+ " of node " + sourceNode.name 
-				+ " could not be resolved."
-			)
+			handler.error("Java model incomplete",String.format("Field binding for %s of node %s could not be resolved.", superFieldAccess.name, sourceNode.name))
 			throw new UnsupportedOperationException("Field binding could not be resolved. Java model incomplete.")
 		}
 	}
@@ -103,9 +87,10 @@ class JavaASTExpressionEvaluationHelper {
      * @param sourceNode the node representing the caller
      * @param graph the hypergraph
      * @param dataTypePatterns list to identify data types
+	 * @param handler error and reporting handler    
      */
     def static void processClassInstanceCreation(ClassInstanceCreation callee, Node sourceNode,
-    	 ModularHypergraph graph, List<String> dataTypePatterns 
+    	 ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler 
     ) {
     	val calleeTypeBinding = callee.resolveTypeBinding
     	if (!calleeTypeBinding.isDataType(dataTypePatterns)) { /** create only for behavior classes. */
@@ -129,14 +114,13 @@ class JavaASTExpressionEvaluationHelper {
 		    	/** create call edge as this is a local context. */
 		    	handleCallEdgeInsertion(graph, sourceNode, targetNode)
     		} else {
-    			displayMessage("Binding Error", "Callee constructor binding cannot be resolved in " 
-    				+ callee + " for node " + sourceNode.name)
+    			handler.error("Binding Error", String.format("Callee constructor binding cannot be resolved in %s for node %s", callee, sourceNode.name))
     		}
 	    	/**
 	    	 * node is the correct source node for evaluate, as all parameters are accessed inside of method and not the
 	    	 * instantiated constructor.
 	    	 */
-	    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
+	    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
 	    }
     }
     
@@ -149,9 +133,10 @@ class JavaASTExpressionEvaluationHelper {
      * @param sourceNode the node representing the caller
      * @param graph the hypergraph
      * @param dataTypePatterns a list of patterns to identify data types
+     * @param handler handler for reporting and error output
      */
     def static void processMethodInvocation(MethodInvocation callee, Node sourceNode, 
-    	ModularHypergraph graph, List<String> dataTypePatterns 
+    	ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler 
     ) {
     	val calleeMethodBinding = callee.resolveMethodBinding
     	if (calleeMethodBinding !== null) {
@@ -169,10 +154,10 @@ class JavaASTExpressionEvaluationHelper {
 		    	 * Parameter node is the correct source node to evaluate the parameters, as all parameters
 		    	 * are accessed inside of method and not the instantiated constructor.
 		    	 */
-		    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns)]
+		    	callee.arguments.forEach[argument | (argument as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)]
 	    	}
 	    } else {
-	    	throw new UnsupportedOperationException("Internal error: The method binding could not be resolved for " + callee.toString + " called " + sourceNode.name)
+	    	handler.error("Internal error", String.format("The method binding could not be resolved for %s called %s", callee.toString, sourceNode.name))
 	    }
     }
     
@@ -185,11 +170,11 @@ class JavaASTExpressionEvaluationHelper {
      * @param graph the modular graph
      * @param dataTypePatterns a list of patterns to identify data types
      */
-    def static void processLambdaExpression(LambdaExpression lambda, Node sourceNode, ModularHypergraph graph, List<String> dataTypePatterns) {
+    def static void processLambdaExpression(LambdaExpression lambda, Node sourceNode, ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler) {
     	val body = lambda.body
     	switch (body) {
-    		Block: body.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode)]
-    		Expression: body.evaluate(sourceNode, graph, dataTypePatterns)
+    		Block: body.statements.forEach[(it as Statement).evaluateStatement(graph, dataTypePatterns, sourceNode, handler)]
+    		Expression: body.evaluate(sourceNode, graph, dataTypePatterns, handler)
     	}	
     }
     
@@ -203,14 +188,14 @@ class JavaASTExpressionEvaluationHelper {
      * @param dataTypePatterns a list of patterns to identify data types
      */
     def static void processSuperMethodInvocation(SuperMethodInvocation callee, Node sourceNode,
-    	ModularHypergraph graph, List<String> dataTypePatterns
+    	ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler
     ) {
 		val targetSuperMethodBinding = callee.resolveMethodBinding
 		if (targetSuperMethodBinding !== null) {
 			val targetNode = findOrCreateTargetNode(graph, targetSuperMethodBinding.declaringClass, targetSuperMethodBinding)
 			handleCallEdgeInsertion(graph, sourceNode, targetNode)
 		   	callee.arguments.forEach[
-				(it as Expression).evaluate(sourceNode, graph, dataTypePatterns)
+				(it as Expression).evaluate(sourceNode, graph, dataTypePatterns, handler)
 			]
 		} else {
 			throw new UnsupportedOperationException("Internal error: The method binding for a super call could not be resolved for " + callee.toString)
@@ -226,7 +211,7 @@ class JavaASTExpressionEvaluationHelper {
 	 * @param sourceNode the node causing the access
 	 * @param graph the graph containing the edge
 	 */	
-	def static void processSimpleName(SimpleName name, Node sourceNode, ModularHypergraph graph)  {
+	def static void processSimpleName(SimpleName name, Node sourceNode, ModularHypergraph graph, IOutputHandler handler)  {
 		val nameBinding = name.resolveBinding
 		switch(nameBinding) {
 			IVariableBinding: { /** this referes to a variable => data access edge. */
@@ -235,10 +220,11 @@ class JavaASTExpressionEvaluationHelper {
 					sourceNode.edges.add(edge)
 				}
 			}
+			case null: {
+				handler.error("Resolving Failed", String.format("Tried to resolve a binding for %s in processSimpleName", name.toString))
+			}
 			default: {
-				displayMessage("Missing Functionality", "Binding type " 
-					+ nameBinding.class 
-					+ " is not supported by processSimpleName")
+				handler.error("Missing Functionality", String.format("Binding type %s is not supported by processSimpleName", nameBinding.class))
 				throw new UnsupportedOperationException("Binding type " + nameBinding.class + " is not supported by processSimpleName")
 			}
 		}
@@ -252,7 +238,7 @@ class JavaASTExpressionEvaluationHelper {
 	 * @param sourceNode the node causing the access
 	 * @param graph the graph containing the edge
 	 */	
-	def static void processQualifiedName(QualifiedName name, Node sourceNode, ModularHypergraph graph)  {
+	def static void processQualifiedName(QualifiedName name, Node sourceNode, ModularHypergraph graph, IOutputHandler handler)  {
 		// TODO most likely the qualifier should be handled here
 		val nameBinding = name.resolveBinding
 		switch(nameBinding) {
@@ -262,10 +248,11 @@ class JavaASTExpressionEvaluationHelper {
 					sourceNode.edges.add(edge)
 				}
 			}
+			case null: {
+				handler.error("Resolving Failed", String.format("Tried to resolve a binding for %s in processQualifiedName", name.toString))
+			}
 			default: {
-				displayMessage("Missing Functionality", "Binding type " 
-					+ nameBinding.class 
-					+ " is not supported by processQualifiedName")
+				handler.error("Missing Functionality", String.format("Binding type %s is not supported by processQualifiedName", nameBinding.class))
 				throw new UnsupportedOperationException("Binding type " 
 					+ nameBinding.class + " is not supported by processQualifiedName"
 				)
@@ -305,7 +292,7 @@ class JavaASTExpressionEvaluationHelper {
      * @param dataTypePatterns a list of patterns to identify data types
      */
     def static processFieldAccess(FieldAccess fieldAccess, Node sourceNode, ITypeBinding contextTypeBinding, 
-    	ModularHypergraph graph, List<String> dataTypePatterns
+    	ModularHypergraph graph, List<String> dataTypePatterns, IOutputHandler handler
     ) {
     	val prefix = fieldAccess.expression
 	    switch(prefix) {
@@ -313,6 +300,7 @@ class JavaASTExpressionEvaluationHelper {
 	    		if (fieldAccess.resolveTypeBinding.isDataType(dataTypePatterns)) {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding.variableDeclaration)
 		    		if (edge === null) {
+		    			// TODO should use handler error message feature
 		    			LogModelProvider.INSTANCE.addMessage("Error", 
 		    				"Resolving failed in this expression. Missing edge for a data type property. "
 		    				 + fieldAccess.resolveFieldBinding)
@@ -336,6 +324,7 @@ class JavaASTExpressionEvaluationHelper {
 		    		val edge = graph.edges.findDataEdge(fieldAccess.resolveFieldBinding)
 		    		if (edge === null) {
 		    			// TODO how can this happen?
+		    			// TODO this should be part of the handler error logger
 		    			LogModelProvider.INSTANCE.addMessage("Error", 
 		    				"Resolving failed in field access expression. Missing edge for a data type property. "
 		    				+ fieldAccess.resolveFieldBinding)
@@ -350,9 +339,7 @@ class JavaASTExpressionEvaluationHelper {
 	    	}
 			// TODO other prefixes might contain method calls add evaluate here accordingly
 	    	default: {
-	    		displayMessage("Missing Functionality", "Prefix type " 
-	    			+ prefix.class.name + " not supported "
-	    			+ JavaASTExpressionEvaluationHelper.name + ".processFieldAccess")
+	    		handler.error("Missing Functionality", String.format("Prefix type %s not supported %s.processFieldAccess", prefix.class.name, JavaASTExpressionEvaluationHelper.name))
 	    		throw new UnsupportedOperationException("Prefix type " + prefix.class.name
 	    			+ " not supported " + JavaASTExpressionEvaluationHelper.name + ".processFieldAccess"
 	    		)

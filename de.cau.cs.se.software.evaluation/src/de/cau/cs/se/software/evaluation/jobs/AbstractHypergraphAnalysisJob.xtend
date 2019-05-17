@@ -23,11 +23,9 @@ import de.cau.cs.se.software.evaluation.transformation.metric.TransformationInte
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationIntraModuleGraph
 import de.cau.cs.se.software.evaluation.transformation.metric.TransformationMaximalInterconnectedGraph
 import de.cau.cs.se.software.evaluation.views.AnalysisResultModelProvider
-import de.cau.cs.se.software.evaluation.views.AnalysisResultView
 import org.eclipse.core.resources.IProject
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
-import org.eclipse.ui.PlatformUI
 
 /**
  * Abstract class implementing the basic metrics of the Edward B. Allen entropy
@@ -66,7 +64,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		hypergraphSize.generate(inputHypergraph)
 
 		result.addResult(project.project.name, "hypergraph size", hypergraphSize.result)
-		updateView()
+		handler.updateResultView()
 				
 		return hypergraphSize.result
 	}
@@ -87,7 +85,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val complexity = calculateComplexity.calculate(inputHypergraph, "Calculate system's hypergraph complexity")
 		
 		result.addResult(project.project.name, "hypergraph complexity", complexity)
-		updateView()
+		handler.updateResultView()
 
 		return complexity
 	}
@@ -116,7 +114,7 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		val complexityIntermodule = calculateComplexity.calculate(intermoduleHyperedgesOnlyGraph.result, 
 			"Calculate intermodule complexity")
 		result.addResult(project.project.name, "inter module coupling", complexityIntermodule)	
-		updateView()
+		handler.updateResultView()
 	}
 	
 	
@@ -183,26 +181,9 @@ abstract class AbstractHypergraphAnalysisJob extends Job {
 		
 		/** display results */
 		result.addResult(project.project.name, "graph cohesion", cohesion)
-		updateView()
-		
+		handler.updateResultView()		
 		return cohesion
 	}
-		
-	/**
-	 * Update the analysis view after updating its content.
-	 */
-	protected def updateView() {
-		PlatformUI.getWorkbench.display.syncExec(new Runnable() {
-       		override void run() {
-				val part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-					getActivePage().findView(AnalysisResultView.ID)
-				if(part !== null)
-					(part as AnalysisResultView).update()
-				else
-					println("Analysis result view is not open; could not update.")
-	    	}
-     	})
-	}
-	
+
 	
 }
