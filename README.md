@@ -9,7 +9,7 @@ See "adding support for a metamodel" in the wiki.
 ## Eclipse-Repository
 
 A pre-compiled of the **architecture evaluation tool** can be found at
-* snapshot version https://maui.se.informatik.uni-kiel.de/repo/se/snapshot
+* snapshot version https://maui.se.informatik.uni-kiel.de/repo/se/snapshot/
 * release versions https://maui.se.informatik.uni-kiel.de/repo/se/releases/ (when they come available)
 
 ## Dependencies
