@@ -17,7 +17,7 @@
 		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
 		<tychoVersion>1.3.0</tychoVersion>
 		<pmdVersion>6.13.0</pmdVersion>
-		<checkstyleVersion>8.17</checkstyleVersion>
+		<checkstyleVersion>8.29</checkstyleVersion>
 
 		<xtextVersion>2.16.0</xtextVersion>
 		<xtendVersion>2.16.0</xtendVersion>
