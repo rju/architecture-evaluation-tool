@@ -17,11 +17,23 @@
          id="headless"
          point="org.eclipse.core.runtime.products">
       <product
-            application="de.cau.cs.se.software.evaluation.headless"
-            name="Complexity Analysis Tool">
+            application="org.eclipse.e4.ui.workbench.swt.E4Application"
+            name="de.cau.cs.se.software.evaluation.headless">
          <property
                name="appName"
-               value="Complexity Analysis Tool">
+               value="de.cau.cs.se.software.evaluation.headless">
+         </property>
+      </product>
+   </extension>
+   <extension
+         id="SoftwareEvaluation"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="de.cau.cs.se.software.evaluation.headless.application"
+            name="de.cau.cs.se.software.evaluation.headless">
+         <property
+               name="appName"
+               value="de.cau.cs.se.software.evaluation.headless">
          </property>
       </product>
    </extension>
