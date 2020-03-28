@@ -93,6 +93,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public int getCount() {
 		return count;
 	}
@@ -102,6 +103,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setCount(int newCount) {
 		int oldCount = count;
 		count = newCount;
@@ -114,6 +116,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public PlanarNode getStart() {
 		if (start != null && start.eIsProxy()) {
 			InternalEObject oldStart = (InternalEObject)start;
@@ -140,6 +143,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setStart(PlanarNode newStart) {
 		PlanarNode oldStart = start;
 		start = newStart;
@@ -152,6 +156,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public PlanarNode getEnd() {
 		if (end != null && end.eIsProxy()) {
 			InternalEObject oldEnd = (InternalEObject)end;
@@ -178,6 +183,7 @@ public class PlanarEdgeImpl extends NamedElementImpl implements PlanarEdge {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setEnd(PlanarNode newEnd) {
 		PlanarNode oldEnd = end;
 		end = newEnd;

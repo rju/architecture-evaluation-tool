@@ -29,10 +29,6 @@ public interface PlanarNode extends NamedElement {
 	 * Returns the value of the '<em><b>Edges</b></em>' reference list.
 	 * The list contents are of type {@link de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge}.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Edges</em>' reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Edges</em>' reference list.
 	 * @see de.cau.cs.se.software.evaluation.graph.transformation.TransformationPackage#getPlanarNode_Edges()
@@ -45,10 +41,6 @@ public interface PlanarNode extends NamedElement {
 	 * Returns the value of the '<em><b>Kind</b></em>' attribute.
 	 * The literals are from the enumeration {@link de.cau.cs.se.software.evaluation.hypergraph.EModuleKind}.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Kind</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Kind</em>' attribute.
 	 * @see de.cau.cs.se.software.evaluation.hypergraph.EModuleKind
@@ -73,10 +65,6 @@ public interface PlanarNode extends NamedElement {
 	/**
 	 * Returns the value of the '<em><b>Context</b></em>' attribute.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Context</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Context</em>' attribute.
 	 * @see #setContext(String)

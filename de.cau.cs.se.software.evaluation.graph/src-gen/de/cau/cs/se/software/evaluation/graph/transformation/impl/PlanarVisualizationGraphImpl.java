@@ -80,6 +80,7 @@ public class PlanarVisualizationGraphImpl extends MinimalEObjectImpl.Container i
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<PlanarNode> getNodes() {
 		if (nodes == null) {
 			nodes = new EObjectContainmentEList<PlanarNode>(PlanarNode.class, this, TransformationPackage.PLANAR_VISUALIZATION_GRAPH__NODES);
@@ -92,6 +93,7 @@ public class PlanarVisualizationGraphImpl extends MinimalEObjectImpl.Container i
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<PlanarEdge> getEdges() {
 		if (edges == null) {
 			edges = new EObjectContainmentEList<PlanarEdge>(PlanarEdge.class, this, TransformationPackage.PLANAR_VISUALIZATION_GRAPH__EDGES);

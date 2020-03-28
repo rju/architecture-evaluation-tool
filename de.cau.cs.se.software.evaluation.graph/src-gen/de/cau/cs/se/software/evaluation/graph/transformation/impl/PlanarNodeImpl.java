@@ -110,6 +110,7 @@ public class PlanarNodeImpl extends NamedElementImpl implements PlanarNode {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EList<PlanarEdge> getEdges() {
 		if (edges == null) {
 			edges = new EObjectResolvingEList<PlanarEdge>(PlanarEdge.class, this, TransformationPackage.PLANAR_NODE__EDGES);
@@ -122,6 +123,7 @@ public class PlanarNodeImpl extends NamedElementImpl implements PlanarNode {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EModuleKind getKind() {
 		return kind;
 	}
@@ -131,6 +133,7 @@ public class PlanarNodeImpl extends NamedElementImpl implements PlanarNode {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setKind(EModuleKind newKind) {
 		EModuleKind oldKind = kind;
 		kind = newKind == null ? KIND_EDEFAULT : newKind;
@@ -143,6 +146,7 @@ public class PlanarNodeImpl extends NamedElementImpl implements PlanarNode {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public String getContext() {
 		return context;
 	}
@@ -152,6 +156,7 @@ public class PlanarNodeImpl extends NamedElementImpl implements PlanarNode {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public void setContext(String newContext) {
 		String oldContext = context;
 		context = newContext;
