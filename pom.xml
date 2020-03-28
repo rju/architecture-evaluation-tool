@@ -13,27 +13,29 @@
 	<name>Static software analysis based an hypergraphs</name>
 
 	<properties>
+		<tychoVersion>1.6.0</tychoVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
-		<tychoVersion>1.3.0</tychoVersion>
+		<platformVersion>[3.9,4.16)</platformVersion>
 		<pmdVersion>6.13.0</pmdVersion>
 		<checkstyleVersion>8.17</checkstyleVersion>
 
-		<xtextVersion>2.16.0</xtextVersion>
-		<xtendVersion>2.16.0</xtendVersion>
+		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
+		<xtextVersion>2.21.0</xtextVersion>
+		<xtendVersion>2.21.0</xtendVersion>
+		<maven-compiler-source>1.8</maven-compiler-source>
+		<maven-compiler-target>1.8</maven-compiler-target>
 
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<!-- repository URL -->
+		<eclipseRepoUrl>https://download.eclipse.org/releases/2020-03/</eclipseRepoUrl>
+		<elkRepoUrl>https://download.eclipse.org/elk/updates/releases/0.6.1/</elkRepoUrl>
+		<kieler-prag-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2020-02/</kieler-prag-repo.url>
+		<kieler-sema-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly/semantics/</kieler-sema-repo.url>
+		<kieler-klighd-repo.url>http://services.typefox.io/open-source/jenkins/job/KLighD/job/releases-2020-02-1.0.0/lastSuccessfulBuild/artifact/updatesite/</kieler-klighd-repo.url>
 
-		<platformVersion>[3.9,4.7)</platformVersion>
+                <tycho-repo.url>https://mvnrepository.com/artifact/org.eclipse.tycho/tycho-versions-plugin</tycho-repo.url>
 
-		<eclipseRepoUrl>http://download.eclipse.org/releases/oxygen/</eclipseRepoUrl>
-		<!-- old http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2016-07/ -->
-		<kiekerRepoUrl>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/</kiekerRepoUrl>
-		<elkRepoUrl>http://download.eclipse.org/elk/updates/releases/0.3.0/</elkRepoUrl>
-
-		<gecoRepoUrl>https://maui.se.informatik.uni-kiel.de/repo/geco/release/1.0.0/</gecoRepoUrl>
 		<palladioRepoUrl>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladioRepoUrl>
+		<gecoRepoUrl>https://maui.se.informatik.uni-kiel.de/repo/geco/snapshot/</gecoRepoUrl>
 	</properties>
 
 	<modules>
@@ -63,16 +65,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-compiler-plugin</artifactId>
-				<version>${tychoVersion}</version>
-				<configuration>
-					<compilerArgs>
-						<arg>-err:-forbidden,-discouraged</arg>
-					</compilerArgs>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
 				<version>${tychoVersion}</version>
 				<executions>
@@ -80,34 +72,6 @@
 						<id>plugin-source</id>
 						<goals>
 							<goal>plugin-source</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tychoVersion}</version>
-				<executions>
-					<execution>
-						<id>source-feature</id>
-						<phase>package</phase>
-						<goals>
-							<goal>source-feature</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-p2-plugin</artifactId>
-				<version>${tychoVersion}</version>
-				<executions>
-					<execution>
-						<id>attach-p2-metadata</id>
-						<phase>package</phase>
-						<goals>
-							<goal>p2-metadata</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -153,6 +117,59 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+				<version>${tychoVersion}</version>
+				<executions>
+					<execution>
+						<id>source-feature</id>
+						<phase>package</phase>
+						<goals>
+							<goal>source-feature</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-plugin</artifactId>
+				<version>${tychoVersion}</version>
+				<executions>
+					<execution>
+						<id>attach-p2-metadata</id>
+						<phase>package</phase>
+						<goals>
+							<goal>p2-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-packaging-plugin</artifactId>
+				<version>${tychoVersion}</version>
+				<configuration>
+					<format>'v'yyyyMMdd'-'HHmm</format>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-versions-plugin</artifactId>
+				<version>${tychoVersion}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tychoVersion}</version>
+				<configuration>
+					<compilerArgs>
+						<arg>-err:-forbidden,-discouraged</arg>
+					</compilerArgs>
+					<useProjectSettings>false</useProjectSettings>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -244,7 +261,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 	<repositories>
 		<repository>
 			<id>eclipse</id>
@@ -268,22 +284,30 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>kieler</id>
-			<url>${kiekerRepoUrl}</url>
+			<id>kieler-prag</id>
+			<url>${kieler-prag-repo.url}</url>
 			<layout>p2</layout>
 		</repository>
-
+		<repository>
+			<id>kieler-sema</id>
+			<url>${kieler-sema-repo.url}</url>
+			<layout>p2</layout>
+		</repository>
+		<repository>
+			<id>kieler-klighd</id>
+			<url>${kieler-klighd-repo.url}</url>
+			<layout>p2</layout>
+		</repository>
 		<repository>
 			<id>central</id>
 			<name>Maven Central</name>
-			<url>http://repo1.maven.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
 			<id>geco</id>
 			<url>${gecoRepoUrl}</url>
 			<layout>p2</layout>
 		</repository>
-
 		<repository>
 			<id>palladio</id>
 			<url>${palladioRepoUrl}</url>
@@ -295,7 +319,7 @@
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
-			<url>http://nexus.codehaus.org/snapshots/</url>
+			<url>https://nexus.codehaus.org/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
@@ -314,7 +338,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.15</version>
+				<version>3.0.0</version>
+				<configuration>
+					<configLocation>cs-conf.xml</configLocation>
+					<propertyExpansion>config_loc=${basedir}</propertyExpansion>
+				</configuration>
 			</plugin>
 		</plugins>
 	</reporting>
