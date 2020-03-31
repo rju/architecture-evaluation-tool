@@ -13,31 +13,34 @@
 	<name>Static software analysis based an hypergraphs</name>
 
 	<properties>
-		<tychoVersion>1.6.0</tychoVersion>
+		<tycho-version>1.6.0</tycho-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<platformVersion>[3.9,4.16)</platformVersion>
-		<pmdVersion>6.13.0</pmdVersion>
-		<checkstyleVersion>8.17</checkstyleVersion>
+		<platform-version>[3.9,4.17)</platform-version>
 
-		<checkstyle.config.location>cs-conf.xml</checkstyle.config.location>
-		<xtextVersion>2.21.0</xtextVersion>
-		<xtendVersion>2.21.0</xtendVersion>
+		<pmd-version>6.13.0</pmd-version>
+		<checkstyle-version>3.1.1</checkstyle-version>
+		<checkstyle-crawler-version>8.29</checkstyle-crawler-version>
+
+		<checkstyle-config-location>cs-conf.xml</checkstyle-config-location>
+		<xtext-version>2.21.0</xtext-version>
+		<xtend-version>2.21.0</xtend-version>
+		<mwe2-version>2.11.2</mwe2-version>
+
 		<maven-compiler-source>1.11</maven-compiler-source>
 		<maven-compiler-target>1.11</maven-compiler-target>
 
 		<!-- repository URL -->
-		<eclipseRepoUrl>https://download.eclipse.org/releases/2020-03/</eclipseRepoUrl>
-		<elkRepoUrl>https://download.eclipse.org/elk/updates/releases/0.6.1/</elkRepoUrl>
-		<kieler-prag-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2020-02/</kieler-prag-repo.url>
-		<kieler-sema-repo.url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly/semantics/</kieler-sema-repo.url>
-		<kieler-klighd-repo.url>http://services.typefox.io/open-source/jenkins/job/KLighD/job/releases-2020-02-1.0.0/lastSuccessfulBuild/artifact/updatesite/</kieler-klighd-repo.url>
+		<eclipse-repo-url>https://download.eclipse.org/releases/2020-03/</eclipse-repo-url>
+		<elk-repo-url>https://download.eclipse.org/elk/updates/releases/0.6.1/</elk-repo-url>
+		<kieler-prag-repo-url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/release_pragmatics_2020-02/</kieler-prag-repo-url>
+		<kieler-sema-repo-url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly/semantics/</kieler-sema-repo-url>
+		<kieler-klighd-repo-url>http://services.typefox.io/open-source/jenkins/job/KLighD/job/releases-2020-02-1.0.0/lastSuccessfulBuild/artifact/updatesite/</kieler-klighd-repo-url>
 
-                <tycho-repo.url>https://mvnrepository.com/artifact/org.eclipse.tycho/tycho-versions-plugin</tycho-repo.url>
+                <tycho-repo-url>https://mvnrepository.com/artifact/org.eclipse.tycho/tycho-versions-plugin</tycho-repo-url>
 
-		<palladioRepoUrl>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladioRepoUrl>
-		<gecoRepoUrl>https://maui.se.informatik.uni-kiel.de/repo/geco/snapshot/</gecoRepoUrl>
+		<palladio-repo-url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo-url>
+		<geco-repo-url>https://maui.se.informatik.uni-kiel.de/repo/geco/snapshot/</geco-repo-url>
 	</properties>
-
 	<modules>
 		<module>de.cau.cs.se.software.evaluation</module>
 		<module>de.cau.cs.se.software.evaluation.headless</module>
@@ -60,13 +63,13 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<executions>
 					<execution>
 						<id>plugin-source</id>
@@ -79,7 +82,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<configuration>
 					<pomDependencies>consider</pomDependencies>
 					<target>
@@ -94,22 +97,12 @@
 						<environment>
 							<os>linux</os>
 							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
 							<arch>x86_64</arch>
 						</environment>
 						<environment>
 							<os>macosx</os>
 							<ws>cocoa</ws>
 							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
 						</environment>
 						<environment>
 							<os>win32</os>
@@ -122,7 +115,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
 				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<executions>
 					<execution>
 						<id>source-feature</id>
@@ -136,7 +129,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<executions>
 					<execution>
 						<id>attach-p2-metadata</id>
@@ -150,21 +143,20 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<configuration>
 					<format>'v'yyyyMMdd'-'HHmm</format>
 				</configuration>
 			</plugin>
-			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-versions-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-compiler-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<configuration>
 					<compilerArgs>
 						<arg>-err:-forbidden,-discouraged</arg>
@@ -173,28 +165,29 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 		<pluginManagement>
 			<plugins>
-				<!-- checkstyle plugin -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.0.0</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>${checkstyleVersion}</version>
-						</dependency>
-					</dependencies>
-					<configuration>
-						<linkXRef>true</linkXRef>
-						<propertyExpansion>config_loc=${workspace}</propertyExpansion>
-						<configLocation>cs-conf.xml</configLocation>
-						<failsOnError>false</failsOnError>
-					</configuration>
-				</plugin>
+			
+						<!-- checkstyle plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${checkstyle-version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle-crawler-version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<linkXRef>true</linkXRef>
+					<propertyExpansion>config_loc=${workspace}</propertyExpansion>
+					<configLocation>cs-conf.xml</configLocation>
+					<failsOnError>true</failsOnError>
+				</configuration>
+			</plugin>
+			
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-pmd-plugin</artifactId>
@@ -203,12 +196,12 @@
 						<dependency>
 							<groupId>net.sourceforge.pmd</groupId>
 							<artifactId>pmd-core</artifactId>
-							<version>${pmdVersion}</version>
+							<version>${pmd-version}</version>
 						</dependency>
 						<dependency>
 							<groupId>net.sourceforge.pmd</groupId>
 							<artifactId>pmd-java</artifactId>
-							<version>${pmdVersion}</version>
+							<version>${pmd-version}</version>
 						</dependency>
 					</dependencies>
 					<configuration>
@@ -221,7 +214,7 @@
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>
-					<version>${xtendVersion}</version>
+					<version>${xtend-version}</version>
 					<executions>
 						<execution>
 							<phase>process-sources</phase>
@@ -240,7 +233,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<executions>
 						<execution>
 							<id>gen-clean</id>
@@ -264,12 +257,12 @@
 	<repositories>
 		<repository>
 			<id>eclipse</id>
-			<url>${eclipseRepoUrl}</url>
+			<url>${eclipse-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>elk</id>
-			<url>${elkRepoUrl}</url>
+			<url>${elk-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
@@ -285,17 +278,17 @@
 		</repository>
 		<repository>
 			<id>kieler-prag</id>
-			<url>${kieler-prag-repo.url}</url>
+			<url>${kieler-prag-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>kieler-sema</id>
-			<url>${kieler-sema-repo.url}</url>
+			<url>${kieler-sema-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>kieler-klighd</id>
-			<url>${kieler-klighd-repo.url}</url>
+			<url>${kieler-klighd-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
@@ -305,16 +298,15 @@
 		</repository>
 		<repository>
 			<id>geco</id>
-			<url>${gecoRepoUrl}</url>
+			<url>${geco-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>palladio</id>
-			<url>${palladioRepoUrl}</url>
+			<url>${palladio-repo-url}</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
-
 	<pluginRepositories>
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
@@ -341,7 +333,7 @@
 				<version>3.0.0</version>
 				<configuration>
 					<configLocation>cs-conf.xml</configLocation>
-					<propertyExpansion>config_loc=${basedir}</propertyExpansion>
+					<propertyExpansion>config_loc=${workspace}</propertyExpansion>
 				</configuration>
 			</plugin>
 		</plugins>
