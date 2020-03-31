@@ -183,7 +183,7 @@
 						<linkXRef>true</linkXRef>
 						<propertyExpansion>config_loc=${workspace}</propertyExpansion>
 						<configLocation>cs-conf.xml</configLocation>
-						<failsOnError>true</failsOnError>
+						<failsOnError>false</failsOnError>
 					</configuration>
 				</plugin>
 				<plugin>
