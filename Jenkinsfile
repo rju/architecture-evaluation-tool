@@ -19,14 +19,14 @@ pipeline {
 		}
 		stage('Check') {
 			steps {
-				sh 'mvn -Dtycho.mode=maven --batch-mode package checkstyle:checkstyle pmd:pmd -Dworkspace=' + env.WORKSPACE // spotbugs:spotbugs
+				sh 'mvn --batch-mode package checkstyle:checkstyle pmd:pmd -Dworkspace=' + env.WORKSPACE // spotbugs:spotbugs
 			}
 			post {
 				always {
 					recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
 					recordIssues enabledForFailure: true, tool: checkStyle()
 //					recordIssues enabledForFailure: true, tool: spotBugs()
-					recordIssues enabledForFailure: true, tool: pmdParser()
+//					recordIssues enabledForFailure: true, tool: pmdParser()
 				}
 			}
 		}
