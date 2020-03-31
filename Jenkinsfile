@@ -2,7 +2,7 @@ pipeline {
 	agent any
 
 	environment {
-		KEYSTORE = credentials('geco-repo-key') // must be changed to the correct key
+		KEYSTORE = credentials('software-quality-tools')
 		UPDATE_SITE_URL = "sftp://repo@repo.se.internal/var/www/html/se"
 	}
 
