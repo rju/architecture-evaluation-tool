@@ -25,10 +25,6 @@ public interface PlanarEdge extends NamedElement {
 	/**
 	 * Returns the value of the '<em><b>Count</b></em>' attribute.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Count</em>' attribute isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Count</em>' attribute.
 	 * @see #setCount(int)
@@ -51,10 +47,6 @@ public interface PlanarEdge extends NamedElement {
 	/**
 	 * Returns the value of the '<em><b>Start</b></em>' reference.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Start</em>' reference isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Start</em>' reference.
 	 * @see #setStart(PlanarNode)
@@ -77,10 +69,6 @@ public interface PlanarEdge extends NamedElement {
 	/**
 	 * Returns the value of the '<em><b>End</b></em>' reference.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>End</em>' reference isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>End</em>' reference.
 	 * @see #setEnd(PlanarNode)

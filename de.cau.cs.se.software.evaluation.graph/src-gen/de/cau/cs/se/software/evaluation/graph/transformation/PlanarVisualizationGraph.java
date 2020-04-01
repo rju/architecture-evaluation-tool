@@ -28,10 +28,6 @@ public interface PlanarVisualizationGraph extends EObject {
 	 * Returns the value of the '<em><b>Nodes</b></em>' containment reference list.
 	 * The list contents are of type {@link de.cau.cs.se.software.evaluation.graph.transformation.PlanarNode}.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Nodes</em>' containment reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Nodes</em>' containment reference list.
 	 * @see de.cau.cs.se.software.evaluation.graph.transformation.TransformationPackage#getPlanarVisualizationGraph_Nodes()
@@ -44,10 +40,6 @@ public interface PlanarVisualizationGraph extends EObject {
 	 * Returns the value of the '<em><b>Edges</b></em>' containment reference list.
 	 * The list contents are of type {@link de.cau.cs.se.software.evaluation.graph.transformation.PlanarEdge}.
 	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of the '<em>Edges</em>' containment reference list isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Edges</em>' containment reference list.
 	 * @see de.cau.cs.se.software.evaluation.graph.transformation.TransformationPackage#getPlanarVisualizationGraph_Edges()

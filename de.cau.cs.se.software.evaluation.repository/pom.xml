@@ -16,7 +16,7 @@
 
 	<properties>
 		<maven.deploy.skip>false</maven.deploy.skip>
-		<buildRepoPath>${project.build.directory}/repository/</buildRepoPath>
+		<build-repo-path>${project.build.directory}/repository/</build-repo-path>
 		<!-- updateSiteUrl>file:///srv/vhosts/eus/qa/snapshot/</updateSiteUrl -->
 	</properties>
 
@@ -48,7 +48,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-director-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<executions>
 					<execution>
 						<id>materialize-products</id>
@@ -67,7 +67,7 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-p2-repository-plugin</artifactId>
-				<version>${tychoVersion}</version>
+				<version>${tycho-version}</version>
 				<configuration>
                 			<includeAllDependencies>true</includeAllDependencies>
           			</configuration>
@@ -87,9 +87,9 @@
 						</goals>
 						<configuration>
 							<serverId>repo</serverId>
-							<fromDir>${buildRepoPath}</fromDir>
+							<fromDir>${build-repo-path}</fromDir>
 							<includes>**</includes>
-							<url>${updateSiteUrl}</url>
+							<url>${update-site-url}</url>
 							<toDir>snapshot</toDir>
 						</configuration>
 					</execution>

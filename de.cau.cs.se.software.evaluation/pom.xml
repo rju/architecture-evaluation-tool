@@ -28,7 +28,7 @@
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>
-					<version>${xtendVersion}</version>
+					<version>${xtend-version}</version>
 					<executions>
 						<execution>
 							<phase>process-sources</phase>

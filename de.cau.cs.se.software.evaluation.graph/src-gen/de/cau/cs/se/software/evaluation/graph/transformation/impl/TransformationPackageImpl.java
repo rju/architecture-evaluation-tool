@@ -124,6 +124,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getNamedElement() {
 		return namedElementEClass;
 	}
@@ -133,6 +134,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getNamedElement_Name() {
 		return (EAttribute)namedElementEClass.getEStructuralFeatures().get(0);
 	}
@@ -142,6 +144,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getPlanarVisualizationGraph() {
 		return planarVisualizationGraphEClass;
 	}
@@ -151,6 +154,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getPlanarVisualizationGraph_Nodes() {
 		return (EReference)planarVisualizationGraphEClass.getEStructuralFeatures().get(0);
 	}
@@ -160,6 +164,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getPlanarVisualizationGraph_Edges() {
 		return (EReference)planarVisualizationGraphEClass.getEStructuralFeatures().get(1);
 	}
@@ -169,6 +174,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getPlanarNode() {
 		return planarNodeEClass;
 	}
@@ -178,6 +184,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getPlanarNode_Edges() {
 		return (EReference)planarNodeEClass.getEStructuralFeatures().get(0);
 	}
@@ -187,6 +194,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getPlanarNode_Kind() {
 		return (EAttribute)planarNodeEClass.getEStructuralFeatures().get(1);
 	}
@@ -196,6 +204,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getPlanarNode_Context() {
 		return (EAttribute)planarNodeEClass.getEStructuralFeatures().get(2);
 	}
@@ -205,6 +214,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EClass getPlanarEdge() {
 		return planarEdgeEClass;
 	}
@@ -214,6 +224,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EAttribute getPlanarEdge_Count() {
 		return (EAttribute)planarEdgeEClass.getEStructuralFeatures().get(0);
 	}
@@ -223,6 +234,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getPlanarEdge_Start() {
 		return (EReference)planarEdgeEClass.getEStructuralFeatures().get(1);
 	}
@@ -232,6 +244,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public EReference getPlanarEdge_End() {
 		return (EReference)planarEdgeEClass.getEStructuralFeatures().get(2);
 	}
@@ -241,6 +254,7 @@ public class TransformationPackageImpl extends EPackageImpl implements Transform
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	@Override
 	public TransformationFactory getTransformationFactory() {
 		return (TransformationFactory)getEFactoryInstance();
 	}
