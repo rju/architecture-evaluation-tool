@@ -2,7 +2,7 @@ pipeline {
 	agent any
 
 	environment {
-		KEYSTORE = credentials('software-quality-tools')
+		KEYSTORE = credentials('software-quality-tools-key')
 		UPDATE_SITE_URL = "sftp://repo@repo.se.internal/var/www/html/se"
 	}
 
