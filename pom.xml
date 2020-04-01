@@ -36,8 +36,6 @@
 		<kieler-sema-repo-url>http://rtsys.informatik.uni-kiel.de/~kieler/updatesite/nightly/semantics/</kieler-sema-repo-url>
 		<kieler-klighd-repo-url>http://services.typefox.io/open-source/jenkins/job/KLighD/job/releases-2020-02-1.0.0/lastSuccessfulBuild/artifact/updatesite/</kieler-klighd-repo-url>
 
-                <tycho-repo-url>https://mvnrepository.com/artifact/org.eclipse.tycho/tycho-versions-plugin</tycho-repo-url>
-
 		<palladio-repo-url>https://sdqweb.ipd.kit.edu/eclipse/palladiosimulator/releases/latest/</palladio-repo-url>
 		<geco-repo-url>https://maui.se.informatik.uni-kiel.de/repo/geco/snapshot/</geco-repo-url>
 	</properties>
