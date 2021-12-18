@@ -108,7 +108,6 @@
 			<property name="influenceFormat" value="0" />
 		</module>
 
-
 		<!--
 		 !________________________________________________________________________________________
 		 !
@@ -427,7 +426,6 @@
 		<module name="SuperFinalize" />
 
 
-
 		<!--
 			!________________________________________________________________________________________
 			!
@@ -495,7 +493,7 @@
 			<property name="tokens" value="METHOD_DEF, CTOR_DEF" />
 		</module>
 
-		<!-- Validates  Javadoc comments to help ensure they are well formed. -->
+		<!-- Validates Javadoc comments to help ensure they are well formed. -->
 		<!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocStyle -->
 		<module name="JavadocStyle">
 			<property name="severity" value="info" />
