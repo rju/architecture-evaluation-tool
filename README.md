@@ -1,5 +1,9 @@
 # Architecture Evaluation Tool
 
+we moved to https://codeberg.org/prefec2/architecture-evaluation-tool
+
+Updates will be released there.
+
 The architecture evaluation tool supports the analysis of Java projects and GECO megamodels based on a hypergraph metric from Edward B. Allen (2007) [1]. The underlying framework allows to extend the analysis for other types of models and programming languages. this is achieved by
 a) using frontend transfromations to create a hypergraph or modular hypergraph
 b) a set of analysis metrics and transfromations for these hypergraphs and modular hypergraphs
